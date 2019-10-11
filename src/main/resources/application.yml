@@ -1,0 +1,114 @@
+server.servlet.context-path: /rekrutteringsbistand-api
+
+management.endpoints.web:
+  exposure.include: info, health, metrics, prometheus
+  base-path: /internal/actuator
+  flyway:
+    locations: classpath:/db/migration
+
+pam:
+  ad:
+    url: ${PAMADBACKEND_URL:http://localhost:9001}
+    gateway:
+      headername: ${PAM_AD_GATEWAY_HEADERNAME:x-nav-apiKey}
+      apikey: ${PAM_AD_GATEWAY_APIKEY:foo}
+  search-api:
+    url: ${PAMSEARCHAPIBACKEND_URL:http://localhost:9000}
+    gateway:
+      headername: ${PAM_SEARCH_API_GATEWAY_HEADERNAME:x-nav-apiKey}
+      apikey: ${PAM_SEARCH_API_GATEWAY_APIKEY:foo}
+  kandidatliste:
+    url: ${PAM_KANDIDATLISTE_API_URL}
+
+spring:
+  profiles:
+    active: local
+
+---
+
+spring:
+  profiles: local
+  h2.console:
+    enabled: true
+    path: /h2
+  flyway:
+    locations: classpath:/db/migration,/db/testdata
+
+mock:
+  port: 8081
+
+altinn:
+  url: "http://localhost:${mock.port}/altinn/"
+  apikey: "test"
+  apigw.apikey: "test"
+  iaweb.service:
+    code: 3403
+    edition: 1
+
+no.nav.security.oidc:
+  issuers: iss-localhost, selvbetjening
+  issuer:
+    iss-localhost:
+      discoveryurl: http://metadata
+      accepted_audience: aud-localhost
+    selvbetjening:
+      discoveryurl: http://metadata
+      accepted_audience: aud-localhost
+
+---
+
+spring:
+  profiles: mvc-test
+
+no.nav.security.oidc:
+  issuers: iss-localhost, selvbetjening
+  issuer:
+    iss-localhost:
+      discoveryurl: http://metadata
+      accepted_audience: aud-localhost
+    selvbetjening:
+      discoveryurl: http://metadata
+      accepted_audience: aud-localhost
+
+altinn:
+  url: "http://localhost:1331/altinn/"
+  apikey: "test"
+  apigw.apikey: "test"
+  iaweb.service:
+    code: 3403
+    edition: 1
+
+---
+
+spring:
+  profiles: dev
+
+altinn:
+  url: "https://api-gw-q1.adeo.no/"
+  apikey: ${ALTINN_APIKEY}
+  apigw.apikey: ${ALTINN_APIGW_APIKEY}
+  iaweb.service:
+    code: 3403
+    edition: 1
+
+database.navn: rekrutteringsbistand
+vault.mount-path: postgresql/preprod-fss
+
+---
+
+spring:
+  profiles: prod
+
+altinn:
+  url: "https://api-gw.adeo.no/"
+  apikey: ${ALTINN_APIKEY}
+  apigw.apikey: ${ALTINN_APIGW_APIKEY}
+  iaweb.service:
+    code: 3403
+    edition: 2
+
+database.navn: rekrutteringsbistand
+vault.mount-path: postgresql/prod-fss
+
+
+

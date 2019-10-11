@@ -1,0 +1,27 @@
+apiVersion: "nais.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: rekrutteringsbistand-api
+  namespace: default
+  labels:
+    team: teamtag
+spec:
+  image: navikt/rekrutteringsbistand-api:{{version}}
+  team: teamtag
+  port: 8080
+  ingresses:
+    - https://arbeidsgiver.nais.adeo.no/rekrutteringsbistand-api/
+  liveness:
+    path: /rekrutteringsbistand-api/internal/healthcheck
+    initialDelay: 20
+  readiness:
+    path: /rekrutteringsbistand-api/internal/healthcheck
+    initialDelay: 20
+  env:
+    - name: SPRING_PROFILES_ACTIVE
+      value: prod
+  prometheus:
+    enabled: true
+    path: /rekrutteringsbistand-api/internal/actuator/prometheus
+  vault:
+    enabled: true
