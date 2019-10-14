@@ -12,10 +12,10 @@ spec:
   ingresses:
     - https://arbeidsgiver.nais.preprod.local/rekrutteringsbistand-api/
   liveness:
-    path: /rekrutteringsbistand-api/internal/healthcheck
+    path: /rekrutteringsbistand-api/internal/actuator/health
     initialDelay: 20
   readiness:
-    path: /rekrutteringsbistand-api/internal/healthcheck
+    path: /rekrutteringsbistand-api/internal/actuator/health
     initialDelay: 20
   env:
     - name: SPRING_PROFILES_ACTIVE
