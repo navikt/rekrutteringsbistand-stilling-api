@@ -12,6 +12,12 @@ spring:
 
 spring:
   profiles: local
+no.nav.security.oidc:
+  issuers: loginservice-oidc
+  issuer.loginservice-oidc:
+    discoveryurl: http://metadata
+    accepted_audience: aud-localhost
+    cookie_name: isso-localhost-idtoken
 
 ---
 
@@ -23,10 +29,23 @@ spring:
 spring:
   profiles: dev
 
+no.nav.security.oidc:
+  issuers: loginservice-oidc
+  issuer.loginservice-oidc:
+    discoveryurl: ${LOGINSERVICE_OIDC_DISCOVERYURI}
+    accepted_audience: ${LOGINSERVICE_OIDC_CLIENTID}
+    cookie_name: isso-idtoken
+
 ---
 
 spring:
   profiles: prod
 
+no.nav.security.oidc:
+  issuers: loginservice-oidc
+  issuer.loginservice-oidc:
+    discoveryurl: ${LOGINSERVICE_OIDC_DISCOVERYURI}
+    accepted_audience: ${LOGINSERVICE_OIDC_CLIENTID}
+    cookie_name: isso-idtoken
 
 

@@ -1,12 +1,15 @@
 package no.nav.rekrutteringsbistand.api
 
 import no.nav.rekrutteringsbistand.api.innloggetbruker.InnloggetBrukerController
+import no.nav.security.oidc.test.support.spring.TokenGeneratorConfiguration
 import no.nav.security.spring.oidc.api.EnableOIDCTokenValidation
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.context.annotation.ComponentScan
+import org.springframework.context.annotation.Import
 
+@Import(value = [TokenGeneratorConfiguration::class])
 @SpringBootApplication
 @EnableOIDCTokenValidation(ignore = ["org.springframework"])
 class RekrutteringsbistandApplication
