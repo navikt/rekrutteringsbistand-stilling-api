@@ -69,5 +69,9 @@ abstract class BaseRestProxyController protected constructor(protected val restT
         response.sendError(HttpStatus.BAD_GATEWAY.value(), e.message)
     }
 
+    companion object {
+        val ROOT_URL = "/rekrutteringsbistand-api"
+    }
+
 }
 

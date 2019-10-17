@@ -20,6 +20,6 @@ class SokController(restTemplateBuilder: RestTemplateBuilder, externalConfigurat
     @RequestMapping
     private fun sok(method: HttpMethod, request: HttpServletRequest, @RequestBody body: String = "") : ResponseEntity<String> {
         //return ResponseEntity(HttpStatus.NOT_IMPLEMENTED)
-        return proxyJsonRequest(method,request,"/rekrutteringsbistand-api", body)
+        return proxyJsonRequest(method,request,ROOT_URL, body)
     }
 }

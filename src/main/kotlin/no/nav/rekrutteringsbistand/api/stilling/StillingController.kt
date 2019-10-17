@@ -18,7 +18,7 @@ class StillingController(restTemplateBuilder: RestTemplateBuilder, externalConfi
 
     @RequestMapping
     fun stilling(method: HttpMethod, request: HttpServletRequest, @RequestBody(required = false) body: String?) : ResponseEntity<String> {
-        return proxyJsonRequest(method,request,"/rekrutteringsbistand-api/rekrutteringsbistand", body?:"")
+        return proxyJsonRequest(method,request,"$ROOT_URL/rekrutteringsbistand", body?:"")
     }
 
 }

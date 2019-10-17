@@ -1,9 +1,9 @@
 package no.nav.rekrutteringsbistand.api
 
-import no.nav.rekrutteringsbistand.api.innloggetbruker.InnloggetBrukerDTO
+import no.nav.rekrutteringsbistand.api.innloggetbruker.InnloggetBruker
 
 object Testbruker {
 
-    val CLARK = InnloggetBrukerDTO("Clark.Kent@nav.no", "Clark Kent", "C12345")
+    val CLARK = InnloggetBruker("Clark.Kent@nav.no", "Clark Kent", "C12345")
 
 }
