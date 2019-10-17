@@ -1,6 +1,6 @@
 package no.nav.rekrutteringsbistand.api
 
-import no.nav.rekrutteringsbistand.api.innloggetbruker.InnloggetBruker
+import no.nav.rekrutteringsbistand.api.requester.InnloggetBruker
 
 object Testbruker {
 

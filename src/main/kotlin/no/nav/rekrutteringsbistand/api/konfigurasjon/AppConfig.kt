@@ -1,36 +1,22 @@
-package no.nav.rekrutteringsbistand.api
+package no.nav.rekrutteringsbistand.api.konfigurasjon
 
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import no.nav.rekrutteringsbistand.api.requester.HeaderFilter
 import org.apache.http.conn.ssl.DefaultHostnameVerifier
 import org.apache.http.impl.client.HttpClientBuilder
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.boot.web.servlet.FilterRegistrationBean
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.context.annotation.Profile
 import org.springframework.core.Ordered
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory
 import org.springframework.scheduling.annotation.EnableAsync
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
-import org.springframework.web.client.RestTemplate
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 import org.springframework.web.filter.CorsFilter
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 
-import javax.net.ssl.HttpsURLConnection
-import javax.net.ssl.SSLContext
-import javax.net.ssl.TrustManager
-import javax.net.ssl.X509TrustManager
-import java.security.KeyManagementException
-import java.security.NoSuchAlgorithmException
-import java.security.cert.X509Certificate
 import java.time.Duration
 import java.util.Arrays
-import java.util.Collections
-import java.util.concurrent.Executor
 
 @Configuration
 @EnableAsync

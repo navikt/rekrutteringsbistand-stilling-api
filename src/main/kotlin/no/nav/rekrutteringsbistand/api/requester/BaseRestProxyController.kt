@@ -1,8 +1,6 @@
-package no.nav.rekrutteringsbistand.api
+package no.nav.rekrutteringsbistand.api.requester
 
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Autowired
+import no.nav.rekrutteringsbistand.api.LOG
 import org.springframework.http.*
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.client.ResourceAccessException

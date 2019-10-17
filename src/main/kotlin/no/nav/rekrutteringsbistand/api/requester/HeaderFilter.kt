@@ -1,4 +1,4 @@
-package no.nav.rekrutteringsbistand.api
+package no.nav.rekrutteringsbistand.api.requester
 
 import org.springframework.web.filter.OncePerRequestFilter
 
