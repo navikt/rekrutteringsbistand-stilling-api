@@ -2,7 +2,6 @@ package no.nav.rekrutteringsbistand.api
 
 import com.nimbusds.jwt.JWTClaimsSet.Builder
 import net.minidev.json.JSONArray
-import no.nav.rekrutteringsbistand.api.innloggetbruker.NAVGruppeRoller
 import no.nav.security.oidc.api.Unprotected
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping

@@ -1,4 +1,4 @@
-package no.nav.rekrutteringsbistand.api.innloggetbruker
+package no.nav.rekrutteringsbistand.api
 
 
 object NAVGruppeRoller {

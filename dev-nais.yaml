@@ -22,6 +22,8 @@ spec:
       value: dev
     - name: LOGINSERVICE_OIDC_DISCOVERYURI
       value: https://login.microsoftonline.com/966ac572-f5b7-4bbe-aa88-c76419c0f851/.well-known/openid-configuration
+    - name: STILLING_API_URL
+      value: xxx
 
   prometheus:
     enabled: true

@@ -19,6 +19,9 @@ no.nav.security.oidc:
     accepted_audience: aud-localhost
     cookie_name: isso-localhost-idtoken
 
+external:
+  stilling-api:
+    url: ${STILLING_API_URL:http://localhost:9014}
 ---
 
 spring:
@@ -36,6 +39,12 @@ no.nav.security.oidc:
     accepted_audience: ${LOGINSERVICE_OIDC_CLIENTID}
     cookie_name: isso-idtoken
 
+external:
+  stilling-api:
+    url: ${STILLING_API_URL}
+
+
+
 ---
 
 spring:
@@ -48,4 +57,6 @@ no.nav.security.oidc:
     accepted_audience: ${LOGINSERVICE_OIDC_CLIENTID}
     cookie_name: isso-idtoken
 
-
+external:
+  stilling-api:
+    url: ${STILLING_API_URL}

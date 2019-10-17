@@ -1,7 +1,5 @@
 package no.nav.rekrutteringsbistand.api
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import org.apache.http.conn.ssl.DefaultHostnameVerifier
@@ -65,6 +63,19 @@ class AppConfig : WebMvcConfigurer {
         bean.setUrlPatterns(Arrays.asList("/rekrutteringsbistand/api/*"))
         bean.setEnabled(true)
         return bean
+    }
+
+    @Bean
+    fun restTemplateBuilder(): RestTemplateBuilder {
+        return RestTemplateBuilder()
+                .setConnectTimeout(Duration.ofMillis(5000))
+                .setReadTimeout(Duration.ofMillis(30000))
+                .requestFactory {
+                    HttpComponentsClientHttpRequestFactory(
+                            HttpClientBuilder.create()
+                                    .setSSLHostnameVerifier(DefaultHostnameVerifier()) // Fix SSL hostname verification for *.local domains
+                                    .build())
+                }
     }
 
 }

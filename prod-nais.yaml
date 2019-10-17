@@ -22,6 +22,9 @@ spec:
       value: prod
     - name: LOGINSERVICE_OIDC_DISCOVERYURI
       value: https://login.microsoftonline.com/navno.onmicrosoft.com/.well-known/openid-configuration
+    - name: STILLING_API_URL
+      value: https://pam-ad-api.nais.preprod.local/rekrutteringsbistand/
+      #value: https://pam-ad-api.nais.preprod.local/rekrutteringsbistand/api/v1/ads
   prometheus:
     enabled: true
     path: /rekrutteringsbistand-api/internal/actuator/prometheus
