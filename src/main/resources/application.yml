@@ -26,6 +26,12 @@ external:
 
 spring:
   profiles: mvc-test
+no.nav.security.oidc:
+  issuers: loginservice-oidc
+  issuer.loginservice-oidc:
+    discoveryurl: http://metadata
+    accepted_audience: aud-localhost
+    cookie_name: isso-localhost-idtoken
 
 ---
 

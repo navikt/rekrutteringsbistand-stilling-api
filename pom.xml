@@ -120,6 +120,11 @@
             <artifactId>oidc-test-support</artifactId>
             <version>${oidc-support.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.module</groupId>
+            <artifactId>jackson-module-kotlin</artifactId>
+            <version>2.10.0</version>
+        </dependency>
     </dependencies>
 
 
