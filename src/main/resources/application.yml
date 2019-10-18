@@ -43,8 +43,6 @@ external:
   stilling-api:
     url: ${STILLING_API_URL}
 
-
-
 ---
 
 spring:

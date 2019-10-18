@@ -14,6 +14,7 @@ import java.util.*
 class InnloggetBrukerController {
 
     @Autowired
+    @Suppress("SpringJavaInjectionPointsAutowiringInspection") // Denne må aktiveres i spring eller test oicd rammeverk
     lateinit var contextHolder: SpringOIDCRequestContextHolder
     private val ISSUER = "loginservice-oidc"
 

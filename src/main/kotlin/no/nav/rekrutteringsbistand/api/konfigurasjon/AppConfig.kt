@@ -14,54 +14,50 @@ import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 import org.springframework.web.filter.CorsFilter
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
-
 import java.time.Duration
-import java.util.Arrays
+import java.util.*
 
 @Configuration
 @EnableAsync
 class AppConfig : WebMvcConfigurer {
 
     @Bean
-    fun corsServletFilterRegistration(): FilterRegistrationBean<*> {
-        val source = UrlBasedCorsConfigurationSource()
-        val config = CorsConfiguration()
-        config.addAllowedOrigin("*")
-        config.addAllowedMethod("*")
-        config.allowCredentials = true
-        config.maxAge = 4000L
-        config.addAllowedHeader("*")
-        source.registerCorsConfiguration("/**", config)
-        val corsFilter = CorsFilter(source)
+    fun corsServletFilterRegistration(): FilterRegistrationBean<*> =
+            FilterRegistrationBean<CorsFilter>().apply {
+                filter = CorsFilter(
+                        UrlBasedCorsConfigurationSource()
+                                .apply {
+                                    registerCorsConfiguration("/**", CorsConfiguration().apply {
+                                        addAllowedOrigin("*")
+                                        addAllowedMethod("*")
+                                        allowCredentials = true
+                                        maxAge = 4000L
+                                        addAllowedHeader("*")
+                                    })
+                                })
+                order = Ordered.HIGHEST_PRECEDENCE
+                urlPatterns = setOf("/*")
+                isEnabled = true
+            }
+}
 
-        val bean = FilterRegistrationBean<CorsFilter>()
-        bean.filter = corsFilter
-        bean.order = Ordered.HIGHEST_PRECEDENCE
-        bean.urlPatterns = setOf("/*")
-        bean.isEnabled = true
-        return bean
+@Bean
+fun headerFilterRegistration(): FilterRegistrationBean<*> =
+    FilterRegistrationBean<HeaderFilter>().apply {
+        setFilter(HeaderFilter())
+        setUrlPatterns(Arrays.asList("/rekrutteringsbistand/api/*"))
+        setEnabled(true)
     }
 
-    @Bean
-    fun headerFilterRegistration(): FilterRegistrationBean<*> {
-        val bean = FilterRegistrationBean<HeaderFilter>()
-        bean.setFilter(HeaderFilter())
-        bean.setUrlPatterns(Arrays.asList("/rekrutteringsbistand/api/*"))
-        bean.setEnabled(true)
-        return bean
-    }
-
-    @Bean
-    fun restTemplateBuilder(): RestTemplateBuilder {
-        return RestTemplateBuilder()
-                .setConnectTimeout(Duration.ofMillis(5000))
-                .setReadTimeout(Duration.ofMillis(30000))
-                .requestFactory {
-                    HttpComponentsClientHttpRequestFactory(
-                            HttpClientBuilder.create()
-                                    .setSSLHostnameVerifier(DefaultHostnameVerifier()) // Fix SSL hostname verification for *.local domains
-                                    .build())
-                }
-    }
-
+@Bean
+fun restTemplateBuilder(): RestTemplateBuilder {
+    return RestTemplateBuilder()
+            .setConnectTimeout(Duration.ofMillis(5000))
+            .setReadTimeout(Duration.ofMillis(30000))
+            .requestFactory {
+                HttpComponentsClientHttpRequestFactory(
+                        HttpClientBuilder.create()
+                                .setSSLHostnameVerifier(DefaultHostnameVerifier()) // Fix SSL hostname verification for *.local domains
+                                .build())
+            }
 }
