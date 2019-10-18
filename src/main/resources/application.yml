@@ -32,6 +32,9 @@ no.nav.security.oidc:
     discoveryurl: http://metadata
     accepted_audience: aud-localhost
     cookie_name: isso-localhost-idtoken
+external:
+  stilling-api:
+    url: http://localhost:8189
 
 ---
 
