@@ -8,7 +8,7 @@ metadata:
 spec:
   image: navikt/rekrutteringsbistand-api:{{version}}
   team: teamtag
-  port: 8080
+  port: 9501
   ingresses:
     - https://arbeidsgiver.nais.preprod.local/rekrutteringsbistand-api/
   liveness:

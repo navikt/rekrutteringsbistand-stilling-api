@@ -4,6 +4,9 @@ management.endpoints.web:
   exposure.include: info, health, metrics, prometheus
   base-path: /internal/actuator
 
+server:
+  port: 9501
+
 spring:
   profiles:
     active: local
