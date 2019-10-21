@@ -17,6 +17,7 @@ spec:
   readiness:
     path: /rekrutteringsbistand-api/internal/actuator/health
     initialDelay: 20
+  webproxy: true
   env:
     - name: SPRING_PROFILES_ACTIVE
       value: dev
