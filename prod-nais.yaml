@@ -20,10 +20,6 @@ spec:
   env:
     - name: SPRING_PROFILES_ACTIVE
       value: prod
-    - name: LOGINSERVICE_OIDC_DISCOVERYURI
-      value: https://login.microsoftonline.com/navno.onmicrosoft.com/.well-known/openid-configuration
-    - name: STILLING_API_URL
-      value: <todo legg inn når sikkerhet er testet i preprod>
   prometheus:
     enabled: true
     path: /rekrutteringsbistand-api/internal/actuator/prometheus

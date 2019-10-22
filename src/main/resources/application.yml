@@ -47,13 +47,13 @@ spring:
 no.nav.security.oidc:
   issuers: loginservice-oidc
   issuer.loginservice-oidc:
-    discoveryurl: ${LOGINSERVICE_OIDC_DISCOVERYURI}
+    discoveryurl: https://login.microsoftonline.com/NAVtestB2C.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1A_idporten_ver1
     accepted_audience: 0090b6e1-ffcc-4c37-bc21-049f7d1f0fe5
     cookie_name: isso-idtoken
 
 external:
   stilling-api:
-    url: ${STILLING_API_URL}
+    url: https://pam-ad-api.nais.preprod.local
 
 ---
 
@@ -63,10 +63,10 @@ spring:
 no.nav.security.oidc:
   issuers: loginservice-oidc
   issuer.loginservice-oidc:
-    discoveryurl: ${LOGINSERVICE_OIDC_DISCOVERYURI}
+    discoveryurl: https://login.microsoftonline.com/navnob2c.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1A_idporten
     accepted_audience: 45104d6a-f5bc-4e8c-b352-4bbfc9381f25
     cookie_name: isso-idtoken
 
 external:
   stilling-api:
-    url: ${STILLING_API_URL}
+    url: https://todo
