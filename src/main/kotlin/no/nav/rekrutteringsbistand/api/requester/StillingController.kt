@@ -1,7 +1,7 @@
 package no.nav.rekrutteringsbistand.api.requester
 
 import no.nav.rekrutteringsbistand.api.konfigurasjon.ExternalConfiguration
-import no.nav.security.oidc.api.ProtectedWithClaims
+import no.nav.security.oidc.api.Protected
 import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.http.HttpMethod
 import org.springframework.http.ResponseEntity
@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController
 import javax.servlet.http.HttpServletRequest
 
 @RestController
-@ProtectedWithClaims(issuer = "loginservice-oidc")
+@Protected
 class StillingController(
         restTemplateBuilder: RestTemplateBuilder,
         @Suppress("SpringJavaInjectionPointsAutowiringInspection") externalConfiguration: ExternalConfiguration

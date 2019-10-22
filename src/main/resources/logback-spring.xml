@@ -18,7 +18,7 @@
         </appender>
 
         <logger level="INFO" name="sporbarhetslogger" additivity="false">
-            <appender-ref ref="sporbarhetsloggAppender" />
+            <appender-ref ref="sporbarhetsloggAppender"/>
         </logger>
 
         <root level="INFO">

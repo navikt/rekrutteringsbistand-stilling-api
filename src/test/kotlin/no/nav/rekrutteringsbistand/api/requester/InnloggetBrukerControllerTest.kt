@@ -31,14 +31,14 @@ internal class InnloggetBrukerControllerTest {
 
     @Test
     fun hentInnloggetBrukerReturnererBruker() {
-        restTemplate.getForObject( "${localBaseUrl()}/rekrutteringsbistand/api/v1/reportee", InnloggetBruker::class.java).apply {
+        restTemplate.getForObject("${localBaseUrl()}/rekrutteringsbistand/api/v1/reportee", InnloggetBruker::class.java).apply {
             assertThat(this).isEqualTo(Testbruker.CLARK)
         }
     }
 
     @Test
     fun tokenLever() {
-        restTemplate.getForObject( "${localBaseUrl()}/rekrutteringsbistand/api/v1/reportee/token-expiring", Boolean::class.java).apply {
+        restTemplate.getForObject("${localBaseUrl()}/rekrutteringsbistand/api/v1/reportee/token-expiring", Boolean::class.java).apply {
             assertThat(this).isFalse()
         }
 

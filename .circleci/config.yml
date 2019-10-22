@@ -2,31 +2,31 @@ version: 2.1
 jobs:
   bygg:
     docker:
-    - image: circleci/openjdk:11
+      - image: circleci/openjdk:11
     steps:
-    - checkout
-    - restore_cache:
-        keys:
-          - maven-repo-v1-{{ .Branch }}-{{ checksum "pom.xml" }}
-          - maven-repo-v1-{{ .Branch }}-
-          - maven-repo-v1-
-    - run:
+      - checkout
+      - restore_cache:
+          keys:
+            - maven-repo-v1-{{ .Branch }}-{{ checksum "pom.xml" }}
+            - maven-repo-v1-{{ .Branch }}-
+            - maven-repo-v1-
+      - run:
           name: Bygger med Maven
           command: mvn clean package
-    - save_cache:
-        paths:
-          - ~/.m2
-        key: maven-repo-v1-{{ .Branch }}-{{ checksum "pom.xml" }}
-    - setup_remote_docker
-    - run:
-        name: Bygger Docker image
-        command: docker build -t "navikt/rekrutteringsbistand-api:$CIRCLE_SHA1" .
-    - run:
-        name: Pusher Docker image
-        command: |
-          echo $DOCKER_PASSWORD | docker login --username $DOCKER_LOGIN --password-stdin
-          docker push "navikt/rekrutteringsbistand-api:$CIRCLE_SHA1"
-          echo "Docker image: $CIRCLE_SHA1"
+      - save_cache:
+          paths:
+            - ~/.m2
+          key: maven-repo-v1-{{ .Branch }}-{{ checksum "pom.xml" }}
+      - setup_remote_docker
+      - run:
+          name: Bygger Docker image
+          command: docker build -t "navikt/rekrutteringsbistand-api:$CIRCLE_SHA1" .
+      - run:
+          name: Pusher Docker image
+          command: |
+            echo $DOCKER_PASSWORD | docker login --username $DOCKER_LOGIN --password-stdin
+            docker push "navikt/rekrutteringsbistand-api:$CIRCLE_SHA1"
+            echo "Docker image: $CIRCLE_SHA1"
 
   deploy-til-dev:
     docker:

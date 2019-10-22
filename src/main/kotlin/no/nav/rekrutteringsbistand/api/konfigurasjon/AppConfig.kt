@@ -43,11 +43,11 @@ class AppConfig : WebMvcConfigurer {
 
 @Bean
 fun headerFilterRegistration(): FilterRegistrationBean<*> =
-    FilterRegistrationBean<HeaderFilter>().apply {
-        setFilter(HeaderFilter())
-        setUrlPatterns(Arrays.asList("/rekrutteringsbistand/api/*"))
-        setEnabled(true)
-    }
+        FilterRegistrationBean<HeaderFilter>().apply {
+            setFilter(HeaderFilter())
+            setUrlPatterns(Arrays.asList("/rekrutteringsbistand/api/*"))
+            setEnabled(true)
+        }
 
 @Bean
 fun restTemplateBuilder(): RestTemplateBuilder {

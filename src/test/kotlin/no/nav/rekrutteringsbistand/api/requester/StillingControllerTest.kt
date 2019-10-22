@@ -48,7 +48,7 @@ internal class StillingControllerTest {
         val headers = HttpHeaders()
 
         val request = HttpEntity("body", headers)
-        restTemplate.postForObject( "${localBaseUrl()}/search-api/underenhet/_search", request, String::class.java).apply {
+        restTemplate.postForObject("${localBaseUrl()}/search-api/underenhet/_search", request, String::class.java).apply {
             Assertions.assertThat(this)
                     .isEqualTo(sokResponse)
         }

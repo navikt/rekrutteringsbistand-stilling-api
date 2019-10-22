@@ -1,6 +1,6 @@
 package no.nav.rekrutteringsbistand.api.requester
 
-import no.nav.security.oidc.api.ProtectedWithClaims
+import no.nav.security.oidc.api.Protected
 import no.nav.security.spring.oidc.SpringOIDCRequestContextHolder
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.GetMapping
@@ -10,7 +10,7 @@ import java.util.*
 
 @RestController
 @RequestMapping("/rekrutteringsbistand/api/v1/reportee")
-@ProtectedWithClaims(issuer = "loginservice-oidc")
+@Protected
 class InnloggetBrukerController {
 
     @Autowired

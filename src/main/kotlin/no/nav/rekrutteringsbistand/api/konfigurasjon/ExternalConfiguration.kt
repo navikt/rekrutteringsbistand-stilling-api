@@ -1,4 +1,6 @@
-@file:Suppress("ConfigurationProperties") // Spring 5.2 trenger ikke lenger @Configuration, men IntelliJ 2019.2 henger ikke helt med.
+@file:Suppress("ConfigurationProperties")
+
+// Spring 5.2 trenger ikke lenger @Configuration, men IntelliJ 2019.2 henger ikke helt med.
 
 package no.nav.rekrutteringsbistand.api.konfigurasjon
 
