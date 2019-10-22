@@ -47,18 +47,6 @@ abstract class BaseRestProxyController protected constructor(protected val restT
                 .build(true).toUri()
     }
 
-    @ExceptionHandler(RestClientResponseException::class)
-    @Throws(IOException::class)
-    protected fun handleResponseException(e: RestClientResponseException): ResponseEntity<String> =
-            ResponseEntity.status(e.rawStatusCode)
-                    .headers(e.responseHeaders)
-                    .body(e.responseBodyAsString)
-
-    @ExceptionHandler(IOException::class, ResourceAccessException::class)
-    @Throws(IOException::class)
-    protected fun handleIOException(e: Exception, response: HttpServletResponse) =
-            response.sendError(HttpStatus.BAD_GATEWAY.value(), e.message)
-
     companion object {
         val ROOT_URL = "/rekrutteringsbistand-api"
     }
