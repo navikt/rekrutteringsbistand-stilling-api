@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.ResponseBody
 import org.springframework.web.client.ResourceAccessException
+import org.springframework.web.context.request.ServletWebRequest
 import org.springframework.web.context.request.WebRequest
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler
 import java.io.IOException
@@ -23,7 +24,8 @@ class RestResponseEntityExceptionHandler : ResponseEntityExceptionHandler() {
     @ExceptionHandler(value = [OIDCUnauthorizedException::class, AccessDeniedException::class])
     @ResponseBody
     protected fun handleUnauthorizedException(e: RuntimeException, webRequest: WebRequest): ResponseEntity<Any> {
-        LOG.info("${HttpStatus.UNAUTHORIZED} contextpath:${webRequest.contextPath} Authorization:${webRequest.getHeader(HttpHeaders.AUTHORIZATION)} Cookie:${webRequest.getHeader(HttpHeaders.COOKIE)} HEADERS:${webRequest.headerNames}",e)
+        val servletRequest: String = ((( webRequest as ServletWebRequest)).getRequest().getRequestURI().toString())
+        LOG.info("${HttpStatus.UNAUTHORIZED} contextpath:${webRequest.contextPath} request:$servletRequest HEADERS:${webRequest.headerNames} Authorization:${webRequest.getHeader(HttpHeaders.AUTHORIZATION)} Cookie:${webRequest.getHeader(HttpHeaders.COOKIE)}",e)
         return getResponseEntity(e, "You are not authorized to access this ressource", HttpStatus.UNAUTHORIZED)
     }
 
