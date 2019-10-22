@@ -2,6 +2,7 @@ package no.nav.rekrutteringsbistand.api.requester
 
 import no.nav.rekrutteringsbistand.api.LOG
 import no.nav.security.spring.oidc.validation.interceptor.OIDCUnauthorizedException
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -22,6 +23,7 @@ class RestResponseEntityExceptionHandler : ResponseEntityExceptionHandler() {
     @ExceptionHandler(value = [OIDCUnauthorizedException::class, AccessDeniedException::class])
     @ResponseBody
     protected fun handleUnauthorizedException(e: RuntimeException, webRequest: WebRequest): ResponseEntity<Any> {
+        LOG.error("${HttpStatus.UNAUTHORIZED} contextpath:${webRequest.contextPath} Authorization:${webRequest.getHeader(HttpHeaders.AUTHORIZATION)} Cookie:${webRequest.getHeader(HttpHeaders.COOKIE)} HEADERS:${webRequest.headerNames}",e)
         return getResponseEntity(e, "You are not authorized to access this ressource", HttpStatus.UNAUTHORIZED)
     }
 
