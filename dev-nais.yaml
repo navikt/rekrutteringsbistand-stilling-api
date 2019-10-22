@@ -21,7 +21,6 @@ spec:
   env:
     - name: SPRING_PROFILES_ACTIVE
       value: dev
-
   prometheus:
     enabled: true
     path: /rekrutteringsbistand-api/internal/actuator/prometheus

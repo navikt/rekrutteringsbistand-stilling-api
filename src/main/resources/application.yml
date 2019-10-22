@@ -69,4 +69,4 @@ no.nav.security.oidc:
 
 external:
   stilling-api:
-    url: https://todo
+    url: https://pam-ad-api.nais.adeo.no
