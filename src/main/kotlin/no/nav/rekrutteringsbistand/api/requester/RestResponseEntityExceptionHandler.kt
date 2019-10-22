@@ -24,8 +24,8 @@ class RestResponseEntityExceptionHandler : ResponseEntityExceptionHandler() {
     @ExceptionHandler(value = [OIDCUnauthorizedException::class, AccessDeniedException::class])
     @ResponseBody
     protected fun handleUnauthorizedException(e: RuntimeException, webRequest: WebRequest): ResponseEntity<Any> {
-        val servletRequest: String = (((webRequest as ServletWebRequest)).getRequest().getRequestURI().toString())
-        LOG.info("${HttpStatus.UNAUTHORIZED} contextpath:${webRequest.contextPath} request:$servletRequest HEADERS:${webRequest.headerNames} Authorization:${webRequest.getHeader(HttpHeaders.AUTHORIZATION)} Cookie:${webRequest.getHeader(HttpHeaders.COOKIE)}", e)
+        val servletRequest: String = ((( webRequest as ServletWebRequest)).getRequest().getRequestURI().toString())
+        LOG.info("${HttpStatus.UNAUTHORIZED} contextpath:${webRequest.contextPath} request:$servletRequest HEADERS:${webRequest.headerNames} Authorization:${webRequest.getHeader(HttpHeaders.AUTHORIZATION)} Cookie:${webRequest.getHeader(HttpHeaders.COOKIE)}",e)
         return getResponseEntity(e, "You are not authorized to access this ressource", HttpStatus.UNAUTHORIZED)
     }
 

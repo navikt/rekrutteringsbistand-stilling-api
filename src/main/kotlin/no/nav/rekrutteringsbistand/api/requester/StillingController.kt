@@ -1,7 +1,9 @@
 package no.nav.rekrutteringsbistand.api.requester
 
+import no.nav.rekrutteringsbistand.api.konfigurasjon.Configuration
 import no.nav.rekrutteringsbistand.api.konfigurasjon.ExternalConfiguration
 import no.nav.security.oidc.api.Protected
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.http.HttpMethod
 import org.springframework.http.ResponseEntity
@@ -12,17 +14,19 @@ import javax.servlet.http.HttpServletRequest
 
 @RestController
 @Protected
-class StillingController(
-        restTemplateBuilder: RestTemplateBuilder,
-        @Suppress("SpringJavaInjectionPointsAutowiringInspection") externalConfiguration: ExternalConfiguration
-) : BaseRestProxyController(restTemplateBuilder.build(), externalConfiguration.stillingApi.url) {
+class StillingController (
+        val restProxy: RestProxy,
+        @Suppress("SpringJavaInjectionPointsAutowiringInspection") val externalConfiguration: ExternalConfiguration) {
+
 
     @RequestMapping("/rekrutteringsbistand/api/v1/**")
-    fun stilling(method: HttpMethod, request: HttpServletRequest, @RequestBody(required = false) body: String?): ResponseEntity<String> =
-            proxyJsonRequest(method, request, "$ROOT_URL/rekrutteringsbistand", body ?: "")
+    fun stilling(method: HttpMethod, request: HttpServletRequest, @RequestBody(required = false) body: String?): ResponseEntity<String> {
+        return restProxy.proxyJsonRequest(method, request, "${Configuration.ROOT_URL}/rekrutteringsbistand", body
+                ?: "", externalConfiguration.stillingApi.url)
+    }
 
     @RequestMapping("/search-api/**")
     private fun sok(method: HttpMethod, request: HttpServletRequest, @RequestBody body: String = ""): ResponseEntity<String> =
-            proxyJsonRequest(method, request, ROOT_URL, body)
+            restProxy.proxyJsonRequest(method, request, Configuration.ROOT_URL, body, externalConfiguration.stillingApi.url)
 
 }

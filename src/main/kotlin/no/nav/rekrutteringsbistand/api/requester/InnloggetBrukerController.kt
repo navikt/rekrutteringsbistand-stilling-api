@@ -1,5 +1,6 @@
 package no.nav.rekrutteringsbistand.api.requester
 
+import no.nav.rekrutteringsbistand.api.TokenUtils.Companion.ISSUER_ISSO
 import no.nav.security.oidc.api.Protected
 import no.nav.security.spring.oidc.SpringOIDCRequestContextHolder
 import org.springframework.beans.factory.annotation.Autowired
@@ -16,11 +17,10 @@ class InnloggetBrukerController {
     @Autowired
     @Suppress("SpringJavaInjectionPointsAutowiringInspection") // Denne må aktiveres i spring eller test oicd rammeverk
     lateinit var contextHolder: SpringOIDCRequestContextHolder
-    private val ISSUER = "loginservice-oidc"
 
     @GetMapping
     fun hentInnloggetBruker(): InnloggetBruker =
-            contextHolder.oidcValidationContext.getClaims(ISSUER)
+            contextHolder.oidcValidationContext.getClaims(ISSUER_ISSO)
                     .run {
                         InnloggetBruker(
                                 userName = get("unique_name"),
@@ -30,9 +30,9 @@ class InnloggetBrukerController {
 
     @GetMapping("/token-expiring")
     fun isExpiringToken(): Boolean =
-            contextHolder.oidcValidationContext.hasValidTokenFor(ISSUER) &&
+            contextHolder.oidcValidationContext.hasValidTokenFor(ISSUER_ISSO) &&
                     Date(System.currentTimeMillis() + 5 * 60000)
-                            .after(contextHolder.oidcValidationContext.getClaims(ISSUER).claimSet.expirationTime)
+                            .after(contextHolder.oidcValidationContext.getClaims(ISSUER_ISSO).claimSet.expirationTime)
 
 }
 

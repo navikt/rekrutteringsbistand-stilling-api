@@ -16,8 +16,8 @@ spring:
 spring:
   profiles: local
 no.nav.security.oidc:
-  issuers: loginservice-oidc
-  issuer.loginservice-oidc:
+  issuers: isso
+  issuer.isso:
     discoveryurl: http://metadata
     accepted_audience: aud-localhost
     cookie_name: isso-localhost-idtoken
@@ -30,8 +30,8 @@ external:
 spring:
   profiles: mvc-test
 no.nav.security.oidc:
-  issuers: loginservice-oidc
-  issuer.loginservice-oidc:
+  issuers: isso
+  issuer.isso:
     discoveryurl: http://metadata
     accepted_audience: aud-localhost
     cookie_name: isso-localhost-idtoken
@@ -45,11 +45,11 @@ spring:
   profiles: dev
 
 no.nav.security.oidc:
-  issuers: loginservice-oidc
-  issuer.loginservice-oidc:
-    discoveryurl: https://login.microsoftonline.com/NAVtestB2C.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1A_idporten_ver1
-    accepted_audience: 0090b6e1-ffcc-4c37-bc21-049f7d1f0fe5
-    cookie_name: isso-idtoken
+  issuers: isso
+  issuer.isso:
+    discoveryurl: https://login.microsoftonline.com/NAVQ.onmicrosoft.com/.well-known/openid-configuration
+    accepted_audience: 38e07d31-659d-4595-939a-f18dce3446c5
+    proxyurl: http://webproxy.nais:8088
 
 external:
   stilling-api:
@@ -61,11 +61,11 @@ spring:
   profiles: prod
 
 no.nav.security.oidc:
-  issuers: loginservice-oidc
-  issuer.loginservice-oidc:
-    discoveryurl: https://login.microsoftonline.com/navnob2c.onmicrosoft.com/v2.0/.well-known/openid-configuration?p=B2C_1A_idporten
-    accepted_audience: 45104d6a-f5bc-4e8c-b352-4bbfc9381f25
-    cookie_name: isso-idtoken
+  issuers: isso
+  issuer.isso:
+    discoveryurl: https://login.microsoftonline.com/navno.onmicrosoft.com/.well-known/openid-configuration
+    accepted_audience: 9b4e07a3-4f4c-4bab-b866-87f62dff480d
+    proxyurl: http://webproxy.nais:8088
 
 external:
   stilling-api:
