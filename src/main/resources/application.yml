@@ -1,21 +1,8 @@
 server.servlet.context-path: /rekrutteringsbistand-api
 
-management:
-  metrics:
-    export:
-      prometheus:
-        enabled: true
-  endpoint:
-    prometheus:
-      enabled: true
-    metrics:
-      enabled: true
-    mappings:
-      enabled: true
-  endpoints:
-    web:
-      exposure:
-        include: ["prometheus", "metrics", "mappings"]
+management.endpoints.web:
+  exposure.include: info, health, metrics, prometheus
+  base-path: /internal/actuator
 
 server:
   port: 9501
