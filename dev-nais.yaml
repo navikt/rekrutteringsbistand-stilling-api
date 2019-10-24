@@ -25,4 +25,4 @@ spec:
     enabled: true
     path: /rekrutteringsbistand-api/internal/actuator/prometheus
   vault:
-    enabled: false
+    enabled: true

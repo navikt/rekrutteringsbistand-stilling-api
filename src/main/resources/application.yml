@@ -55,6 +55,11 @@ external:
   stilling-api:
     url: https://pam-ad-api.nais.preprod.local
 
+database:
+  navn: rekrutteringsbistand
+  url: jdbc:postgresql://b27dbvl008.preprod.local:5432/rekrutteringsbistand
+
+vault.mount-path: postgresql/preprod-fss
 ---
 
 spring:
@@ -70,3 +75,9 @@ no.nav.security.oidc:
 external:
   stilling-api:
     url: https://pam-ad-api.nais.adeo.no
+
+database:
+  navn: rekrutteringsbistand
+  url: jdbc:postgresql://A01DBVL010.adeo.no:5432/rekrutteringsbistand
+
+vault.mount-path: postgresql/prod-fss
