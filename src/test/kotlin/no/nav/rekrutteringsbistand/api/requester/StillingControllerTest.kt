@@ -57,7 +57,7 @@ internal class StillingControllerTest {
 
     companion object {
         fun mappingBuilderStilling(): MappingBuilder {
-            return WireMock.get(WireMock.urlPathMatching("/api/v1/ads"))
+            return WireMock.get(WireMock.urlPathMatching("/rekrutteringsbistand/api/v1/ads"))
                     .withHeader(HttpHeaders.CONTENT_TYPE, equalTo(MediaType.APPLICATION_JSON.toString()))
                     .withHeader(HttpHeaders.ACCEPT, equalTo(MediaType.APPLICATION_JSON.toString()))
                     .withHeader(HttpHeaders.AUTHORIZATION, matching("Bearer .*}"))
