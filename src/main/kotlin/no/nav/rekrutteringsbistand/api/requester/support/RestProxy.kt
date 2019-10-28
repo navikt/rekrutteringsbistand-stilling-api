@@ -1,14 +1,11 @@
-package no.nav.rekrutteringsbistand.api.requester
+package no.nav.rekrutteringsbistand.api.requester.support
 
 import no.nav.rekrutteringsbistand.api.LOG
-import no.nav.rekrutteringsbistand.api.TokenUtils
 import no.nav.rekrutteringsbistand.api.toMultiValueMap
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.http.*
 import org.springframework.stereotype.Component
 import org.springframework.util.MultiValueMap
-import org.springframework.web.client.RestTemplate
 import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
 import javax.servlet.http.HttpServletRequest
@@ -17,14 +14,14 @@ import javax.servlet.http.HttpServletRequest
  * Base class with common code for proxying requests through API gateway to target endpoints and error handling.
  */
 @Component
-class RestProxy ( restTemplateBuilder: RestTemplateBuilder, val tokenUtils: TokenUtils ) {
+class RestProxy(restTemplateBuilder: RestTemplateBuilder, val tokenUtils: TokenUtils) {
 
     var restTemplate = restTemplateBuilder.build()
 
     fun proxyJsonRequest(method: HttpMethod,
-                                   request: HttpServletRequest,
-                                   stripPathPrefix: String,
-                                   body: String, targetUrl: String): ResponseEntity<String> =
+                         request: HttpServletRequest,
+                         stripPathPrefix: String,
+                         body: String, targetUrl: String): ResponseEntity<String> =
             restTemplate.exchange(
                     buildProxyTargetUrl(request, stripPathPrefix, targetUrl),
                     method,

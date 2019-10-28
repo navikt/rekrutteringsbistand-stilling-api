@@ -1,6 +1,6 @@
 package no.nav.rekrutteringsbistand.api.konfigurasjon
 
-import no.nav.rekrutteringsbistand.api.requester.HeaderFilter
+import no.nav.rekrutteringsbistand.api.requester.support.HeaderFilter
 import org.apache.http.conn.ssl.DefaultHostnameVerifier
 import org.apache.http.impl.client.HttpClientBuilder
 import org.springframework.boot.web.client.RestTemplateBuilder

@@ -1,0 +1,5 @@
+CREATE TABLE REKRUTTERINGSBISTAND (
+    id SERIAL PRIMARY KEY,
+    stilling_uuid VARCHAR(36),
+    overfoert_til VARCHAR(7)
+);

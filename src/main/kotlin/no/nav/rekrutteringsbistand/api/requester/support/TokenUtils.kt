@@ -1,4 +1,4 @@
-package no.nav.rekrutteringsbistand.api
+package no.nav.rekrutteringsbistand.api.requester.support
 
 import com.nimbusds.jwt.JWTClaimsSet
 import no.nav.security.oidc.context.OIDCRequestContextHolder

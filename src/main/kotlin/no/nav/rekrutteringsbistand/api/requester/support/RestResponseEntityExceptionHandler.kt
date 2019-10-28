@@ -1,8 +1,8 @@
-package no.nav.rekrutteringsbistand.api.requester
+package no.nav.rekrutteringsbistand.api.requester.support
 
 import no.nav.rekrutteringsbistand.api.LOG
 import no.nav.security.spring.oidc.validation.interceptor.OIDCUnauthorizedException
-import org.springframework.http.HttpHeaders
+import org.springframework.dao.EmptyResultDataAccessException
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -40,6 +40,15 @@ class RestResponseEntityExceptionHandler : ResponseEntityExceptionHandler() {
         LOG.error("IO feil", e)
         response.sendError(HttpStatus.BAD_GATEWAY.value(), e.message)
     }
+
+    @ExceptionHandler(value = [EmptyResultDataAccessException::class])
+    @ResponseBody
+    protected fun handleNotFound(e: RuntimeException, webRequest: WebRequest): ResponseEntity<Any> {
+        val uri = (webRequest as ServletWebRequest).request.requestURI
+        LOG.error("Ikke funnet: $uri")
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Ikke funnet $uri")
+    }
+
 
     private fun getResponseEntity(e: RuntimeException, melding: String, status: HttpStatus): ResponseEntity<Any> {
         val body = HashMap<String, String>(1)
