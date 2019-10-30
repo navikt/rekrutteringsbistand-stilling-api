@@ -40,6 +40,14 @@ class RekrutteringsbistandController(val repo: RekrutteringsbistandRepository) {
         return ResponseEntity.ok().body(dto)
     }
 
+    @GetMapping("/stilling")
+    fun hentForStillingider(@RequestParam stillingUuider: List<String>): List<RekrutteringsbistandDto> =
+            repo.hentForStillinger(stillingUuider)
+                    .map {     RekrutteringsbistandDto(
+                            rekrutteringUuid = it.rekrutteringUuid,
+                            stillingUuid = it.stillingUuid,
+                            overfoertTil = it.overfoertTil) }
+
 
     @GetMapping("/stilling/{id}")
     fun hentForStilling(@PathVariable id: String): RekrutteringsbistandDto =
@@ -106,6 +114,17 @@ class RekrutteringsbistandRepository(
                         stillingUuid = rs.getString("stilling_uuid"),
                         overfoertTil = rs.getString("overfoert_til"))
             }!!
+
+    fun hentForStillinger(stillingUuider: List<String>): List<Rekrutteringsbistand> =
+        namedParameterJdbcTemplate.query(
+                "SELECT * FROM REKRUTTERINGSBISTAND WHERE stilling_uuid IN(:stilling_uuider)",
+                MapSqlParameterSource("stilling_uuider", stillingUuider.joinToString(",")))
+        { rs: ResultSet, _: Int ->
+            Rekrutteringsbistand(
+                    rekrutteringUuid = rs.getString("rekruttering_uuid"),
+                    stillingUuid = rs.getString("stilling_uuid"),
+                    overfoertTil = rs.getString("overfoert_til"))
+    }
 
     fun hentForIdent(ident: String): Collection<Rekrutteringsbistand> =
             namedParameterJdbcTemplate.query(
