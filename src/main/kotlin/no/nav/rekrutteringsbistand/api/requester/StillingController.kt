@@ -17,7 +17,6 @@ class StillingController(
         val restProxy: RestProxy,
         @Suppress("SpringJavaInjectionPointsAutowiringInspection") val externalConfiguration: ExternalConfiguration) {
 
-
     @RequestMapping("/rekrutteringsbistand/api/v1/**")
     fun stilling(method: HttpMethod, request: HttpServletRequest, @RequestBody(required = false) body: String?): ResponseEntity<String> {
         return restProxy.proxyJsonRequest(method, request, Configuration.ROOT_URL, body

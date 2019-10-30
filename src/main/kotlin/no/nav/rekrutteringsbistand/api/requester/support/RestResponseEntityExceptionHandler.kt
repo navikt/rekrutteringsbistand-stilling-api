@@ -46,7 +46,7 @@ class RestResponseEntityExceptionHandler : ResponseEntityExceptionHandler() {
     protected fun handleNotFound(e: RuntimeException, webRequest: WebRequest): ResponseEntity<Any> {
         val uri = (webRequest as ServletWebRequest).request.requestURI
         LOG.error("Ikke funnet: $uri")
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Ikke funnet $uri")
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(uri)
     }
 
 
