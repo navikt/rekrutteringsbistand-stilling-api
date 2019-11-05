@@ -23,7 +23,7 @@ class RekrutteringsbistandController(val repo: RekrutteringsbistandRepository) {
         repo.lagre(Rekrutteringsbistand(
                 rekrutteringUuid = UUID.randomUUID().toString(),
                 stillingUuid = dto.stillingUuid,
-                overfoertTil = dto.overfoertTil
+                eierIdent = dto.eierIdent
         ))
         return ResponseEntity.ok().body(dto)
     }
@@ -35,7 +35,7 @@ class RekrutteringsbistandController(val repo: RekrutteringsbistandRepository) {
         repo.oppdater(Rekrutteringsbistand(
                 rekrutteringUuid = dto.rekrutteringUuid,
                 stillingUuid = dto.stillingUuid,
-                overfoertTil = dto.overfoertTil
+                eierIdent = dto.eierIdent
         ))
         return ResponseEntity.ok().body(dto)
     }
@@ -46,7 +46,7 @@ class RekrutteringsbistandController(val repo: RekrutteringsbistandRepository) {
                     .map {     RekrutteringsbistandDto(
                             rekrutteringUuid = it.rekrutteringUuid,
                             stillingUuid = it.stillingUuid,
-                            overfoertTil = it.overfoertTil) }
+                            eierIdent = it.eierIdent) }
 
 
     @GetMapping("/stilling/{id}")
@@ -56,7 +56,7 @@ class RekrutteringsbistandController(val repo: RekrutteringsbistandRepository) {
                         RekrutteringsbistandDto(
                                 rekrutteringUuid = this.rekrutteringUuid,
                                 stillingUuid = this.stillingUuid,
-                                overfoertTil = this.overfoertTil)
+                                eierIdent = this.eierIdent)
                     }
 
     @GetMapping("/ident/{id}")
@@ -67,14 +67,14 @@ class RekrutteringsbistandController(val repo: RekrutteringsbistandRepository) {
                             RekrutteringsbistandDto(
                                     rekrutteringUuid = it.rekrutteringUuid,
                                     stillingUuid = it.stillingUuid,
-                                    overfoertTil = it.overfoertTil)
+                                    eierIdent = it.eierIdent)
                         }
                     }
 
     data class RekrutteringsbistandDto(
             val rekrutteringUuid: String?,
             val stillingUuid: String,
-            val overfoertTil: String
+            val eierIdent: String
     )
 }
 
@@ -90,16 +90,16 @@ class RekrutteringsbistandRepository(
                     mapOf(
                             Pair("rekruttering_uuid", rekrutteringsbistand.rekrutteringUuid),
                             Pair("stilling_uuid", rekrutteringsbistand.stillingUuid),
-                            Pair("overfoert_til", rekrutteringsbistand.overfoertTil)
+                            Pair("eier_ident", rekrutteringsbistand.eierIdent)
                     )
             )
 
     fun oppdater(rekrutteringsbistand: Rekrutteringsbistand) =
             namedParameterJdbcTemplate.update(
-                    "update Rekrutteringsbistand set overfoert_til=:overfoert_til where rekruttering_uuid=:rekruttering_uuid",
+                    "update Rekrutteringsbistand set eier_ident=:eier_ident where rekruttering_uuid=:rekruttering_uuid",
                     mapOf(
                             Pair("rekruttering_uuid", rekrutteringsbistand.rekrutteringUuid),
-                            Pair("overfoert_til", rekrutteringsbistand.overfoertTil)
+                            Pair("eier_ident", rekrutteringsbistand.eierIdent)
                     )
 
             )
@@ -112,7 +112,7 @@ class RekrutteringsbistandRepository(
                 Rekrutteringsbistand(
                         rekrutteringUuid = rs.getString("rekruttering_uuid"),
                         stillingUuid = rs.getString("stilling_uuid"),
-                        overfoertTil = rs.getString("overfoert_til"))
+                        eierIdent = rs.getString("eier_ident"))
             }!!
 
     fun hentForStillinger(stillingUuider: List<String>): List<Rekrutteringsbistand> =
@@ -123,18 +123,18 @@ class RekrutteringsbistandRepository(
             Rekrutteringsbistand(
                     rekrutteringUuid = rs.getString("rekruttering_uuid"),
                     stillingUuid = rs.getString("stilling_uuid"),
-                    overfoertTil = rs.getString("overfoert_til"))
+                    eierIdent = rs.getString("eier_ident"))
     }
 
     fun hentForIdent(ident: String): Collection<Rekrutteringsbistand> =
             namedParameterJdbcTemplate.query(
-                    "SELECT * FROM REKRUTTERINGSBISTAND WHERE overfoert_til = :overfoert_til",
-                    MapSqlParameterSource("overfoert_til", ident))
+                    "SELECT * FROM REKRUTTERINGSBISTAND WHERE eier_ident = :eier_ident",
+                    MapSqlParameterSource("eier_ident", ident))
             { rs: ResultSet, _: Int ->
                 Rekrutteringsbistand(
                         rekrutteringUuid = rs.getString("rekruttering_uuid"),
                         stillingUuid = rs.getString("stilling_uuid"),
-                        overfoertTil = rs.getString("overfoert_til")
+                        eierIdent = rs.getString("eier_ident")
                 )
             }
 }
@@ -142,5 +142,5 @@ class RekrutteringsbistandRepository(
 data class Rekrutteringsbistand(
         val rekrutteringUuid: String,
         val stillingUuid: String,
-        val overfoertTil: String
+        val eierIdent: String
 )
