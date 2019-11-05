@@ -103,7 +103,7 @@ class RekrutteringsbistandRepository(
 
     fun oppdater(rekrutteringsbistand: Rekrutteringsbistand) =
             namedParameterJdbcTemplate.update(
-                    "update Rekrutteringsbistand set eier_ident=:eier_ident AND eier_navn=:eier_navn where rekruttering_uuid=:rekruttering_uuid",
+                    "update Rekrutteringsbistand set eier_ident=:eier_ident, eier_navn=:eier_navn where rekruttering_uuid=:rekruttering_uuid",
                     mapOf(
                             Pair("rekruttering_uuid", rekrutteringsbistand.rekrutteringUuid),
                             Pair("eier_ident", rekrutteringsbistand.eierIdent),
