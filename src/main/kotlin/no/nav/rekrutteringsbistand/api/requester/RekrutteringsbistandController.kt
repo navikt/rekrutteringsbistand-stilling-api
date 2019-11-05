@@ -6,6 +6,7 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert
 import org.springframework.stereotype.Repository
+import org.springframework.stereotype.Service
 import org.springframework.web.bind.annotation.*
 import java.sql.ResultSet
 import java.util.*
@@ -82,6 +83,12 @@ class RekrutteringsbistandController(val repo: RekrutteringsbistandRepository) {
             val eierIdent: String,
             val eierNavn: String
     )
+}
+
+@Service
+class RekrutteringsbistandService(val repo: RekrutteringsbistandRepository) {
+
+    fun hentForStilling(uuid: String) : Rekrutteringsbistand = repo.hentForStilling(uuid)
 }
 
 @Repository

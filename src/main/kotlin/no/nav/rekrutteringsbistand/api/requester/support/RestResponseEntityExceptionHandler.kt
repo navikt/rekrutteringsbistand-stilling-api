@@ -41,14 +41,13 @@ class RestResponseEntityExceptionHandler : ResponseEntityExceptionHandler() {
         response.sendError(HttpStatus.BAD_GATEWAY.value(), e.message)
     }
 
-    @ExceptionHandler(value = [EmptyResultDataAccessException::class])
+    @ExceptionHandler(value = [EmptyResultDataAccessException::class, NoContentException::class])
     @ResponseBody
-    protected fun handleNotFound(e: RuntimeException, webRequest: WebRequest): ResponseEntity<Any> {
+    protected fun handleNoContent(e: RuntimeException, webRequest: WebRequest): ResponseEntity<Any> {
         val uri = (webRequest as ServletWebRequest).request.requestURI
-        LOG.error("Ikke funnet: $uri")
+        LOG.error("Ikke innhold: $uri")
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(uri)
     }
-
 
     private fun getResponseEntity(e: RuntimeException, melding: String, status: HttpStatus): ResponseEntity<Any> {
         val body = HashMap<String, String>(1)
@@ -64,5 +63,7 @@ class RestResponseEntityExceptionHandler : ResponseEntityExceptionHandler() {
 
         return ResponseEntity.status(status).contentType(MediaType.APPLICATION_JSON).body(body)
     }
+
+    class NoContentException(message: String?): java.lang.RuntimeException(message)
 
 }

@@ -28,7 +28,7 @@ class RestProxy(restTemplateBuilder: RestTemplateBuilder, val tokenUtils: TokenU
                     HttpEntity(body, proxyHeaders(request)),
                     String::class.java)
 
-    private fun proxyHeaders(request: HttpServletRequest): MultiValueMap<String, String> =
+    fun proxyHeaders(request: HttpServletRequest): MultiValueMap<String, String> =
             mapOf(
                     HttpHeaders.CONTENT_TYPE to MediaType.APPLICATION_JSON.toString(),
                     HttpHeaders.ACCEPT to MediaType.APPLICATION_JSON.toString()

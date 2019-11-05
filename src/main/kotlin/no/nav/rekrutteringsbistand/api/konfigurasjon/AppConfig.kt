@@ -1,5 +1,7 @@
 package no.nav.rekrutteringsbistand.api.konfigurasjon
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.KotlinModule
 import no.nav.rekrutteringsbistand.api.requester.support.HeaderFilter
 import org.apache.http.conn.ssl.DefaultHostnameVerifier
 import org.apache.http.impl.client.HttpClientBuilder
@@ -16,6 +18,9 @@ import org.springframework.web.filter.CorsFilter
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 import java.time.Duration
 import java.util.*
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
+
+
 
 @Configuration
 @EnableAsync
