@@ -23,7 +23,8 @@ class RekrutteringsbistandController(val repo: RekrutteringsbistandRepository) {
         repo.lagre(Rekrutteringsbistand(
                 rekrutteringUuid = UUID.randomUUID().toString(),
                 stillingUuid = dto.stillingUuid,
-                eierIdent = dto.eierIdent
+                eierIdent = dto.eierIdent,
+                eierNavn = dto.eierNavn
         ))
         return ResponseEntity.ok().body(dto)
     }
@@ -35,7 +36,8 @@ class RekrutteringsbistandController(val repo: RekrutteringsbistandRepository) {
         repo.oppdater(Rekrutteringsbistand(
                 rekrutteringUuid = dto.rekrutteringUuid,
                 stillingUuid = dto.stillingUuid,
-                eierIdent = dto.eierIdent
+                eierIdent = dto.eierIdent,
+                eierNavn =  dto.eierNavn
         ))
         return ResponseEntity.ok().body(dto)
     }
@@ -46,7 +48,8 @@ class RekrutteringsbistandController(val repo: RekrutteringsbistandRepository) {
                     .map {     RekrutteringsbistandDto(
                             rekrutteringUuid = it.rekrutteringUuid,
                             stillingUuid = it.stillingUuid,
-                            eierIdent = it.eierIdent) }
+                            eierIdent = it.eierIdent,
+                            eierNavn = it.eierNavn) }
 
 
     @GetMapping("/stilling/{id}")
@@ -56,7 +59,8 @@ class RekrutteringsbistandController(val repo: RekrutteringsbistandRepository) {
                         RekrutteringsbistandDto(
                                 rekrutteringUuid = this.rekrutteringUuid,
                                 stillingUuid = this.stillingUuid,
-                                eierIdent = this.eierIdent)
+                                eierIdent = this.eierIdent,
+                                eierNavn = this.eierNavn)
                     }
 
     @GetMapping("/ident/{id}")
@@ -67,14 +71,16 @@ class RekrutteringsbistandController(val repo: RekrutteringsbistandRepository) {
                             RekrutteringsbistandDto(
                                     rekrutteringUuid = it.rekrutteringUuid,
                                     stillingUuid = it.stillingUuid,
-                                    eierIdent = it.eierIdent)
+                                    eierIdent = it.eierIdent,
+                                    eierNavn = it.eierNavn)
                         }
                     }
 
     data class RekrutteringsbistandDto(
             val rekrutteringUuid: String?,
             val stillingUuid: String,
-            val eierIdent: String
+            val eierIdent: String,
+            val eierNavn: String
     )
 }
 
@@ -90,16 +96,19 @@ class RekrutteringsbistandRepository(
                     mapOf(
                             Pair("rekruttering_uuid", rekrutteringsbistand.rekrutteringUuid),
                             Pair("stilling_uuid", rekrutteringsbistand.stillingUuid),
-                            Pair("eier_ident", rekrutteringsbistand.eierIdent)
+                            Pair("eier_ident", rekrutteringsbistand.eierIdent),
+                            Pair("eier_navn", rekrutteringsbistand.eierNavn)
                     )
             )
 
     fun oppdater(rekrutteringsbistand: Rekrutteringsbistand) =
             namedParameterJdbcTemplate.update(
-                    "update Rekrutteringsbistand set eier_ident=:eier_ident where rekruttering_uuid=:rekruttering_uuid",
+                    "update Rekrutteringsbistand set eier_ident=:eier_ident AND eier_navn=:eier_navn where rekruttering_uuid=:rekruttering_uuid",
                     mapOf(
                             Pair("rekruttering_uuid", rekrutteringsbistand.rekrutteringUuid),
-                            Pair("eier_ident", rekrutteringsbistand.eierIdent)
+                            Pair("eier_ident", rekrutteringsbistand.eierIdent),
+                            Pair("eier_navn", rekrutteringsbistand.eierNavn)
+
                     )
 
             )
@@ -112,7 +121,10 @@ class RekrutteringsbistandRepository(
                 Rekrutteringsbistand(
                         rekrutteringUuid = rs.getString("rekruttering_uuid"),
                         stillingUuid = rs.getString("stilling_uuid"),
-                        eierIdent = rs.getString("eier_ident"))
+                        eierIdent = rs.getString("eier_ident"),
+                        eierNavn = rs.getString("eier_navn")
+
+                )
             }!!
 
     fun hentForStillinger(stillingUuider: List<String>): List<Rekrutteringsbistand> =
@@ -123,7 +135,9 @@ class RekrutteringsbistandRepository(
             Rekrutteringsbistand(
                     rekrutteringUuid = rs.getString("rekruttering_uuid"),
                     stillingUuid = rs.getString("stilling_uuid"),
-                    eierIdent = rs.getString("eier_ident"))
+                    eierIdent = rs.getString("eier_ident"),
+                    eierNavn = rs.getString("eier_navn")
+            )
     }
 
     fun hentForIdent(ident: String): Collection<Rekrutteringsbistand> =
@@ -134,7 +148,8 @@ class RekrutteringsbistandRepository(
                 Rekrutteringsbistand(
                         rekrutteringUuid = rs.getString("rekruttering_uuid"),
                         stillingUuid = rs.getString("stilling_uuid"),
-                        eierIdent = rs.getString("eier_ident")
+                        eierIdent = rs.getString("eier_ident"),
+                        eierNavn = rs.getString("eier_navn")
                 )
             }
 }
@@ -142,5 +157,6 @@ class RekrutteringsbistandRepository(
 data class Rekrutteringsbistand(
         val rekrutteringUuid: String,
         val stillingUuid: String,
-        val eierIdent: String
+        val eierIdent: String,
+        val eierNavn: String
 )
