@@ -31,10 +31,8 @@ class RestProxy(restTemplateBuilder: RestTemplateBuilder, val tokenUtils: TokenU
     fun proxyHeaders(request: HttpServletRequest): MultiValueMap<String, String> =
             mapOf(
                     HttpHeaders.CONTENT_TYPE to MediaType.APPLICATION_JSON.toString(),
-                    HttpHeaders.ACCEPT to MediaType.APPLICATION_JSON.toString()
-            ).plus(
-                    request.cookies
-                            .map { HttpHeaders.AUTHORIZATION to "Bearer ${tokenUtils.hentOidcToken()}}" }
+                    HttpHeaders.ACCEPT to MediaType.APPLICATION_JSON.toString(),
+                    HttpHeaders.AUTHORIZATION to "Bearer ${tokenUtils.hentOidcToken()}}"
             ).toMultiValueMap()
 
     protected fun buildProxyTargetUrl(request: HttpServletRequest, stripPrefix: String, targetUrl: String): URI {

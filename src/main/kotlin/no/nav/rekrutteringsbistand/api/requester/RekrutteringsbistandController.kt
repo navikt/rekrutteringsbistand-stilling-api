@@ -1,5 +1,6 @@
 package no.nav.rekrutteringsbistand.api.requester
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import no.nav.security.oidc.api.Protected
 import org.springframework.http.ResponseEntity
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
@@ -19,15 +20,10 @@ class RekrutteringsbistandController(val repo: RekrutteringsbistandRepository) {
     @PostMapping
     fun lagre(@RequestBody dto: RekrutteringsbistandDto): ResponseEntity<RekrutteringsbistandDto> {
 
-        if(dto.rekrutteringUuid != null)  return ResponseEntity.badRequest().body(dto)
-
-        repo.lagre(Rekrutteringsbistand(
-                rekrutteringUuid = UUID.randomUUID().toString(),
-                stillingUuid = dto.stillingUuid,
-                eierIdent = dto.eierIdent,
-                eierNavn = dto.eierNavn
-        ))
-        return ResponseEntity.ok().body(dto)
+        if (dto.rekrutteringUuid != null) return ResponseEntity.badRequest().body(dto)
+        val medUuid = dto.copy(rekrutteringUuid = UUID.randomUUID().toString())
+        repo.lagre(medUuid.asRekrutteringsbistand())
+        return ResponseEntity.ok().body(medUuid)
     }
 
     @PutMapping
@@ -38,7 +34,7 @@ class RekrutteringsbistandController(val repo: RekrutteringsbistandRepository) {
                 rekrutteringUuid = dto.rekrutteringUuid,
                 stillingUuid = dto.stillingUuid,
                 eierIdent = dto.eierIdent,
-                eierNavn =  dto.eierNavn
+                eierNavn = dto.eierNavn
         ))
         return ResponseEntity.ok().body(dto)
     }
@@ -46,22 +42,14 @@ class RekrutteringsbistandController(val repo: RekrutteringsbistandRepository) {
     @GetMapping("/stilling")
     fun hentForStillingider(@RequestParam stillingUuider: List<String>): List<RekrutteringsbistandDto> =
             repo.hentForStillinger(stillingUuider)
-                    .map {     RekrutteringsbistandDto(
-                            rekrutteringUuid = it.rekrutteringUuid,
-                            stillingUuid = it.stillingUuid,
-                            eierIdent = it.eierIdent,
-                            eierNavn = it.eierNavn) }
+                    .map { it.asDto() }
 
 
     @GetMapping("/stilling/{id}")
     fun hentForStilling(@PathVariable id: String): RekrutteringsbistandDto =
             repo.hentForStilling(id)
                     .run {
-                        RekrutteringsbistandDto(
-                                rekrutteringUuid = this.rekrutteringUuid,
-                                stillingUuid = this.stillingUuid,
-                                eierIdent = this.eierIdent,
-                                eierNavn = this.eierNavn)
+                        this.asDto()
                     }
 
     @GetMapping("/ident/{id}")
@@ -69,26 +57,15 @@ class RekrutteringsbistandController(val repo: RekrutteringsbistandRepository) {
             repo.hentForIdent(id)
                     .run {
                         this.map {
-                            RekrutteringsbistandDto(
-                                    rekrutteringUuid = it.rekrutteringUuid,
-                                    stillingUuid = it.stillingUuid,
-                                    eierIdent = it.eierIdent,
-                                    eierNavn = it.eierNavn)
+                            it.asDto()
                         }
                     }
-
-    data class RekrutteringsbistandDto(
-            val rekrutteringUuid: String?,
-            val stillingUuid: String,
-            val eierIdent: String,
-            val eierNavn: String
-    )
 }
 
 @Service
 class RekrutteringsbistandService(val repo: RekrutteringsbistandRepository) {
 
-    fun hentForStilling(uuid: String) : Rekrutteringsbistand = repo.hentForStilling(uuid)
+    fun hentForStilling(uuid: String): Rekrutteringsbistand = repo.hentForStilling(uuid)
 }
 
 @Repository
@@ -125,45 +102,62 @@ class RekrutteringsbistandRepository(
                     "SELECT * FROM REKRUTTERINGSBISTAND WHERE stilling_uuid = :stilling_uuid",
                     MapSqlParameterSource("stilling_uuid", stillingUuid))
             { rs: ResultSet, _: Int ->
-                Rekrutteringsbistand(
-                        rekrutteringUuid = rs.getString("rekruttering_uuid"),
-                        stillingUuid = rs.getString("stilling_uuid"),
-                        eierIdent = rs.getString("eier_ident"),
-                        eierNavn = rs.getString("eier_navn")
-
-                )
+                Rekrutteringsbistand.fromDB(rs)
             }!!
 
     fun hentForStillinger(stillingUuider: List<String>): List<Rekrutteringsbistand> =
-        namedParameterJdbcTemplate.query(
-                "SELECT * FROM REKRUTTERINGSBISTAND WHERE stilling_uuid IN(:stilling_uuider)",
-                MapSqlParameterSource("stilling_uuider", stillingUuider.joinToString(",")))
-        { rs: ResultSet, _: Int ->
-            Rekrutteringsbistand(
-                    rekrutteringUuid = rs.getString("rekruttering_uuid"),
-                    stillingUuid = rs.getString("stilling_uuid"),
-                    eierIdent = rs.getString("eier_ident"),
-                    eierNavn = rs.getString("eier_navn")
-            )
-    }
+            namedParameterJdbcTemplate.query(
+                    "SELECT * FROM REKRUTTERINGSBISTAND WHERE stilling_uuid IN(:stilling_uuider)",
+                    MapSqlParameterSource("stilling_uuider", stillingUuider.joinToString(",")))
+            { rs: ResultSet, _: Int ->
+                Rekrutteringsbistand.fromDB(rs)
+            }
 
     fun hentForIdent(ident: String): Collection<Rekrutteringsbistand> =
             namedParameterJdbcTemplate.query(
                     "SELECT * FROM REKRUTTERINGSBISTAND WHERE eier_ident = :eier_ident",
                     MapSqlParameterSource("eier_ident", ident))
             { rs: ResultSet, _: Int ->
-                Rekrutteringsbistand(
-                        rekrutteringUuid = rs.getString("rekruttering_uuid"),
-                        stillingUuid = rs.getString("stilling_uuid"),
-                        eierIdent = rs.getString("eier_ident"),
-                        eierNavn = rs.getString("eier_navn")
-                )
+                Rekrutteringsbistand.fromDB(rs)
             }
 }
 
 data class Rekrutteringsbistand(
-        val rekrutteringUuid: String,
+        val rekrutteringUuid: String?,
         val stillingUuid: String,
         val eierIdent: String,
         val eierNavn: String
-)
+) {
+    fun asDto() =
+            RekrutteringsbistandDto(
+                    rekrutteringUuid = this.rekrutteringUuid,
+                    stillingUuid = this.stillingUuid,
+                    eierIdent = this.eierIdent,
+                    eierNavn = this.eierNavn)
+
+    companion object {
+        fun fromDB(rs: ResultSet) =
+                Rekrutteringsbistand(
+                        rekrutteringUuid = rs.getString("rekruttering_uuid"),
+                        stillingUuid = rs.getString("stilling_uuid"),
+                        eierIdent = rs.getString("eier_ident"),
+                        eierNavn = rs.getString("eier_navn"))
+    }
+}
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class RekrutteringsbistandDto(
+        val rekrutteringUuid: String?,
+        val stillingUuid: String,
+        val eierIdent: String,
+        val eierNavn: String
+) {
+    fun asRekrutteringsbistand() =
+            Rekrutteringsbistand(
+                    rekrutteringUuid = this.rekrutteringUuid,
+                    stillingUuid = this.stillingUuid,
+                    eierIdent = this.eierIdent,
+                    eierNavn = this.eierNavn
+            )
+
+}
