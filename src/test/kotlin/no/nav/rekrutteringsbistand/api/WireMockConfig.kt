@@ -9,20 +9,20 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
 
-@Profile("mvc-test")
+@Profile("mock")
 @Configuration
 class WireMockConfig {
 
     private val LOGGER = LoggerFactory.getLogger(WireMockConfig::class.java)
 
-    @Bean
-    fun wireMockServer(): WireMockServer {
-        LOGGER.info("Starter Wiremock")
-        return WireMockServer(wireMockConfig().notifier(ConsoleNotifier(true)).port(8189)).apply {
-            stubFor(StillingControllerTest.mappingBuilderStilling())
-            stubFor(StillingControllerTest.mappingBuilderSok())
-            start()
-            LOGGER.info("Wiremock startet ${isRunning} ${port()}")
-        }
-    }
+//    @Bean
+//    fun wireMockServer(): WireMockServer {
+//        LOGGER.info("Starter Wiremock")
+//        return WireMockServer(wireMockConfig().notifier(ConsoleNotifier(true)).port(8189)).apply {
+//            stubFor(StillingControllerTest.mappingBuilderStilling())
+//            stubFor(StillingControllerTest.mappingBuilderSok())
+//            start()
+//            LOGGER.info("Wiremock startet ${isRunning} ${port()}")
+//        }
+//    }
 }

@@ -12,5 +12,8 @@ fun main(args: Array<String>) {
 
 @Import(value = [TokenGeneratorConfiguration::class])
 @SpringBootApplication
-@EnableOIDCTokenValidation(ignore = ["org.springframework"])
+@EnableOIDCTokenValidation(ignore = [
+    "org.springframework",
+    "springfox.documentation.swagger.web.ApiResourceController"
+])
 class RekrutteringsbistandApplication

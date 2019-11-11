@@ -9,5 +9,8 @@ fun main(args: Array<String>) {
 }
 
 @SpringBootApplication
-@EnableOIDCTokenValidation(ignore = ["org.springframework"])
+@EnableOIDCTokenValidation(ignore = [
+    "org.springframework",
+    "springfox.documentation.swagger.web.ApiResourceController"
+])
 class RekrutteringsbistandApplication
