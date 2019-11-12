@@ -26,12 +26,6 @@ class StillingController(
         @Suppress("SpringJavaInjectionPointsAutowiringInspection") val externalConfiguration: ExternalConfiguration,
         val stillingService: StillingService) {
 
-    @RequestMapping("/rekrutteringsbistand/api/v1/**")
-    fun stilling(method: HttpMethod, request: HttpServletRequest, @RequestBody(required = false) body: String?): ResponseEntity<String> {
-        return restProxy.proxyJsonRequest(method, request, Configuration.ROOT_URL, body
-                ?: "", externalConfiguration.stillingApi.url)
-    }
-
     @RequestMapping("/search-api/**")
     private fun sok(method: HttpMethod, request: HttpServletRequest, @RequestBody body: String = ""): ResponseEntity<String> =
             restProxy.proxyJsonRequest(method, request, Configuration.ROOT_URL, body, externalConfiguration.stillingApi.url)
