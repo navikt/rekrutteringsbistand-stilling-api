@@ -19,7 +19,6 @@ import javax.servlet.http.HttpServletResponse
 @RequestMapping("/local")
 class ISSOTokenGeneratorController {
 
-
     @Unprotected
     @GetMapping("/cookie-isso")
     @Throws(IOException::class)
