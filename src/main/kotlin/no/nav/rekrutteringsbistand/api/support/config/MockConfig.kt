@@ -24,8 +24,10 @@ class MockConfig {
             stubFor(hentStillinger())
             stubFor(hentStilling())
             stubFor(postStilling())
+            stubFor(putStilling())
             stubFor(categoriesTypeahead())
             stubFor(postdata())
+            stubFor(municipals())
             stubFor(mappingBuilderSok())
             start()
             LOG.info("Startet WireMock på port ${port()}")
@@ -63,6 +65,16 @@ class MockConfig {
                             .withBody(postStillingResponse))
         }
 
+        fun putStilling(): MappingBuilder {
+            return WireMock.put(WireMock.urlPathMatching("/rekrutteringsbistand/api/v1/ads"))
+                    .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON.toString()))
+                    .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON.toString()))
+                    .withHeader(HttpHeaders.AUTHORIZATION, WireMock.matching("Bearer .*}"))
+                    .willReturn(WireMock.aResponse().withStatus(200)
+                            .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                            .withBody(postStillingResponse))
+        }
+
         fun categoriesTypeahead(): MappingBuilder {
             return WireMock.get(WireMock.urlPathMatching("/rekrutteringsbistand/api/v1/categories-with-altnames/"))
                     .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON.toString()))
@@ -81,6 +93,16 @@ class MockConfig {
                     .willReturn(WireMock.aResponse().withStatus(200)
                             .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                             .withBody(postdata))
+        }
+
+        fun municipals(): MappingBuilder {
+            return WireMock.get(WireMock.urlPathMatching("/rekrutteringsbistand/api/v1/geography/municipals"))
+                    .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON.toString()))
+                    .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON.toString()))
+                    .withHeader(HttpHeaders.AUTHORIZATION, WireMock.matching("Bearer .*}"))
+                    .willReturn(WireMock.aResponse().withStatus(200)
+                            .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                            .withBody(municipalsResponse))
         }
 
         fun mappingBuilderSok(): MappingBuilder {
@@ -419,6 +441,111 @@ class MockConfig {
                      "code":"03",
                      "name":"OSLO"
                   }
+               }
+            ]
+        """.trimIndent()
+
+        val municipalsResponse = """
+            [
+               {
+                  "code":"1818",
+                  "name":"HERØY (NORDLAND)",
+                  "countyCode":"18"
+               },
+               {
+                  "code":"1903",
+                  "name":"HARSTAD",
+                  "countyCode":"19"
+               },
+               {
+                  "code":"0631",
+                  "name":"FLESBERG",
+                  "countyCode":"06"
+               },
+               {
+                  "code":"5014",
+                  "name":"FRØYA",
+                  "countyCode":"50"
+               },
+               {
+                  "code":"1928",
+                  "name":"TORSKEN",
+                  "countyCode":"19"
+               },
+               {
+                  "code":"5061",
+                  "name":"RINDAL",
+                  "countyCode":"50"
+               },
+               {
+                  "code":"1219",
+                  "name":"BØMLO",
+                  "countyCode":"12"
+               },
+               {
+                  "code":"0430",
+                  "name":"STOR-ELVDAL",
+                  "countyCode":"04"
+               },
+               {
+                  "code":"1528",
+                  "name":"SYKKYLVEN",
+                  "countyCode":"15"
+               },
+               {
+                  "code":"0217",
+                  "name":"OPPEGÅRD",
+                  "countyCode":"02"
+               },
+               {
+                  "code":"0515",
+                  "name":"VÅGÅ",
+                  "countyCode":"05"
+               },
+               {
+                  "code":"5047",
+                  "name":"OVERHALLA",
+                  "countyCode":"50"
+               },
+               {
+                  "code":"1840",
+                  "name":"SALTDAL",
+                  "countyCode":"18"
+               },
+               {
+                  "code":"0815",
+                  "name":"KRAGERØ",
+                  "countyCode":"08"
+               },
+               {
+                  "code":"1234",
+                  "name":"GRANVIN",
+                  "countyCode":"12"
+               },
+               {
+                  "code":"1120",
+                  "name":"KLEPP",
+                  "countyCode":"11"
+               },
+               {
+                  "code":"0532",
+                  "name":"JEVNAKER",
+                  "countyCode":"05"
+               },
+               {
+                  "code":"1141",
+                  "name":"FINNØY",
+                  "countyCode":"11"
+               },
+               {
+                  "code":"1867",
+                  "name":"BØ (NORDLAND)",
+                  "countyCode":"18"
+               },
+               {
+                  "code":"0428",
+                  "name":"TRYSIL",
+                  "countyCode":"04"
                }
             ]
         """.trimIndent()
