@@ -44,7 +44,6 @@ class MockConfig {
                     .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON.toString()))
                     .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON.toString()))
                     .withHeader(HttpHeaders.AUTHORIZATION, WireMock.matching("Bearer .*}"))
-                    .withRequestBody(WireMock.equalTo("body"))
                     .willReturn(WireMock.aResponse().withStatus(200)
                             .withBody(sokResponse))
 

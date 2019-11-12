@@ -1,6 +1,6 @@
 package no.nav.rekrutteringsbistand.api.requester
 
-import no.nav.rekrutteringsbistand.api.Testbruker
+import no.nav.rekrutteringsbistand.api.Testdata
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -31,7 +31,7 @@ internal class InnloggetBrukerControllerTest {
     @Test
     fun hentInnloggetBrukerReturnererBruker() {
         restTemplate.getForObject( "${localBaseUrl()}/rekrutteringsbistand/api/v1/reportee", InnloggetBruker::class.java).apply {
-            assertThat(this).isEqualTo(Testbruker.CLARK)
+            assertThat(this).isEqualTo(Testdata.enVeileder)
         }
     }
 
