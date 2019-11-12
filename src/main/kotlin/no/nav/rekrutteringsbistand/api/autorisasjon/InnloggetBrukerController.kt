@@ -1,6 +1,6 @@
-package no.nav.rekrutteringsbistand.api.requester
+package no.nav.rekrutteringsbistand.api.autorisasjon
 
-import no.nav.rekrutteringsbistand.api.requester.support.TokenUtils.Companion.ISSUER_ISSO
+import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils.Companion.ISSUER_ISSO
 import no.nav.security.oidc.api.Protected
 import no.nav.security.spring.oidc.SpringOIDCRequestContextHolder
 import org.springframework.beans.factory.annotation.Autowired

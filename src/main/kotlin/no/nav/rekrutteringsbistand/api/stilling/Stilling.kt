@@ -1,7 +1,7 @@
-package no.nav.rekrutteringsbistand.api.requester.support.stillingDomene
+package no.nav.rekrutteringsbistand.api.stilling
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import no.nav.rekrutteringsbistand.api.requester.RekrutteringsbistandDto
+import no.nav.rekrutteringsbistand.api.rekrutteringsbistand.RekrutteringsbistandDto
 import java.time.LocalDateTime
 import java.util.*
 

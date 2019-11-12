@@ -1,4 +1,4 @@
-package no.nav.rekrutteringsbistand.api.konfigurasjon
+package no.nav.rekrutteringsbistand.api.support.config
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource

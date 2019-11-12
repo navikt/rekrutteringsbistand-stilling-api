@@ -1,4 +1,4 @@
-package no.nav.rekrutteringsbistand.api.requester
+package no.nav.rekrutteringsbistand.api.autorisasjon
 
 import no.nav.rekrutteringsbistand.api.Testdata
 import org.assertj.core.api.Assertions.assertThat

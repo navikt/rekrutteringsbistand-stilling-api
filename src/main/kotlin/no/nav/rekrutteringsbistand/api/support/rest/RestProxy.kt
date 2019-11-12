@@ -1,7 +1,8 @@
-package no.nav.rekrutteringsbistand.api.requester.support
+package no.nav.rekrutteringsbistand.api.support.rest
 
-import no.nav.rekrutteringsbistand.api.LOG
-import no.nav.rekrutteringsbistand.api.toMultiValueMap
+import no.nav.rekrutteringsbistand.api.support.LOG
+import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
+import no.nav.rekrutteringsbistand.api.support.toMultiValueMap
 import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.http.*
 import org.springframework.stereotype.Component

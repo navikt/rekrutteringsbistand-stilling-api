@@ -1,4 +1,4 @@
-package no.nav.rekrutteringsbistand.api
+package no.nav.rekrutteringsbistand.api.support
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

@@ -1,6 +1,6 @@
-package no.nav.rekrutteringsbistand.api.requester.support
+package no.nav.rekrutteringsbistand.api.support.rest
 
-import no.nav.rekrutteringsbistand.api.LOG
+import no.nav.rekrutteringsbistand.api.support.LOG
 import no.nav.security.spring.oidc.validation.interceptor.OIDCUnauthorizedException
 import org.springframework.dao.EmptyResultDataAccessException
 import org.springframework.http.HttpStatus

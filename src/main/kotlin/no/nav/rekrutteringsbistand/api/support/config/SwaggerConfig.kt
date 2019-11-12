@@ -1,4 +1,4 @@
-package no.nav.rekrutteringsbistand.api.konfigurasjon
+package no.nav.rekrutteringsbistand.api.support.config
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration

@@ -1,14 +1,13 @@
-package no.nav.rekrutteringsbistand.api.requester
+package no.nav.rekrutteringsbistand.api.stilling
 
-import no.nav.rekrutteringsbistand.api.LOG
-import no.nav.rekrutteringsbistand.api.konfigurasjon.Configuration
-import no.nav.rekrutteringsbistand.api.konfigurasjon.ExternalConfiguration
-import no.nav.rekrutteringsbistand.api.requester.support.RestProxy
-import no.nav.rekrutteringsbistand.api.requester.support.RestResponseEntityExceptionHandler
-import no.nav.rekrutteringsbistand.api.requester.support.TokenUtils
-import no.nav.rekrutteringsbistand.api.requester.support.stillingDomene.Page
-import no.nav.rekrutteringsbistand.api.requester.support.stillingDomene.Stilling
-import no.nav.rekrutteringsbistand.api.toMultiValueMap
+import no.nav.rekrutteringsbistand.api.support.LOG
+import no.nav.rekrutteringsbistand.api.support.config.Configuration
+import no.nav.rekrutteringsbistand.api.support.config.ExternalConfiguration
+import no.nav.rekrutteringsbistand.api.rekrutteringsbistand.RekrutteringsbistandService
+import no.nav.rekrutteringsbistand.api.support.rest.RestProxy
+import no.nav.rekrutteringsbistand.api.support.rest.RestResponseEntityExceptionHandler
+import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
+import no.nav.rekrutteringsbistand.api.support.toMultiValueMap
 import no.nav.security.oidc.api.Protected
 import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.core.ParameterizedTypeReference

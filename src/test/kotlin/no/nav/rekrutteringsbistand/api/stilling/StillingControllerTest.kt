@@ -1,11 +1,7 @@
-package no.nav.rekrutteringsbistand.api.requester
+package no.nav.rekrutteringsbistand.api.stilling
 
-import com.github.tomakehurst.wiremock.client.MappingBuilder
-import com.github.tomakehurst.wiremock.client.WireMock
-import com.github.tomakehurst.wiremock.client.WireMock.equalTo
-import com.github.tomakehurst.wiremock.client.WireMock.matching
-import no.nav.rekrutteringsbistand.api.konfigurasjon.MockConfig.Companion.sokResponse
-import no.nav.rekrutteringsbistand.api.konfigurasjon.MockConfig.Companion.stillingResponse
+import no.nav.rekrutteringsbistand.api.support.config.MockConfig.Companion.sokResponse
+import no.nav.rekrutteringsbistand.api.support.config.MockConfig.Companion.stillingResponse
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -15,7 +11,6 @@ import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
-import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit4.SpringRunner
 

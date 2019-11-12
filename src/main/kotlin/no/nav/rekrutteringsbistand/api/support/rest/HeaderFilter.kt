@@ -1,6 +1,6 @@
-package no.nav.rekrutteringsbistand.api.requester.support
+package no.nav.rekrutteringsbistand.api.support.rest
 
-import no.nav.rekrutteringsbistand.api.withAddedHeaders
+import no.nav.rekrutteringsbistand.api.support.withAddedHeaders
 import org.springframework.web.filter.OncePerRequestFilter
 import java.io.IOException
 import javax.servlet.FilterChain

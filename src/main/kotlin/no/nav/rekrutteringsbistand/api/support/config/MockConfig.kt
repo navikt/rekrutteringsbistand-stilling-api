@@ -1,11 +1,11 @@
-package no.nav.rekrutteringsbistand.api.konfigurasjon
+package no.nav.rekrutteringsbistand.api.support.config
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.MappingBuilder
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.common.ConsoleNotifier
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
-import no.nav.rekrutteringsbistand.api.LOG
+import no.nav.rekrutteringsbistand.api.support.LOG
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile

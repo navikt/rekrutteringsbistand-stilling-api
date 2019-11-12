@@ -1,8 +1,6 @@
-package no.nav.rekrutteringsbistand.api.konfigurasjon
+package no.nav.rekrutteringsbistand.api.support.config
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.KotlinModule
-import no.nav.rekrutteringsbistand.api.requester.support.HeaderFilter
+import no.nav.rekrutteringsbistand.api.support.rest.HeaderFilter
 import org.apache.http.conn.ssl.DefaultHostnameVerifier
 import org.apache.http.impl.client.HttpClientBuilder
 import org.springframework.boot.web.client.RestTemplateBuilder
@@ -18,8 +16,6 @@ import org.springframework.web.filter.CorsFilter
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 import java.time.Duration
 import java.util.*
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
-
 
 
 @Configuration

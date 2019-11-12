@@ -1,4 +1,4 @@
-package no.nav.rekrutteringsbistand.api.requester
+package no.nav.rekrutteringsbistand.api.rekrutteringsbistand
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import no.nav.security.oidc.api.Protected
