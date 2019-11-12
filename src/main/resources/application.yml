@@ -11,7 +11,7 @@ server:
 
 spring:
   profiles:
-    active: local
+    active: local, mock
 
 ---
 
@@ -25,25 +25,11 @@ no.nav.security.oidc:
     cookie_name: isso-localhost-idtoken
 
 external:
-  stilling-api:
-    url: ${STILLING_API_URL:http://localhost:9014}
+  stilling-api.url: http://localhost:9914
 
 spring.h2.console:
   enabled: true
   path: /h2
----
-
-spring:
-  profiles: mvc-test
-no.nav.security.oidc:
-  issuers: isso
-  issuer.isso:
-    discoveryurl: http://metadata
-    accepted_audience: aud-localhost
-    cookie_name: isso-localhost-idtoken
-external:
-  stilling-api:
-    url: http://localhost:8189
 
 ---
 

@@ -1,9 +1,12 @@
-package no.nav.rekrutteringsbistand.api
+package no.nav.rekrutteringsbistand.api.konfigurasjon
 
 import com.nimbusds.jwt.JWTClaimsSet.Builder
 import net.minidev.json.JSONArray
 import no.nav.security.oidc.api.Unprotected
 import no.nav.security.oidc.test.support.JwtTokenGenerator.*
+import no.nav.security.oidc.test.support.spring.TokenGeneratorConfiguration
+import org.springframework.context.annotation.Import
+import org.springframework.context.annotation.Profile
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
@@ -15,10 +18,11 @@ import javax.servlet.http.Cookie
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
+@Profile("local")
+@Import(TokenGeneratorConfiguration::class)
 @RestController
 @RequestMapping("/local")
-class ISSOTokenGeneratorController {
-
+class LocalLoginConfig {
 
     @Unprotected
     @GetMapping("/cookie-isso")
@@ -33,9 +37,9 @@ class ISSOTokenGeneratorController {
                 cookieName,
                 createSignedJWT(
                         Builder(buildClaimSet(subject, ISS, AUD, ACR, EXPIRY))
-                                .claim("unique_name", Testbruker.CLARK.userName)
-                                .claim("NAVident", Testbruker.CLARK.navIdent)
-                                .claim("name", Testbruker.CLARK.displayName)
+                                .claim("unique_name", "Clark.Kent@nav.no")
+                                .claim("NAVident", "C12345")
+                                .claim("name", "Clark Kent")
                                 .claim("groups", JSONArray().appendElement(role)).build()).serialize()).apply {
             domain = "localhost"
             path = "/"
@@ -51,5 +55,9 @@ class ISSOTokenGeneratorController {
             return cookie
         }
     }
+}
 
+object NAVGruppeRoller {
+    // These are not correct roles, its just for testing purposes, TODO find correct roles when we go to production.
+    const val NSS_ADMIN: String = "174bec27-e954-453b-8486-4a80d9fc7636"
 }
