@@ -1,7 +1,6 @@
 package no.nav.rekrutteringsbistand.api.rekrutteringsbistand
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import no.nav.rekrutteringsbistand.api.support.rest.RestResponseEntityExceptionHandler
 import no.nav.security.oidc.api.Protected
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -22,6 +21,7 @@ class RekrutteringsbistandController(val repo: RekrutteringsbistandRepository) {
 
     @PostMapping
     fun lagre(@RequestBody dto: RekrutteringsbistandDto): ResponseEntity<RekrutteringsbistandDto> {
+
         if (dto.rekrutteringUuid != null) throw BadRequestException("rekrutteringsUuid must be null for post")
         val medUuid = dto.copy(rekrutteringUuid = UUID.randomUUID().toString())
         repo.lagre(medUuid.asRekrutteringsbistand())

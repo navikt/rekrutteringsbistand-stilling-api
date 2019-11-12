@@ -23,6 +23,7 @@ class MockConfig {
                 .port(9914)).apply {
             stubFor(hentStillinger())
             stubFor(hentStilling())
+            stubFor(postStilling())
             stubFor(mappingBuilderSok())
             start()
             LOG.info("Startet WireMock på port ${port()}")
@@ -48,6 +49,16 @@ class MockConfig {
                     .willReturn(WireMock.aResponse().withStatus(200)
                             .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                             .withBody(stillingResponse))
+        }
+
+        fun postStilling(): MappingBuilder {
+            return WireMock.post(WireMock.urlPathMatching("/rekrutteringsbistand/api/v1/ads"))
+                    .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON.toString()))
+                    .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON.toString()))
+                    .withHeader(HttpHeaders.AUTHORIZATION, WireMock.matching("Bearer .*}"))
+                    .willReturn(WireMock.aResponse().withStatus(201)
+                            .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                            .withBody(postStillingResponse))
         }
 
         fun mappingBuilderSok(): MappingBuilder {
@@ -214,6 +225,57 @@ class MockConfig {
                 "rekruttering": null
             }
 
+        """.trimIndent()
+
+        val postStillingResponse = """
+            {
+               "id": 1000,
+               "uuid": "ee82f29c-51a9-4ca3-994d-45e3ab0e8204",
+               "created": "2019-11-12T14:17:41.105594",
+               "createdBy": "pam-rekrutteringsbistand",
+               "updated": "2019-11-12T14:17:41.105594",
+               "updatedBy": "pam-rekrutteringsbistand",
+               "mediaList": [
+
+               ],
+               "contactList":[
+
+               ],
+               "location":null,
+               "locationList":[
+
+               ],
+               "properties":{
+
+               },
+               "title":"Ny stilling",
+               "status":"INACTIVE",
+               "privacy":"INTERNAL_NOT_SHOWN",
+               "source":"DIR",
+               "medium":"DIR",
+               "reference":"398d532f-3ca1-4ca5-bc9b-da9a4945a510",
+               "published":"2019-11-12T14:17:41.092249",
+               "expires":"2019-11-12T14:17:41.092272",
+               "employer":null,
+               "categoryList":[
+
+               ],
+               "administration":{
+                  "id":1000,
+                  "status":"PENDING",
+                  "comments":null,
+                  "reportee":"Clark Kent",
+                  "remarks":[
+
+                  ],
+                  "navIdent":"C12345"
+               },
+               "publishedByAdmin":null,
+               "businessName":null,
+               "firstPublished":false,
+               "deactivatedByExpiry":false,
+               "activationOnPublishingDate":false
+            }
         """.trimIndent()
 
         val sokResponse = """
