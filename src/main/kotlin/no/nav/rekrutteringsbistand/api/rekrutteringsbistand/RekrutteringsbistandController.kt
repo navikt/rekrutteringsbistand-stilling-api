@@ -1,7 +1,9 @@
 package no.nav.rekrutteringsbistand.api.rekrutteringsbistand
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import no.nav.rekrutteringsbistand.api.support.rest.RestResponseEntityExceptionHandler
 import no.nav.security.oidc.api.Protected
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
@@ -9,6 +11,7 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert
 import org.springframework.stereotype.Repository
 import org.springframework.stereotype.Service
 import org.springframework.web.bind.annotation.*
+import java.lang.RuntimeException
 import java.sql.ResultSet
 import java.util.*
 
@@ -19,8 +22,7 @@ class RekrutteringsbistandController(val repo: RekrutteringsbistandRepository) {
 
     @PostMapping
     fun lagre(@RequestBody dto: RekrutteringsbistandDto): ResponseEntity<RekrutteringsbistandDto> {
-
-        if (dto.rekrutteringUuid != null) return ResponseEntity.badRequest().body(dto)
+        if (dto.rekrutteringUuid != null) throw BadRequestException("rekrutteringsUuid must be null for post")
         val medUuid = dto.copy(rekrutteringUuid = UUID.randomUUID().toString())
         repo.lagre(medUuid.asRekrutteringsbistand())
         return ResponseEntity.ok().body(medUuid)
@@ -28,7 +30,7 @@ class RekrutteringsbistandController(val repo: RekrutteringsbistandRepository) {
 
     @PutMapping
     fun oppdater(@RequestBody dto: RekrutteringsbistandDto): ResponseEntity<RekrutteringsbistandDto> {
-        dto.rekrutteringUuid ?: return ResponseEntity.badRequest().body(dto)
+        dto.rekrutteringUuid ?: throw BadRequestException("rekrutteringUuid must not be null for put")
 
         repo.oppdater(Rekrutteringsbistand(
                 rekrutteringUuid = dto.rekrutteringUuid,
@@ -160,4 +162,9 @@ data class RekrutteringsbistandDto(
                     eierNavn = this.eierNavn
             )
 
+}
+
+@ResponseStatus(HttpStatus.BAD_REQUEST)
+class BadRequestException : RuntimeException {
+    constructor(message: String) : super(message)
 }

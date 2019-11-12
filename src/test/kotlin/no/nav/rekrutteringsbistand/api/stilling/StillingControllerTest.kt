@@ -1,7 +1,7 @@
 package no.nav.rekrutteringsbistand.api.stilling
 
 import no.nav.rekrutteringsbistand.api.support.config.MockConfig.Companion.sokResponse
-import no.nav.rekrutteringsbistand.api.support.config.MockConfig.Companion.stillingResponse
+import no.nav.rekrutteringsbistand.api.support.config.MockConfig.Companion.stillingerResponse
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -34,7 +34,7 @@ internal class StillingControllerTest {
     @Test
     fun hentStillingReturnererStilling() {
         restTemplate.getForObject("${localBaseUrl()}/rekrutteringsbistand/api/v1/ads?a=a", String::class.java).apply {
-            assertThat(this).isEqualToIgnoringWhitespace(stillingResponse)
+            assertThat(this).isEqualToIgnoringWhitespace(stillingerResponse)
         }
 
     }

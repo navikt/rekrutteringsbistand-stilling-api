@@ -76,7 +76,7 @@ class StillingService(
         )
     }
 
-    fun hentStillinger(url: String, queryString: String): Page<Stilling> {
+    fun hentStillinger(url: String, queryString: String?): Page<Stilling> {
 
         val withQueryParams: String = UriComponentsBuilder.fromHttpUrl(url).query(queryString).build().toString()
 

@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.ResponseBody
+import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.client.ResourceAccessException
 import org.springframework.web.context.request.ServletWebRequest
 import org.springframework.web.context.request.WebRequest
@@ -25,13 +26,6 @@ class RestResponseEntityExceptionHandler : ResponseEntityExceptionHandler() {
     @ResponseBody
     protected fun handleUnauthorizedException(e: RuntimeException, webRequest: WebRequest): ResponseEntity<Any> {
         return getResponseEntity(e, "You are not authorized to access this ressource", HttpStatus.UNAUTHORIZED)
-    }
-
-    @ExceptionHandler(value = [Exception::class])
-    @ResponseBody
-    protected fun handleGenerellException(e: RuntimeException, webRequest: WebRequest): ResponseEntity<Any> {
-        LOG.error("Uhåndtert feil", e)
-        return getResponseEntity(e, "Internal error", HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
     @ExceptionHandler(IOException::class, ResourceAccessException::class)
