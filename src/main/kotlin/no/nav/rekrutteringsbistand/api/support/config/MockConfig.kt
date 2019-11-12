@@ -24,6 +24,8 @@ class MockConfig {
             stubFor(hentStillinger())
             stubFor(hentStilling())
             stubFor(postStilling())
+            stubFor(categoriesTypeahead())
+            stubFor(postdata())
             stubFor(mappingBuilderSok())
             start()
             LOG.info("Startet WireMock på port ${port()}")
@@ -59,6 +61,26 @@ class MockConfig {
                     .willReturn(WireMock.aResponse().withStatus(201)
                             .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                             .withBody(postStillingResponse))
+        }
+
+        fun categoriesTypeahead(): MappingBuilder {
+            return WireMock.get(WireMock.urlPathMatching("/rekrutteringsbistand/api/v1/categories-with-altnames/"))
+                    .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON.toString()))
+                    .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON.toString()))
+                    .withHeader(HttpHeaders.AUTHORIZATION, WireMock.matching("Bearer .*}"))
+                    .willReturn(WireMock.aResponse().withStatus(200)
+                            .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                            .withBody(categoriesTypeaheadResponse))
+        }
+
+        fun postdata(): MappingBuilder {
+            return WireMock.get(WireMock.urlPathMatching("/rekrutteringsbistand/api/v1/postdata/"))
+                    .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON.toString()))
+                    .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON.toString()))
+                    .withHeader(HttpHeaders.AUTHORIZATION, WireMock.matching("Bearer .*}"))
+                    .willReturn(WireMock.aResponse().withStatus(200)
+                            .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                            .withBody(postdata))
         }
 
         fun mappingBuilderSok(): MappingBuilder {
@@ -276,6 +298,129 @@ class MockConfig {
                "deactivatedByExpiry":false,
                "activationOnPublishingDate":false
             }
+        """.trimIndent()
+
+        val categoriesTypeaheadResponse = """
+            [
+               {
+                  "id":1,
+                  "code":"0",
+                  "categoryType":"STYRK08NAV",
+                  "name":" MILITÆRE YRKER OG UOPPGITT",
+                  "description":null,
+                  "parentId":null,
+                  "alternativeNames":[
+
+                  ]
+               },
+               {
+                  "id":2,
+                  "code":"00",
+                  "categoryType":"STYRK08NAV",
+                  "name":"Uoppgitt eller yrker som ikke kan identifiseres",
+                  "description":null,
+                  "parentId":1,
+                  "alternativeNames":[
+
+                  ]
+               }
+            ]
+        """.trimIndent()
+
+        val postdata = """
+            [
+               {
+                  "postalCode":"3656",
+                  "city":"ATRÅ",
+                  "municipality":{
+                     "code":"0826",
+                     "name":"TINN",
+                     "countyCode":"08"
+                  },
+                  "county":{
+                     "code":"08",
+                     "name":"TELEMARK"
+                  }
+               },
+               {
+                  "postalCode":"3658",
+                  "city":"MILAND",
+                  "municipality":{
+                     "code":"0826",
+                     "name":"TINN",
+                     "countyCode":"08"
+                  },
+                  "county":{
+                     "code":"08",
+                     "name":"TELEMARK"
+                  }
+               },
+               {
+                  "postalCode":"2329",
+                  "city":"VANG PÅ HEDMARKEN",
+                  "municipality":{
+                     "code":"0403",
+                     "name":"HAMAR",
+                     "countyCode":"04"
+                  },
+                  "county":{
+                     "code":"04",
+                     "name":"HEDMARK"
+                  }
+               },
+               {
+                  "postalCode":"3671",
+                  "city":"NOTODDEN",
+                  "municipality":{
+                     "code":"0807",
+                     "name":"NOTODDEN",
+                     "countyCode":"08"
+                  },
+                  "county":{
+                     "code":"08",
+                     "name":"TELEMARK"
+                  }
+               },
+               {
+                  "postalCode":"3672",
+                  "city":"NOTODDEN",
+                  "municipality":{
+                     "code":"0807",
+                     "name":"NOTODDEN",
+                     "countyCode":"08"
+                  },
+                  "county":{
+                     "code":"08",
+                     "name":"TELEMARK"
+                  }
+               },
+               {
+                  "postalCode":"3673",
+                  "city":"NOTODDEN",
+                  "municipality":{
+                     "code":"0807",
+                     "name":"NOTODDEN",
+                     "countyCode":"08"
+                  },
+                  "county":{
+                     "code":"08",
+                     "name":"TELEMARK"
+                  }
+               },
+               {
+                  "postalCode":"1011",
+                  "city":"OSLO",
+                  "municipality":{
+                     "code":"0301",
+                     "name":"OSLO",
+                     "countyCode":"03"
+                  },
+                  "county":{
+                     "code":"03",
+                     "name":"OSLO"
+                  }
+               }
+            ]
         """.trimIndent()
 
         val sokResponse = """
