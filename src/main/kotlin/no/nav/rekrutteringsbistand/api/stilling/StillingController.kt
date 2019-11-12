@@ -15,6 +15,7 @@ import org.springframework.dao.EmptyResultDataAccessException
 import org.springframework.http.*
 import org.springframework.stereotype.Service
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.client.RestTemplate
 import org.springframework.web.util.UriComponentsBuilder
 import javax.servlet.http.HttpServletRequest
 
@@ -60,12 +61,10 @@ class StillingController(
 
 @Service
 class StillingService(
-        restTemplateBuilder: RestTemplateBuilder,
+        val restTemplate: RestTemplate,
         @Suppress("SpringJavaInjectionPointsAutowiringInspection") val externalConfiguration: ExternalConfiguration,
         val rekrutteringsbistandService: RekrutteringsbistandService,
         val tokenUtils: TokenUtils) {
-
-    var restTemplate = restTemplateBuilder.build()
 
     fun hentStilling(uuid: String): Stilling {
         val url = "${externalConfiguration.stillingApi.url}/rekrutteringsbistand/api/v1/ads/$uuid"

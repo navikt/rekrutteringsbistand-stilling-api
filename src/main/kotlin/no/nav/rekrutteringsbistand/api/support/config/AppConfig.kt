@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.core.Ordered
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory
 import org.springframework.scheduling.annotation.EnableAsync
+import org.springframework.web.client.RestTemplate
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 import org.springframework.web.filter.CorsFilter
@@ -40,25 +41,25 @@ class AppConfig : WebMvcConfigurer {
                 urlPatterns = setOf("/*")
                 isEnabled = true
             }
-}
 
-@Bean
-fun headerFilterRegistration(): FilterRegistrationBean<*> =
-        FilterRegistrationBean<HeaderFilter>().apply {
-            setFilter(HeaderFilter())
-            setUrlPatterns(Arrays.asList("/rekrutteringsbistand/api/*"))
-            setEnabled(true)
-        }
-
-@Bean
-fun restTemplateBuilder(): RestTemplateBuilder {
-    return RestTemplateBuilder()
-            .setConnectTimeout(Duration.ofMillis(5000))
-            .setReadTimeout(Duration.ofMillis(30000))
-            .requestFactory {
-                HttpComponentsClientHttpRequestFactory(
-                        HttpClientBuilder.create()
-                                .setSSLHostnameVerifier(DefaultHostnameVerifier()) // Fix SSL hostname verification for *.local domains
-                                .build())
+    @Bean
+    fun headerFilterRegistration(): FilterRegistrationBean<*> =
+            FilterRegistrationBean<HeaderFilter>().apply {
+                setFilter(HeaderFilter())
+                setUrlPatterns(Arrays.asList("/rekrutteringsbistand/api/*"))
+                setEnabled(true)
             }
+
+    @Bean
+    fun restTemplate(): RestTemplate {
+        return RestTemplateBuilder()
+                .setConnectTimeout(Duration.ofMillis(5000))
+                .setReadTimeout(Duration.ofMillis(30000))
+                .requestFactory {
+                    HttpComponentsClientHttpRequestFactory(
+                            HttpClientBuilder.create()
+                                    .setSSLHostnameVerifier(DefaultHostnameVerifier()) // Fix SSL hostname verification for *.local domains
+                                    .build())
+                }.build()
+    }
 }

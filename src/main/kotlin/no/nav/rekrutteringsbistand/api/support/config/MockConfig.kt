@@ -66,7 +66,7 @@ class MockConfig {
         }
 
         fun putStilling(): MappingBuilder {
-            return WireMock.put(WireMock.urlPathMatching("/rekrutteringsbistand/api/v1/ads"))
+            return WireMock.put(WireMock.urlPathMatching("/rekrutteringsbistand/api/v1/ads/ee82f29c-51a9-4ca3-994d-45e3ab0e8204"))
                     .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON.toString()))
                     .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON.toString()))
                     .withHeader(HttpHeaders.AUTHORIZATION, WireMock.matching("Bearer .*}"))
