@@ -1,7 +1,6 @@
 package no.nav.rekrutteringsbistand.api.stilling
 
 import no.nav.rekrutteringsbistand.api.Testdata.etRekrutteringsbistand
-import no.nav.rekrutteringsbistand.api.Testdata.rekrutteringsDto
 import no.nav.rekrutteringsbistand.api.rekrutteringsbistand.RekrutteringsbistandRepository
 import no.nav.rekrutteringsbistand.api.support.config.MockConfig.Companion.sokResponse
 import no.nav.rekrutteringsbistand.api.support.config.MockConfig.Companion.stillingerResponse
