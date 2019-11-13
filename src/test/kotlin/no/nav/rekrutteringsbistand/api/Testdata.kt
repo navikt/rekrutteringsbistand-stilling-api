@@ -3,11 +3,12 @@ package no.nav.rekrutteringsbistand.api
 import no.nav.rekrutteringsbistand.api.autorisasjon.InnloggetBruker
 import no.nav.rekrutteringsbistand.api.rekrutteringsbistand.OppdaterRekrutteringsbistand
 import no.nav.rekrutteringsbistand.api.rekrutteringsbistand.Rekrutteringsbistand
+import no.nav.rekrutteringsbistand.api.rekrutteringsbistand.RekrutteringsbistandDto
 
 object Testdata {
     val enVeileder = InnloggetBruker("Clark.Kent@nav.no", "Clark Kent", "C12345")
 
-    val etRekrutteringsbistandUtenRekrutteringsUuid = Rekrutteringsbistand(
+    val etRekrutteringsbistand = Rekrutteringsbistand(
             rekrutteringUuid = "12312312-51a9-4ca3-994d-41e3ab0e8204",
             eierIdent = enVeileder.navIdent,
             eierNavn = enVeileder.displayName,
@@ -17,4 +18,11 @@ object Testdata {
             rekrutteringsUuid = "12312312-51a9-4ca3-994d-41e3ab0e8204",
             eierIdent = "Y123123",
             eierNavn = "Nytt navn")
+
+
+    fun rekrutteringsDto(rekrutteringsbistand: Rekrutteringsbistand) = RekrutteringsbistandDto(
+            rekrutteringUuid = rekrutteringsbistand.rekrutteringUuid,
+            stillingUuid = rekrutteringsbistand.stillingUuid,
+            eierIdent = rekrutteringsbistand.eierIdent,
+            eierNavn = rekrutteringsbistand.eierNavn)
 }

@@ -1,7 +1,7 @@
 package no.nav.rekrutteringsbistand.api.rekrutteringsbistand
 
 import no.nav.rekrutteringsbistand.api.Testdata.enRekrutteringsbistandOppdatering
-import no.nav.rekrutteringsbistand.api.Testdata.etRekrutteringsbistandUtenRekrutteringsUuid
+import no.nav.rekrutteringsbistand.api.Testdata.etRekrutteringsbistand
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.After
 import org.junit.Test
@@ -16,7 +16,7 @@ import org.springframework.test.context.junit4.SpringRunner
 @ActiveProfiles("local")
 class RekrutteringsbistandRepositoryTest {
 
-    val tilLagring = etRekrutteringsbistandUtenRekrutteringsUuid
+    val tilLagring = etRekrutteringsbistand
 
     @Autowired
     lateinit var repository: RekrutteringsbistandRepository
