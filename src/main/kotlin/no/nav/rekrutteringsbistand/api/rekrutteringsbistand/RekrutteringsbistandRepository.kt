@@ -23,14 +23,13 @@ class RekrutteringsbistandRepository(
                     )
             )
 
-    fun oppdater(rekrutteringsbistand: Rekrutteringsbistand) =
+    fun oppdaterEierIdentOgEierNavn(oppdatering: OppdaterRekrutteringsbistand) =
             jdbcTemplate.update(
-                    "update Rekrutteringsbistand set eier_ident=:eier_ident, eier_navn=:eier_navn where rekruttering_uuid=:rekruttering_uuid",
+                    "update REKRUTTERINGSBISTAND set eier_ident=:eier_ident, eier_navn=:eier_navn where rekruttering_uuid=:rekruttering_uuid",
                     mapOf(
-                            Pair("rekruttering_uuid", rekrutteringsbistand.rekrutteringUuid),
-                            Pair("eier_ident", rekrutteringsbistand.eierIdent),
-                            Pair("eier_navn", rekrutteringsbistand.eierNavn)
-
+                            Pair("rekruttering_uuid", oppdatering.rekrutteringsUuid),
+                            Pair("eier_ident", oppdatering.eierIdent),
+                            Pair("eier_navn", oppdatering.eierNavn)
                     )
 
             )
@@ -58,4 +57,10 @@ class RekrutteringsbistandRepository(
             { rs: ResultSet, _: Int ->
                 Rekrutteringsbistand.fromDB(rs)
             }
+
+    fun slett(rekrutteringsUuid: String) =
+            jdbcTemplate.update("DELETE FROM REKRUTTERINGSBISTAND WHERE rekruttering_uuid = :rekruttering_uuid",
+                    MapSqlParameterSource("rekruttering_uuid", rekrutteringsUuid))
 }
+
+data class OppdaterRekrutteringsbistand(val rekrutteringsUuid: String, val eierIdent: String, val eierNavn: String)

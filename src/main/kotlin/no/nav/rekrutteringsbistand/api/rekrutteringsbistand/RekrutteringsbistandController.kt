@@ -25,9 +25,8 @@ class RekrutteringsbistandController(val repo: RekrutteringsbistandRepository) {
     fun oppdater(@RequestBody dto: RekrutteringsbistandDto): ResponseEntity<RekrutteringsbistandDto> {
         if (dto.rekrutteringUuid == null) throw BadRequestException("rekrutteringUuid must not be null for put")
 
-        repo.oppdater(Rekrutteringsbistand(
-                rekrutteringUuid = dto.rekrutteringUuid,
-                stillingUuid = dto.stillingUuid,
+        repo.oppdaterEierIdentOgEierNavn(OppdaterRekrutteringsbistand(
+                rekrutteringsUuid = dto.rekrutteringUuid,
                 eierIdent = dto.eierIdent,
                 eierNavn = dto.eierNavn
         ))
