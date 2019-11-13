@@ -2,8 +2,7 @@ package no.nav.rekrutteringsbistand.api.autorisasjon
 
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils.Companion.ISSUER_ISSO
 import no.nav.security.oidc.api.Protected
-import no.nav.security.spring.oidc.SpringOIDCRequestContextHolder
-import org.springframework.beans.factory.annotation.Autowired
+import no.nav.security.oidc.context.OIDCRequestContextHolder
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
@@ -12,11 +11,7 @@ import java.util.*
 @RestController
 @RequestMapping("/rekrutteringsbistand/api/v1/reportee")
 @Protected
-class InnloggetBrukerController {
-
-    @Autowired
-    @Suppress("SpringJavaInjectionPointsAutowiringInspection") // Denne må aktiveres i spring eller test oicd rammeverk
-    lateinit var contextHolder: SpringOIDCRequestContextHolder
+class InnloggetBrukerController(val contextHolder: OIDCRequestContextHolder) {
 
     @GetMapping
     fun hentInnloggetBruker(): InnloggetBruker =

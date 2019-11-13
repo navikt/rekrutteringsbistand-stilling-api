@@ -9,7 +9,6 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.ResponseBody
-import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.client.ResourceAccessException
 import org.springframework.web.context.request.ServletWebRequest
 import org.springframework.web.context.request.WebRequest
@@ -58,6 +57,6 @@ class RestResponseEntityExceptionHandler : ResponseEntityExceptionHandler() {
         return ResponseEntity.status(status).contentType(MediaType.APPLICATION_JSON).body(body)
     }
 
-    class NoContentException(message: String?): java.lang.RuntimeException(message)
+    class NoContentException(message: String?): RuntimeException(message)
 
 }
