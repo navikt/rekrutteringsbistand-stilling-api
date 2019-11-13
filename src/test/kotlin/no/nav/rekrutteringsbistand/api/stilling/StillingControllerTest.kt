@@ -58,7 +58,7 @@ internal class StillingControllerTest {
                 object : ParameterizedTypeReference<Page<Stilling>>() {}
         ).body
 
-        assertThat(stilling!!.content.first().rekruttering).isEqualTo(rekrutteringsDto(etRekrutteringsbistand))
+        assertThat(stilling!!.content.first().rekruttering).isEqualTo(etRekrutteringsbistand.asDto())
         assertThat(stilling.content.first().uuid).isEqualTo(etRekrutteringsbistand.stillingUuid)
 
         repository.slett(etRekrutteringsbistand.rekrutteringUuid!!)
