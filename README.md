@@ -6,7 +6,7 @@ Fungerer også som en proxy for operasjoner mot stillinger.
 Start main i klassen RekrutteringsbistandApplication. 
 
 ### Mocking
-I application.yml, velg mellom mocket stilling eller mot en localhost stillingserver med profilene 'mock' og 'ekstern'.
+I application.yml, velg mellom mocket stilling eller mot en localhost stillingserver med profilene 'stillingMock' og 'ekstern'.
 Mock er default.
 
 

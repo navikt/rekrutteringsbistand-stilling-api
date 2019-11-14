@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 
-@Profile("mock")
+@Profile("stillingMock")
 @Configuration
 class MockConfig {
 

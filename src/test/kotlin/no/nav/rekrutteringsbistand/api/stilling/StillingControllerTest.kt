@@ -21,7 +21,7 @@ import org.springframework.test.context.junit4.SpringRunner
 
 @RunWith(SpringRunner::class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("mock", "local")
+@ActiveProfiles("stillingMock", "local")
 internal class StillingControllerTest {
 
     @LocalServerPort

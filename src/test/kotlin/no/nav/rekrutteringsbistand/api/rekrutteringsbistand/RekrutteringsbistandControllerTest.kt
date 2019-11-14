@@ -21,7 +21,7 @@ import java.util.*
 
 @RunWith(SpringRunner::class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("mock", "local")
+@ActiveProfiles("local")
 class RekrutteringsbisandComponentTest {
 
     @LocalServerPort
@@ -35,7 +35,6 @@ class RekrutteringsbisandComponentTest {
     fun authenticateClient() {
         restTemplate.getForObject("$localBaseUrl/local/cookie-isso", String::class.java)
     }
-
 
     @Test
     fun `Lagring av rekrutteringsbistand skal returnere HTTP status 201 og JSON med nyopprettet rekrutteringUuid`() {
@@ -65,5 +64,4 @@ class RekrutteringsbisandComponentTest {
             assertThat(eierNavn).isEqualTo(input.eierNavn)
         }
     }
-
 }

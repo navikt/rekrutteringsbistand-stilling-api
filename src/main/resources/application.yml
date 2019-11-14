@@ -11,7 +11,7 @@ server:
 
 spring:
   profiles:
-    active: local, mock
+    active: local, stillingMock
 
 ---
 
@@ -30,7 +30,7 @@ spring.h2.console:
 
 ---
 spring:
-  profiles: mock
+  profiles: stillingMock
 external:
   stilling-api.url: http://localhost:9914
 ---
