@@ -23,8 +23,8 @@ class StillingController(
     }
 
     @RequestMapping("/search-api/**")
-    private fun sok(method: HttpMethod, request: HttpServletRequest, @RequestBody body: String = ""): ResponseEntity<String> =
-            restProxy.proxyJsonRequest(method, request, Configuration.ROOT_URL, body, externalConfiguration.stillingApi.url)
+    private fun sok(method: HttpMethod, request: HttpServletRequest, @RequestBody body: String?): ResponseEntity<String> =
+            restProxy.proxyJsonRequest(method, request, Configuration.ROOT_URL, body ?: "", externalConfiguration.stillingApi.url)
 
     @GetMapping("/rekrutteringsbistand/api/v1/stilling/{uuid}")
     fun hentStilling(@PathVariable uuid: String, request: HttpServletRequest): ResponseEntity<Stilling> {

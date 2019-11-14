@@ -1,15 +1,24 @@
 # TAG - rekrutteringsbistand api
+Administrerer veileder rekrutteringsdata for NAV
+Fungerer også som en proxy for operasjoner mot stillinger.
+
+## Starte applikasjonen i utviklingsmiljø
+Start main i klassen RekrutteringsbistandApplication. 
+
+### Mocking
+I application.yml, velg mellom mocket stilling eller mot en localhost stillingserver med profilene 'mock' og 'ekstern'.
+Mock er default.
 
 
-### Oppsett
+## Starte applikasjonen i docker
 
-Bygg image
+### Bygg image
 `docker build -t rekrutteringsbistand-api .`
 
-Kjør container
+###Kjør container
 `docker run -d -p 9501:9501 rekrutteringsbistand-api`
 
-Åpnes i browser: [http://localhost:9501/rekrutteringsbistand-api/internal/healthcheck](http://localhost:9501/rekrutteringsbistand-api/internal/healthcheck)
+## Åpne i browser
+[http://localhost:9501/rekrutteringsbistand-api/swagger-ui.html](http://localhost:9501/rekrutteringsbistand-api/swagger-ui.html)
 
-### Notater
-Applikasjonen er ikke enablet til vault enda (vi tar det når det blir behov for noen secrets)
+
