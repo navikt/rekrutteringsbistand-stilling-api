@@ -4,7 +4,7 @@ import no.nav.security.oidc.api.Protected
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
-import java.lang.RuntimeException
+import java.net.URI
 import java.util.*
 
 @RestController
@@ -18,7 +18,7 @@ class RekrutteringsbistandController(val repo: RekrutteringsbistandRepository) {
         if (dto.rekrutteringUuid != null) throw BadRequestException("rekrutteringsUuid must be null for post")
         val medUuid = dto.copy(rekrutteringUuid = UUID.randomUUID().toString())
         repo.lagre(medUuid.asRekrutteringsbistand())
-        return ResponseEntity.ok().body(medUuid)
+        return ResponseEntity.created(URI("/rekruttering/${medUuid.rekrutteringUuid}")).body(medUuid)
     }
 
     @PutMapping

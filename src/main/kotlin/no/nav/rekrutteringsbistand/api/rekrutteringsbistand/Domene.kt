@@ -29,7 +29,7 @@ data class Rekrutteringsbistand(
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class RekrutteringsbistandDto(
-        val rekrutteringUuid: String?,
+        val rekrutteringUuid: String? = null,
         val stillingUuid: String,
         val eierIdent: String,
         val eierNavn: String

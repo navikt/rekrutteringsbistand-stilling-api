@@ -27,7 +27,7 @@ internal class StillingControllerTest {
     @LocalServerPort
     var port = 0
 
-    private fun localBaseUrl(): String = "http://localhost:$port/rekrutteringsbistand-api"
+    val localBaseUrl by lazy { "http://localhost:$port/rekrutteringsbistand-api" }
 
     @Autowired
     lateinit var repository: RekrutteringsbistandRepository
@@ -36,13 +36,13 @@ internal class StillingControllerTest {
 
     @Before
     fun authenticateClient() {
-        restTemplate.getForObject("${localBaseUrl()}/local/cookie-isso", String::class.java)
+        restTemplate.getForObject("$localBaseUrl/local/cookie-isso", String::class.java)
     }
 
     @Test
     fun hentStilling_skal_returnere_stilling() {
-        restTemplate.getForObject("${localBaseUrl()}/rekrutteringsbistand/api/v1/ads?a=a", String::class.java).apply {
-            assertThat(this).isEqualToIgnoringWhitespace(stillingerResponse)
+        restTemplate.getForObject("$localBaseUrl/rekrutteringsbistand/api/v1/ads?a=a", String::class.java).also {
+            assertThat(it).isEqualToIgnoringWhitespace(stillingerResponse)
         }
     }
 
@@ -51,7 +51,7 @@ internal class StillingControllerTest {
         repository.lagre(etRekrutteringsbistand)
 
         val stilling = restTemplate.exchange(
-                "${localBaseUrl()}/rekrutteringsbistand/api/v1/ads?a=a",
+                "$localBaseUrl/rekrutteringsbistand/api/v1/ads?a=a",
                 HttpMethod.GET,
                 null,
                 object : ParameterizedTypeReference<Page<Stilling>>() {}
@@ -68,8 +68,8 @@ internal class StillingControllerTest {
         val headers = HttpHeaders()
 
         val request = HttpEntity("body", headers)
-        restTemplate.postForObject("${localBaseUrl()}/search-api/underenhet/_search", request, String::class.java).apply {
-            assertThat(this).isEqualToIgnoringWhitespace(sokResponse)
+        restTemplate.postForObject("$localBaseUrl/search-api/underenhet/_search", request, String::class.java).also {
+            assertThat(it).isEqualToIgnoringWhitespace(sokResponse)
         }
     }
 
