@@ -22,7 +22,7 @@ import java.util.*
 @RunWith(SpringRunner::class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("local")
-class RekrutteringsbisandComponentTest { 
+class RekrutteringsbisandComponentTest {
 
     @LocalServerPort
     private var port = 0
