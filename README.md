@@ -1,7 +1,7 @@
 # rekrutteringsbistand-api
 
-Administrerer veileder rekrutteringsdata for NAV
-Fungerer også som en proxy for operasjoner mot stillinger.
+Administrerer Nav-veilders rekrutteringsdata" for NAV
+Fungerer også som en proxy for operasjoner mot stillingsystemet til Nav.
 
 
 # Komme i gang

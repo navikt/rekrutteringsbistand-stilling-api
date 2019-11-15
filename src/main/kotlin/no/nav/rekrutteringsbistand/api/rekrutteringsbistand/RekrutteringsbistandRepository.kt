@@ -16,10 +16,10 @@ class RekrutteringsbistandRepository(
     fun lagre(rekrutteringsbistand: Rekrutteringsbistand) =
             rekrutteringsbistandInsert.executeAndReturnKey(
                     mapOf(
-                            Pair("rekruttering_uuid", rekrutteringsbistand.rekrutteringUuid),
-                            Pair("stilling_uuid", rekrutteringsbistand.stillingUuid),
-                            Pair("eier_ident", rekrutteringsbistand.eierIdent),
-                            Pair("eier_navn", rekrutteringsbistand.eierNavn)
+                            "rekruttering_uuid" to  rekrutteringsbistand.rekrutteringUuid,
+                            "stilling_uuid" to rekrutteringsbistand.stillingUuid,
+                            "eier_ident" to rekrutteringsbistand.eierIdent,
+                            "eier_navn" to rekrutteringsbistand.eierNavn)
                     )
             )
 
@@ -27,9 +27,9 @@ class RekrutteringsbistandRepository(
             jdbcTemplate.update(
                     "update REKRUTTERINGSBISTAND set eier_ident=:eier_ident, eier_navn=:eier_navn where rekruttering_uuid=:rekruttering_uuid",
                     mapOf(
-                            Pair("rekruttering_uuid", oppdatering.rekrutteringsUuid),
-                            Pair("eier_ident", oppdatering.eierIdent),
-                            Pair("eier_navn", oppdatering.eierNavn)
+                            "rekruttering_uuid" to oppdatering.rekrutteringsUuid,
+                            "eier_ident" to oppdatering.eierIdent,
+                            "eier_navn" to oppdatering.eierNavn)
                     )
 
             )
