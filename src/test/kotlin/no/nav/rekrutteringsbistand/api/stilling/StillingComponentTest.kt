@@ -22,7 +22,7 @@ import org.springframework.test.context.junit4.SpringRunner
 @RunWith(SpringRunner::class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("stillingMock", "local")
-internal class StillingControllerTest {
+internal class StillingComponentTest {
 
     @LocalServerPort
     var port = 0
@@ -40,14 +40,14 @@ internal class StillingControllerTest {
     }
 
     @Test
-    fun hentStilling_skal_returnere_stilling() {
+    fun `hentStilling skal returnere stilling`() {
         restTemplate.getForObject("$localBaseUrl/rekrutteringsbistand/api/v1/ads?a=a", String::class.java).also {
             assertThat(it).isEqualToIgnoringWhitespace(stillingerResponse)
         }
     }
 
     @Test
-    fun hentStilling_skal_returnere_stilling_med_rekrutteringsbistand() {
+    fun `hentStilling skal returnere stilling med rekrutteringsbistand`() {
         repository.lagre(etRekrutteringsbistand)
 
         val stilling = restTemplate.exchange(
@@ -64,7 +64,7 @@ internal class StillingControllerTest {
     }
 
     @Test
-    fun hentStillingReturnererSok() {
+    fun `hent stilling returnerer sok`() {
         val headers = HttpHeaders()
 
         val request = HttpEntity("body", headers)
