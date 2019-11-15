@@ -26,8 +26,7 @@ Start main i klassen RekrutteringsbistandApplication.
 
 # Henvendelser
 
-* Prosjektleder per november 2019: Hafsa Elkam, Hafsa.Elkam@nav.no 
-* Teamleder produktteam per novmeber 2019: Tina Krekke, Tina.Krekke@nav.no (per. november 2019)
+TODO: Hva skal være kontaktpunkt for folk som ikke er ansatt i Nav?
 
 ## For NAV-ansatte
 
