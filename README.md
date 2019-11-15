@@ -1,7 +1,8 @@
-# Rekrutteringsbistand-api
+# rekrutteringsbistand-api
 
 Administrerer veileder rekrutteringsdata for NAV
 Fungerer også som en proxy for operasjoner mot stillinger.
+
 
 # Komme i gang
 ## Bygge
@@ -15,12 +16,13 @@ stillingMock er default.
 ### Starte applikasjonen i utviklingsmiljø
 Start main i klassen RekrutteringsbistandApplication. 
 
+## Åpne i browser
+[http://localhost:9501/rekrutteringsbistand-api/swagger-ui.html](http://localhost:9501/rekrutteringsbistand-api/swagger-ui.html)
+
 ## Docker
 1. Bygg image: `docker build -t rekrutteringsbistand-api .`
 2. Kjør container: `docker run -d -p 9501:9501 rekrutteringsbistand-api`
 
-### Åpne i browser
-[http://localhost:9501/rekrutteringsbistand-api/swagger-ui.html](http://localhost:9501/rekrutteringsbistand-api/swagger-ui.html)
 
 # Henvendelser
 
