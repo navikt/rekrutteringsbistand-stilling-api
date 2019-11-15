@@ -33,11 +33,6 @@ class RekrutteringsbistandController(val repo: RekrutteringsbistandRepository) {
         return ResponseEntity.ok().body(dto)
     }
 
-    @GetMapping("/stilling")
-    fun hentForStillingider(@RequestParam stillingUuider: List<String>): List<RekrutteringsbistandDto> =
-            repo.hentForStillinger(stillingUuider).map { it.asDto() }
-
-
     @GetMapping("/stilling/{id}")
     fun hentForStilling(@PathVariable id: String): RekrutteringsbistandDto =
             repo.hentForStilling(id).asDto()
