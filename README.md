@@ -26,7 +26,8 @@ Start main i klassen RekrutteringsbistandApplication.
 
 # Henvendelser
 
-TODO: Hva skal være kontaktpunkt for folk som ikke er ansatt i Nav?
+* https://www.nav.no/no/NAV+og+samfunn/Kontakt+NAV/Kontakt+oss
+* https://github.com/orgs/navikt/teams/teamtag
 
 ## For NAV-ansatte
 
