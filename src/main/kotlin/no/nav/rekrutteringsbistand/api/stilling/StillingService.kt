@@ -61,18 +61,17 @@ class StillingService(
                         })
     }
 
-    fun berikMedRekruttering(stilling: Stilling): Stilling {
-        try {
+    fun berikMedRekruttering(stilling: Stilling): Stilling =
+         try {
             LOG.debug("henter rekrutteringsinformasjon for uuid ${stilling.uuid}")
             val rekrutteringsbidstand = rekrutteringsbistandService.hentForStilling(stilling.uuid!!)
             LOG.debug("fant rekrutteringsinformasjon for uuid ${stilling.uuid}")
-            return stilling.copy(
+            stilling.copy(
                     rekruttering = rekrutteringsbidstand.asDto()
             )
         } catch (er: EmptyResultDataAccessException) {
-            return stilling
+            stilling
         }
-    }
 
     fun headers() =
             mapOf(

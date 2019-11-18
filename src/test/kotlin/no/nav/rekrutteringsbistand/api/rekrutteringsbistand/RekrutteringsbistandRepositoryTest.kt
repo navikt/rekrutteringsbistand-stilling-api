@@ -22,7 +22,7 @@ class RekrutteringsbistandRepositoryTest {
     lateinit var repository: RekrutteringsbistandRepository
 
     @Test
-    fun skal_kunne_lagre_og_hente_ut_rekrutteringsbistand() {
+    fun `skal kunne lagre og hente ut rekrutteringsbistand`() {
         repository.lagre(tilLagring)
         val lagretRekrutteringsbistand = repository.hentForStilling(tilLagring.stillingUuid)
 
@@ -30,7 +30,7 @@ class RekrutteringsbistandRepositoryTest {
     }
 
     @Test
-    fun skal_kunne_oppdatere_eier_ident_og_eier_navn_på_rekrutteringsbistand() {
+    fun `skal kunne oppdatere eier ident og eier navn på rekrutteringsbistand`() {
         repository.lagre(tilLagring)
         repository.oppdaterEierIdentOgEierNavn(enRekrutteringsbistandOppdatering)
 

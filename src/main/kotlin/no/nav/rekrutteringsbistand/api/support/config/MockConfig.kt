@@ -196,7 +196,7 @@ class MockConfig {
 
         """.trimIndent()
 
-        val stillingResponse = """
+        private val stillingResponse = """
             {
                 "id": 1000,
                 "uuid": "ee82f29c-51a9-4ca3-994d-45e3ab0e8204",
@@ -271,7 +271,7 @@ class MockConfig {
 
         """.trimIndent()
 
-        val postStillingResponse = """
+        private val postStillingResponse = """
             {
                "id": 1000,
                "uuid": "ee82f29c-51a9-4ca3-994d-45e3ab0e8204",
@@ -322,7 +322,7 @@ class MockConfig {
             }
         """.trimIndent()
 
-        val categoriesTypeaheadResponse = """
+        private val categoriesTypeaheadResponse = """
             [
                {
                   "id":1,
@@ -349,7 +349,7 @@ class MockConfig {
             ]
         """.trimIndent()
 
-        val postdata = """
+        private val postdata = """
             [
                {
                   "postalCode":"3656",
@@ -445,7 +445,7 @@ class MockConfig {
             ]
         """.trimIndent()
 
-        val municipalsResponse = """
+        private val municipalsResponse = """
             [
                {
                   "code":"1818",
