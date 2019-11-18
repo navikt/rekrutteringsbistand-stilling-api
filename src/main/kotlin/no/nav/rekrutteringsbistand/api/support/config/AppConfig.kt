@@ -16,7 +16,6 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 import org.springframework.web.filter.CorsFilter
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 import java.time.Duration
-import java.util.*
 
 
 @Configuration
@@ -46,7 +45,7 @@ class AppConfig : WebMvcConfigurer {
     fun headerFilterRegistration(): FilterRegistrationBean<*> =
             FilterRegistrationBean<HeaderFilter>().apply {
                 setFilter(HeaderFilter())
-                setUrlPatterns(Arrays.asList("/rekrutteringsbistand/api/*"))
+                urlPatterns = listOf("/rekrutteringsbistand/api/*")
                 setEnabled(true)
             }
 

@@ -13,10 +13,10 @@ data class Stilling(val id: Long?, val uuid: String?, val created: LocalDateTime
                     val rekruttering: RekrutteringsbistandDto?)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class Metadata(val status: String?, val comments: String?, val reportee: String?, val remarks: List<String> = ArrayList(), val navIdent: String?);
+data class Metadata(val status: String?, val comments: String?, val reportee: String?, val remarks: List<String> = ArrayList(), val navIdent: String?)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class Arbeidsgiver(val name: String?, val orgnr: String?, val status: String?, val parentOrgnr: String?, val publicName: String?, val deactivated: LocalDateTime?);
+data class Arbeidsgiver(val name: String?, val orgnr: String?, val status: String?, val parentOrgnr: String?, val publicName: String?, val deactivated: LocalDateTime?)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Geografi(val postalCode: String?, val county: String, val municipal: String?, val municipalCode: String?, val city: String?, val country: String?)

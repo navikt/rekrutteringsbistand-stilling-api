@@ -11,7 +11,7 @@ import java.util.*
 @RestController
 @RequestMapping("/rekrutteringsbistand/api/v1/reportee")
 @Protected
-class InnloggetBrukerController(val contextHolder: OIDCRequestContextHolder) {
+class InnloggetBrukerController(private val contextHolder: OIDCRequestContextHolder) {
 
     @GetMapping
     fun hentInnloggetBruker(): InnloggetBruker =

@@ -25,7 +25,7 @@ class RekrutteringsbistandRepositoryTest {
     lateinit var repository: RekrutteringsbistandRepository
 
     @Test
-    fun skal_kunne_lagre_og_hente_ut_rekrutteringsbistand() {
+    fun `skal kunne lagre og hente ut rekrutteringsbistand`() {
         repository.lagre(tilLagring)
         val lagretRekrutteringsbistand = repository.hentForStilling(tilLagring.stillingUuid)
 
