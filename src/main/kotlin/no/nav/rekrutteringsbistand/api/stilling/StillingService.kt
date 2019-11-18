@@ -1,13 +1,14 @@
 package no.nav.rekrutteringsbistand.api.stilling
 
+import arrow.core.getOrElse
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
+import no.nav.rekrutteringsbistand.api.rekrutteringsbistand.Rekrutteringsbistand
 import no.nav.rekrutteringsbistand.api.rekrutteringsbistand.RekrutteringsbistandService
 import no.nav.rekrutteringsbistand.api.support.LOG
 import no.nav.rekrutteringsbistand.api.support.config.ExternalConfiguration
 import no.nav.rekrutteringsbistand.api.support.rest.RestResponseEntityExceptionHandler
 import no.nav.rekrutteringsbistand.api.support.toMultiValueMap
 import org.springframework.core.ParameterizedTypeReference
-import org.springframework.dao.EmptyResultDataAccessException
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
@@ -61,18 +62,12 @@ class StillingService(
                         })
     }
 
-    fun berikMedRekruttering(stilling: Stilling): Stilling {
-        try {
-            LOG.debug("henter rekrutteringsinformasjon for uuid ${stilling.uuid}")
-            val rekrutteringsbidstand = rekrutteringsbistandService.hentForStilling(stilling.uuid!!)
-            LOG.debug("fant rekrutteringsinformasjon for uuid ${stilling.uuid}")
-            return stilling.copy(
-                    rekruttering = rekrutteringsbidstand.asDto()
-            )
-        } catch (er: EmptyResultDataAccessException) {
-            return stilling
-        }
-    }
+    fun berikMedRekruttering(stilling: Stilling): Stilling =
+            rekrutteringsbistandService.hentForStilling(stilling.uuid!!)
+                    .map(Rekrutteringsbistand::asDto)
+                    .map { stilling.copy(rekruttering = it) }
+                    .getOrElse { stilling }
+
 
     fun headers() =
             mapOf(

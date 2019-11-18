@@ -1,5 +1,7 @@
 package no.nav.rekrutteringsbistand.api.rekrutteringsbistand
 
+import arrow.core.Option
+import arrow.core.firstOrNone
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert
@@ -34,13 +36,12 @@ class RekrutteringsbistandRepository(
 
             )
 
-    fun hentForStilling(stillingUuid: String): Rekrutteringsbistand =
-            jdbcTemplate.queryForObject(
-                    "SELECT * FROM REKRUTTERINGSBISTAND WHERE stilling_uuid = :stilling_uuid",
-                    MapSqlParameterSource("stilling_uuid", stillingUuid))
-            { rs: ResultSet, _: Int ->
-                Rekrutteringsbistand.fromDB(rs)
-            }!!
+    fun hentForStilling(stillingUuid: String): Option<Rekrutteringsbistand> {
+        val list = hentForStillinger(listOf(stillingUuid))
+        check(list.size <= 1) { "Ant. Rekrutteringsbistand for stillingUuid $stillingUuid: ${list.size}" }
+        return list.firstOrNone()
+    }
+
 
     fun hentForStillinger(stillingUuider: List<String>): List<Rekrutteringsbistand> =
             jdbcTemplate.query(

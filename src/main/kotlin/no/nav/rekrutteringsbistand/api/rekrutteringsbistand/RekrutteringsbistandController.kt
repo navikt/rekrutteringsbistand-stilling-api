@@ -1,5 +1,6 @@
 package no.nav.rekrutteringsbistand.api.rekrutteringsbistand
 
+import arrow.core.getOrElse
 import no.nav.security.oidc.api.Protected
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -35,7 +36,7 @@ class RekrutteringsbistandController(val repo: RekrutteringsbistandRepository) {
 
     @GetMapping("/stilling/{id}")
     fun hentForStilling(@PathVariable id: String): RekrutteringsbistandDto =
-            repo.hentForStilling(id).asDto()
+            repo.hentForStilling(id).map { it.asDto() }.getOrElse { throw NotFoundException("Stilling id $id") }
 
     @GetMapping("/ident/{id}")
     fun hentForIdent(@PathVariable id: String): Collection<RekrutteringsbistandDto> =
@@ -45,3 +46,6 @@ class RekrutteringsbistandController(val repo: RekrutteringsbistandRepository) {
 
 @ResponseStatus(HttpStatus.BAD_REQUEST)
 class BadRequestException(message: String) : RuntimeException(message)
+
+@ResponseStatus(HttpStatus.NOT_FOUND)
+class NotFoundException(message: String) : RuntimeException(message)
