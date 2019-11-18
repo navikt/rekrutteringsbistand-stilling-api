@@ -19,7 +19,7 @@ class RekrutteringsbistandRepository(
                             "rekruttering_uuid" to  rekrutteringsbistand.rekrutteringUuid,
                             "stilling_uuid" to rekrutteringsbistand.stillingUuid,
                             "eier_ident" to rekrutteringsbistand.eierIdent,
-                            "eier_navn" to rekrutteringsbistand.eierNavn)
+                            "eier_navn" to rekrutteringsbistand.eierNavn
                     )
             )
 
@@ -29,7 +29,7 @@ class RekrutteringsbistandRepository(
                     mapOf(
                             "rekruttering_uuid" to oppdatering.rekrutteringsUuid,
                             "eier_ident" to oppdatering.eierIdent,
-                            "eier_navn" to oppdatering.eierNavn)
+                            "eier_navn" to oppdatering.eierNavn
                     )
 
             )
