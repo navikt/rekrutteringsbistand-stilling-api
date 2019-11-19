@@ -1,10 +1,10 @@
 package no.nav.rekrutteringsbistand.api.stilling
 
-import arrow.core.getOrElse
-import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
-import no.nav.rekrutteringsbistand.api.rekrutteringsbistand.Rekrutteringsbistand
-import no.nav.rekrutteringsbistand.api.rekrutteringsbistand.RekrutteringsbistandService
-import no.nav.rekrutteringsbistand.api.rekrutteringsbistand.StillingId
+ import arrow.core.getOrElse
+ import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
+ import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsid
+ import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsinfo
+ import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoService
 import no.nav.rekrutteringsbistand.api.support.LOG
 import no.nav.rekrutteringsbistand.api.support.config.ExternalConfiguration
 import no.nav.rekrutteringsbistand.api.support.rest.RestResponseEntityExceptionHandler
@@ -22,7 +22,7 @@ import org.springframework.web.util.UriComponentsBuilder
 class StillingService(
         val restTemplate: RestTemplate,
         val externalConfiguration: ExternalConfiguration,
-        val rekrutteringsbistandService: RekrutteringsbistandService,
+        val rekrutteringsbistandService: StillingsinfoService,
         val tokenUtils: TokenUtils
 ) {
 
@@ -64,8 +64,8 @@ class StillingService(
     }
 
     fun berikMedRekruttering(stilling: Stilling): Stilling =
-            rekrutteringsbistandService.hentForStilling(StillingId(stilling.uuid!!))
-                    .map(Rekrutteringsbistand::asDto)
+            rekrutteringsbistandService.hentForStilling(Stillingsid(stilling.uuid!!))
+                    .map(Stillingsinfo::asDto)
                     .map { stilling.copy(rekruttering = it) }
                     .getOrElse { stilling }
 

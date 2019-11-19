@@ -1,7 +1,7 @@
 package no.nav.rekrutteringsbistand.api.stilling
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import no.nav.rekrutteringsbistand.api.rekrutteringsbistand.RekrutteringsbistandDto
+import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoDto
 import java.time.LocalDateTime
 import java.util.*
 
@@ -10,7 +10,7 @@ data class Stilling(val id: Long?, val uuid: String?, val created: LocalDateTime
                     val title: String?, val status: String?, val privacy: String?, val source: String?, val medium: String?, val reference: String?,
                     val published: LocalDateTime?, val expires: LocalDateTime?, val employer: Arbeidsgiver?, val administration: Metadata?,
                     val location: Geografi?, val locationList: List<Geografi> = ArrayList(), val categoryList: List<Kategori> = ArrayList(), val properties: Map<String, String> = HashMap(),
-                    val rekruttering: RekrutteringsbistandDto?)
+                    val rekruttering: StillingsinfoDto?)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Metadata(val status: String?, val comments: String?, val reportee: String?, val remarks: List<String> = ArrayList(), val navIdent: String?)

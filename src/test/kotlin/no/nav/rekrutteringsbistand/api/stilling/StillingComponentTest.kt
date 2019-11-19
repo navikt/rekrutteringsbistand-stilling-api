@@ -1,7 +1,7 @@
 package no.nav.rekrutteringsbistand.api.stilling
 
-import no.nav.rekrutteringsbistand.api.Testdata.etRekrutteringsbistand
-import no.nav.rekrutteringsbistand.api.rekrutteringsbistand.RekrutteringsbistandRepository
+import no.nav.rekrutteringsbistand.api.Testdata.enStillingsinfo
+import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoRepository
 import no.nav.rekrutteringsbistand.api.support.config.MockConfig.Companion.sokResponse
 import no.nav.rekrutteringsbistand.api.support.config.MockConfig.Companion.stillingerResponse
 import org.assertj.core.api.Assertions.assertThat
@@ -30,7 +30,7 @@ internal class StillingComponentTest {
     val localBaseUrl by lazy { "http://localhost:$port/rekrutteringsbistand-api" }
 
     @Autowired
-    lateinit var repository: RekrutteringsbistandRepository
+    lateinit var repository: StillingsinfoRepository
 
     private val restTemplate = TestRestTemplate(TestRestTemplate.HttpClientOption.ENABLE_COOKIES)
 
@@ -48,7 +48,7 @@ internal class StillingComponentTest {
 
     @Test
     fun `hentStilling skal returnere stilling med rekrutteringsbistand`() {
-        repository.lagre(etRekrutteringsbistand)
+        repository.lagre(enStillingsinfo)
 
         val stilling = restTemplate.exchange(
                 "$localBaseUrl/rekrutteringsbistand/api/v1/ads?a=a",
@@ -57,10 +57,10 @@ internal class StillingComponentTest {
                 object : ParameterizedTypeReference<Page<Stilling>>() {}
         ).body
 
-        assertThat(stilling!!.content.first().rekruttering).isEqualTo(etRekrutteringsbistand.asDto())
-        assertThat(stilling.content.first().uuid).isEqualTo(etRekrutteringsbistand.stillingId.asString())
+        assertThat(stilling!!.content.first().rekruttering).isEqualTo(enStillingsinfo.asDto())
+        assertThat(stilling.content.first().uuid).isEqualTo(enStillingsinfo.stillingsid.asString())
 
-        repository.slett(etRekrutteringsbistand.rekrutteringId)
+        repository.slett(enStillingsinfo.stillingsinfoid)
     }
 
     @Test

@@ -1,4 +1,4 @@
-package no.nav.rekrutteringsbistand.api.rekrutteringsbistand
+package no.nav.rekrutteringsbistand.api.stillingsinfo
 
 import no.nav.rekrutteringsbistand.api.support.toMultiValueMap
 import org.assertj.core.api.Assertions.assertThat
@@ -40,10 +40,10 @@ class RekrutteringsbisandComponentTest {
     fun `Lagring av rekrutteringsbistand skal returnere HTTP status 201 og JSON med nyopprettet rekrutteringUuid`() {
         // Given
         val url = "$localBaseUrl/rekruttering"
-        val input = RekrutteringsbistandDto(
-                eierIdent = "anyEierident",
+        val input = StillingsinfoDto(
+                eierNavident = "anyEierident",
                 eierNavn = "anyEierNavn",
-                stillingUuid = "35158853-a09f-4de7-b045-f450ab8e3efc")
+                stillingsid = "35158853-a09f-4de7-b045-f450ab8e3efc")
         val headers = mapOf(
                 CONTENT_TYPE to APPLICATION_JSON.toString(),
                 ACCEPT to APPLICATION_JSON.toString()
@@ -51,16 +51,16 @@ class RekrutteringsbisandComponentTest {
         val request = HttpEntity(input, headers)
 
         // When
-        val actualResponse = restTemplate.postForEntity(url, request, RekrutteringsbistandDto::class.java)
+        val actualResponse = restTemplate.postForEntity(url, request, StillingsinfoDto::class.java)
 
         // Then
         assertThat(actualResponse.statusCode).isEqualTo(HttpStatus.CREATED)
         assertThat(actualResponse.hasBody())
         actualResponse.body!!.apply {
-            assertThat(rekrutteringUuid).isNotBlank()
-            assertDoesNotThrow { UUID.fromString(rekrutteringUuid) }
-            assertThat(stillingUuid).isEqualTo(input.stillingUuid)
-            assertThat(eierIdent).isEqualTo(input.eierIdent)
+            assertThat(stillingsinfoid).isNotBlank()
+            assertDoesNotThrow { UUID.fromString(stillingsinfoid) }
+            assertThat(stillingsid).isEqualTo(input.stillingsid)
+            assertThat(eierNavident).isEqualTo(input.eierNavident)
             assertThat(eierNavn).isEqualTo(input.eierNavn)
         }
     }
