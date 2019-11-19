@@ -18,10 +18,10 @@ class RekrutteringsbistandRepository(
     fun lagre(rekrutteringsbistand: Rekrutteringsbistand) =
             rekrutteringsbistandInsert.executeAndReturnKey(
                     mapOf(
-                            "rekruttering_uuid" to  rekrutteringsbistand.rekrutteringUuid,
-                            "stilling_uuid" to rekrutteringsbistand.stillingUuid,
-                            "eier_ident" to rekrutteringsbistand.eierIdent,
-                            "eier_navn" to rekrutteringsbistand.eierNavn
+                            "rekruttering_uuid" to  rekrutteringsbistand.rekrutteringId.asString(),
+                            "stilling_uuid" to rekrutteringsbistand.stillingId.asString(),
+                            "eier_ident" to rekrutteringsbistand.eier.ident,
+                            "eier_navn" to rekrutteringsbistand.eier.navn
                     )
             )
 
@@ -36,17 +36,17 @@ class RekrutteringsbistandRepository(
 
             )
 
-    fun hentForStilling(stillingUuid: String): Option<Rekrutteringsbistand> {
-        val list = hentForStillinger(listOf(stillingUuid))
-        check(list.size <= 1) { "Ant. Rekrutteringsbistand for stillingUuid $stillingUuid: ${list.size}" }
+    fun hentForStilling(stillingId: StillingId): Option<Rekrutteringsbistand> {
+        val list = hentForStillinger(listOf(stillingId))
+        check(list.size <= 1) { "Ant. Rekrutteringsbistand for stillingUuid ${stillingId.asString()}: ${list.size}" }
         return list.firstOrNone()
     }
 
 
-    fun hentForStillinger(stillingUuider: List<String>): List<Rekrutteringsbistand> =
+    fun hentForStillinger(stillingIder: List<StillingId>): List<Rekrutteringsbistand> =
             jdbcTemplate.query(
                     "SELECT * FROM REKRUTTERINGSBISTAND WHERE stilling_uuid IN(:stilling_uuider)",
-                    MapSqlParameterSource("stilling_uuider", stillingUuider.joinToString(",")))
+                    MapSqlParameterSource("stilling_uuider", stillingIder.map { it.asString() }.joinToString(",")))
             { rs: ResultSet, _: Int ->
                 Rekrutteringsbistand.fromDB(rs)
             }
@@ -59,9 +59,9 @@ class RekrutteringsbistandRepository(
                 Rekrutteringsbistand.fromDB(rs)
             }
 
-    fun slett(rekrutteringsUuid: String) =
+    fun slett(rekrutteringId: RekrutteringId) =
             jdbcTemplate.update("DELETE FROM REKRUTTERINGSBISTAND WHERE rekruttering_uuid = :rekruttering_uuid",
-                    MapSqlParameterSource("rekruttering_uuid", rekrutteringsUuid))
+                    MapSqlParameterSource("rekruttering_uuid", rekrutteringId.asString()))
 }
 
 data class OppdaterRekrutteringsbistand(val rekrutteringsUuid: String, val eierIdent: String, val eierNavn: String)

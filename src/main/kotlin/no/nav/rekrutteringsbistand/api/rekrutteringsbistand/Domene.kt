@@ -1,29 +1,29 @@
 package no.nav.rekrutteringsbistand.api.rekrutteringsbistand
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import java.lang.IllegalArgumentException
 import java.sql.ResultSet
+import java.util.*
 
 data class Rekrutteringsbistand(
-        val rekrutteringUuid: String?,
-        val stillingUuid: String,
-        val eierIdent: String,
-        val eierNavn: String
+        val rekrutteringId: RekrutteringId,
+        val stillingId: StillingId,
+        val eier: Eier
 ) {
 
     fun asDto() =
             RekrutteringsbistandDto(
-                    rekrutteringUuid = this.rekrutteringUuid,
-                    stillingUuid = this.stillingUuid,
-                    eierIdent = this.eierIdent,
-                    eierNavn = this.eierNavn)
+                    rekrutteringUuid = this.rekrutteringId.toString(),
+                    stillingUuid = this.stillingId.toString(),
+                    eierIdent = this.eier.ident,
+                    eierNavn = this.eier.navn)
 
     companion object {
         fun fromDB(rs: ResultSet) =
                 Rekrutteringsbistand(
-                        rekrutteringUuid = rs.getString("rekruttering_uuid"),
-                        stillingUuid = rs.getString("stilling_uuid"),
-                        eierIdent = rs.getString("eier_ident"),
-                        eierNavn = rs.getString("eier_navn"))
+                        rekrutteringId = RekrutteringId(verdi = rs.getString("rekruttering_uuid")),
+                        stillingId = StillingId(verdi = rs.getString("stilling_uuid")),
+                        eier = Eier(ident = rs.getString("eier_ident"), navn = rs.getString("eier_navn")))
     }
 }
 
@@ -36,9 +36,28 @@ data class RekrutteringsbistandDto(
 ) {
     fun asRekrutteringsbistand() =
             Rekrutteringsbistand(
-                    rekrutteringUuid = this.rekrutteringUuid,
-                    stillingUuid = this.stillingUuid,
-                    eierIdent = this.eierIdent,
-                    eierNavn = this.eierNavn
+                    rekrutteringId = RekrutteringId(verdi = this.rekrutteringUuid
+                            ?: throw IllegalArgumentException("Rekrutteringsbistand må ha en uuid")
+                    ),
+                    stillingId = StillingId(verdi = this.stillingUuid),
+                    eier = Eier(ident = this.eierIdent, navn = this.eierNavn)
             )
 }
+
+data class RekrutteringId(val verdi: UUID) {
+    constructor(verdi: String) : this(UUID.fromString(verdi))
+
+    fun asString() = verdi.toString()
+    fun asUuid() = verdi
+    override fun toString(): String = asString()
+}
+
+data class StillingId(val verdi: UUID) {
+    constructor(verdi: String) : this(UUID.fromString(verdi))
+
+    fun asString() = verdi.toString()
+    fun asUuid() = verdi
+    override fun toString(): String = asString()
+}
+
+data class Eier(val ident: String, val navn: String)

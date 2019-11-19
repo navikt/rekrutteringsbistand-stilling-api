@@ -36,7 +36,7 @@ class RekrutteringsbistandController(val repo: RekrutteringsbistandRepository) {
 
     @GetMapping("/stilling/{id}")
     fun hentForStilling(@PathVariable id: String): RekrutteringsbistandDto =
-            repo.hentForStilling(id).map { it.asDto() }.getOrElse { throw NotFoundException("Stilling id $id") }
+            repo.hentForStilling(StillingId(id)).map { it.asDto() }.getOrElse { throw NotFoundException("Stilling id $id") }
 
     @GetMapping("/ident/{id}")
     fun hentForIdent(@PathVariable id: String): Collection<RekrutteringsbistandDto> =

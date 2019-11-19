@@ -5,6 +5,6 @@ import org.springframework.stereotype.Service
 
 @Service
 class RekrutteringsbistandService(private val repository: RekrutteringsbistandRepository) {
-    fun hentForStilling(uuid: String): Option<Rekrutteringsbistand> =
-            repository.hentForStilling(uuid)
+    fun hentForStilling(stillingId: StillingId): Option<Rekrutteringsbistand> =
+            repository.hentForStilling(stillingId)
 }

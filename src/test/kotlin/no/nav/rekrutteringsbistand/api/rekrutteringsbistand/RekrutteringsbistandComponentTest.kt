@@ -43,7 +43,7 @@ class RekrutteringsbisandComponentTest {
         val input = RekrutteringsbistandDto(
                 eierIdent = "anyEierident",
                 eierNavn = "anyEierNavn",
-                stillingUuid = "anyStillingUuid")
+                stillingUuid = "35158853-a09f-4de7-b045-f450ab8e3efc")
         val headers = mapOf(
                 CONTENT_TYPE to APPLICATION_JSON.toString(),
                 ACCEPT to APPLICATION_JSON.toString()

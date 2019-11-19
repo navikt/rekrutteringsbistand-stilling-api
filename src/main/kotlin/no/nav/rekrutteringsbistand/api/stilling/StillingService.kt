@@ -4,6 +4,7 @@ import arrow.core.getOrElse
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
 import no.nav.rekrutteringsbistand.api.rekrutteringsbistand.Rekrutteringsbistand
 import no.nav.rekrutteringsbistand.api.rekrutteringsbistand.RekrutteringsbistandService
+import no.nav.rekrutteringsbistand.api.rekrutteringsbistand.StillingId
 import no.nav.rekrutteringsbistand.api.support.LOG
 import no.nav.rekrutteringsbistand.api.support.config.ExternalConfiguration
 import no.nav.rekrutteringsbistand.api.support.rest.RestResponseEntityExceptionHandler
@@ -63,7 +64,7 @@ class StillingService(
     }
 
     fun berikMedRekruttering(stilling: Stilling): Stilling =
-            rekrutteringsbistandService.hentForStilling(stilling.uuid!!)
+            rekrutteringsbistandService.hentForStilling(StillingId(stilling.uuid!!))
                     .map(Rekrutteringsbistand::asDto)
                     .map { stilling.copy(rekruttering = it) }
                     .getOrElse { stilling }

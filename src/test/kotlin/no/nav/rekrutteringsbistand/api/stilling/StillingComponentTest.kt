@@ -58,9 +58,9 @@ internal class StillingComponentTest {
         ).body
 
         assertThat(stilling!!.content.first().rekruttering).isEqualTo(etRekrutteringsbistand.asDto())
-        assertThat(stilling.content.first().uuid).isEqualTo(etRekrutteringsbistand.stillingUuid)
+        assertThat(stilling.content.first().uuid).isEqualTo(etRekrutteringsbistand.stillingId.asString())
 
-        repository.slett(etRekrutteringsbistand.rekrutteringUuid!!)
+        repository.slett(etRekrutteringsbistand.rekrutteringId)
     }
 
     @Test

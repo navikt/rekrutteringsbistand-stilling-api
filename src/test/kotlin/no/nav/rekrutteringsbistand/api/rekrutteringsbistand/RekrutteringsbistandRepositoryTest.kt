@@ -27,7 +27,7 @@ class RekrutteringsbistandRepositoryTest {
     @Test
     fun `skal kunne lagre og hente ut rekrutteringsbistand`() {
         repository.lagre(tilLagring)
-        val lagretRekrutteringsbistand = repository.hentForStilling(tilLagring.stillingUuid)
+        val lagretRekrutteringsbistand = repository.hentForStilling(tilLagring.stillingId)
 
         assertThat(lagretRekrutteringsbistand).isEqualTo(Some(tilLagring))
     }
@@ -37,14 +37,14 @@ class RekrutteringsbistandRepositoryTest {
         repository.lagre(tilLagring)
         repository.oppdaterEierIdentOgEierNavn(enRekrutteringsbistandOppdatering)
 
-        val endretRekrutteringsbistand = repository.hentForStilling(tilLagring.stillingUuid).getOrElse { fail("Testsetup") }
+        val endretRekrutteringsbistand = repository.hentForStilling(tilLagring.stillingId).getOrElse { fail("Testsetup") }
 
-        assertThat(endretRekrutteringsbistand.eierIdent).isEqualTo(enRekrutteringsbistandOppdatering.eierIdent)
-        assertThat(endretRekrutteringsbistand.eierNavn).isEqualTo(enRekrutteringsbistandOppdatering.eierNavn)
+        assertThat(endretRekrutteringsbistand.eier.ident).isEqualTo(enRekrutteringsbistandOppdatering.eierIdent)
+        assertThat(endretRekrutteringsbistand.eier.navn).isEqualTo(enRekrutteringsbistandOppdatering.eierNavn)
     }
 
     @After
     fun cleanUp() {
-        repository.slett(tilLagring.rekrutteringUuid!!)
+        repository.slett(tilLagring.rekrutteringId)
     }
 }
