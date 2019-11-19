@@ -39,8 +39,8 @@ class StillingsinfoRepositoryTest {
 
         val endretRekrutteringsbistand = repository.hentForStilling(tilLagring.stillingsid).getOrElse { fail("Testsetup") }
 
-        assertThat(endretRekrutteringsbistand.eier.navident).isEqualTo(enStillingsinfoOppdatering.eierNavident)
-        assertThat(endretRekrutteringsbistand.eier.navn).isEqualTo(enStillingsinfoOppdatering.eierNavn)
+        assertThat(endretRekrutteringsbistand.eier.navident).isEqualTo(enStillingsinfoOppdatering.eier.navident)
+        assertThat(endretRekrutteringsbistand.eier.navn).isEqualTo(enStillingsinfoOppdatering.eier.navn)
     }
 
     @After

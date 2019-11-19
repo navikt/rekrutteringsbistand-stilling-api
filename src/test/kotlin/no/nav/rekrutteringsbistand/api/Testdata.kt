@@ -12,7 +12,6 @@ object Testdata {
             stillingsid = Stillingsid("ee82f29c-51a9-4ca3-994d-45e3ab0e8204"))
 
     val enStillingsinfoOppdatering = OppdaterStillingsinfo(
-            stillingsinfoid = "12312312-51a9-4ca3-994d-41e3ab0e8204",
-            eierNavident = "Y123123",
-            eierNavn = "Nytt navn")
+            stillingsinfoid = Stillingsinfoid("12312312-51a9-4ca3-994d-41e3ab0e8204"),
+            eier = Eier(navident = "Y123123", navn = "Nytt navn"))
 }

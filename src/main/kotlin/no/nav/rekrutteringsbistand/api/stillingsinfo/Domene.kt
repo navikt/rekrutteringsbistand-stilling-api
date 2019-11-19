@@ -27,6 +27,9 @@ data class Stillingsinfo(
     }
 }
 
+
+data class OppdaterStillingsinfo(val stillingsinfoid: Stillingsinfoid, val eier: Eier)
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class StillingsinfoDto(
         val stillingsinfoid: String? = null,
@@ -40,6 +43,14 @@ data class StillingsinfoDto(
                             ?: throw IllegalArgumentException("Stillingsinfo må ha en stillingsinfoid")
                     ),
                     stillingsid = Stillingsid(verdi = this.stillingsid),
+                    eier = Eier(navident = this.eierNavident, navn = this.eierNavn)
+            )
+
+    fun asOppdaterStillingsinfo() =
+            OppdaterStillingsinfo(
+                    stillingsinfoid = Stillingsinfoid(verdi = this.stillingsinfoid
+                            ?: throw IllegalArgumentException("Stillingsinfo må ha en stillingsinfoid")
+                    ),
                     eier = Eier(navident = this.eierNavident, navn = this.eierNavn)
             )
 }

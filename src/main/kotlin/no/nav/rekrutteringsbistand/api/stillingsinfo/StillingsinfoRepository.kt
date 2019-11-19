@@ -29,9 +29,9 @@ class StillingsinfoRepository(
             jdbcTemplate.update(
                     "update Stillingsinfo set eier_navident=:eier_navident, eier_navn=:eier_navn where stillingsinfoid=:stillingsinfoid",
                     mapOf(
-                            "stillingsinfoid" to oppdatering.stillingsinfoid,
-                            "eier_navident" to oppdatering.eierNavident,
-                            "eier_navn" to oppdatering.eierNavn
+                            "stillingsinfoid" to oppdatering.stillingsinfoid.asString(),
+                            "eier_navident" to oppdatering.eier.navident,
+                            "eier_navn" to oppdatering.eier.navn
                     )
 
             )
@@ -63,5 +63,3 @@ class StillingsinfoRepository(
             jdbcTemplate.update("DELETE FROM STILLINGSINFO WHERE STILLINGSINFOID = :stillingsinfoid",
                     MapSqlParameterSource("stillingsinfoid", stillingsinfoid.asString()))
 }
-
-data class OppdaterStillingsinfo(val stillingsinfoid: String, val eierNavident: String, val eierNavn: String)

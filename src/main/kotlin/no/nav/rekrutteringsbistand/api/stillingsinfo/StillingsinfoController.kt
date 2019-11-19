@@ -27,9 +27,8 @@ class StillingsinfoController(val repo: StillingsinfoRepository) {
         if (dto.stillingsinfoid == null) throw BadRequestException("Stillingsinfoid må ha verdi for put")
 
         repo.oppdaterEierIdentOgEierNavn(OppdaterStillingsinfo(
-                stillingsinfoid = dto.stillingsinfoid,
-                eierNavident = dto.eierNavident,
-                eierNavn = dto.eierNavn
+                stillingsinfoid = Stillingsinfoid(dto.stillingsinfoid),
+                eier = Eier(navident = dto.eierNavident, navn = dto.eierNavn)
         ))
         return ResponseEntity.ok().body(dto)
     }
