@@ -5,9 +5,7 @@ import no.nav.rekrutteringsbistand.api.Testdata
 import no.nav.rekrutteringsbistand.api.support.toMultiValueMap
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.fail
-import org.junit.After
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.runner.RunWith
@@ -16,6 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.boot.test.web.client.TestRestTemplate.HttpClientOption.ENABLE_COOKIES
 import org.springframework.boot.web.server.LocalServerPort
+import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders.ACCEPT
 import org.springframework.http.HttpHeaders.CONTENT_TYPE
@@ -47,8 +46,7 @@ class StillingsinfoComponentTest {
     }
 
     @Test
-    @Ignore
-    fun `Henting av rekrutteringsbistand skal returnere HTTP status 200 og JSON med nyopprettet rekrutteringUuid`() {
+    fun `Henting av rekrutteringsbistand basert på stilling skal returnere HTTP status 200 og JSON med nyopprettet rekrutteringUuid`() {
         // Given
         val lagre = Testdata.enStillingsinfo
         repository.lagre(lagre)
@@ -75,6 +73,40 @@ class StillingsinfoComponentTest {
             repository.slett(lagre.stillingsinfoid)
         }
     }
+
+    @Test
+    fun `Henting av rekrutteringsbistand basert på bruker skal returnere HTTP status 200 og JSON med nyopprettet rekrutteringUuid`() {
+        // Given
+        val lagre = Testdata.enStillingsinfo
+        repository.lagre(lagre)
+
+        val url = "$localBaseUrl/rekruttering/ident/${lagre.eier.navident}"
+
+        val headers = mapOf(
+                CONTENT_TYPE to APPLICATION_JSON.toString(),
+                ACCEPT to APPLICATION_JSON.toString()
+        ).toMultiValueMap()
+
+        val httpEntity = HttpEntity(null, headers)
+
+        // When
+        val actualResponse =
+                restTemplate.run { exchange(url, HttpMethod.GET, httpEntity, object : ParameterizedTypeReference<List<StillingsinfoDto>>() {}) }
+
+        // Then
+        assertThat(actualResponse.statusCode).isEqualTo(HttpStatus.OK)
+        assertThat(actualResponse.hasBody())
+        actualResponse.body!!.apply {
+            assertThat(this).hasSize(1)
+            this.get(0).apply {
+                assertThat(stillingsinfoid).isNotBlank()
+                assertDoesNotThrow { UUID.fromString(stillingsinfoid) }
+                assertThat(this).isEqualTo(lagre.asDto())
+                repository.slett(lagre.stillingsinfoid)
+            }
+        }
+    }
+
 
     @Test
     fun `Lagring av rekrutteringsbistand skal returnere HTTP status 201 og JSON med nyopprettet rekrutteringUuid`() {
