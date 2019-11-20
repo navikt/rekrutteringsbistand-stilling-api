@@ -13,21 +13,21 @@ class StillingsinfoRepository(
         val jdbcTemplate: NamedParameterJdbcTemplate,
         simpleJdbcInsert: SimpleJdbcInsert) {
 
-    val stillingsinfoInsert = simpleJdbcInsert.withTableName("Stillingsinfo").usingGeneratedKeyColumns("ID")
+    val stillingsinfoInsert = simpleJdbcInsert.withTableName("Stillingsinfo").usingGeneratedKeyColumns("id")
 
     fun lagre(stillingsinfo: Stillingsinfo) =
             stillingsinfoInsert.executeAndReturnKey(
                     mapOf(
-                            "stillingsinfoid" to stillingsinfo.stillingsinfoid.asString(),
-                            "stillingsid" to stillingsinfo.stillingsid.asString(),
-                            "eier_navident" to stillingsinfo.eier.navident,
-                            "eier_navn" to stillingsinfo.eier.navn
+                            STILLINGSINFOID to stillingsinfo.stillingsinfoid.asString(),
+                            STILLINGSID to stillingsinfo.stillingsid.asString(),
+                            EIER_NAVIDENT to stillingsinfo.eier.navident,
+                            EIER_NAVN to stillingsinfo.eier.navn
                     )
             )
 
     fun oppdaterEierIdentOgEierNavn(oppdatering: OppdaterStillingsinfo) =
             jdbcTemplate.update(
-                    "update Stillingsinfo set eier_navident=:eier_navident, eier_navn=:eier_navn where stillingsinfoid=:stillingsinfoid",
+                    "update $STILLINGSINFO set $EIER_NAVIDENT=:eier_navident, $EIER_NAVN=:eier_navn where $STILLINGSINFOID=:stillingsinfoid",
                     mapOf(
                             "stillingsinfoid" to oppdatering.stillingsinfoid.asString(),
                             "eier_navident" to oppdatering.eier.navident,
@@ -45,7 +45,7 @@ class StillingsinfoRepository(
 
     fun hentForStillinger(stillingsider: List<Stillingsid>): List<Stillingsinfo> =
             jdbcTemplate.query(
-                    "SELECT * FROM STILLINGSINFO WHERE STILLINGSID IN(:stillingsider)",
+                    "SELECT * FROM $STILLINGSINFO WHERE $STILLINGSID IN(:stillingsider)",
                     MapSqlParameterSource("stillingsider", stillingsider.map { it.asString() }.joinToString(",")))
             { rs: ResultSet, _: Int ->
                 Stillingsinfo.fromDB(rs)
@@ -53,13 +53,21 @@ class StillingsinfoRepository(
 
     fun hentForIdent(ident: String): Collection<Stillingsinfo> =
             jdbcTemplate.query(
-                    "SELECT * FROM STILLINGSINFO WHERE eier_navident = :eier_navident",
+                    "SELECT * FROM $STILLINGSINFO WHERE $EIER_NAVIDENT = :eier_navident",
                     MapSqlParameterSource("eier_navident", ident))
             { rs: ResultSet, _: Int ->
                 Stillingsinfo.fromDB(rs)
             }
 
     fun slett(stillingsinfoid: Stillingsinfoid) =
-            jdbcTemplate.update("DELETE FROM STILLINGSINFO WHERE STILLINGSINFOID = :stillingsinfoid",
+            jdbcTemplate.update("DELETE FROM $STILLINGSINFO WHERE $STILLINGSINFOID = :stillingsinfoid",
                     MapSqlParameterSource("stillingsinfoid", stillingsinfoid.asString()))
+
+    companion object {
+        const val STILLINGSINFO = "Stillingsinfo"
+        const val STILLINGSINFOID = "stillingsinfoid"
+        const val STILLINGSID = "stillingsid"
+        const val EIER_NAVIDENT =  "eier_navident"
+        const val EIER_NAVN = "eier_navn"
+    }
 }
