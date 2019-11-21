@@ -1,10 +1,10 @@
 package no.nav.rekrutteringsbistand.api.stilling
 
- import arrow.core.getOrElse
- import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
- import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsid
- import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsinfo
- import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoService
+import arrow.core.getOrElse
+import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
+import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsid
+import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsinfo
+import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoService
 import no.nav.rekrutteringsbistand.api.support.LOG
 import no.nav.rekrutteringsbistand.api.support.config.ExternalConfiguration
 import no.nav.rekrutteringsbistand.api.support.rest.RestResponseEntityExceptionHandler
@@ -27,12 +27,12 @@ class StillingService(
 ) {
 
     fun hentStilling(uuid: String): Stilling {
-        val url = "${externalConfiguration.stillingApi.url}/rekrutteringsbistand/api/v1/ads/$uuid"
+        val url = "${externalConfiguration.stillingApi.url}/b2b/api/v1/ads/$uuid"
         LOG.debug("henter stilling fra url $url")
         val opprinneligStilling = restTemplate.exchange(
                 url,
                 HttpMethod.GET,
-                HttpEntity(null, headers()),
+                HttpEntity(null, headersUtenToken()),
                 Stilling::class.java)
                 .body
 
@@ -75,5 +75,11 @@ class StillingService(
                     HttpHeaders.CONTENT_TYPE to MediaType.APPLICATION_JSON.toString(),
                     HttpHeaders.ACCEPT to MediaType.APPLICATION_JSON.toString(),
                     HttpHeaders.AUTHORIZATION to "Bearer ${tokenUtils.hentOidcToken()}}"
+            ).toMultiValueMap()
+
+    fun headersUtenToken() =
+            mapOf(
+                    HttpHeaders.CONTENT_TYPE to MediaType.APPLICATION_JSON.toString(),
+                    HttpHeaders.ACCEPT to MediaType.APPLICATION_JSON.toString()
             ).toMultiValueMap()
 }
