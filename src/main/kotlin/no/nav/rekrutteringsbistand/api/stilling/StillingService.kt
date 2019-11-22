@@ -42,42 +42,39 @@ class StillingService(
     }
 
     fun hentStillinger(url: String, queryString: String?): Page<Stilling> {
+        val opprinneligeStillinger: Page<Stilling> = hent(url, queryString)
+                ?: throw RestResponseEntityExceptionHandler.NoContentException("Fant ikke stillinger")
 
+        val stillingerMedRekruttering = opprinneligeStillinger.content.map(::berikMedRekruttering)
+        return opprinneligeStillinger.copy(content = stillingerMedRekruttering)
+    }
+
+    private fun hent(url: String, queryString: String?): Page<Stilling>? {
         val withQueryParams: String = UriComponentsBuilder.fromHttpUrl(url).query(queryString).build().toString()
-
         LOG.debug("henter stilling fra url $withQueryParams")
-        val opprinneligeStillinger = restTemplate.exchange(
+        return restTemplate.exchange(
                 withQueryParams,
                 HttpMethod.GET,
                 HttpEntity(null, headers()),
                 object : ParameterizedTypeReference<Page<Stilling>>() {})
                 .body
-
-        val validertContent = (opprinneligeStillinger
-                ?: throw RestResponseEntityExceptionHandler.NoContentException("Fant ikke stillinger")).content
-
-        return opprinneligeStillinger.copy(
-                content = validertContent
-                        .map {
-                            berikMedRekruttering(it)
-                        })
     }
 
-    fun berikMedRekruttering(stilling: Stilling): Stilling =
+    private fun berikMedRekruttering(stilling: Stilling): Stilling =
             rekrutteringsbistandService.hentForStilling(Stillingsid(stilling.uuid!!))
                     .map(Stillingsinfo::asDto)
                     .map { stilling.copy(rekruttering = it) }
                     .getOrElse { stilling }
 
 
-    fun headers() =
+    private fun headers() =
             mapOf(
                     HttpHeaders.CONTENT_TYPE to MediaType.APPLICATION_JSON.toString(),
                     HttpHeaders.ACCEPT to MediaType.APPLICATION_JSON.toString(),
                     HttpHeaders.AUTHORIZATION to "Bearer ${tokenUtils.hentOidcToken()}}"
             ).toMultiValueMap()
 
-    fun headersUtenToken() =
+    private fun headersUtenToken() =
             mapOf(
                     HttpHeaders.CONTENT_TYPE to MediaType.APPLICATION_JSON.toString(),
                     HttpHeaders.ACCEPT to MediaType.APPLICATION_JSON.toString()
