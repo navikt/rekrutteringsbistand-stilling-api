@@ -42,7 +42,7 @@ class KandidatlisteKlient(restTemplateBuilder: RestTemplateBuilder,
                         }
                     }
         } catch (t: Throwable) {
-            LOG.error("oppdatering av kandidatliste med url $url feilet", t)
+            LOG.error("oppdatering av kandidatliste med url $url feilet")
             throw t
         }
 
