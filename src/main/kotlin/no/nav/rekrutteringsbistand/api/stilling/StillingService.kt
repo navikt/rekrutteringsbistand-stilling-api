@@ -29,16 +29,15 @@ class StillingService(
     fun hentStilling(uuid: String): Stilling {
         val url = "${externalConfiguration.stillingApi.url}/b2b/api/v1/ads/$uuid"
         LOG.debug("henter stilling fra url $url")
-        val opprinneligStilling = restTemplate.exchange(
+        val opprinneligStilling: Stilling = restTemplate.exchange(
                 url,
                 HttpMethod.GET,
                 HttpEntity(null, headersUtenToken()),
                 Stilling::class.java)
                 .body
+                ?: throw RestResponseEntityExceptionHandler.NoContentException("Fant ikke stilling")
 
-        return berikMedRekruttering(
-                opprinneligStilling ?: throw RestResponseEntityExceptionHandler.NoContentException("Fant ikke stilling")
-        )
+        return berikMedRekruttering(opprinneligStilling)
     }
 
     fun hentStillinger(url: String, queryString: String?): Page<Stilling> {
