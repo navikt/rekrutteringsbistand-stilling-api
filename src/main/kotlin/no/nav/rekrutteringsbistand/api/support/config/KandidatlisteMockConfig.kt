@@ -17,7 +17,7 @@ import org.springframework.http.MediaType
 @Configuration
 class KandidatlisteMockConfig {
 
-    @Bean
+    @Bean(name = ["kandidatlisteWireMock"])
     fun wireMockServer(): WireMockServer {
         return WireMockServer(WireMockConfiguration.wireMockConfig()
                 .notifier(ConsoleNotifier(true))

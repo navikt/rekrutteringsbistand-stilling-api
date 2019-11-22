@@ -26,7 +26,7 @@ import org.springframework.test.context.junit4.SpringRunner
 import java.util.*
 
 @RunWith(SpringRunner::class)
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @ActiveProfiles("local", "kandidatlisteMock")
 class StillingsinfoComponentTest {
 
@@ -46,7 +46,7 @@ class StillingsinfoComponentTest {
     }
 
     @Test
-    fun `Henting av rekrutteringsbistand basert på stilling skal returnere HTTP status 200 og JSON med nyopprettet rekrutteringUuid`() {
+    fun `henting av rekrutteringsbistand basert på stilling skal returnere HTTP status 200 og JSON med nyopprettet rekrutteringUuid`() {
         // Given
         val lagre = Testdata.enStillingsinfo
         repository.lagre(lagre)
@@ -75,7 +75,7 @@ class StillingsinfoComponentTest {
     }
 
     @Test
-    fun `Henting av rekrutteringsbistand basert på bruker skal returnere HTTP status 200 og JSON med nyopprettet rekrutteringUuid`() {
+    fun `henting av rekrutteringsbistand basert på bruker skal returnere HTTP status 200 og JSON med nyopprettet rekrutteringUuid`() {
         // Given
         val lagre = Testdata.enStillingsinfo
         repository.lagre(lagre)
@@ -109,7 +109,7 @@ class StillingsinfoComponentTest {
 
 
     @Test
-    fun `Lagring av rekrutteringsbistand skal returnere HTTP status 201 og JSON med nyopprettet rekrutteringUuid`() {
+    fun `lagring av rekrutteringsbistand skal returnere HTTP status 201 og JSON med nyopprettet rekrutteringUuid`() {
         // Given
         val tilLagring = Testdata.enStillingsinfo.asDto().copy(stillingsinfoid = null)
         val url = "$localBaseUrl/rekruttering"
@@ -143,7 +143,7 @@ class StillingsinfoComponentTest {
     }
 
     @Test
-    fun `Oppdatering av rekrutteringsbistand skal returnere HTTP status 200 og JSON med oppdatert rekrutteringUuid`() {
+    fun `oppdatering av rekrutteringsbistand skal returnere HTTP status 200 og JSON med oppdatert rekrutteringUuid`() {
 
         // Given
         val lagre = Testdata.enStillingsinfo
@@ -177,6 +177,7 @@ class StillingsinfoComponentTest {
                     .isEqualTo(oppdatere)
             repository.slett(this.stillingsinfoid)
         }
+
     }
 
 }
