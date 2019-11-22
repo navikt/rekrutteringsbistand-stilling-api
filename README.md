@@ -26,8 +26,9 @@ Start main i klassen RekrutteringsbistandApplication.
 
 # Henvendelser
 
+* Opprett gjerne en issue i Github for alle typer spørsmål
+* IT-utviklerne i Github-teamet https://github.com/orgs/navikt/teams/teamtag
 * IT-avdelingen i [Arbeids- og velferdsdirektoratet](https://www.nav.no/no/NAV+og+samfunn/Kontakt+NAV/Relatert+informasjon/arbeids-og-velferdsdirektoratet-kontorinformasjon)
-* IT-utviklerne i [Github-teamet](https://github.com/orgs/navikt/teams/teamtag)
 
 ## For NAV-ansatte
 
