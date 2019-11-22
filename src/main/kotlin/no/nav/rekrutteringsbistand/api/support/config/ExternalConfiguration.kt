@@ -5,6 +5,10 @@ import org.springframework.stereotype.Component
 
 @Component
 @ConfigurationProperties(prefix = "external")
-class ExternalConfiguration(val stillingApi: StillingApi = StillingApi()) {
+class ExternalConfiguration(
+        val stillingApi: StillingApi = StillingApi(),
+        val kandidatlisteApi: KandidatlisteApi = KandidatlisteApi()
+) {
     class StillingApi(var url: String = "")
+    class KandidatlisteApi(var url: String = "")
 }

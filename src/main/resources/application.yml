@@ -11,7 +11,7 @@ server:
 
 spring:
   profiles:
-    active: local, stillingMock
+    active: local, stillingMock, kandidatlisteMock
 
 ---
 
@@ -35,6 +35,11 @@ external:
   stilling-api.url: http://localhost:9914
 ---
 spring:
+  profiles: kandidatlisteMock
+external:
+  kandidatliste-api.url: http://localhost:9924/pam-kandidatsok-api/rest/veileder/stilling
+---
+spring:
   profiles: ekstern
 external:
   stilling-api.url: http://localhost:9014
@@ -54,6 +59,8 @@ no.nav.security.oidc:
 external:
   stilling-api:
     url: https://pam-ad-api.nais.preprod.local
+  kandidatliste-api:
+    url: https://pam-kandidatsok-api-q0.nais.preprod.local/pam-kandidatsok-api/rest/veileder/stilling
 
 database:
   navn: rekrutteringsbistand
@@ -75,6 +82,8 @@ no.nav.security.oidc:
 external:
   stilling-api:
     url: https://pam-ad-api.nais.adeo.no
+  kandidatliste-api:
+    url: https://pam-kandidatsok-api.nais.adeo.no/pam-kandidatsok-api/rest/veileder/stilling
 
 database:
   navn: rekrutteringsbistand
