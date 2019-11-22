@@ -27,17 +27,24 @@ class KandidatlisteKlient(restTemplateBuilder: RestTemplateBuilder,
                 .build()
     }
 
-    fun sendAdCandidateListMessage(stillingsid: Stillingsid): ResponseEntity<Void> {
-        return restTemplate.exchange(
-                buildUpdateNotificationUrl(stillingsid),
-                HttpMethod.PUT,
-                HttpEntity(null, headers()),
-                Void::class.java)
-                .also {
-                    if (it.statusCode != HttpStatus.NO_CONTENT) {
-                        LOG.warn("Uventet response fra kandidatliste-api for ad {}: {}", stillingsid.asString(), it.statusCodeValue)
+    fun oppdaterKandidatliste(stillingsid: Stillingsid): ResponseEntity<Void> {
+        val url = buildUpdateNotificationUrl(stillingsid)
+        LOG.info("Oppdaterer kandidatliste, url: $url")
+        try {
+            return restTemplate.exchange(
+                    url,
+                    HttpMethod.PUT,
+                    HttpEntity(null, headers()),
+                    Void::class.java)
+                    .also {
+                        if (it.statusCode != HttpStatus.NO_CONTENT) {
+                            LOG.warn("Uventet response fra kandidatliste-api for ad {}: {}", stillingsid.asString(), it.statusCodeValue)
+                        }
                     }
-                }
+        } catch (t: Throwable) {
+            LOG.error("oppdatering av kandidatliste med url $url feilet", t)
+            throw t
+        }
 
     }
 

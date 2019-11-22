@@ -26,7 +26,7 @@ class StillingsinfoController(
         LOG.debug("lager ny stillingsinfo for stillinginfoid ${stillingsInfo.stillingsid} stillingid ${stillingsInfo.stillingsinfoid}")
 
         repo.lagre(stillingsInfo)
-        kandidatlisteKlient.sendAdCandidateListMessage(stillingsInfo.stillingsid)
+        kandidatlisteKlient.oppdaterKandidatliste(stillingsInfo.stillingsid)
         return ResponseEntity.created(URI("/rekruttering/${stillingsInfo.stillingsinfoid.asString()}")).body(stillingsInfo.asDto())
     }
 
@@ -36,7 +36,7 @@ class StillingsinfoController(
 
         LOG.debug("Oppdaterer stillingsinfo for stillingInfoid ${dto.asStillingsinfo().stillingsinfoid.asString()} stillingid  ${dto.asStillingsinfo().stillingsid.asString()}")
         repo.oppdaterEierIdentOgEierNavn(dto.asOppdaterStillingsinfo())
-        kandidatlisteKlient.sendAdCandidateListMessage(dto.asStillingsinfo().stillingsid)
+        kandidatlisteKlient.oppdaterKandidatliste(dto.asStillingsinfo().stillingsid)
         return ResponseEntity.ok().body(dto)
     }
 

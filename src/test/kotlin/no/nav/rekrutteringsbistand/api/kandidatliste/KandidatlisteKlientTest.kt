@@ -26,7 +26,7 @@ class KandidatlisteKlientTest {
 
     @Test
     fun `Skal kunne oppdatere en kandidatliste`() {
-        val response = klient.sendAdCandidateListMessage(Stillingsid(UUID.randomUUID()))
+        val response = klient.oppdaterKandidatliste(Stillingsid(UUID.randomUUID()))
         assertThat(response.statusCode).isEqualTo(HttpStatus.NO_CONTENT)
 
     }
