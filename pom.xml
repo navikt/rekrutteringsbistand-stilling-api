@@ -105,6 +105,7 @@
         </dependency>
 
         <!-- Prometheus -->
+        <!-- TODO Are: Trenger vi denne? Tror ikke det. -->
         <dependency>
             <groupId>io.micrometer</groupId>
             <artifactId>micrometer-core</artifactId>
