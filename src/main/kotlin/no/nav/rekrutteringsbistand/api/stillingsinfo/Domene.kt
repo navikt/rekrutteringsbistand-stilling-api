@@ -1,7 +1,6 @@
 package no.nav.rekrutteringsbistand.api.stillingsinfo
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import java.lang.IllegalArgumentException
 import java.sql.ResultSet
 import java.util.*
 

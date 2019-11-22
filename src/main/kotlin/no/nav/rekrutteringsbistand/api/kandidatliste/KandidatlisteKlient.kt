@@ -30,8 +30,8 @@ class KandidatlisteKlient(restTemplateBuilder: RestTemplateBuilder,
     fun oppdaterKandidatliste(stillingsid: Stillingsid): ResponseEntity<Void> {
         val url = buildUpdateNotificationUrl(stillingsid)
         LOG.info("Oppdaterer kandidatliste, url: $url")
-        try {
-            return restTemplate.exchange(
+        return try {
+            restTemplate.exchange(
                     url,
                     HttpMethod.PUT,
                     HttpEntity(null, headers()),
