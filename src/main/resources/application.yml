@@ -28,18 +28,17 @@ spring.h2.console:
   enabled: true
   path: /h2
 
----
-spring:
-  profiles: stillingMock
 external:
   stilling-api.url: http://localhost:9914
+
 ---
+
 spring:
   profiles: ekstern
 external:
   stilling-api.url: http://localhost:9014
----
 
+---
 
 spring:
   profiles: dev
@@ -60,6 +59,7 @@ database:
   url: jdbc:postgresql://b27dbvl008.preprod.local:5432/rekrutteringsbistand
 
 vault.mount-path: postgresql/preprod-fss
+
 ---
 
 spring:
