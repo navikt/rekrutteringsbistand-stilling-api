@@ -14,8 +14,9 @@ import javax.servlet.http.HttpServletRequest
 @Protected
 class StillingController(
         val restProxy: RestProxy,
-        @Suppress("SpringJavaInjectionPointsAutowiringInspection") val externalConfiguration: ExternalConfiguration,
-        val stillingService: StillingService) {
+        val externalConfiguration: ExternalConfiguration,
+        val stillingService: StillingService
+) {
 
     @RequestMapping("/rekrutteringsbistand/api/v1/**")
     fun stilling(method: HttpMethod, request: HttpServletRequest, @RequestBody(required = false) body: String?): ResponseEntity<String> {

@@ -30,16 +30,12 @@ spring.h2.console:
 
 external:
   stilling-api.url: http://localhost:9914
-
----
-
-spring:
-  profiles: kandidatlisteMock
-external:
   kandidatliste-api.url: http://localhost:9924/pam-kandidatsok-api/rest/veileder/stilling
+
 ---
+
 spring:
-  profiles: ekstern
+  profiles: eksternStilling
 external:
   stilling-api.url: http://localhost:9014
 

@@ -10,7 +10,7 @@ Maven: `mvn clean install`
 
 ## Kjøre
 ### Mocking
-I application.yml, velg mellom mocket stilling eller mot en localhost stillingserver med profilene 'stillingMock' og 'ekstern'.
+I application.yml, velg mellom mocket stilling eller mot en localhost stillingserver med profilene 'stillingMock' og 'eksternStilling'.
 stillingMock er default.
 
 ### Starte applikasjonen i utviklingsmiljø

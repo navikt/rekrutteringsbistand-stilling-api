@@ -12,7 +12,6 @@ import no.nav.rekrutteringsbistand.api.Testdata.enStilling
 import no.nav.rekrutteringsbistand.api.Testdata.enStillingsinfo
 import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoRepository
 import no.nav.rekrutteringsbistand.api.support.config.MockConfig.Companion.sokResponse
-import no.nav.rekrutteringsbistand.api.support.config.MockConfig.Companion.stillingerResponse
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Rule
@@ -58,11 +57,10 @@ internal class StillingComponentTest {
     }
 
     @Test
-    fun `hentStilling skal returnere stilling`() {
-        restTemplate.getForObject("$localBaseUrl/rekrutteringsbistand/api/v1/ads?a=a", String::class.java).also {
-            // TODO: Denne skal vel vaere stillingResponse?
-            assertThat(it).isEqualToIgnoringWhitespace(stillingerResponse)
-        }
+    fun `hentStilling skal returnere en stilling uten stillingsinfo hvis det ikke er lagret`() {
+        mockUtenAuthorization("/b2b/api/v1/ads/${enStilling.uuid}", enStilling)
+        val stilling = restTemplate.getForObject("$localBaseUrl/rekrutteringsbistand/api/v1/stilling/${enStilling.uuid}", Stilling::class.java)
+        assertThat(stilling).isEqualTo(enStilling)
     }
 
     @Test
@@ -122,6 +120,17 @@ internal class StillingComponentTest {
                         .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON.toString()))
                         .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON.toString()))
                         .withHeader(HttpHeaders.AUTHORIZATION, WireMock.matching("Bearer .*}"))
+                        .willReturn(WireMock.aResponse().withStatus(200)
+                                .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                                .withBody(objectMapper.writeValueAsString(body)))
+        )
+    }
+
+    private fun mockUtenAuthorization(urlPath: String, body: Any) {
+        wiremock.stubFor(
+                WireMock.get(WireMock.urlPathMatching(urlPath))
+                        .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON.toString()))
+                        .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON.toString()))
                         .willReturn(WireMock.aResponse().withStatus(200)
                                 .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                                 .withBody(objectMapper.writeValueAsString(body)))

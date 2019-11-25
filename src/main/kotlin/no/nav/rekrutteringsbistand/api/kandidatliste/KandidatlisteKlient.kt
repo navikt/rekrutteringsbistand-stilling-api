@@ -14,7 +14,7 @@ import java.time.Duration
 
 @Component
 class KandidatlisteKlient(restTemplateBuilder: RestTemplateBuilder,
-                          @Suppress("SpringJavaInjectionPointsAutowiringInspection") externalConfiguration: ExternalConfiguration) {
+                          externalConfiguration: ExternalConfiguration) {
 
     private val restTemplate: RestTemplate
     private val baseUrl: URI
