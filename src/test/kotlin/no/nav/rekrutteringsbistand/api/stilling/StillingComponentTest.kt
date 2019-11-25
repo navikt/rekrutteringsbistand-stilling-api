@@ -13,6 +13,7 @@ import no.nav.rekrutteringsbistand.api.Testdata.enStillingsinfo
 import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoRepository
 import no.nav.rekrutteringsbistand.api.support.config.MockConfig.Companion.sokResponse
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -59,29 +60,25 @@ internal class StillingComponentTest {
     @Test
     fun `hentStilling skal returnere en stilling uten stillingsinfo hvis det ikke er lagret`() {
         mockUtenAuthorization("/b2b/api/v1/ads/${enStilling.uuid}", enStilling)
-        val stilling = restTemplate.getForObject("$localBaseUrl/rekrutteringsbistand/api/v1/stilling/${enStilling.uuid}", Stilling::class.java)
-        assertThat(stilling).isEqualTo(enStilling)
+        restTemplate.getForObject("$localBaseUrl/rekrutteringsbistand/api/v1/stilling/${enStilling.uuid}", Stilling::class.java).also {
+            assertThat(it).isEqualTo(enStilling)
+        }
     }
 
     @Test
     fun `hentStilling skal returnere stilling beriket med stillingsinfo`() {
         repository.lagre(enStillingsinfo)
 
-        val stilling = restTemplate.exchange(
-                "$localBaseUrl/rekrutteringsbistand/api/v1/ads?a=a",
-                HttpMethod.GET,
-                null,
-                object : ParameterizedTypeReference<Page<Stilling>>() {}
-        ).body
+        mockUtenAuthorization("/b2b/api/v1/ads/${enStilling.uuid}", enStilling)
 
-        assertThat(stilling!!.content.first().rekruttering).isEqualTo(enStillingsinfo.asDto())
-        assertThat(stilling.content.first().uuid).isEqualTo(enStillingsinfo.stillingsid.asString())
-
-        repository.slett(enStillingsinfo.stillingsinfoid)
+        restTemplate.getForObject("$localBaseUrl/rekrutteringsbistand/api/v1/stilling/${enStilling.uuid}", Stilling::class.java).also {
+            assertThat(it.rekruttering).isEqualTo(enStillingsinfo.asDto())
+            assertThat(it.uuid).isEqualTo(enStillingsinfo.stillingsid.asString())
+        }
     }
 
     @Test
-    fun `hentStilling skal returnere sok`() {
+    fun `sok skal returnere sok`() {
         val headers = HttpHeaders()
 
         val request = HttpEntity("body", headers)
@@ -135,5 +132,11 @@ internal class StillingComponentTest {
                                 .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                                 .withBody(objectMapper.writeValueAsString(body)))
         )
+    }
+
+    @After
+    fun tearDown() {
+        repository.slett(enStillingsinfo.stillingsinfoid)
+        repository.slett(enAnnenStillingsinfo.stillingsinfoid)
     }
 }
