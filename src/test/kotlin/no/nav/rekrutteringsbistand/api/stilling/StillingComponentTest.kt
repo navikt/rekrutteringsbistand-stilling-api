@@ -12,7 +12,6 @@ import no.nav.rekrutteringsbistand.api.Testdata.enAnnenStillingsinfo
 import no.nav.rekrutteringsbistand.api.Testdata.enStilling
 import no.nav.rekrutteringsbistand.api.Testdata.enStillingsinfo
 import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoRepository
-import no.nav.rekrutteringsbistand.api.support.config.MockConfig.Companion.sokResponse
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.After
 import org.junit.Before
@@ -81,12 +80,11 @@ internal class StillingComponentTest {
     }
 
     @Test
-    fun `sok skal returnere sok`() {
-        val headers = HttpHeaders()
-
-        val request = HttpEntity("body", headers)
-        restTemplate.postForObject("$localBaseUrl/search-api/underenhet/_search", request, String::class.java).also {
-            assertThat(it).isEqualToIgnoringWhitespace(sokResponse)
+    fun `sok skal videresende respons direkte`() {
+        val stillingsSokRespons = "{}"
+        mockString("/search-api/underenhet/_search", stillingsSokRespons)
+        restTemplate.postForObject("$localBaseUrl/search-api/underenhet/_search", HttpEntity("{}", HttpHeaders()), String::class.java).also {
+            assertThat(it).isEqualTo(stillingsSokRespons)
         }
     }
 
@@ -134,6 +132,18 @@ internal class StillingComponentTest {
                         .willReturn(aResponse().withStatus(200)
                                 .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
                                 .withBody(objectMapper.writeValueAsString(body)))
+        )
+    }
+
+    private fun mockString(urlPath: String, body: String) {
+        wiremock.stubFor(
+                WireMock.post(urlPathMatching(urlPath))
+                        .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON.toString()))
+                        .withHeader(ACCEPT, equalTo(APPLICATION_JSON.toString()))
+                        .withHeader(AUTHORIZATION, matching("Bearer .*}"))
+                        .willReturn(aResponse().withStatus(200)
+                                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+                                .withBody(body))
         )
     }
 
