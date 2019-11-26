@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.github.tomakehurst.wiremock.client.WireMock
+import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.options
 import com.github.tomakehurst.wiremock.junit.WireMockRule
 import no.nav.rekrutteringsbistand.api.Testdata.enAnnenStilling
@@ -25,8 +26,10 @@ import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpHeaders.*
 import org.springframework.http.HttpMethod
-import org.springframework.http.MediaType
+import org.springframework.http.MediaType.APPLICATION_JSON
+import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit4.SpringRunner
 
@@ -113,23 +116,23 @@ internal class StillingComponentTest {
 
     private fun mock(urlPath: String, body: Any) {
         wiremock.stubFor(
-                WireMock.get(WireMock.urlPathMatching(urlPath))
-                        .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON.toString()))
-                        .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON.toString()))
-                        .withHeader(HttpHeaders.AUTHORIZATION, WireMock.matching("Bearer .*}"))
-                        .willReturn(WireMock.aResponse().withStatus(200)
-                                .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                WireMock.get(urlPathMatching(urlPath))
+                        .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON.toString()))
+                        .withHeader(ACCEPT, equalTo(APPLICATION_JSON.toString()))
+                        .withHeader(AUTHORIZATION, matching("Bearer .*}"))
+                        .willReturn(aResponse().withStatus(200)
+                                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
                                 .withBody(objectMapper.writeValueAsString(body)))
         )
     }
 
     private fun mockUtenAuthorization(urlPath: String, body: Any) {
         wiremock.stubFor(
-                WireMock.get(WireMock.urlPathMatching(urlPath))
-                        .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON.toString()))
-                        .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON.toString()))
-                        .willReturn(WireMock.aResponse().withStatus(200)
-                                .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                WireMock.get(urlPathMatching(urlPath))
+                        .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON.toString()))
+                        .withHeader(ACCEPT, equalTo(APPLICATION_JSON.toString()))
+                        .willReturn(aResponse().withStatus(200)
+                                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
                                 .withBody(objectMapper.writeValueAsString(body)))
         )
     }
