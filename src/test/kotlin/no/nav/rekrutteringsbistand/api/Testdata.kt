@@ -31,25 +31,10 @@ object Testdata {
             location = null
     )
 
-    val enAnnenStilling = Stilling(
-            rekruttering = null,
+    val enAnnenStilling = enStilling.copy(
             id = 1001,
             uuid = UUID.randomUUID().toString(),
-            created = LocalDateTime.now(),
-            createdBy = "nss-admin",
-            updated = LocalDateTime.now(),
-            updatedBy = "nss-admin",
-            title = "testnss",
-            status = "ACTIVE",
-            privacy = "SHOW_ALL",
-            source = "ASS",
-            medium = "ASS",
-            reference = UUID.randomUUID().toString(),
-            published = LocalDateTime.now(),
-            expires = LocalDateTime.now(),
-            employer = null,
-            administration = null,
-            location = null
+            reference = UUID.randomUUID().toString()
     )
 
     val enStillingsinfo = Stillingsinfo(
