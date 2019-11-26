@@ -1,6 +1,7 @@
 package no.nav.rekrutteringsbistand.api.support.rest
 
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
+import no.nav.rekrutteringsbistand.api.stilling.Stilling
 import no.nav.rekrutteringsbistand.api.support.LOG
 import no.nav.rekrutteringsbistand.api.support.toMultiValueMap
 import org.springframework.http.HttpEntity
@@ -25,6 +26,16 @@ class RestProxy(val restTemplate: RestTemplate, val tokenUtils: TokenUtils) {
                          request: HttpServletRequest,
                          stripPathPrefix: String,
                          body: String, targetUrl: String): ResponseEntity<String> =
+            restTemplate.exchange(
+                    buildProxyTargetUrl(request, stripPathPrefix, targetUrl),
+                    method,
+                    HttpEntity(body, proxyHeaders(request)),
+                    String::class.java)
+
+    fun proxyJsonRequest(method: HttpMethod,
+                         request: HttpServletRequest,
+                         stripPathPrefix: String,
+                         body: Stilling, targetUrl: String): ResponseEntity<String> =
             restTemplate.exchange(
                     buildProxyTargetUrl(request, stripPathPrefix, targetUrl),
                     method,

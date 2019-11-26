@@ -54,7 +54,7 @@ internal class StillingComponentTest {
                 "$localBaseUrl/rekrutteringsbistand/api/v1/ads?a=a",
                 HttpMethod.GET,
                 null,
-                object : ParameterizedTypeReference<Page<Stilling>>() {}
+                object : ParameterizedTypeReference<Page<StillingMedStillingsinfo>>() {}
         ).body
 
         assertThat(stilling!!.content.first().rekruttering).isEqualTo(enStillingsinfo.asDto())
