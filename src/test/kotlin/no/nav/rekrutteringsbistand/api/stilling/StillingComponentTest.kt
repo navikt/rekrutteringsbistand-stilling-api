@@ -62,7 +62,7 @@ internal class StillingComponentTest {
     @Test
     fun `hentStilling skal returnere en stilling uten stillingsinfo hvis det ikke er lagret`() {
         mockUtenAuthorization("/b2b/api/v1/ads/${enStilling.uuid}", enStilling)
-        restTemplate.getForObject("$localBaseUrl/rekrutteringsbistand/api/v1/stilling/${enStilling.uuid}", Stilling::class.java).also {
+        restTemplate.getForObject("$localBaseUrl/rekrutteringsbistand/api/v1/stilling/${enStilling.uuid}", StillingMedStillingsinfo::class.java).also {
             assertThat(it).isEqualTo(enStilling)
         }
     }
@@ -73,7 +73,7 @@ internal class StillingComponentTest {
 
         mockUtenAuthorization("/b2b/api/v1/ads/${enStilling.uuid}", enStilling)
 
-        restTemplate.getForObject("$localBaseUrl/rekrutteringsbistand/api/v1/stilling/${enStilling.uuid}", Stilling::class.java).also {
+        restTemplate.getForObject("$localBaseUrl/rekrutteringsbistand/api/v1/stilling/${enStilling.uuid}", StillingMedStillingsinfo::class.java).also {
             assertThat(it.rekruttering).isEqualTo(enStillingsinfo.asDto())
             assertThat(it.uuid).isEqualTo(enStillingsinfo.stillingsid.asString())
         }
@@ -101,11 +101,11 @@ internal class StillingComponentTest {
 
         mock("/rekrutteringsbistand/api/v1/ads", opprinneligeStillinger)
 
-        val stillinger: List<Stilling> = restTemplate.exchange(
+        val stillinger: List<StillingMedStillingsinfo> = restTemplate.exchange(
                 "$localBaseUrl/rekrutteringsbistand/api/v1/ads",
                 HttpMethod.GET,
                 null,
-                object : ParameterizedTypeReference<Page<Stilling>>() {}
+                object : ParameterizedTypeReference<Page<StillingMedStillingsinfo>>() {}
         ).body!!.content
 
         assertThat(stillinger.first().rekruttering).isEqualTo(enStillingsinfo.asDto())

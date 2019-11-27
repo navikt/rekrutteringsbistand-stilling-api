@@ -26,14 +26,14 @@ class StillingService(
         val tokenUtils: TokenUtils
 ) {
 
-    fun hentStilling(uuid: String): Stilling {
+    fun hentStilling(uuid: String): StillingMedStillingsinfo {
         val url = "${externalConfiguration.stillingApi.url}/b2b/api/v1/ads/$uuid"
         LOG.debug("henter stilling fra url $url")
-        val opprinneligStilling: Stilling = restTemplate.exchange(
+        val opprinneligStilling: StillingMedStillingsinfo = restTemplate.exchange(
                 url,
                 HttpMethod.GET,
                 HttpEntity(null, headersUtenToken()),
-                Stilling::class.java
+                StillingMedStillingsinfo::class.java
         )
                 .body
                 ?: throw RestResponseEntityExceptionHandler.NoContentException("Fant ikke stilling")
@@ -41,30 +41,30 @@ class StillingService(
         return berikMedRekruttering(opprinneligStilling)
     }
 
-    fun hentStillinger(url: String, queryString: String?): Page<Stilling> {
-        val opprinneligeStillinger: Page<Stilling> = hent(url, queryString)
+    fun hentStillinger(url: String, queryString: String?): Page<StillingMedStillingsinfo> {
+        val opprinneligeStillinger: Page<StillingMedStillingsinfo> = hent(url, queryString)
                 ?: throw RestResponseEntityExceptionHandler.NoContentException("Fant ikke stillinger")
 
         val stillingerMedRekruttering = opprinneligeStillinger.content.map(::berikMedRekruttering)
         return opprinneligeStillinger.copy(content = stillingerMedRekruttering)
     }
 
-    private fun hent(url: String, queryString: String?): Page<Stilling>? {
+    private fun hent(url: String, queryString: String?): Page<StillingMedStillingsinfo>? {
         val withQueryParams: String = UriComponentsBuilder.fromHttpUrl(url).query(queryString).build().toString()
         LOG.debug("henter stilling fra url $withQueryParams")
         return restTemplate.exchange(
                 withQueryParams,
                 HttpMethod.GET,
                 HttpEntity(null, headers()),
-                object : ParameterizedTypeReference<Page<Stilling>>() {}
+                object : ParameterizedTypeReference<Page<StillingMedStillingsinfo>>() {}
         ).body
     }
 
-    private fun berikMedRekruttering(stilling: Stilling): Stilling =
-            rekrutteringsbistandService.hentForStilling(Stillingsid(stilling.uuid!!))
+    fun berikMedRekruttering(stillingMedStillingsinfo: StillingMedStillingsinfo): StillingMedStillingsinfo =
+            rekrutteringsbistandService.hentForStilling(Stillingsid(stillingMedStillingsinfo.uuid!!))
                     .map(Stillingsinfo::asDto)
-                    .map { stilling.copy(rekruttering = it) }
-                    .getOrElse { stilling }
+                    .map { stillingMedStillingsinfo.copy(rekruttering = it) }
+                    .getOrElse { stillingMedStillingsinfo }
 
 
     private fun headers() =
