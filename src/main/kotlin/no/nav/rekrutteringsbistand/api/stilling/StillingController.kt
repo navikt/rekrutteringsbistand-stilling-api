@@ -14,27 +14,34 @@ import javax.servlet.http.HttpServletRequest
 @Protected
 class StillingController(
         val restProxy: RestProxy,
-        @Suppress("SpringJavaInjectionPointsAutowiringInspection") val externalConfiguration: ExternalConfiguration,
-        val stillingService: StillingService) {
+        val externalConfiguration: ExternalConfiguration,
+        val stillingService: StillingService
+) {
 
-    @RequestMapping("/rekrutteringsbistand/api/v1/**")
-    fun stilling(method: HttpMethod, request: HttpServletRequest, @RequestBody(required = false) body: String?): ResponseEntity<String> {
+    @RequestMapping("/rekrutteringsbistand/api/v1/ads/**", method = [RequestMethod.PUT, RequestMethod.POST])
+    fun proxyPutPostTilStillingsApi(method: HttpMethod, request: HttpServletRequest, @RequestBody body: Stilling): ResponseEntity<String> {
         return restProxy.proxyJsonRequest(method, request, Configuration.ROOT_URL, body
-                ?: "", externalConfiguration.stillingApi.url)
+                , externalConfiguration.stillingApi.url)
+    }
+
+    @GetMapping("/rekrutteringsbistand/api/v1/**")
+    fun proxyGetTilStillingsApi(method: HttpMethod, request: HttpServletRequest, @RequestBody(required = false) body: String?): ResponseEntity<String> {
+        return restProxy.proxyJsonRequest(method, request, Configuration.ROOT_URL, body ?: ""
+                , externalConfiguration.stillingApi.url)
     }
 
     @RequestMapping("/search-api/**")
-    private fun sok(method: HttpMethod, request: HttpServletRequest, @RequestBody body: String?): ResponseEntity<String> =
+    private fun proxySokTilStillingsApi(method: HttpMethod, request: HttpServletRequest, @RequestBody body: String?): ResponseEntity<String> =
             restProxy.proxyJsonRequest(method, request, Configuration.ROOT_URL, body ?: "", externalConfiguration.stillingApi.url)
 
     @Unprotected // Fordi kandidatsøk har hentet stillinger uten token frem til nå.
     @GetMapping("/rekrutteringsbistand/api/v1/stilling/{uuid}")
-    fun hentStilling(@PathVariable uuid: String, request: HttpServletRequest): ResponseEntity<Stilling> {
+    fun hentStilling(@PathVariable uuid: String, request: HttpServletRequest): ResponseEntity<StillingMedStillingsinfo> {
         return ResponseEntity.ok().body(stillingService.hentStilling(uuid))
     }
 
     @GetMapping("/rekrutteringsbistand/api/v1/ads")
-    fun hentStillinger(request: HttpServletRequest): ResponseEntity<Page<Stilling>> {
+    fun hentStillinger(request: HttpServletRequest): ResponseEntity<Page<StillingMedStillingsinfo>> {
         return ResponseEntity.ok().body(stillingService.hentStillinger(
                 "${externalConfiguration.stillingApi.url}/rekrutteringsbistand/api/v1/ads",
                 request.queryString
@@ -42,7 +49,7 @@ class StillingController(
     }
 
     @GetMapping("/rekrutteringsbistand/api/v1/ads/rekrutteringsbistand/minestillinger")
-    fun hentMineStillinger(request: HttpServletRequest): ResponseEntity<Page<Stilling>> {
+    fun hentMineStillinger(request: HttpServletRequest): ResponseEntity<Page<StillingMedStillingsinfo>> {
         return ResponseEntity.ok().body(stillingService.hentStillinger(
                 "${externalConfiguration.stillingApi.url}/rekrutteringsbistand/api/v1/ads/rekrutteringsbistand/minestillinger",
                 request.queryString

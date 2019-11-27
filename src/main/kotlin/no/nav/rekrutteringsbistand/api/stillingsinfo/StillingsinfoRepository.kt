@@ -67,7 +67,7 @@ class StillingsinfoRepository(
         const val STILLINGSINFO = "Stillingsinfo"
         const val STILLINGSINFOID = "stillingsinfoid"
         const val STILLINGSID = "stillingsid"
-        const val EIER_NAVIDENT =  "eier_navident"
+        const val EIER_NAVIDENT = "eier_navident"
         const val EIER_NAVN = "eier_navn"
     }
 }

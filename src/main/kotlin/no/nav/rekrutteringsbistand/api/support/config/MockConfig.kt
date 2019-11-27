@@ -115,159 +115,218 @@ class MockConfig {
                             .withBody(sokResponse))
         }
 
-        val stillingerResponse = """
+        private val stillingerResponse = """
             {
-                "content": [
-                    {
-                        "id": 1000,
-                        "uuid": "ee82f29c-51a9-4ca3-994d-45e3ab0e8204",
-                        "created": "2019-11-11T14:58:22.815329",
-                        "createdBy": "nss-admin",
-                        "updated": "2019-11-11T15:18:37.218633",
-                        "updatedBy": "nss-admin",
-                        "title": "testnss",
-                        "status": "ACTIVE",
-                        "privacy": "SHOW_ALL",
-                        "source": "ASS",
-                        "medium": "ASS",
-                        "reference": "ee82f29c-51a9-4ca3-994d-45e3ab0e8204",
-                        "published": "2019-11-11T15:01:30.940226",
-                        "expires": "2019-11-12T02:00:00",
-                        "employer": {
-                            "name": "NES & NES AS",
-                            "orgnr": "914163854",
-                            "status": "ACTIVE",
-                            "parentOrgnr": "914134390",
-                            "publicName": "NES & NES AS",
-                            "deactivated": null
-                        },
-                        "administration": {
-                            "status": "DONE",
-                            "comments": null,
-                            "reportee": "Clark Kent",
-                            "remarks": [],
-                            "navIdent": "C12345"
-                        },
-                        "location": {
-                            "postalCode": null,
-                            "county": "OSLO",
-                            "municipal": "OSLO",
-                            "municipalCode": "0301",
-                            "city": null,
-                            "country": "NORGE"
-                        },
-                        "locationList": [
-                            {
-                                "postalCode": null,
-                                "county": "OSLO",
-                                "municipal": "OSLO",
-                                "municipalCode": "0301",
-                                "city": null,
-                                "country": "NORGE"
-                            }
-                        ],
-                        "categoryList": [
-                            {
-                                "code": "0000.01",
-                                "categoryType": "STYRK08NAV",
-                                "name": "Hjelpearbeider (privat/offentlig virksomhet)"
-                            }
-                        ],
-                        "properties": {
-                            "extent": "Heltid",
-                            "workhours": "[\"Dagtid\"]",
-                            "workday": "[\"Ukedager\"]",
-                            "applicationdue": "10102020",
-                            "jobtitle": "ggg",
-                            "searchtags": "[{\"label\":\"Siviltjenestearbeider\",\"score\":1.0},{\"label\":\"Miljoarbeider sosiale fagfelt\",\"score\":0.07061906}]",
-                            "positioncount": "1",
-                            "engagementtype": "Sesong",
-                            "jobarrangement": "Skift",
-                            "classification_input_source": "categoryName",
-                            "sector": "Privat",
-                            "adtext": "<p>test </p>"
-                        },
-                        "rekruttering": null
-                    }
-                ],
-                "totalPages": 1,
-                "totalElements": 1
-            }
-
-        """.trimIndent()
-
-        private val stillingResponse = """
-            {
-                "id": 1000,
-                "uuid": "ee82f29c-51a9-4ca3-994d-45e3ab0e8204",
-                "created": "2019-11-11T14:58:22.815329",
-                "createdBy": "nss-admin",
-                "updated": "2019-11-11T15:18:37.218633",
-                "updatedBy": "nss-admin",
-                "title": "testnss",
-                "status": "ACTIVE",
-                "privacy": "SHOW_ALL",
-                "source": "ASS",
-                "medium": "ASS",
-                "reference": "ee82f29c-51a9-4ca3-994d-45e3ab0e8204",
-                "published": "2019-11-11T15:01:30.940226",
-                "expires": "2019-11-12T02:00:00",
-                "employer": {
-                    "name": "NES & NES AS",
-                    "orgnr": "914163854",
+            "content": [
+                {
+                    "id": 1000,
+                    "uuid": "ee82f29c-51a9-4ca3-994d-45e3ab0e8204",
+                    "created": "2019-11-11T14:58:22.815329",
+                    "createdBy": "nss-admin",
+                    "updated": "2019-11-11T15:18:37.218633",
+                    "updatedBy": "nss-admin",
+                    "mediaList": [],
+                    "contactList": [],
+                    "title": "testnss",
                     "status": "ACTIVE",
-                    "parentOrgnr": "914134390",
-                    "publicName": "NES & NES AS",
-                    "deactivated": null
-                },
-                "administration": {
-                    "status": "DONE",
-                    "comments": null,
-                    "reportee": "Clark Kent",
-                    "remarks": [],
-                    "navIdent": "C12345"
-                },
-                "location": {
-                    "postalCode": null,
-                    "county": "OSLO",
-                    "municipal": "OSLO",
-                    "municipalCode": "0301",
-                    "city": null,
-                    "country": "NORGE"
-                },
-                "locationList": [
-                    {
+                    "privacy": "SHOW_ALL",
+                    "source": "ASS",
+                    "medium": "ASS",
+                    "reference": "ee82f29c-51a9-4ca3-994d-45e3ab0e8204",
+                    "published": "2019-11-11T15:01:30.940226",
+                    "expires": "2019-11-12T02:00:00",
+                    "employer": {
+                        "id": null,
+                        "uuid": null,
+                        "created": null,
+                        "createdBy": null,
+                        "updated": null,
+                        "updatedBy": null,
+                        "mediaList": [],
+                        "contactList": [],
+                        "location": null,
+                        "locationList": [],
+                        "properties": {},
+                        "name": "NES & NES AS",
+                        "orgnr": "914163854",
+                        "status": "ACTIVE",
+                        "parentOrgnr": "914134390",
+                        "publicName": "NES & NES AS",
+                        "deactivated": null,
+                        "orgform": null,
+                        "employees": null
+                    },
+                    "administration": {
+                        "id": null,
+                        "status": "DONE",
+                        "comments": null,
+                        "reportee": "Clark Kent",
+                        "remarks": [],
+                        "navIdent": "C12345"
+                    },
+                    "location": {
+                        "address": null,
                         "postalCode": null,
                         "county": "OSLO",
                         "municipal": "OSLO",
                         "municipalCode": "0301",
                         "city": null,
-                        "country": "NORGE"
-                    }
-                ],
-                "categoryList": [
-                    {
-                        "code": "0000.01",
-                        "categoryType": "STYRK08NAV",
-                        "name": "Hjelpearbeider (privat/offentlig virksomhet)"
-                    }
-                ],
-                "properties": {
-                    "extent": "Heltid",
-                    "workhours": "[\"Dagtid\"]",
-                    "workday": "[\"Ukedager\"]",
-                    "applicationdue": "10102020",
-                    "jobtitle": "ggg",
-                    "searchtags": "[{\"label\":\"Siviltjenestearbeider\",\"score\":1.0},{\"label\":\"Miljoarbeider sosiale fagfelt\",\"score\":0.07061906}]",
-                    "positioncount": "1",
-                    "engagementtype": "Sesong",
-                    "jobarrangement": "Skift",
-                    "classification_input_source": "categoryName",
-                    "sector": "Privat",
-                    "adtext": "<p>test </p>"
-                },
-                "rekruttering": null
-            }
+                        "country": "NORGE",
+                        "latitude": null,
+                        "longitude": null
+                    },
+                    "locationList": [
+                        {
+                            "address": null,
+                            "postalCode": null,
+                            "county": "OSLO",
+                            "municipal": "OSLO",
+                            "municipalCode": "0301",
+                            "city": null,
+                            "country": "NORGE",
+                            "latitude": null,
+                            "longitude": null
+                        }
+                    ],
+                    "categoryList": [
+                        {
+                            "id": null,
+                            "code": "0000.01",
+                            "categoryType": "STYRK08NAV",
+                            "name": "Hjelpearbeider (privat/offentlig virksomhet)",
+                            "description": null,
+                            "parentId": null
+                        }
+                    ],
+                    "properties": {
+                        "extent": "Heltid",
+                        "workhours": "[\"Dagtid\"]",
+                        "workday": "[\"Ukedager\"]",
+                        "applicationdue": "10102020",
+                        "jobtitle": "ggg",
+                        "searchtags": "[{\"label\":\"Siviltjenestearbeider\",\"score\":1.0},{\"label\":\"Miljoarbeider sosiale fagfelt\",\"score\":0.07061906}]",
+                        "positioncount": "1",
+                        "engagementtype": "Sesong",
+                        "jobarrangement": "Skift",
+                        "classification_input_source": "categoryName",
+                        "sector": "Privat",
+                        "adtext": "<p>test </p>"
+                    },
+                    "publishedByAdmin": null,
+                    "businessName": null,
+                    "firstPublished": null,
+                    "deactivatedByExpiry": null,
+                    "activationOnPublishingDate": null,
+                    "rekruttering": null
+                }
+            ],
+            "totalPages": 1,
+            "totalElements": 1
+        }
+        """.trimIndent()
+
+        private val stillingResponse = """
+               {
+            "id": 1000,
+            "uuid": "ee82f29c-51a9-4ca3-994d-45e3ab0e8204",
+            "created": "2019-11-11T14:58:22.815329",
+            "createdBy": "nss-admin",
+            "updated": "2019-11-11T15:18:37.218633",
+            "updatedBy": "nss-admin",
+            "mediaList": [],
+            "contactList": [],
+            "title": "testnss",
+            "status": "ACTIVE",
+            "privacy": "SHOW_ALL",
+            "source": "ASS",
+            "medium": "ASS",
+            "reference": "ee82f29c-51a9-4ca3-994d-45e3ab0e8204",
+            "published": "2019-11-11T15:01:30.940226",
+            "expires": "2019-11-12T02:00:00",
+            "employer": {
+                "id": null,
+                "uuid": null,
+                "created": null,
+                "createdBy": null,
+                "updated": null,
+                "updatedBy": null,
+                "mediaList": [],
+                "contactList": [],
+                "location": null,
+                "locationList": [],
+                "properties": {},
+                "name": "NES & NES AS",
+                "orgnr": "914163854",
+                "status": "ACTIVE",
+                "parentOrgnr": "914134390",
+                "publicName": "NES & NES AS",
+                "deactivated": null,
+                "orgform": null,
+                "employees": null
+            },
+            "administration": {
+                "id": null,
+                "status": "DONE",
+                "comments": null,
+                "reportee": "Clark Kent",
+                "remarks": [],
+                "navIdent": "C12345"
+            },
+            "location": {
+                "address": null,
+                "postalCode": null,
+                "county": "OSLO",
+                "municipal": "OSLO",
+                "municipalCode": "0301",
+                "city": null,
+                "country": "NORGE",
+                "latitude": null,
+                "longitude": null
+            },
+            "locationList": [
+                {
+                    "address": null,
+                    "postalCode": null,
+                    "county": "OSLO",
+                    "municipal": "OSLO",
+                    "municipalCode": "0301",
+                    "city": null,
+                    "country": "NORGE",
+                    "latitude": null,
+                    "longitude": null
+                }
+            ],
+            "categoryList": [
+                {
+                    "id": null,
+                    "code": "0000.01",
+                    "categoryType": "STYRK08NAV",
+                    "name": "Hjelpearbeider (privat/offentlig virksomhet)",
+                    "description": null,
+                    "parentId": null
+                }
+            ],
+            "properties": {
+                "extent": "Heltid",
+                "workhours": "[\"Dagtid\"]",
+                "workday": "[\"Ukedager\"]",
+                "applicationdue": "10102020",
+                "jobtitle": "ggg",
+                "searchtags": "[{\"label\":\"Siviltjenestearbeider\",\"score\":1.0},{\"label\":\"Miljoarbeider sosiale fagfelt\",\"score\":0.07061906}]",
+                "positioncount": "1",
+                "engagementtype": "Sesong",
+                "jobarrangement": "Skift",
+                "classification_input_source": "categoryName",
+                "sector": "Privat",
+                "adtext": "<p>test </p>"
+            },
+            "publishedByAdmin": null,
+            "businessName": null,
+            "firstPublished": null,
+            "deactivatedByExpiry": null,
+            "activationOnPublishingDate": null,
+            "rekruttering": null
+        }
 
         """.trimIndent()
 

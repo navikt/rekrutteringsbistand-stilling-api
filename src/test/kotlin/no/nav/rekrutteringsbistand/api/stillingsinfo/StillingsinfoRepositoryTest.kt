@@ -25,7 +25,7 @@ class StillingsinfoRepositoryTest {
     lateinit var repository: StillingsinfoRepository
 
     @Test
-    fun `skal kunne lagre og hente ut rekrutteringsbistand`() {
+    fun `Skal kunne lagre og hente ut stillingsinfo`() {
         repository.lagre(tilLagring)
         val lagretRekrutteringsbistand = repository.hentForStilling(tilLagring.stillingsid)
 
@@ -33,7 +33,7 @@ class StillingsinfoRepositoryTest {
     }
 
     @Test
-    fun `Skal kunne oppdatere eierident og eiernavn på rekrutteringsbistand`() {
+    fun `Skal kunne oppdatere eierident og eiernavn på stillingsinfo`() {
         repository.lagre(tilLagring)
         repository.oppdaterEierIdentOgEierNavn(enStillingsinfoOppdatering)
 

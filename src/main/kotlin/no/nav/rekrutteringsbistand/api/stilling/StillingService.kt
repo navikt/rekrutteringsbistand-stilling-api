@@ -1,5 +1,6 @@
 package no.nav.rekrutteringsbistand.api.stilling
 
+import arrow.core.Option
 import arrow.core.getOrElse
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsid
@@ -22,62 +23,61 @@ import org.springframework.web.util.UriComponentsBuilder
 class StillingService(
         val restTemplate: RestTemplate,
         val externalConfiguration: ExternalConfiguration,
-        val rekrutteringsbistandService: StillingsinfoService,
+        val stillingsinfoService: StillingsinfoService,
         val tokenUtils: TokenUtils
 ) {
 
-    fun hentStilling(uuid: String): Stilling {
+    fun hentStilling(uuid: String): StillingMedStillingsinfo {
         val url = "${externalConfiguration.stillingApi.url}/b2b/api/v1/ads/$uuid"
         LOG.debug("henter stilling fra url $url")
-        val opprinneligStilling = restTemplate.exchange(
+        val opprinneligStilling: StillingMedStillingsinfo = restTemplate.exchange(
                 url,
                 HttpMethod.GET,
                 HttpEntity(null, headersUtenToken()),
-                Stilling::class.java)
-                .body
-
-        return berikMedRekruttering(
-                opprinneligStilling ?: throw RestResponseEntityExceptionHandler.NoContentException("Fant ikke stilling")
+                StillingMedStillingsinfo::class.java
         )
+                .body
+                ?: throw RestResponseEntityExceptionHandler.NoContentException("Fant ikke stilling")
+
+        val stillingsinfo: Option<Stillingsinfo> = hentStillingsinfo(opprinneligStilling)
+        return stillingsinfo.map { opprinneligStilling.copy(rekruttering = it.asDto()) }.getOrElse { opprinneligStilling }
     }
 
-    fun hentStillinger(url: String, queryString: String?): Page<Stilling> {
+    fun hentStillinger(url: String, queryString: String?): Page<StillingMedStillingsinfo> {
+        val opprinneligeStillingerPage: Page<StillingMedStillingsinfo> = hent(url, queryString)
+                ?: throw RestResponseEntityExceptionHandler.NoContentException("Fant ikke stillinger")
+        val opprinneligeStillinger = opprinneligeStillingerPage.content
+        val stillingsinfoer = opprinneligeStillinger.map(::hentStillingsinfo)
+        val newContent = stillingsinfoer.zip(opprinneligeStillinger, ::leggPåStillingsinfo)
+        return opprinneligeStillingerPage.copy(content = newContent)
+    }
 
+    private fun leggPåStillingsinfo(info: Option<Stillingsinfo>, opprinnelig: StillingMedStillingsinfo): StillingMedStillingsinfo {
+        return info.map { opprinnelig.copy(rekruttering = it.asDto()) }.getOrElse { opprinnelig }
+    }
+
+    private fun hent(url: String, queryString: String?): Page<StillingMedStillingsinfo>? {
         val withQueryParams: String = UriComponentsBuilder.fromHttpUrl(url).query(queryString).build().toString()
-
         LOG.debug("henter stilling fra url $withQueryParams")
-        val opprinneligeStillinger = restTemplate.exchange(
+        return restTemplate.exchange(
                 withQueryParams,
                 HttpMethod.GET,
                 HttpEntity(null, headers()),
-                object : ParameterizedTypeReference<Page<Stilling>>() {})
-                .body
-
-        val validertContent = (opprinneligeStillinger
-                ?: throw RestResponseEntityExceptionHandler.NoContentException("Fant ikke stillinger")).content
-
-        return opprinneligeStillinger.copy(
-                content = validertContent
-                        .map {
-                            berikMedRekruttering(it)
-                        })
+                object : ParameterizedTypeReference<Page<StillingMedStillingsinfo>>() {}
+        ).body
     }
 
-    fun berikMedRekruttering(stilling: Stilling): Stilling =
-            rekrutteringsbistandService.hentForStilling(Stillingsid(stilling.uuid!!))
-                    .map(Stillingsinfo::asDto)
-                    .map { stilling.copy(rekruttering = it) }
-                    .getOrElse { stilling }
+    private fun hentStillingsinfo(stillingMedStillingsinfo: StillingMedStillingsinfo): Option<Stillingsinfo> =
+            stillingsinfoService.hentForStilling(Stillingsid(stillingMedStillingsinfo.uuid!!))
 
-
-    fun headers() =
+    private fun headers() =
             mapOf(
                     HttpHeaders.CONTENT_TYPE to MediaType.APPLICATION_JSON.toString(),
                     HttpHeaders.ACCEPT to MediaType.APPLICATION_JSON.toString(),
                     HttpHeaders.AUTHORIZATION to "Bearer ${tokenUtils.hentOidcToken()}}"
             ).toMultiValueMap()
 
-    fun headersUtenToken() =
+    private fun headersUtenToken() =
             mapOf(
                     HttpHeaders.CONTENT_TYPE to MediaType.APPLICATION_JSON.toString(),
                     HttpHeaders.ACCEPT to MediaType.APPLICATION_JSON.toString()
