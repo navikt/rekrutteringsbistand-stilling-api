@@ -33,7 +33,8 @@ class StillingService(
                 url,
                 HttpMethod.GET,
                 HttpEntity(null, headersUtenToken()),
-                Stilling::class.java)
+                Stilling::class.java
+        )
                 .body
                 ?: throw RestResponseEntityExceptionHandler.NoContentException("Fant ikke stilling")
 
@@ -55,8 +56,8 @@ class StillingService(
                 withQueryParams,
                 HttpMethod.GET,
                 HttpEntity(null, headers()),
-                object : ParameterizedTypeReference<Page<Stilling>>() {})
-                .body
+                object : ParameterizedTypeReference<Page<Stilling>>() {}
+        ).body
     }
 
     private fun berikMedRekruttering(stilling: Stilling): Stilling =
