@@ -1,13 +1,16 @@
 package no.nav.rekrutteringsbistand.api.stillingsinfo
 
 import arrow.core.getOrElse
-import no.nav.rekrutteringsbistand.api.Testdata
+import com.github.tomakehurst.wiremock.client.WireMock.*
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration
+import com.github.tomakehurst.wiremock.junit.WireMockRule
 import no.nav.rekrutteringsbistand.api.Testdata.enStillingsinfo
 import no.nav.rekrutteringsbistand.api.support.toMultiValueMap
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.fail
 import org.junit.After
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.runner.RunWith
@@ -22,7 +25,9 @@ import org.springframework.http.HttpHeaders.ACCEPT
 import org.springframework.http.HttpHeaders.CONTENT_TYPE
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
+import org.springframework.http.HttpStatus.NO_CONTENT
 import org.springframework.http.MediaType.APPLICATION_JSON
+import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit4.SpringRunner
 import java.util.*
@@ -31,6 +36,9 @@ import java.util.*
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @ActiveProfiles("local")
 class StillingsinfoComponentTest {
+
+    @get:Rule
+    val wiremock = WireMockRule(WireMockConfiguration.options().port(9924))
 
     @LocalServerPort
     private var port = 0
@@ -74,44 +82,28 @@ class StillingsinfoComponentTest {
 
 
     @Test
-    fun `lagring av rekrutteringsbistand skal returnere HTTP status 201 og JSON med nyopprettet rekrutteringUuid`() {
-        // Given
-        val tilLagring = Testdata.enStillingsinfo.asDto().copy(stillingsinfoid = null)
+    fun `Opprettelse av stillingsinfo skal returnere HTTP 201 med opprettet stillingsinfo`() {
+        val tilLagring = enStillingsinfo.asDto().copy(stillingsinfoid = null)
+        mockKandidatlisteOppdatering()
+
         val url = "$localBaseUrl/rekruttering"
+        val stillingsinfoRespons = restTemplate.postForEntity(url, httpEntity(tilLagring), StillingsinfoDto::class.java)
+        val lagretStillingsinfo = repository.hentForStilling(enStillingsinfo.stillingsid).getOrElse { fail("fant ikke stillingen") }
 
-        val headers = mapOf(
-                CONTENT_TYPE to APPLICATION_JSON.toString(),
-                ACCEPT to APPLICATION_JSON.toString()
-        ).toMultiValueMap()
-        val httpEntity = HttpEntity(tilLagring, headers)
-
-        // When
-        val actualResponse = restTemplate.postForEntity(url, httpEntity, StillingsinfoDto::class.java)
-
-        // Then
-        assertThat(actualResponse.statusCode).isEqualTo(HttpStatus.CREATED)
-        assertThat(actualResponse.hasBody())
-        actualResponse.body!!.apply {
-            assertThat(stillingsinfoid).isNotBlank()
-            assertDoesNotThrow { UUID.fromString(stillingsinfoid) }
-            assertThat(this.copy(stillingsinfoid = null))
-                    .isEqualTo(tilLagring)
+        assertThat(stillingsinfoRespons.statusCode).isEqualTo(HttpStatus.CREATED)
+        stillingsinfoRespons.body!!.apply {
+            assertThat(this).isEqualToIgnoringGivenFields(tilLagring, "stillingsinfoid")
+            assertThat(stillingsinfoid).isEqualTo(lagretStillingsinfo.stillingsinfoid.asString())
         }
 
-        val oppdatert = repository.hentForStilling(Testdata.enStillingsinfo.stillingsid).getOrElse { fail("fant ikke stillingen") }
-        oppdatert.apply {
-            assertThat(stillingsinfoid.asString()).isNotBlank()
-            assertThat(this.asDto())
-                    .isEqualTo(actualResponse.body!!)
-            repository.slett(this.stillingsinfoid)
-        }
+        repository.slett(lagretStillingsinfo.stillingsinfoid)
     }
 
     @Test
     fun `oppdatering av rekrutteringsbistand skal returnere HTTP status 200 og JSON med oppdatert rekrutteringUuid`() {
 
         // Given
-        val lagre = Testdata.enStillingsinfo
+        val lagre = enStillingsinfo
         val oppdatere = lagre.copy(eier = Eier(navident = "endretIdent", navn = "endretNavn"))
         val lagret = repository.lagre(lagre)
 
@@ -156,5 +148,15 @@ class StillingsinfoComponentTest {
                 ACCEPT to APPLICATION_JSON.toString()
         ).toMultiValueMap()
         return HttpEntity(body, headers)
+    }
+
+    private fun mockKandidatlisteOppdatering() {
+        wiremock.stubFor(
+                put(urlPathMatching("/pam-kandidatsok-api/rest/veileder/stilling/.*/kandidatliste"))
+                        .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON.toString()))
+                        .withHeader(ACCEPT, equalTo(APPLICATION_JSON.toString()))
+                        .willReturn(aResponse().withStatus(NO_CONTENT.value())
+                                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE))
+        )
     }
 }
