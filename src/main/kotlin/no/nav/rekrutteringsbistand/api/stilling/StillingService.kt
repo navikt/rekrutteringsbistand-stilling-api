@@ -38,7 +38,7 @@ class StillingService(
                 .body
                 ?: throw RestResponseEntityExceptionHandler.NoContentException("Fant ikke stilling")
 
-        return opprinneligStilling.leggInnStillingsinfo(hentStillingsinfo(opprinneligStilling))
+        return opprinneligStilling.medStillingsinfo(hentStillingsinfo(opprinneligStilling))
     }
 
     fun hentStillinger(url: String, queryString: String?): Page<StillingMedStillingsinfo> {
@@ -46,7 +46,7 @@ class StillingService(
                 ?: throw RestResponseEntityExceptionHandler.NoContentException("Fant ikke stillinger")
 
         return opprinneligeStillinger.copy(content = opprinneligeStillinger.content
-                .map { it.leggInnStillingsinfo(hentStillingsinfo(it)) })
+                .map { it.medStillingsinfo(hentStillingsinfo(it)) })
     }
 
     private fun hent(url: String, queryString: String?): Page<StillingMedStillingsinfo>? {

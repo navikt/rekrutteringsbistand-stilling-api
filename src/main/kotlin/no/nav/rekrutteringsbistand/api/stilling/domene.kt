@@ -39,7 +39,7 @@ data class StillingMedStillingsinfo(
         val activationOnPublishingDate: Boolean?,
         val rekruttering: StillingsinfoDto?
 ) {
-    fun leggInnStillingsinfo(stillingsinfo: Option<Stillingsinfo>) =
+    fun medStillingsinfo(stillingsinfo: Option<Stillingsinfo>) =
             this.copy(rekruttering = stillingsinfo.map { it.asDto() }.orNull())
 }
 
