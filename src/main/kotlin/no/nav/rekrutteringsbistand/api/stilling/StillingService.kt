@@ -1,6 +1,6 @@
 package no.nav.rekrutteringsbistand.api.stilling
 
-import arrow.core.getOrElse
+import arrow.core.Option
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsid
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsinfo
@@ -22,7 +22,7 @@ import org.springframework.web.util.UriComponentsBuilder
 class StillingService(
         val restTemplate: RestTemplate,
         val externalConfiguration: ExternalConfiguration,
-        val rekrutteringsbistandService: StillingsinfoService,
+        val stillingsinfoService: StillingsinfoService,
         val tokenUtils: TokenUtils
 ) {
 
@@ -38,15 +38,15 @@ class StillingService(
                 .body
                 ?: throw RestResponseEntityExceptionHandler.NoContentException("Fant ikke stilling")
 
-        return berikMedRekruttering(opprinneligStilling)
+        return opprinneligStilling.leggInnStillingsinfo(hentStillingsinfo(opprinneligStilling))
     }
 
     fun hentStillinger(url: String, queryString: String?): Page<StillingMedStillingsinfo> {
         val opprinneligeStillinger: Page<StillingMedStillingsinfo> = hent(url, queryString)
                 ?: throw RestResponseEntityExceptionHandler.NoContentException("Fant ikke stillinger")
 
-        val stillingerMedRekruttering = opprinneligeStillinger.content.map(::berikMedRekruttering)
-        return opprinneligeStillinger.copy(content = stillingerMedRekruttering)
+        return opprinneligeStillinger.copy(content = opprinneligeStillinger.content
+                .map { it.leggInnStillingsinfo(hentStillingsinfo(it)) })
     }
 
     private fun hent(url: String, queryString: String?): Page<StillingMedStillingsinfo>? {
@@ -60,12 +60,8 @@ class StillingService(
         ).body
     }
 
-    fun berikMedRekruttering(stillingMedStillingsinfo: StillingMedStillingsinfo): StillingMedStillingsinfo =
-            rekrutteringsbistandService.hentForStilling(Stillingsid(stillingMedStillingsinfo.uuid!!))
-                    .map(Stillingsinfo::asDto)
-                    .map { stillingMedStillingsinfo.copy(rekruttering = it) }
-                    .getOrElse { stillingMedStillingsinfo }
-
+    private fun hentStillingsinfo(stillingMedStillingsinfo: StillingMedStillingsinfo): Option<Stillingsinfo> =
+            stillingsinfoService.hentForStilling(Stillingsid(stillingMedStillingsinfo.uuid!!))
 
     private fun headers() =
             mapOf(

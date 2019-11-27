@@ -1,6 +1,8 @@
 package no.nav.rekrutteringsbistand.api.stilling
 
+import arrow.core.Option
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsinfo
 import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoDto
 import java.time.LocalDateTime
 import java.util.*
@@ -36,7 +38,10 @@ data class StillingMedStillingsinfo(
         val deactivatedByExpiry: Boolean?,
         val activationOnPublishingDate: Boolean?,
         val rekruttering: StillingsinfoDto?
-)
+) {
+    fun leggInnStillingsinfo(stillingsinfo: Option<Stillingsinfo>) =
+            this.copy(rekruttering = stillingsinfo.map { it.asDto() }.orNull())
+}
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Stilling(
