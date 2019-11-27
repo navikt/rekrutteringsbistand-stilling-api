@@ -115,7 +115,7 @@ class MockConfig {
                             .withBody(sokResponse))
         }
 
-        val stillingerResponse = """
+        private val stillingerResponse = """
             {
             "content": [
                 {

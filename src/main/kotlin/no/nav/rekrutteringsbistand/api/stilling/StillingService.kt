@@ -29,38 +29,35 @@ class StillingService(
     fun hentStilling(uuid: String): StillingMedStillingsinfo {
         val url = "${externalConfiguration.stillingApi.url}/b2b/api/v1/ads/$uuid"
         LOG.debug("henter stilling fra url $url")
-        val opprinneligStilling = restTemplate.exchange(
+        val opprinneligStilling: StillingMedStillingsinfo = restTemplate.exchange(
                 url,
                 HttpMethod.GET,
                 HttpEntity(null, headersUtenToken()),
-                StillingMedStillingsinfo::class.java)
-                .body
-
-        return berikMedRekruttering(
-                opprinneligStilling ?: throw RestResponseEntityExceptionHandler.NoContentException("Fant ikke stilling")
+                StillingMedStillingsinfo::class.java
         )
+                .body
+                ?: throw RestResponseEntityExceptionHandler.NoContentException("Fant ikke stilling")
+
+        return berikMedRekruttering(opprinneligStilling)
     }
 
     fun hentStillinger(url: String, queryString: String?): Page<StillingMedStillingsinfo> {
+        val opprinneligeStillinger: Page<StillingMedStillingsinfo> = hent(url, queryString)
+                ?: throw RestResponseEntityExceptionHandler.NoContentException("Fant ikke stillinger")
 
+        val stillingerMedRekruttering = opprinneligeStillinger.content.map(::berikMedRekruttering)
+        return opprinneligeStillinger.copy(content = stillingerMedRekruttering)
+    }
+
+    private fun hent(url: String, queryString: String?): Page<StillingMedStillingsinfo>? {
         val withQueryParams: String = UriComponentsBuilder.fromHttpUrl(url).query(queryString).build().toString()
-
         LOG.debug("henter stilling fra url $withQueryParams")
-        val opprinneligeStillinger = restTemplate.exchange(
+        return restTemplate.exchange(
                 withQueryParams,
                 HttpMethod.GET,
                 HttpEntity(null, headers()),
-                object : ParameterizedTypeReference<Page<StillingMedStillingsinfo>>() {})
-                .body
-
-        val validertContent = (opprinneligeStillinger
-                ?: throw RestResponseEntityExceptionHandler.NoContentException("Fant ikke stillinger")).content
-
-        return opprinneligeStillinger.copy(
-                content = validertContent
-                        .map {
-                            berikMedRekruttering(it)
-                        })
+                object : ParameterizedTypeReference<Page<StillingMedStillingsinfo>>() {}
+        ).body
     }
 
     fun berikMedRekruttering(stillingMedStillingsinfo: StillingMedStillingsinfo): StillingMedStillingsinfo =
@@ -70,14 +67,14 @@ class StillingService(
                     .getOrElse { stillingMedStillingsinfo }
 
 
-    fun headers() =
+    private fun headers() =
             mapOf(
                     HttpHeaders.CONTENT_TYPE to MediaType.APPLICATION_JSON.toString(),
                     HttpHeaders.ACCEPT to MediaType.APPLICATION_JSON.toString(),
                     HttpHeaders.AUTHORIZATION to "Bearer ${tokenUtils.hentOidcToken()}}"
             ).toMultiValueMap()
 
-    fun headersUtenToken() =
+    private fun headersUtenToken() =
             mapOf(
                     HttpHeaders.CONTENT_TYPE to MediaType.APPLICATION_JSON.toString(),
                     HttpHeaders.ACCEPT to MediaType.APPLICATION_JSON.toString()

@@ -14,25 +14,25 @@ import javax.servlet.http.HttpServletRequest
 @Protected
 class StillingController(
         val restProxy: RestProxy,
-        @Suppress("SpringJavaInjectionPointsAutowiringInspection") val externalConfiguration: ExternalConfiguration,
-        val stillingService: StillingService) {
+        val externalConfiguration: ExternalConfiguration,
+        val stillingService: StillingService
+) {
 
     @RequestMapping("/rekrutteringsbistand/api/v1/ads/**", method = [RequestMethod.PUT, RequestMethod.POST])
-    fun stilling(method: HttpMethod, request: HttpServletRequest, @RequestBody body: Stilling): ResponseEntity<String> {
+    fun proxyPutPostTilStillingsApi(method: HttpMethod, request: HttpServletRequest, @RequestBody body: Stilling): ResponseEntity<String> {
         return restProxy.proxyJsonRequest(method, request, Configuration.ROOT_URL, body
                 , externalConfiguration.stillingApi.url)
     }
 
-    @RequestMapping("/rekrutteringsbistand/api/v1/**", method = [RequestMethod.GET])
-    fun stilling(method: HttpMethod, request: HttpServletRequest, @RequestBody(required = false) body: String?): ResponseEntity<String> {
+    @GetMapping("/rekrutteringsbistand/api/v1/**")
+    fun proxyGetTilStillingsApi(method: HttpMethod, request: HttpServletRequest, @RequestBody(required = false) body: String?): ResponseEntity<String> {
         return restProxy.proxyJsonRequest(method, request, Configuration.ROOT_URL, body ?: ""
                 , externalConfiguration.stillingApi.url)
     }
 
     @RequestMapping("/search-api/**")
-    private fun sok(method: HttpMethod, request: HttpServletRequest, @RequestBody body: String?): ResponseEntity<String> =
-            restProxy.proxyJsonRequest(method, request, Configuration.ROOT_URL, body
-                    ?: "", externalConfiguration.stillingApi.url)
+    private fun proxySokTilStillingsApi(method: HttpMethod, request: HttpServletRequest, @RequestBody body: String?): ResponseEntity<String> =
+            restProxy.proxyJsonRequest(method, request, Configuration.ROOT_URL, body ?: "", externalConfiguration.stillingApi.url)
 
     @Unprotected // Fordi kandidatsøk har hentet stillinger uten token frem til nå.
     @GetMapping("/rekrutteringsbistand/api/v1/stilling/{uuid}")

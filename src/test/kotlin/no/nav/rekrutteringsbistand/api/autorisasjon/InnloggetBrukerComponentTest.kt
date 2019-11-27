@@ -1,6 +1,6 @@
 package no.nav.rekrutteringsbistand.api.autorisasjon
 
-import no.nav.rekrutteringsbistand.api.Testdata
+import no.nav.rekrutteringsbistand.api.Testdata.enVeileder
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -13,7 +13,7 @@ import org.springframework.test.context.junit4.SpringRunner
 
 @RunWith(SpringRunner::class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("stillingMock", "local")
+@ActiveProfiles("local")
 internal class InnloggetBrukerComponentTest {
 
     @LocalServerPort
@@ -31,7 +31,7 @@ internal class InnloggetBrukerComponentTest {
     @Test
     fun hentInnloggetBrukerReturnererBruker() {
         restTemplate.getForObject("${localBaseUrl()}/rekrutteringsbistand/api/v1/reportee", InnloggetBruker::class.java).apply {
-            assertThat(this).isEqualTo(Testdata.enVeileder)
+            assertThat(this).isEqualTo(enVeileder)
         }
     }
 
@@ -41,5 +41,4 @@ internal class InnloggetBrukerComponentTest {
             assertThat(this).isFalse()
         }
     }
-
 }
