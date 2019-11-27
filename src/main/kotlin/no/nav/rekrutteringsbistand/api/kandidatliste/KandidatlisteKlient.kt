@@ -13,8 +13,10 @@ import java.net.URI
 import java.time.Duration
 
 @Component
-class KandidatlisteKlient(restTemplateBuilder: RestTemplateBuilder,
-                          externalConfiguration: ExternalConfiguration) {
+class KandidatlisteKlient(
+        restTemplateBuilder: RestTemplateBuilder,
+        externalConfiguration: ExternalConfiguration
+) {
 
     private val restTemplate: RestTemplate
     private val baseUrl: URI
