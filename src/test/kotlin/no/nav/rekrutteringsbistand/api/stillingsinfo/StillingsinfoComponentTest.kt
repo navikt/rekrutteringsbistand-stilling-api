@@ -2,9 +2,11 @@ package no.nav.rekrutteringsbistand.api.stillingsinfo
 
 import arrow.core.getOrElse
 import no.nav.rekrutteringsbistand.api.Testdata
+import no.nav.rekrutteringsbistand.api.Testdata.enStillingsinfo
 import no.nav.rekrutteringsbistand.api.support.toMultiValueMap
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.fail
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.jupiter.api.assertDoesNotThrow
@@ -27,7 +29,7 @@ import java.util.*
 
 @RunWith(SpringRunner::class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-@ActiveProfiles("local", "kandidatlisteMock")
+@ActiveProfiles("local")
 class StillingsinfoComponentTest {
 
     @LocalServerPort
@@ -46,32 +48,14 @@ class StillingsinfoComponentTest {
     }
 
     @Test
-    fun `henting av rekrutteringsbistand basert på stilling skal returnere HTTP status 200 og JSON med nyopprettet rekrutteringUuid`() {
-        // Given
-        val lagre = Testdata.enStillingsinfo
-        repository.lagre(lagre)
+    fun `Henting av stillingsinfo basert på stilling skal returnere HTTP OK med lagret stillingsinfo`() {
+        repository.lagre(enStillingsinfo)
 
-        val url = "$localBaseUrl/rekruttering/stilling/${lagre.stillingsid}"
+        val url = "$localBaseUrl/rekruttering/stilling/${enStillingsinfo.stillingsid}"
+        val stillingsinfoRespons = restTemplate.exchange(url, HttpMethod.GET, httpEntity(null), StillingsinfoDto::class.java)
 
-        val headers = mapOf(
-                CONTENT_TYPE to APPLICATION_JSON.toString(),
-                ACCEPT to APPLICATION_JSON.toString()
-        ).toMultiValueMap()
-
-        val httpEntity = HttpEntity(null, headers)
-
-        // When
-        val actualResponse = restTemplate.exchange(url, HttpMethod.GET, httpEntity, StillingsinfoDto::class.java)
-
-        // Then
-        assertThat(actualResponse.statusCode).isEqualTo(HttpStatus.OK)
-        assertThat(actualResponse.hasBody())
-        actualResponse.body!!.apply {
-            assertThat(stillingsinfoid).isNotBlank()
-            assertDoesNotThrow { UUID.fromString(stillingsinfoid) }
-            assertThat(this).isEqualTo(lagre.asDto())
-            repository.slett(lagre.stillingsinfoid)
-        }
+        assertThat(stillingsinfoRespons.statusCode).isEqualTo(HttpStatus.OK)
+        assertThat(stillingsinfoRespons.body).isEqualTo(enStillingsinfo.asDto())
     }
 
     @Test
@@ -180,4 +164,16 @@ class StillingsinfoComponentTest {
 
     }
 
+    @After
+    fun tearDown() {
+        repository.slett(enStillingsinfo.stillingsinfoid)
+    }
+
+    private fun httpEntity(body: Any?): HttpEntity<Any> {
+        val headers = mapOf(
+                CONTENT_TYPE to APPLICATION_JSON.toString(),
+                ACCEPT to APPLICATION_JSON.toString()
+        ).toMultiValueMap()
+        return HttpEntity(body, headers)
+    }
 }
