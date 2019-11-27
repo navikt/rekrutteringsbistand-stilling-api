@@ -59,35 +59,16 @@ class StillingsinfoComponentTest {
     }
 
     @Test
-    fun `henting av rekrutteringsbistand basert på bruker skal returnere HTTP status 200 og JSON med nyopprettet rekrutteringUuid`() {
-        // Given
-        val lagre = Testdata.enStillingsinfo
-        repository.lagre(lagre)
+    fun `Henting av stillingsinfo basert på bruker skal returnere HTTP 200 med lagret stillingsinfo`() {
+        repository.lagre(enStillingsinfo)
 
-        val url = "$localBaseUrl/rekruttering/ident/${lagre.eier.navident}"
+        val url = "$localBaseUrl/rekruttering/ident/${enStillingsinfo.eier.navident}"
+        val stillingsinfoRespons = restTemplate.exchange(url, HttpMethod.GET, httpEntity(null), object : ParameterizedTypeReference<List<StillingsinfoDto>>() {})
 
-        val headers = mapOf(
-                CONTENT_TYPE to APPLICATION_JSON.toString(),
-                ACCEPT to APPLICATION_JSON.toString()
-        ).toMultiValueMap()
-
-        val httpEntity = HttpEntity(null, headers)
-
-        // When
-        val actualResponse =
-                restTemplate.run { exchange(url, HttpMethod.GET, httpEntity, object : ParameterizedTypeReference<List<StillingsinfoDto>>() {}) }
-
-        // Then
-        assertThat(actualResponse.statusCode).isEqualTo(HttpStatus.OK)
-        assertThat(actualResponse.hasBody())
-        actualResponse.body!!.apply {
+        assertThat(stillingsinfoRespons.statusCode).isEqualTo(HttpStatus.OK)
+        stillingsinfoRespons.body.apply {
             assertThat(this).hasSize(1)
-            this.get(0).apply {
-                assertThat(stillingsinfoid).isNotBlank()
-                assertDoesNotThrow { UUID.fromString(stillingsinfoid) }
-                assertThat(this).isEqualTo(lagre.asDto())
-                repository.slett(lagre.stillingsinfoid)
-            }
+            assertThat(this!![0]).isEqualTo(enStillingsinfo.asDto())
         }
     }
 
