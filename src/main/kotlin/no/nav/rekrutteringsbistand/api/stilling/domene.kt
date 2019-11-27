@@ -38,10 +38,7 @@ data class StillingMedStillingsinfo(
         val deactivatedByExpiry: Boolean?,
         val activationOnPublishingDate: Boolean?,
         val rekruttering: StillingsinfoDto?
-) {
-    fun medStillingsinfo(stillingsinfo: Option<Stillingsinfo>) =
-            this.copy(rekruttering = stillingsinfo.map { it.asDto() }.orNull())
-}
+)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Stilling(

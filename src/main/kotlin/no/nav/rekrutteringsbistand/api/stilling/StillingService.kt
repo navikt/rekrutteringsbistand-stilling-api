@@ -1,6 +1,7 @@
 package no.nav.rekrutteringsbistand.api.stilling
 
 import arrow.core.Option
+import arrow.core.getOrElse
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsid
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsinfo
@@ -38,15 +39,21 @@ class StillingService(
                 .body
                 ?: throw RestResponseEntityExceptionHandler.NoContentException("Fant ikke stilling")
 
-        return opprinneligStilling.medStillingsinfo(hentStillingsinfo(opprinneligStilling))
+        val stillingsinfo: Option<Stillingsinfo> = hentStillingsinfo(opprinneligStilling)
+        return stillingsinfo.map { opprinneligStilling.copy(rekruttering = it.asDto()) }.getOrElse { opprinneligStilling }
     }
 
     fun hentStillinger(url: String, queryString: String?): Page<StillingMedStillingsinfo> {
-        val opprinneligeStillinger: Page<StillingMedStillingsinfo> = hent(url, queryString)
+        val opprinneligeStillingerPage: Page<StillingMedStillingsinfo> = hent(url, queryString)
                 ?: throw RestResponseEntityExceptionHandler.NoContentException("Fant ikke stillinger")
+        val opprinneligeStillinger = opprinneligeStillingerPage.content
+        val stillingsinfoer = opprinneligeStillinger.map(::hentStillingsinfo)
+        val newContent = stillingsinfoer.zip(opprinneligeStillinger, ::leggPåStillingsinfo)
+        return opprinneligeStillingerPage.copy(content = newContent)
+    }
 
-        return opprinneligeStillinger.copy(content = opprinneligeStillinger.content
-                .map { it.medStillingsinfo(hentStillingsinfo(it)) })
+    private fun leggPåStillingsinfo(info: Option<Stillingsinfo>, opprinnelig: StillingMedStillingsinfo): StillingMedStillingsinfo {
+        return info.map { opprinnelig.copy(rekruttering = it.asDto()) }.getOrElse { opprinnelig }
     }
 
     private fun hent(url: String, queryString: String?): Page<StillingMedStillingsinfo>? {
