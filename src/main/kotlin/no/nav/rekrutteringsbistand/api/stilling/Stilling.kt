@@ -31,16 +31,44 @@ data class Stilling(
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class Metadata(val status: String?, val comments: String?, val reportee: String?, val remarks: List<String> = ArrayList(), val navIdent: String?)
+data class Metadata(
+        val status: String?,
+        val comments: String?,
+        val reportee: String?,
+        val remarks: List<String> = ArrayList(),
+        val navIdent: String?
+)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class Arbeidsgiver(val name: String?, val orgnr: String?, val status: String?, val parentOrgnr: String?, val publicName: String?, val deactivated: LocalDateTime?)
+data class Arbeidsgiver(
+        val name: String?,
+        val orgnr: String?,
+        val status: String?,
+        val parentOrgnr: String?,
+        val publicName: String?,
+        val deactivated: LocalDateTime?
+)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class Geografi(val postalCode: String?, val county: String?, val municipal: String?, val municipalCode: String?, val city: String?, val country: String?)
+data class Geografi(
+        val postalCode: String?,
+        val county: String?,
+        val municipal: String?,
+        val municipalCode: String?,
+        val city: String?,
+        val country: String?
+)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class Kategori(val code: String?, val categoryType: String?, val name: String?)
+data class Kategori(
+        val code: String?,
+        val categoryType: String?,
+        val name: String?
+)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class Page<T>(val content: List<T>, val totalPages: Int, val totalElements: Int)
+data class Page<T>(
+        val content: List<T>,
+        val totalPages: Int,
+        val totalElements: Int
+)
