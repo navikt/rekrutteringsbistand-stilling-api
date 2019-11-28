@@ -24,8 +24,8 @@ import org.springframework.http.HttpHeaders.*
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatus.NO_CONTENT
-import org.springframework.http.MediaType.APPLICATION_JSON
-import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
+import org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE
+import org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit4.SpringRunner
 
@@ -118,8 +118,8 @@ class StillingsinfoComponentTest {
 
     private fun httpEntity(body: Any?): HttpEntity<Any> {
         val headers = mapOf(
-                CONTENT_TYPE to APPLICATION_JSON.toString(),
-                ACCEPT to APPLICATION_JSON.toString()
+                CONTENT_TYPE to APPLICATION_JSON_UTF8_VALUE,
+                ACCEPT to APPLICATION_JSON_UTF8_VALUE
         ).toMultiValueMap()
         return HttpEntity(body, headers)
     }
@@ -127,11 +127,11 @@ class StillingsinfoComponentTest {
     private fun mockKandidatlisteOppdatering() {
         wiremock.stubFor(
                 put(urlPathMatching("/pam-kandidatsok-api/rest/veileder/stilling/.*/kandidatliste"))
-                        .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON.toString()))
-                        .withHeader(ACCEPT, equalTo(APPLICATION_JSON.toString()))
+                        .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_UTF8_VALUE))
+                        .withHeader(ACCEPT, equalTo(APPLICATION_JSON_UTF8_VALUE))
                         .willReturn(aResponse().withStatus(NO_CONTENT.value())
                                 .withHeader(CONNECTION, "close") // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
-                                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE))
+                                .withHeader(CONTENT_TYPE, APPLICATION_JSON_UTF8_VALUE))
         )
     }
 }

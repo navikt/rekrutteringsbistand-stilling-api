@@ -56,7 +56,7 @@ class RestResponseEntityExceptionHandler : ResponseEntityExceptionHandler() {
                 )
         )
 
-        return ResponseEntity.status(status).contentType(MediaType.APPLICATION_JSON).body(body)
+        return ResponseEntity.status(status).contentType(MediaType.APPLICATION_JSON_UTF8).body(body)
     }
 
     class NoContentException(message: String?) : RuntimeException(message)

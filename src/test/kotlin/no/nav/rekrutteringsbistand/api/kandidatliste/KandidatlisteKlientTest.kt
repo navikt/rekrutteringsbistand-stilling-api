@@ -12,8 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.HttpHeaders.*
 import org.springframework.http.HttpStatus.NO_CONTENT
-import org.springframework.http.MediaType.APPLICATION_JSON
-import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
+import org.springframework.http.MediaType.*
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit4.SpringRunner
 import java.util.*
@@ -33,11 +32,11 @@ class KandidatlisteKlientTest {
     fun `Skal sende oppdaterKandidatliste-request med riktig URL og headere`() {
         wiremock.stubFor(
                 put(urlPathMatching("/pam-kandidatsok-api/rest/veileder/stilling/.*/kandidatliste"))
-                        .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON.toString()))
-                        .withHeader(ACCEPT, equalTo(APPLICATION_JSON.toString()))
+                        .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_UTF8_VALUE))
+                        .withHeader(ACCEPT, equalTo(APPLICATION_JSON_UTF8_VALUE))
                         .willReturn(aResponse().withStatus(NO_CONTENT.value())
                                 .withHeader(CONNECTION, "close") // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
-                                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE))
+                                .withHeader(CONTENT_TYPE, APPLICATION_JSON_UTF8_VALUE))
         )
 
         val respons = klient.oppdaterKandidatliste(Stillingsid(UUID.randomUUID()))

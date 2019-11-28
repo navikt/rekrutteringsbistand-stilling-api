@@ -31,10 +31,10 @@ class KandidatlisteMockConfig {
     companion object {
         fun oppdaterKandidatliste(): MappingBuilder {
             return WireMock.put(WireMock.urlPathMatching("/pam-kandidatsok-api/rest/veileder/stilling/.*/kandidatliste"))
-                    .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON.toString()))
-                    .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON.toString()))
+                    .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                    .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_UTF8_VALUE))
                     .willReturn(WireMock.aResponse().withStatus(HttpStatus.NO_CONTENT.value())
-                            .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
+                            .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_UTF8_VALUE))
         }
     }
 }
