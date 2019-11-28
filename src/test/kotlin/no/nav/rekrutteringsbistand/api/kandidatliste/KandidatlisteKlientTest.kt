@@ -10,8 +10,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.http.HttpHeaders.ACCEPT
-import org.springframework.http.HttpHeaders.CONTENT_TYPE
+import org.springframework.http.HttpHeaders.*
 import org.springframework.http.HttpStatus.NO_CONTENT
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
@@ -37,6 +36,7 @@ class KandidatlisteKlientTest {
                         .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON.toString()))
                         .withHeader(ACCEPT, equalTo(APPLICATION_JSON.toString()))
                         .willReturn(aResponse().withStatus(NO_CONTENT.value())
+                                .withHeader(CONNECTION, "close") // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
                                 .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE))
         )
 

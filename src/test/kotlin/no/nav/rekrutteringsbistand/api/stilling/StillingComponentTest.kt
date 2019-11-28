@@ -119,6 +119,7 @@ internal class StillingComponentTest {
                         .withHeader(ACCEPT, equalTo(APPLICATION_JSON.toString()))
                         .withHeader(AUTHORIZATION, matching("Bearer .*}"))
                         .willReturn(aResponse().withStatus(200)
+                                .withHeader(CONNECTION, "close") // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
                                 .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
                                 .withBody(objectMapper.writeValueAsString(body)))
         )
@@ -130,6 +131,7 @@ internal class StillingComponentTest {
                         .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON.toString()))
                         .withHeader(ACCEPT, equalTo(APPLICATION_JSON.toString()))
                         .willReturn(aResponse().withStatus(200)
+                                .withHeader(CONNECTION, "close") // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
                                 .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
                                 .withBody(objectMapper.writeValueAsString(body)))
         )
@@ -142,6 +144,7 @@ internal class StillingComponentTest {
                         .withHeader(ACCEPT, equalTo(APPLICATION_JSON.toString()))
                         .withHeader(AUTHORIZATION, matching("Bearer .*}"))
                         .willReturn(aResponse().withStatus(200)
+                                .withHeader(CONNECTION, "close") // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
                                 .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
                                 .withBody(body))
         )
