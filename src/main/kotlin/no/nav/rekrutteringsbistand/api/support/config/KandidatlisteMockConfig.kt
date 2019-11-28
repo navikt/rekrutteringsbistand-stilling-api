@@ -36,7 +36,5 @@ class KandidatlisteMockConfig {
                     .willReturn(WireMock.aResponse().withStatus(HttpStatus.NO_CONTENT.value())
                             .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
         }
-
-
     }
 }
