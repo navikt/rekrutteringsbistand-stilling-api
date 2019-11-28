@@ -30,7 +30,7 @@ class KandidatlisteKlientTest {
     lateinit var klient: KandidatlisteKlient
 
     @Test
-    fun `oppdaterKandidatliste skal returnere no content`() {
+    fun `Skal sende oppdaterKandidatliste-request med riktig URL og headere`() {
         wiremock.stubFor(
                 put(urlPathMatching("/pam-kandidatsok-api/rest/veileder/stilling/.*/kandidatliste"))
                         .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON.toString()))
