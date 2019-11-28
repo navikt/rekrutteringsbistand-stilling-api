@@ -24,7 +24,7 @@ class StillingController(
                 , externalConfiguration.stillingApi.url)
     }
 
-    @GetMapping("/rekrutteringsbistand/api/v1/**")
+    @RequestMapping("/rekrutteringsbistand/api/v1/**")
     fun proxyGetTilStillingsApi(method: HttpMethod, request: HttpServletRequest, @RequestBody(required = false) body: String?): ResponseEntity<String> {
         return restProxy.proxyJsonRequest(method, request, Configuration.ROOT_URL, body ?: ""
                 , externalConfiguration.stillingApi.url)
