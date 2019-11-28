@@ -1,13 +1,17 @@
 package no.nav.rekrutteringsbistand.api.stillingsinfo
 
 import arrow.core.getOrElse
-import no.nav.rekrutteringsbistand.api.Testdata
+import com.github.tomakehurst.wiremock.client.WireMock.*
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration
+import com.github.tomakehurst.wiremock.junit.WireMockRule
+import no.nav.rekrutteringsbistand.api.Testdata.enStillingsinfo
 import no.nav.rekrutteringsbistand.api.support.toMultiValueMap
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.fail
+import org.junit.After
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
-import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -16,19 +20,22 @@ import org.springframework.boot.test.web.client.TestRestTemplate.HttpClientOptio
 import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.HttpEntity
-import org.springframework.http.HttpHeaders.ACCEPT
-import org.springframework.http.HttpHeaders.CONTENT_TYPE
+import org.springframework.http.HttpHeaders.*
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
-import org.springframework.http.MediaType.APPLICATION_JSON
+import org.springframework.http.HttpStatus.NO_CONTENT
+import org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE
+import org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit4.SpringRunner
-import java.util.*
 
 @RunWith(SpringRunner::class)
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-@ActiveProfiles("local", "kandidatlisteMock")
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@ActiveProfiles("local")
 class StillingsinfoComponentTest {
+
+    @get:Rule
+    val wiremock = WireMockRule(WireMockConfiguration.options().port(9924))
 
     @LocalServerPort
     private var port = 0
@@ -46,138 +53,85 @@ class StillingsinfoComponentTest {
     }
 
     @Test
-    fun `henting av rekrutteringsbistand basert på stilling skal returnere HTTP status 200 og JSON med nyopprettet rekrutteringUuid`() {
-        // Given
-        val lagre = Testdata.enStillingsinfo
-        repository.lagre(lagre)
+    fun `Henting av stillingsinfo basert på stilling skal returnere HTTP OK med lagret stillingsinfo`() {
+        repository.lagre(enStillingsinfo)
 
-        val url = "$localBaseUrl/rekruttering/stilling/${lagre.stillingsid}"
+        val url = "$localBaseUrl/rekruttering/stilling/${enStillingsinfo.stillingsid}"
+        val stillingsinfoRespons = restTemplate.exchange(url, HttpMethod.GET, httpEntity(null), StillingsinfoDto::class.java)
 
-        val headers = mapOf(
-                CONTENT_TYPE to APPLICATION_JSON.toString(),
-                ACCEPT to APPLICATION_JSON.toString()
-        ).toMultiValueMap()
-
-        val httpEntity = HttpEntity(null, headers)
-
-        // When
-        val actualResponse = restTemplate.exchange(url, HttpMethod.GET, httpEntity, StillingsinfoDto::class.java)
-
-        // Then
-        assertThat(actualResponse.statusCode).isEqualTo(HttpStatus.OK)
-        assertThat(actualResponse.hasBody())
-        actualResponse.body!!.apply {
-            assertThat(stillingsinfoid).isNotBlank()
-            assertDoesNotThrow { UUID.fromString(stillingsinfoid) }
-            assertThat(this).isEqualTo(lagre.asDto())
-            repository.slett(lagre.stillingsinfoid)
-        }
+        assertThat(stillingsinfoRespons.statusCode).isEqualTo(HttpStatus.OK)
+        assertThat(stillingsinfoRespons.body).isEqualTo(enStillingsinfo.asDto())
     }
 
     @Test
-    fun `henting av rekrutteringsbistand basert på bruker skal returnere HTTP status 200 og JSON med nyopprettet rekrutteringUuid`() {
-        // Given
-        val lagre = Testdata.enStillingsinfo
-        repository.lagre(lagre)
+    fun `Henting av stillingsinfo basert på bruker skal returnere HTTP 200 med lagret stillingsinfo`() {
+        repository.lagre(enStillingsinfo)
 
-        val url = "$localBaseUrl/rekruttering/ident/${lagre.eier.navident}"
+        val url = "$localBaseUrl/rekruttering/ident/${enStillingsinfo.eier.navident}"
+        val stillingsinfoRespons = restTemplate.exchange(url, HttpMethod.GET, httpEntity(null), object : ParameterizedTypeReference<List<StillingsinfoDto>>() {})
 
-        val headers = mapOf(
-                CONTENT_TYPE to APPLICATION_JSON.toString(),
-                ACCEPT to APPLICATION_JSON.toString()
-        ).toMultiValueMap()
-
-        val httpEntity = HttpEntity(null, headers)
-
-        // When
-        val actualResponse =
-                restTemplate.run { exchange(url, HttpMethod.GET, httpEntity, object : ParameterizedTypeReference<List<StillingsinfoDto>>() {}) }
-
-        // Then
-        assertThat(actualResponse.statusCode).isEqualTo(HttpStatus.OK)
-        assertThat(actualResponse.hasBody())
-        actualResponse.body!!.apply {
+        assertThat(stillingsinfoRespons.statusCode).isEqualTo(HttpStatus.OK)
+        stillingsinfoRespons.body.apply {
             assertThat(this).hasSize(1)
-            this.get(0).apply {
-                assertThat(stillingsinfoid).isNotBlank()
-                assertDoesNotThrow { UUID.fromString(stillingsinfoid) }
-                assertThat(this).isEqualTo(lagre.asDto())
-                repository.slett(lagre.stillingsinfoid)
-            }
+            assertThat(this!![0]).isEqualTo(enStillingsinfo.asDto())
         }
     }
 
 
     @Test
-    fun `lagring av rekrutteringsbistand skal returnere HTTP status 201 og JSON med nyopprettet rekrutteringUuid`() {
-        // Given
-        val tilLagring = Testdata.enStillingsinfo.asDto().copy(stillingsinfoid = null)
+    fun `Opprettelse av stillingsinfo skal returnere HTTP 201 med opprettet stillingsinfo`() {
+        val tilLagring = enStillingsinfo.asDto().copy(stillingsinfoid = null)
+        mockKandidatlisteOppdatering()
+
         val url = "$localBaseUrl/rekruttering"
+        val stillingsinfoRespons = restTemplate.postForEntity(url, httpEntity(tilLagring), StillingsinfoDto::class.java)
+        val lagretStillingsinfo = repository.hentForStilling(enStillingsinfo.stillingsid).getOrElse { fail("fant ikke stillingen") }
 
-        val headers = mapOf(
-                CONTENT_TYPE to APPLICATION_JSON.toString(),
-                ACCEPT to APPLICATION_JSON.toString()
-        ).toMultiValueMap()
-        val httpEntity = HttpEntity(tilLagring, headers)
-
-        // When
-        val actualResponse = restTemplate.postForEntity(url, httpEntity, StillingsinfoDto::class.java)
-
-        // Then
-        assertThat(actualResponse.statusCode).isEqualTo(HttpStatus.CREATED)
-        assertThat(actualResponse.hasBody())
-        actualResponse.body!!.apply {
-            assertThat(stillingsinfoid).isNotBlank()
-            assertDoesNotThrow { UUID.fromString(stillingsinfoid) }
-            assertThat(this.copy(stillingsinfoid = null))
-                    .isEqualTo(tilLagring)
+        assertThat(stillingsinfoRespons.statusCode).isEqualTo(HttpStatus.CREATED)
+        stillingsinfoRespons.body!!.apply {
+            assertThat(this).isEqualToIgnoringGivenFields(tilLagring, "stillingsinfoid")
+            assertThat(stillingsinfoid).isEqualTo(lagretStillingsinfo.stillingsinfoid.asString())
         }
 
-        val oppdatert = repository.hentForStilling(Testdata.enStillingsinfo.stillingsid).getOrElse { fail("fant ikke stillingen") }
-        oppdatert.apply {
-            assertThat(stillingsinfoid.asString()).isNotBlank()
-            assertThat(this.asDto())
-                    .isEqualTo(actualResponse.body!!)
-            repository.slett(this.stillingsinfoid)
-        }
+        repository.slett(lagretStillingsinfo.stillingsinfoid)
     }
 
     @Test
-    fun `oppdatering av rekrutteringsbistand skal returnere HTTP status 200 og JSON med oppdatert rekrutteringUuid`() {
+    fun `Oppdatering av stillingsinfo skal returnere HTTP 200 med oppdatert stillingsinfo`() {
+        repository.lagre(enStillingsinfo)
+        val oppdatering = enStillingsinfo.copy(eier = Eier(navident = "endretIdent", navn = "endretNavn"))
+        mockKandidatlisteOppdatering()
 
-        // Given
-        val lagre = Testdata.enStillingsinfo
-        val oppdatere = lagre.copy(eier = Eier(navident = "endretIdent", navn = "endretNavn"))
-        val lagret = repository.lagre(lagre)
+        val oppdateringRespons = restTemplate.exchange("$localBaseUrl/rekruttering", HttpMethod.PUT, httpEntity(oppdatering.asDto()), StillingsinfoDto::class.java)
+        val lagretStillingsinfo = repository.hentForStilling(enStillingsinfo.stillingsid).getOrElse { fail("fant ikke stillingen") }
 
-        val url = "$localBaseUrl/rekruttering"
+        assertThat(oppdateringRespons.statusCode).isEqualTo(HttpStatus.OK)
+        assertThat(oppdateringRespons.body).isEqualTo(lagretStillingsinfo.asDto())
 
-        val headers = mapOf(
-                CONTENT_TYPE to APPLICATION_JSON.toString(),
-                ACCEPT to APPLICATION_JSON.toString()
-        ).toMultiValueMap()
-        val httpEntity = HttpEntity(oppdatere.asDto(), headers)
-
-        // When
-        val actualResponse = restTemplate.exchange(url, HttpMethod.PUT, httpEntity, StillingsinfoDto::class.java)
-
-        // Then
-        assertThat(actualResponse.statusCode).isEqualTo(HttpStatus.OK)
-        assertThat(actualResponse.hasBody())
-        actualResponse.body!!.apply {
-            assertThat(stillingsinfoid).isNotBlank()
-            assertDoesNotThrow { UUID.fromString(stillingsinfoid) }
-            assertThat(this).isEqualTo(oppdatere.asDto())
-        }
-
-        val oppdatert = repository.hentForStilling(oppdatere.stillingsid).getOrElse { fail("fant ikke stillingen") }
-        oppdatert.apply {
-            assertThat(stillingsinfoid.asString()).isNotBlank()
-            assertThat(this)
-                    .isEqualTo(oppdatere)
-            repository.slett(this.stillingsinfoid)
-        }
-
+        repository.slett(lagretStillingsinfo.stillingsinfoid)
     }
 
+    @After
+    fun tearDown() {
+        repository.slett(enStillingsinfo.stillingsinfoid)
+    }
+
+    private fun httpEntity(body: Any?): HttpEntity<Any> {
+        val headers = mapOf(
+                CONTENT_TYPE to APPLICATION_JSON_UTF8_VALUE,
+                ACCEPT to APPLICATION_JSON_UTF8_VALUE
+        ).toMultiValueMap()
+        return HttpEntity(body, headers)
+    }
+
+    private fun mockKandidatlisteOppdatering() {
+        wiremock.stubFor(
+                put(urlPathMatching("/pam-kandidatsok-api/rest/veileder/stilling/.*/kandidatliste"))
+                        .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_UTF8_VALUE))
+                        .withHeader(ACCEPT, equalTo(APPLICATION_JSON_UTF8_VALUE))
+                        .willReturn(aResponse().withStatus(NO_CONTENT.value())
+                                .withHeader(CONNECTION, "close") // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
+                                .withHeader(CONTENT_TYPE, APPLICATION_JSON_UTF8_VALUE))
+        )
+    }
 }

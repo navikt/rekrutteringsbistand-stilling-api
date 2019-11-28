@@ -13,10 +13,10 @@ spec:
     - https://arbeidsgiver.nais.preprod.local/rekrutteringsbistand-api/
   liveness:
     path: /rekrutteringsbistand-api/internal/actuator/health
-    initialDelay: 20
+    initialDelay: 30
   readiness:
     path: /rekrutteringsbistand-api/internal/actuator/health
-    initialDelay: 20
+    initialDelay: 30
   webproxy: false
   env:
     - name: SPRING_PROFILES_ACTIVE

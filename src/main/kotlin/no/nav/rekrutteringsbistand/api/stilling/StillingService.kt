@@ -72,14 +72,14 @@ class StillingService(
 
     private fun headers() =
             mapOf(
-                    HttpHeaders.CONTENT_TYPE to MediaType.APPLICATION_JSON.toString(),
-                    HttpHeaders.ACCEPT to MediaType.APPLICATION_JSON.toString(),
+                    HttpHeaders.CONTENT_TYPE to MediaType.APPLICATION_JSON_UTF8_VALUE,
+                    HttpHeaders.ACCEPT to MediaType.APPLICATION_JSON_UTF8_VALUE,
                     HttpHeaders.AUTHORIZATION to "Bearer ${tokenUtils.hentOidcToken()}}"
             ).toMultiValueMap()
 
     private fun headersUtenToken() =
             mapOf(
-                    HttpHeaders.CONTENT_TYPE to MediaType.APPLICATION_JSON.toString(),
-                    HttpHeaders.ACCEPT to MediaType.APPLICATION_JSON.toString()
+                    HttpHeaders.CONTENT_TYPE to MediaType.APPLICATION_JSON_UTF8_VALUE,
+                    HttpHeaders.ACCEPT to MediaType.APPLICATION_JSON_UTF8_VALUE
             ).toMultiValueMap()
 }

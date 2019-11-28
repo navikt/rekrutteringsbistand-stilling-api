@@ -46,15 +46,17 @@ object Testdata {
     val enStillingsinfo = Stillingsinfo(
             stillingsinfoid = Stillingsinfoid(UUID.randomUUID()),
             eier = Eier(navident = enVeileder.navIdent, navn = enVeileder.displayName),
-            stillingsid = Stillingsid(enStilling.uuid!!))
+            stillingsid = Stillingsid(enStilling.uuid!!)
+    )
 
     val enAnnenStillingsinfo = Stillingsinfo(
             stillingsinfoid = Stillingsinfoid(UUID.randomUUID()),
             eier = Eier(navident = enVeileder.navIdent, navn = enVeileder.displayName),
-            stillingsid = Stillingsid(enAnnenStilling.uuid!!))
+            stillingsid = Stillingsid(enAnnenStilling.uuid!!)
+    )
 
     val enStillingsinfoOppdatering = OppdaterStillingsinfo(
             stillingsinfoid = enStillingsinfo.stillingsinfoid,
-            eier = Eier(navident = enAnnenVeileder.navIdent, navn = enAnnenVeileder.displayName))
-
+            eier = Eier(navident = enAnnenVeileder.navIdent, navn = enAnnenVeileder.displayName)
+    )
 }
