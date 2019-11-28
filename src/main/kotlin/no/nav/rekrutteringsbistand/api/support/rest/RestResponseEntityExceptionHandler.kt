@@ -24,6 +24,7 @@ class RestResponseEntityExceptionHandler : ResponseEntityExceptionHandler() {
     @ExceptionHandler(value = [OIDCUnauthorizedException::class, AccessDeniedException::class])
     @ResponseBody
     protected fun handleUnauthorizedException(e: RuntimeException, webRequest: WebRequest): ResponseEntity<Any> {
+        LOG.warn("Authorization exception contextPath: {}, message: {}", webRequest.contextPath, e.message)
         return getResponseEntity(e, "You are not authorized to access this ressource", HttpStatus.UNAUTHORIZED)
     }
 
