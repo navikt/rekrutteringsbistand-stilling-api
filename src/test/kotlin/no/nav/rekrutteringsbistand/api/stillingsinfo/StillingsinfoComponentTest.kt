@@ -12,7 +12,6 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -21,8 +20,7 @@ import org.springframework.boot.test.web.client.TestRestTemplate.HttpClientOptio
 import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.HttpEntity
-import org.springframework.http.HttpHeaders.ACCEPT
-import org.springframework.http.HttpHeaders.CONTENT_TYPE
+import org.springframework.http.HttpHeaders.*
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatus.NO_CONTENT
@@ -30,7 +28,6 @@ import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit4.SpringRunner
-import java.util.*
 
 @RunWith(SpringRunner::class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
@@ -100,41 +97,18 @@ class StillingsinfoComponentTest {
     }
 
     @Test
-    fun `oppdatering av rekrutteringsbistand skal returnere HTTP status 200 og JSON med oppdatert rekrutteringUuid`() {
+    fun `Oppdatering av stillingsinfo skal returnere HTTP 200 med oppdatert stillingsinfo`() {
+        repository.lagre(enStillingsinfo)
+        val oppdatering = enStillingsinfo.copy(eier = Eier(navident = "endretIdent", navn = "endretNavn"))
+        mockKandidatlisteOppdatering()
 
-        // Given
-        val lagre = enStillingsinfo
-        val oppdatere = lagre.copy(eier = Eier(navident = "endretIdent", navn = "endretNavn"))
-        val lagret = repository.lagre(lagre)
+        val oppdateringRespons = restTemplate.exchange("$localBaseUrl/rekruttering", HttpMethod.PUT, httpEntity(oppdatering.asDto()), StillingsinfoDto::class.java)
+        val lagretStillingsinfo = repository.hentForStilling(enStillingsinfo.stillingsid).getOrElse { fail("fant ikke stillingen") }
 
-        val url = "$localBaseUrl/rekruttering"
+        assertThat(oppdateringRespons.statusCode).isEqualTo(HttpStatus.OK)
+        assertThat(oppdateringRespons.body).isEqualTo(lagretStillingsinfo.asDto())
 
-        val headers = mapOf(
-                CONTENT_TYPE to APPLICATION_JSON.toString(),
-                ACCEPT to APPLICATION_JSON.toString()
-        ).toMultiValueMap()
-        val httpEntity = HttpEntity(oppdatere.asDto(), headers)
-
-        // When
-        val actualResponse = restTemplate.exchange(url, HttpMethod.PUT, httpEntity, StillingsinfoDto::class.java)
-
-        // Then
-        assertThat(actualResponse.statusCode).isEqualTo(HttpStatus.OK)
-        assertThat(actualResponse.hasBody())
-        actualResponse.body!!.apply {
-            assertThat(stillingsinfoid).isNotBlank()
-            assertDoesNotThrow { UUID.fromString(stillingsinfoid) }
-            assertThat(this).isEqualTo(oppdatere.asDto())
-        }
-
-        val oppdatert = repository.hentForStilling(oppdatere.stillingsid).getOrElse { fail("fant ikke stillingen") }
-        oppdatert.apply {
-            assertThat(stillingsinfoid.asString()).isNotBlank()
-            assertThat(this)
-                    .isEqualTo(oppdatere)
-            repository.slett(this.stillingsinfoid)
-        }
-
+        repository.slett(lagretStillingsinfo.stillingsinfoid)
     }
 
     @After
@@ -156,6 +130,7 @@ class StillingsinfoComponentTest {
                         .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON.toString()))
                         .withHeader(ACCEPT, equalTo(APPLICATION_JSON.toString()))
                         .willReturn(aResponse().withStatus(NO_CONTENT.value())
+                                .withHeader(CONNECTION, "close") // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
                                 .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE))
         )
     }

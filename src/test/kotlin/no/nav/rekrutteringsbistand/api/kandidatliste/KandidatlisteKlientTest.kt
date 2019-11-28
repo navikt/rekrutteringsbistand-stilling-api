@@ -20,7 +20,7 @@ import org.springframework.test.context.junit4.SpringRunner
 import java.util.*
 
 @RunWith(SpringRunner::class)
-@SpringBootTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("local")
 class KandidatlisteKlientTest {
 
