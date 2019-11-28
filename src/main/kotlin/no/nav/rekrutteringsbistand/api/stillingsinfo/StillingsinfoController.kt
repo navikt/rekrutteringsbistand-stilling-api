@@ -31,7 +31,6 @@ class StillingsinfoController(
     }
 
     @PutMapping
-    // TODO: Kan man ikke ta inn OppdaterStillingsinfo her?
     fun oppdater(@RequestBody dto: StillingsinfoDto): ResponseEntity<StillingsinfoDto> {
         if (dto.stillingsinfoid == null) throw BadRequestException("Stillingsinfoid må ha verdi for put")
 
