@@ -23,7 +23,9 @@ class CustomResponseBodyAdviceAdapter : ResponseBodyAdvice<Any> {
                                  serverHttpResponse: ServerHttpResponse): Any? {
         if (serverHttpRequest is ServletServerHttpRequest &&
                 serverHttpResponse is ServletServerHttpResponse) {
-            LOG.info("advicerestrequest: ${serverHttpRequest.headers} response: ${serverHttpResponse.servletResponse.getHeader(HttpHeaders.CONTENT_TYPE)} o: $o")
+            LOG.info("advicerestrequest: ${serverHttpRequest.method} ${serverHttpRequest.uri} ${serverHttpRequest.headers} " +
+                    "advicerestresponse: ${serverHttpResponse.servletResponse.headerNames} " +
+                    "advicerestbody: $o")
         }
         return o
     }

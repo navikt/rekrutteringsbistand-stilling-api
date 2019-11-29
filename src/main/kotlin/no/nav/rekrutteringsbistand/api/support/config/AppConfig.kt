@@ -55,19 +55,23 @@ class AppConfig {
         return RestTemplateBuilder()
                 .setConnectTimeout(Duration.ofMillis(5000))
                 .setReadTimeout(Duration.ofMillis(30000))
-                .interceptors(LogInterceptor())
+                .interceptors(RequestLogInterceptor())
                 .requestFactory { BufferingClientHttpRequestFactory(SimpleClientHttpRequestFactory()) }
                 .build()
     }
 
-    class LogInterceptor: ClientHttpRequestInterceptor {
+    class RequestLogInterceptor: ClientHttpRequestInterceptor {
         override fun intercept(request: HttpRequest, body: ByteArray, execution: ClientHttpRequestExecution): ClientHttpResponse {
             val response = execution.execute(request, body)
             val responseBody = StreamUtils.copyToString(response.body, Charset.defaultCharset())
-            LOG.info("Resttemplate kall. uri: ${request.uri} requestHeaders: ${request.headers}, requestBody: ${String(body)}, responseBody: ${responseBody}, responseHeaders: ${response.headers}")
+            LOG.info("Resttemplate kall, uri: ${request.uri} ${request.method}")
+            LOG.info("Resttemplate kall, requestHeaders: ${request.headers}")
+            LOG.info("Resttemplate kall, responseBody: ${responseBody}")
+            LOG.info("Resttemplate kall, responseHeaders: ${response.headers}")
             return response
         }
     }
+
 
     @Bean
     fun httpLogging(): CommonsRequestLoggingFilter? {
