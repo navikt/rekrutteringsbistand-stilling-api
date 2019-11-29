@@ -19,12 +19,14 @@ class StillingController(
         val stillingService: StillingService
 ) {
 
-    @RequestMapping("/rekrutteringsbistand/api/v1/ads/**", method = [RequestMethod.PUT, RequestMethod.POST],
+    @RequestMapping(
+            "/rekrutteringsbistand/api/v1/ads/**",
+            method = [RequestMethod.PUT, RequestMethod.POST],
             consumes = [MediaType.APPLICATION_JSON_UTF8_VALUE],
-            produces = [MediaType.APPLICATION_JSON_UTF8_VALUE])
+            produces = [MediaType.APPLICATION_JSON_UTF8_VALUE]
+    )
     fun proxyPutPostTilStillingsApi(method: HttpMethod, request: HttpServletRequest, @RequestBody body: Stilling): ResponseEntity<String> {
-        return restProxy.proxyJsonRequest(method, request, Configuration.ROOT_URL, body
-                , externalConfiguration.stillingApi.url)
+        return restProxy.proxyJsonRequest(method, request, Configuration.ROOT_URL, body, externalConfiguration.stillingApi.url)
     }
 
     @RequestMapping("/rekrutteringsbistand/api/v1/**")
