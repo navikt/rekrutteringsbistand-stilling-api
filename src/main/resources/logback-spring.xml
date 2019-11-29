@@ -20,6 +20,7 @@
         <logger level="INFO" name="sporbarhetslogger" additivity="false">
             <appender-ref ref="sporbarhetsloggAppender"/>
         </logger>
+        <logger name="org.springframework.web" level="DEBUG"/>
 
         <root level="INFO">
             <appender-ref ref="consoleJsonAppender"/>
