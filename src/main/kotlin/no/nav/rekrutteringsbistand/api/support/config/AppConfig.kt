@@ -67,6 +67,7 @@ class AppConfig {
             LOG.info("Resttemplate kall, uri: ${request.uri} ${request.method}")
             LOG.info("Resttemplate kall, requestHeaders: ${request.headers}")
             LOG.info("Resttemplate kall, responseBody: ${responseBody}")
+            LOG.info("Resttemplate kall, responseHeaders: ${response.headers}")
             return response
         }
     }
