@@ -23,6 +23,6 @@ class HeaderFilter : OncePerRequestFilter() {
                                     "X-Frame-Options" to "sameorigin",
                                     "X-Content-Type-Options" to "nosniff",
                                     "X-XSS-Protection" to "1; mode=block",
-                                    HttpHeaders.CONTENT_TYPE to MediaType.APPLICATION_JSON_UTF8_VALUE)))
+                                    "Content-type" to MediaType.APPLICATION_JSON_UTF8_VALUE)))
 }
 
