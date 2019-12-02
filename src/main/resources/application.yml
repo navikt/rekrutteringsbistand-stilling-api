@@ -1,10 +1,12 @@
 server.servlet.context-path: /rekrutteringsbistand-api
 
-management.endpoints.web:
-  exposure.include: info, health, metrics, prometheus
-  base-path: /internal/actuator
-  flyway:
-    locations: classpath:/db/migration
+management:
+  endpoints.web:
+    exposure.include: info, health, metrics, prometheus
+    base-path: /internal/actuator
+    flyway:
+      locations: classpath:/db/migration
+  endpoint.health.show-details: always
 
 server:
   port: 9501
