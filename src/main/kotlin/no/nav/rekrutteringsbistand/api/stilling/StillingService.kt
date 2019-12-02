@@ -43,6 +43,38 @@ class StillingService(
         return stillingsinfo.map { opprinneligStilling.copy(rekruttering = it.asDto()) }.getOrElse { opprinneligStilling }
     }
 
+    fun opprettStilling(stilling: Stilling, queryString: String?): StillingMedStillingsinfo {
+        val url = "${externalConfiguration.stillingApi.url}/api/v1/ads"
+        LOG.debug("Oppdaterer stilling med url $url/$queryString")
+        val opprinneligStilling: StillingMedStillingsinfo = restTemplate.exchange(
+                url + queryString,
+                HttpMethod.POST,
+                HttpEntity(stilling, headers()),
+                StillingMedStillingsinfo::class.java
+        )
+                .body
+                ?: throw RestResponseEntityExceptionHandler.NoContentException("Tom body fra opprett stilling")
+
+        val stillingsinfo: Option<Stillingsinfo> = hentStillingsinfo(opprinneligStilling)
+        return stillingsinfo.map { opprinneligStilling.copy(rekruttering = it.asDto()) }.getOrElse { opprinneligStilling }
+    }
+
+    fun oppdaterStilling(uuid: String, stilling: Stilling, queryString: String?): StillingMedStillingsinfo? {
+        val url = "${externalConfiguration.stillingApi.url}/api/v1/ads/${uuid}"
+        LOG.debug("oppretter stilling med url $url/$queryString")
+        val opprinneligStilling: StillingMedStillingsinfo = restTemplate.exchange(
+                url + queryString,
+                HttpMethod.PUT,
+                HttpEntity(stilling, headers()),
+                StillingMedStillingsinfo::class.java
+        )
+                .body
+                ?: throw RestResponseEntityExceptionHandler.NoContentException("Tom body fra oppdater stilling")
+
+        val stillingsinfo: Option<Stillingsinfo> = hentStillingsinfo(opprinneligStilling)
+        return stillingsinfo.map { opprinneligStilling.copy(rekruttering = it.asDto()) }.getOrElse { opprinneligStilling }
+    }
+
     fun hentStillinger(url: String, queryString: String?): Page<StillingMedStillingsinfo> {
         val opprinneligeStillingerPage: Page<StillingMedStillingsinfo> = hent(url, queryString)
                 ?: throw RestResponseEntityExceptionHandler.NoContentException("Fant ikke stillinger")
@@ -82,4 +114,5 @@ class StillingService(
                     HttpHeaders.CONTENT_TYPE to MediaType.APPLICATION_JSON_UTF8_VALUE,
                     HttpHeaders.ACCEPT to MediaType.APPLICATION_JSON_UTF8_VALUE
             ).toMultiValueMap()
+
 }
