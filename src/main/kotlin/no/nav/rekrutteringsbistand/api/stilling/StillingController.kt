@@ -34,10 +34,7 @@ class StillingController(
 
     @RequestMapping("/rekrutteringsbistand/api/v1/**")
     fun proxyGetTilStillingsApi(method: HttpMethod, request: HttpServletRequest, @RequestBody(required = false) body: String?): ResponseEntity<String> {
-        val response = restProxy.proxyJsonRequest(method, request, Configuration.ROOT_URL, body ?: "", externalConfiguration.stillingApi.url)
-        val headers: HttpHeaders = response.headers
-        headers.set("Content-type", MediaType.APPLICATION_JSON_UTF8_VALUE)
-        return ResponseEntity(response.body, headers, response.statusCode)
+        return restProxy.proxyJsonRequest(method, request, Configuration.ROOT_URL, body ?: "", externalConfiguration.stillingApi.url)
     }
 
     @RequestMapping("/search-api/**")

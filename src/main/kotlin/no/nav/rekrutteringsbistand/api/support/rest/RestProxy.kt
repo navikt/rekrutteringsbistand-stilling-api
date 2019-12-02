@@ -7,6 +7,7 @@ import no.nav.rekrutteringsbistand.api.support.toMultiValueMap
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders.*
 import org.springframework.http.HttpMethod
+import org.springframework.http.MediaType.APPLICATION_JSON_UTF8
 import org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Component
@@ -34,8 +35,8 @@ class RestProxy(val restTemplate: RestTemplate, val tokenUtils: TokenUtils) {
 
     fun proxyHeaders(request: HttpServletRequest): MultiValueMap<String, String> =
             mapOf(
-                    CONTENT_TYPE to APPLICATION_JSON_UTF8_VALUE,
-                    ACCEPT to APPLICATION_JSON_UTF8_VALUE,
+                    CONTENT_TYPE to APPLICATION_JSON_UTF8.toString(),
+                    ACCEPT to APPLICATION_JSON_UTF8.toString(),
                     AUTHORIZATION to "Bearer ${tokenUtils.hentOidcToken()}}"
             ).toMultiValueMap()
 
