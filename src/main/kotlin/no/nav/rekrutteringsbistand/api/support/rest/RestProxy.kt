@@ -26,12 +26,12 @@ class RestProxy(val restTemplate: RestTemplate, val tokenUtils: TokenUtils) {
     fun proxyJsonRequest(method: HttpMethod,
                          request: HttpServletRequest,
                          stripPathPrefix: String,
-                         body: String, targetUrl: String): ResponseEntity<String> =
+                         body: String, targetUrl: String): ResponseEntity<java.lang.String> =
             restTemplate.exchange(
                     buildProxyTargetUrl(request, stripPathPrefix, targetUrl),
                     method,
                     HttpEntity(body, proxyHeaders(request)),
-                    String::class.java)
+                    java.lang.String::class.java)
 
     fun proxyHeaders(request: HttpServletRequest): MultiValueMap<String, String> =
             mapOf(

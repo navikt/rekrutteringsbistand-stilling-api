@@ -1,5 +1,6 @@
 package no.nav.rekrutteringsbistand.api.stilling
 
+import no.nav.rekrutteringsbistand.api.support.LOG
 import no.nav.rekrutteringsbistand.api.support.config.Configuration
 import no.nav.rekrutteringsbistand.api.support.config.ExternalConfiguration
 import no.nav.rekrutteringsbistand.api.support.rest.RestProxy
@@ -33,13 +34,14 @@ class StillingController(
     }
 
     @RequestMapping("/rekrutteringsbistand/api/v1/**")
-    fun proxyGetTilStillingsApi(method: HttpMethod, request: HttpServletRequest, @RequestBody(required = false) body: String?): ResponseEntity<String> {
+    fun proxyGetTilStillingsApi(method: HttpMethod, request: HttpServletRequest, @RequestBody(required = false) body: String?): ResponseEntity<java.lang.String> {
         return restProxy.proxyJsonRequest(method, request, Configuration.ROOT_URL, body ?: "", externalConfiguration.stillingApi.url)
     }
 
     @RequestMapping("/search-api/**")
-    private fun proxySokTilStillingsApi(method: HttpMethod, request: HttpServletRequest, @RequestBody body: String?): ResponseEntity<String> {
+    private fun proxySokTilStillingsApi(method: HttpMethod, request: HttpServletRequest, @RequestBody body: String?): ResponseEntity<java.lang.String> {
         val response = restProxy.proxyJsonRequest(method, request, Configuration.ROOT_URL, body ?: "", externalConfiguration.stillingApi.url)
+        LOG.info("searchbody: ${response.body.toString()}")
         val headers = mapOf(
                 HttpHeaders.CONTENT_TYPE to MediaType.APPLICATION_JSON_UTF8_VALUE,
                 HttpHeaders.ACCEPT to MediaType.APPLICATION_JSON_UTF8_VALUE
