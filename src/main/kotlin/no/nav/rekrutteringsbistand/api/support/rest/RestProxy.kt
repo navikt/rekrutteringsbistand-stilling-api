@@ -8,11 +8,13 @@ import org.springframework.http.HttpHeaders.*
 import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType.APPLICATION_JSON_UTF8
 import org.springframework.http.ResponseEntity
+import org.springframework.http.converter.StringHttpMessageConverter
 import org.springframework.stereotype.Component
 import org.springframework.util.MultiValueMap
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
+import java.nio.charset.StandardCharsets
 import javax.servlet.http.HttpServletRequest
 
 /**
@@ -25,11 +27,14 @@ class RestProxy(val restTemplate: RestTemplate, val tokenUtils: TokenUtils) {
                          request: HttpServletRequest,
                          stripPathPrefix: String,
                          body: String, targetUrl: String): ResponseEntity<String> {
+        restTemplate.messageConverters.add(StringHttpMessageConverter(StandardCharsets.UTF_8))
         val response = restTemplate.exchange(
                 buildProxyTargetUrl(request, stripPathPrefix, targetUrl),
                 method,
                 HttpEntity(body, proxyHeaders(request)),
                 String::class.java)
+
+
         LOG.info("searchbody headers: ${response.headers}")
         LOG.info("searchbody: ${response.body}")
         return response
