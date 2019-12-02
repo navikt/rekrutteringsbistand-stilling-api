@@ -2,6 +2,8 @@ package no.nav.rekrutteringsbistand.api.support.config
 
 import no.nav.rekrutteringsbistand.api.support.LOG
 import no.nav.rekrutteringsbistand.api.support.rest.HeaderFilter
+import org.apache.http.conn.ssl.DefaultHostnameVerifier
+import org.apache.http.impl.client.HttpClientBuilder
 import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.boot.web.servlet.FilterRegistrationBean
 import org.springframework.context.annotation.Bean
@@ -56,7 +58,12 @@ class AppConfig {
                 .setConnectTimeout(Duration.ofMillis(5000))
                 .setReadTimeout(Duration.ofMillis(30000))
                 .interceptors(RequestLogInterceptor())
-                .requestFactory { BufferingClientHttpRequestFactory(SimpleClientHttpRequestFactory()) }
+                .requestFactory {
+                    BufferingClientHttpRequestFactory(HttpComponentsClientHttpRequestFactory(
+                            HttpClientBuilder.create()
+                                    .setSSLHostnameVerifier(DefaultHostnameVerifier()) // Fix SSL hostname verification for *.local domains
+                                    .build()))
+                }
                 .build()
     }
 
@@ -71,7 +78,6 @@ class AppConfig {
             return response
         }
     }
-
 
     @Bean
     fun httpLogging(): CommonsRequestLoggingFilter? {
