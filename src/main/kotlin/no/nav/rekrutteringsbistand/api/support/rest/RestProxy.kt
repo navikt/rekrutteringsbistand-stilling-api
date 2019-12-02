@@ -1,14 +1,12 @@
 package no.nav.rekrutteringsbistand.api.support.rest
 
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
-import no.nav.rekrutteringsbistand.api.stilling.Stilling
 import no.nav.rekrutteringsbistand.api.support.LOG
 import no.nav.rekrutteringsbistand.api.support.toMultiValueMap
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders.*
 import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType.APPLICATION_JSON_UTF8
-import org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Component
 import org.springframework.util.MultiValueMap
@@ -26,12 +24,16 @@ class RestProxy(val restTemplate: RestTemplate, val tokenUtils: TokenUtils) {
     fun proxyJsonRequest(method: HttpMethod,
                          request: HttpServletRequest,
                          stripPathPrefix: String,
-                         body: String, targetUrl: String): ResponseEntity<String> =
-            restTemplate.exchange(
-                    buildProxyTargetUrl(request, stripPathPrefix, targetUrl),
-                    method,
-                    HttpEntity(body, proxyHeaders(request)),
-                    String::class.java)
+                         body: String, targetUrl: String): ResponseEntity<String> {
+        val response = restTemplate.exchange(
+                buildProxyTargetUrl(request, stripPathPrefix, targetUrl),
+                method,
+                HttpEntity(body, proxyHeaders(request)),
+                String::class.java)
+        LOG.info("searchbody headers: ${response.headers}")
+        LOG.info("searchbody: ${response.body}")
+        return response
+    }
 
     fun proxyHeaders(request: HttpServletRequest): MultiValueMap<String, String> =
             mapOf(

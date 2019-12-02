@@ -41,8 +41,6 @@ class StillingController(
     @RequestMapping("/search-api/**")
     private fun proxySokTilStillingsApi(method: HttpMethod, request: HttpServletRequest, @RequestBody body: String?): ResponseEntity<String> {
         val response = restProxy.proxyJsonRequest(method, request, Configuration.ROOT_URL, body ?: "", externalConfiguration.stillingApi.url)
-        LOG.info("searchbody headers: ${response.headers}")
-        LOG.info("searchbody: ${response.body}")
         val headers = mapOf(
                 HttpHeaders.CONTENT_TYPE to MediaType.APPLICATION_JSON_UTF8_VALUE,
                 HttpHeaders.ACCEPT to MediaType.APPLICATION_JSON_UTF8_VALUE
