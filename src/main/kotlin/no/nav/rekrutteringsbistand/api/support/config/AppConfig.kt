@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.core.Ordered
 import org.springframework.http.HttpRequest
 import org.springframework.http.client.*
+import org.springframework.http.converter.StringHttpMessageConverter
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
@@ -18,6 +19,7 @@ import org.springframework.web.filter.CommonsRequestLoggingFilter
 import org.springframework.web.filter.CorsFilter
 import org.springframework.util.StreamUtils
 import java.nio.charset.Charset
+import java.nio.charset.StandardCharsets
 import java.time.Duration
 import java.util.function.Supplier
 
@@ -54,7 +56,7 @@ class AppConfig {
 
     @Bean
     fun restTemplate(): RestTemplate {
-        return RestTemplateBuilder()
+        val restTemplate = RestTemplateBuilder()
                 .setConnectTimeout(Duration.ofMillis(5000))
                 .setReadTimeout(Duration.ofMillis(30000))
                 .interceptors(RequestLogInterceptor())
@@ -65,6 +67,9 @@ class AppConfig {
                                     .build()))
                 }
                 .build()
+        restTemplate.messageConverters.add(0, StringHttpMessageConverter(StandardCharsets.UTF_8))
+        LOG.info("Resttemplate messageconverters: ${restTemplate.messageConverters}")
+        return restTemplate
     }
 
     class RequestLogInterceptor: ClientHttpRequestInterceptor {

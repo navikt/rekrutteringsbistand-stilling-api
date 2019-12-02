@@ -4,6 +4,7 @@ import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
 import no.nav.rekrutteringsbistand.api.support.LOG
 import no.nav.rekrutteringsbistand.api.support.toMultiValueMap
 import org.springframework.http.HttpEntity
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpHeaders.*
 import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType.APPLICATION_JSON_UTF8
@@ -27,7 +28,7 @@ class RestProxy(val restTemplate: RestTemplate, val tokenUtils: TokenUtils) {
                          request: HttpServletRequest,
                          stripPathPrefix: String,
                          body: String, targetUrl: String): ResponseEntity<String> {
-        restTemplate.messageConverters.add(StringHttpMessageConverter(StandardCharsets.UTF_8))
+
         val response = restTemplate.exchange(
                 buildProxyTargetUrl(request, stripPathPrefix, targetUrl),
                 method,
