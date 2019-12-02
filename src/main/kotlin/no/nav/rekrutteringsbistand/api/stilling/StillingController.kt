@@ -6,6 +6,7 @@ import no.nav.rekrutteringsbistand.api.support.rest.RestProxy
 import no.nav.security.oidc.api.Protected
 import no.nav.security.oidc.api.Unprotected
 import org.springframework.http.HttpMethod
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -19,14 +20,18 @@ class StillingController(
         val stillingService: StillingService
 ) {
 
-    @RequestMapping(
-            "/rekrutteringsbistand/api/v1/ads/**",
-            method = [RequestMethod.PUT, RequestMethod.POST],
-            consumes = [MediaType.APPLICATION_JSON_UTF8_VALUE],
-            produces = [MediaType.APPLICATION_JSON_UTF8_VALUE]
+    @PostMapping(
+            "/rekrutteringsbistand/api/v1/ads/"
     )
-    fun proxyPutPostTilStillingsApi(method: HttpMethod, request: HttpServletRequest, @RequestBody body: Stilling): ResponseEntity<String> {
-        return restProxy.proxyJsonRequest(method, request, Configuration.ROOT_URL, body, externalConfiguration.stillingApi.url)
+    fun proxyPostTilStillingsApi(request: HttpServletRequest, @RequestBody stilling: Stilling): ResponseEntity<StillingMedStillingsinfo> {
+        return ResponseEntity.ok().body(stillingService.opprettStilling(stilling, request.queryString))
+    }
+
+    @PutMapping(
+            "/rekrutteringsbistand/api/v1/ads/{uuid}"
+    )
+    fun proxyPutTilStillingsApi(@PathVariable uuid: String, request: HttpServletRequest, @RequestBody stilling: Stilling): ResponseEntity<StillingMedStillingsinfo> {
+        return ResponseEntity.ok().body(stillingService.oppdaterStilling(uuid, stilling, request.queryString))
     }
 
     @RequestMapping("/rekrutteringsbistand/api/v1/**")
