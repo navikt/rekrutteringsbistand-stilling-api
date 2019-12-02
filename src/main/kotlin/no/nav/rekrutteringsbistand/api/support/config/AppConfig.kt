@@ -59,7 +59,6 @@ class AppConfig {
         val restTemplate = RestTemplateBuilder()
                 .setConnectTimeout(Duration.ofMillis(5000))
                 .setReadTimeout(Duration.ofMillis(30000))
-                .interceptors(RequestLogInterceptor())
                 .requestFactory {
                     BufferingClientHttpRequestFactory(HttpComponentsClientHttpRequestFactory(
                             HttpClientBuilder.create()
@@ -68,20 +67,7 @@ class AppConfig {
                 }
                 .build()
         restTemplate.messageConverters.add(0, StringHttpMessageConverter(StandardCharsets.UTF_8))
-        LOG.info("Resttemplate messageconverters: ${restTemplate.messageConverters}")
         return restTemplate
-    }
-
-    class RequestLogInterceptor: ClientHttpRequestInterceptor {
-        override fun intercept(request: HttpRequest, body: ByteArray, execution: ClientHttpRequestExecution): ClientHttpResponse {
-            val response = execution.execute(request, body)
-            val responseBody = StreamUtils.copyToString(response.body, Charset.defaultCharset())
-            LOG.info("Resttemplate kall, uri: ${request.uri} ${request.method}")
-            LOG.info("Resttemplate kall, requestHeaders: ${request.headers}")
-            LOG.info("Resttemplate kall, responseBody: ${responseBody}")
-            LOG.info("Resttemplate kall, responseHeaders: ${response.headers}")
-            return response
-        }
     }
 
     @Bean

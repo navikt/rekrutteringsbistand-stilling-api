@@ -34,10 +34,6 @@ class RestProxy(val restTemplate: RestTemplate, val tokenUtils: TokenUtils) {
                 method,
                 HttpEntity(body, proxyHeaders(request)),
                 String::class.java)
-
-
-        LOG.info("searchbody headers: ${response.headers}")
-        LOG.info("searchbody: ${response.body}")
         return response
     }
 
