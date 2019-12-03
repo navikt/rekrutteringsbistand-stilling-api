@@ -7,6 +7,8 @@ import no.nav.security.oidc.api.Protected
 import no.nav.security.oidc.api.Unprotected
 import org.springframework.http.*
 import org.springframework.web.bind.annotation.*
+import java.net.URLDecoder
+import java.nio.charset.StandardCharsets
 import javax.servlet.http.HttpServletRequest
 
 @RestController
@@ -55,7 +57,7 @@ class StillingController(
     fun hentMineStillinger(request: HttpServletRequest): ResponseEntity<Page<StillingMedStillingsinfo>> {
         return ResponseEntity.ok().body(stillingService.hentStillinger(
                 "${externalConfiguration.stillingApi.url}/rekrutteringsbistand/api/v1/ads/rekrutteringsbistand/minestillinger",
-                request.queryString
+                URLDecoder.decode(request.queryString, StandardCharsets.UTF_8)
         ))
     }
 
