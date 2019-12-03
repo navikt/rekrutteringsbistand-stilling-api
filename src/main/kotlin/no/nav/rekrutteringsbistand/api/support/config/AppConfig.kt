@@ -69,15 +69,4 @@ class AppConfig {
         restTemplate.messageConverters.add(0, StringHttpMessageConverter(StandardCharsets.UTF_8))
         return restTemplate
     }
-
-    @Bean
-    fun httpLogging(): CommonsRequestLoggingFilter? {
-        val filter = CommonsRequestLoggingFilter()
-        filter.setIncludeQueryString(true)
-        filter.setIncludePayload(true)
-        filter.setMaxPayloadLength(10000)
-        filter.setIncludeHeaders(true)
-        filter.setAfterMessagePrefix("Request data: ")
-        return filter
-    }
 }
