@@ -8,8 +8,8 @@ metadata:
 spec:
   receivers:
     slack:
-      channel: 'tag-notifications-test'
-      # prependText: '<!here>'
+      channel: 'tag-inkludering-alerts-dev'
+      prependText: '<!here>'
   alerts:
     - alert: Applikasjon nede
       severity: danger
