@@ -15,14 +15,14 @@ class HeaderFilter : OncePerRequestFilter() {
     @Throws(ServletException::class, IOException::class)
     override fun doFilterInternal(request: HttpServletRequest,
                                   response: HttpServletResponse,
-                                  filterChain: FilterChain) =
-            filterChain.doFilter(
-                    request,
-                    response.withAddedHeaders(
-                            mapOf(
-                                    "X-Frame-Options" to "sameorigin",
-                                    "X-Content-Type-Options" to "nosniff",
-                                    "X-XSS-Protection" to "1; mode=block",
-                                    "Content-type" to MediaType.APPLICATION_JSON_UTF8_VALUE)))
+                                  filterChain: FilterChain) {
+        return filterChain.doFilter(
+                request,
+                response.withAddedHeaders(
+                        mapOf(
+                                "X-Frame-Options" to "sameorigin",
+                                "X-Content-Type-Options" to "nosniff",
+                                "X-XSS-Protection" to "1; mode=block")))
+    }
 }
 

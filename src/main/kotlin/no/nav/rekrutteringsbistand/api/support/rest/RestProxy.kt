@@ -1,13 +1,12 @@
 package no.nav.rekrutteringsbistand.api.support.rest
 
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
-import no.nav.rekrutteringsbistand.api.stilling.Stilling
 import no.nav.rekrutteringsbistand.api.support.LOG
 import no.nav.rekrutteringsbistand.api.support.toMultiValueMap
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders.*
 import org.springframework.http.HttpMethod
-import org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE
+import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Component
 import org.springframework.util.MultiValueMap
@@ -26,16 +25,16 @@ class RestProxy(val restTemplate: RestTemplate, val tokenUtils: TokenUtils) {
                          request: HttpServletRequest,
                          stripPathPrefix: String,
                          body: String, targetUrl: String): ResponseEntity<String> =
-            restTemplate.exchange(
-                    buildProxyTargetUrl(request, stripPathPrefix, targetUrl),
-                    method,
-                    HttpEntity(body, proxyHeaders(request)),
-                    String::class.java)
+        restTemplate.exchange(
+                buildProxyTargetUrl(request, stripPathPrefix, targetUrl),
+                method,
+                HttpEntity(body, proxyHeaders(request)),
+                String::class.java)
 
     fun proxyHeaders(request: HttpServletRequest): MultiValueMap<String, String> =
             mapOf(
-                    CONTENT_TYPE to APPLICATION_JSON_UTF8_VALUE,
-                    ACCEPT to APPLICATION_JSON_UTF8_VALUE,
+                    CONTENT_TYPE to APPLICATION_JSON_VALUE,
+                    ACCEPT to APPLICATION_JSON_VALUE,
                     AUTHORIZATION to "Bearer ${tokenUtils.hentOidcToken()}}"
             ).toMultiValueMap()
 

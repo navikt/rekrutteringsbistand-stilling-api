@@ -37,81 +37,81 @@ class MockConfig {
     companion object {
         fun hentStillinger(): MappingBuilder {
             return WireMock.get(WireMock.urlPathMatching("/rekrutteringsbistand/api/v1/ads"))
-                    .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_UTF8_VALUE))
-                    .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                    .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
+                    .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
                     .withHeader(HttpHeaders.AUTHORIZATION, WireMock.matching("Bearer .*}"))
                     .willReturn(WireMock.aResponse().withStatus(200)
-                            .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_UTF8_VALUE)
+                            .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                             .withBody(stillingerResponse))
         }
 
         fun hentStilling(): MappingBuilder {
             return WireMock.get(WireMock.urlPathMatching("/rekrutteringsbistand/api/v1/ads/ee82f29c-51a9-4ca3-994d-45e3ab0e8204"))
-                    .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_UTF8_VALUE))
-                    .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                    .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
+                    .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
                     .withHeader(HttpHeaders.AUTHORIZATION, WireMock.matching("Bearer .*}"))
                     .willReturn(WireMock.aResponse().withStatus(200)
-                            .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_UTF8_VALUE)
+                            .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                             .withBody(stillingResponse))
         }
 
         fun postStilling(): MappingBuilder {
             return WireMock.post(WireMock.urlPathMatching("/rekrutteringsbistand/api/v1/ads"))
-                    .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_UTF8_VALUE))
-                    .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                    .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
+                    .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
                     .withHeader(HttpHeaders.AUTHORIZATION, WireMock.matching("Bearer .*}"))
                     .willReturn(WireMock.aResponse().withStatus(201)
-                            .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_UTF8_VALUE)
+                            .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                             .withBody(postStillingResponse))
         }
 
         fun putStilling(): MappingBuilder {
             return WireMock.put(WireMock.urlPathMatching("/rekrutteringsbistand/api/v1/ads/ee82f29c-51a9-4ca3-994d-45e3ab0e8204"))
-                    .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_UTF8_VALUE))
-                    .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                    .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
+                    .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
                     .withHeader(HttpHeaders.AUTHORIZATION, WireMock.matching("Bearer .*}"))
                     .willReturn(WireMock.aResponse().withStatus(200)
-                            .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_UTF8_VALUE)
+                            .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                             .withBody(postStillingResponse))
         }
 
         fun categoriesTypeahead(): MappingBuilder {
             return WireMock.get(WireMock.urlPathMatching("/rekrutteringsbistand/api/v1/categories-with-altnames/"))
-                    .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_UTF8_VALUE))
-                    .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                    .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
+                    .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
                     .withHeader(HttpHeaders.AUTHORIZATION, WireMock.matching("Bearer .*}"))
                     .willReturn(WireMock.aResponse().withStatus(200)
-                            .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_UTF8_VALUE)
+                            .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                             .withBody(categoriesTypeaheadResponse))
         }
 
         fun postdata(): MappingBuilder {
             return WireMock.get(WireMock.urlPathMatching("/rekrutteringsbistand/api/v1/postdata/"))
-                    .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_UTF8_VALUE))
-                    .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                    .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
+                    .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
                     .withHeader(HttpHeaders.AUTHORIZATION, WireMock.matching("Bearer .*}"))
                     .willReturn(WireMock.aResponse().withStatus(200)
-                            .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_UTF8_VALUE)
+                            .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                             .withBody(postdata))
         }
 
         fun municipals(): MappingBuilder {
             return WireMock.get(WireMock.urlPathMatching("/rekrutteringsbistand/api/v1/geography/municipals"))
-                    .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_UTF8_VALUE))
-                    .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                    .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
+                    .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
                     .withHeader(HttpHeaders.AUTHORIZATION, WireMock.matching("Bearer .*}"))
                     .willReturn(WireMock.aResponse().withStatus(200)
-                            .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_UTF8_VALUE)
+                            .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                             .withBody(municipalsResponse))
         }
 
         fun mappingBuilderSok(): MappingBuilder {
             return WireMock.post(WireMock.urlPathMatching("/search-api/underenhet/_search"))
-                    .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_UTF8_VALUE))
-                    .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                    .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
+                    .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
                     .withHeader(HttpHeaders.AUTHORIZATION, WireMock.matching("Bearer .*}"))
                     .willReturn(WireMock.aResponse().withStatus(200)
-                            .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_UTF8_VALUE)
+                            .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                             .withBody(sokResponse))
         }
 
