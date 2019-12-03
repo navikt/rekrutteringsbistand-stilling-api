@@ -47,7 +47,7 @@ class KandidatlisteKlient(
 
     fun headers() =
             mapOf(
-                    HttpHeaders.CONTENT_TYPE to MediaType.APPLICATION_JSON_UTF8_VALUE,
-                    HttpHeaders.ACCEPT to MediaType.APPLICATION_JSON_UTF8_VALUE
+                    HttpHeaders.CONTENT_TYPE to MediaType.APPLICATION_JSON_VALUE,
+                    HttpHeaders.ACCEPT to MediaType.APPLICATION_JSON_VALUE
             ).toMultiValueMap()
 }

@@ -114,12 +114,12 @@ internal class StillingComponentTest {
     private fun mock(urlPath: String, body: Any) {
         wiremock.stubFor(
                 get(urlPathMatching(urlPath))
-                        .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_UTF8_VALUE))
-                        .withHeader(ACCEPT, equalTo(APPLICATION_JSON_UTF8_VALUE))
+                        .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
+                        .withHeader(ACCEPT, equalTo(APPLICATION_JSON_VALUE))
                         .withHeader(AUTHORIZATION, matching("Bearer .*}"))
                         .willReturn(aResponse().withStatus(200)
                                 .withHeader(CONNECTION, "close") // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
-                                .withHeader(CONTENT_TYPE, APPLICATION_JSON_UTF8_VALUE)
+                                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
                                 .withBody(objectMapper.writeValueAsString(body)))
         )
     }
@@ -127,11 +127,11 @@ internal class StillingComponentTest {
     private fun mockUtenAuthorization(urlPath: String, body: Any) {
         wiremock.stubFor(
                 get(urlPathMatching(urlPath))
-                        .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_UTF8_VALUE))
-                        .withHeader(ACCEPT, equalTo(APPLICATION_JSON_UTF8_VALUE))
+                        .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
+                        .withHeader(ACCEPT, equalTo(APPLICATION_JSON_VALUE))
                         .willReturn(aResponse().withStatus(200)
                                 .withHeader(CONNECTION, "close") // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
-                                .withHeader(CONTENT_TYPE, APPLICATION_JSON_UTF8_VALUE)
+                                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
                                 .withBody(objectMapper.writeValueAsString(body)))
         )
     }
@@ -139,12 +139,12 @@ internal class StillingComponentTest {
     private fun mockString(urlPath: String, body: String) {
         wiremock.stubFor(
                 post(urlPathMatching(urlPath))
-                        .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_UTF8_VALUE))
-                        .withHeader(ACCEPT, equalTo(APPLICATION_JSON_UTF8_VALUE))
+                        .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
+                        .withHeader(ACCEPT, equalTo(APPLICATION_JSON_VALUE))
                         .withHeader(AUTHORIZATION, matching("Bearer .*}"))
                         .willReturn(aResponse().withStatus(200)
                                 .withHeader(CONNECTION, "close") // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
-                                .withHeader(CONTENT_TYPE, APPLICATION_JSON_UTF8_VALUE)
+                                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
                                 .withBody(body))
         )
     }

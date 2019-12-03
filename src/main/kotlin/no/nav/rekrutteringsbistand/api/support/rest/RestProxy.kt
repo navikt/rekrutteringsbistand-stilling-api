@@ -4,18 +4,15 @@ import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
 import no.nav.rekrutteringsbistand.api.support.LOG
 import no.nav.rekrutteringsbistand.api.support.toMultiValueMap
 import org.springframework.http.HttpEntity
-import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpHeaders.*
 import org.springframework.http.HttpMethod
-import org.springframework.http.MediaType.APPLICATION_JSON_UTF8
+import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.http.ResponseEntity
-import org.springframework.http.converter.StringHttpMessageConverter
 import org.springframework.stereotype.Component
 import org.springframework.util.MultiValueMap
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
-import java.nio.charset.StandardCharsets
 import javax.servlet.http.HttpServletRequest
 
 /**
@@ -39,8 +36,8 @@ class RestProxy(val restTemplate: RestTemplate, val tokenUtils: TokenUtils) {
 
     fun proxyHeaders(request: HttpServletRequest): MultiValueMap<String, String> =
             mapOf(
-                    CONTENT_TYPE to APPLICATION_JSON_UTF8.toString(),
-                    ACCEPT to APPLICATION_JSON_UTF8.toString(),
+                    CONTENT_TYPE to APPLICATION_JSON_VALUE,
+                    ACCEPT to APPLICATION_JSON_VALUE,
                     AUTHORIZATION to "Bearer ${tokenUtils.hentOidcToken()}}"
             ).toMultiValueMap()
 
