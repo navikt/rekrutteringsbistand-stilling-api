@@ -19,7 +19,7 @@ object Testdata {
             createdBy = "nss-admin",
             updated = LocalDateTime.now(),
             updatedBy = "nss-admin",
-            title = "testnss",
+            title = "testnss Æøå",
             status = "ACTIVE",
             privacy = "SHOW_ALL",
             source = "ASS",

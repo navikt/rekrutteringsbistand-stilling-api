@@ -63,7 +63,7 @@ class StillingService(
         return stillingsinfo.map { opprinneligStilling.copy(rekruttering = it.asDto()) }.getOrElse { opprinneligStilling }
     }
 
-    fun oppdaterStilling(uuid: String, stilling: Stilling, queryString: String?): StillingMedStillingsinfo? {
+    fun oppdaterStilling(uuid: String, stilling: Stilling, queryString: String?): StillingMedStillingsinfo {
         val url = "${externalConfiguration.stillingApi.url}/rekrutteringsbistand/api/v1/ads/${uuid}"
         LOG.debug("oppretter stilling med url $url/$queryString")
         val opprinneligStilling: StillingMedStillingsinfo = try { // TODO Are: Fjern try-catch

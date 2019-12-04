@@ -79,9 +79,52 @@ internal class StillingComponentTest {
 
     @Test
     fun `sok skal videresende respons direkte`() {
-        val stillingsSokRespons = "{}"
-        mockString("/search-api/underenhet/_search", stillingsSokRespons)
-        restTemplate.postForObject("$localBaseUrl/search-api/underenhet/_search", HttpEntity("{}", HttpHeaders()), String::class.java).also {
+        val stillingsSokRespons =
+                """
+                    {
+                        "took": 52,
+                        "timed_out": false,
+                        "_shards": { "total": 3, "successful": 3, "skipped": 0, "failed": 0 },
+                        "hits": {
+                            "total": { "value": 2182, "relation": "eq" },
+                            "max_score": 10.240799,
+                            "hits": [
+                                {
+                                    "_index": "underenhet20191204",
+                                    "_type": "_doc",
+                                    "_id": "914163854",
+                                    "_score": 10.240799,
+                                    "_source": {
+                                        "organisasjonsnummer": "914163854",
+                                        "navn": "NÆS & NÅS AS",
+                                        "organisasjonsform": "BEDR",
+                                        "antallAnsatte": 6,
+                                        "overordnetEnhet": "914134390",
+                                        "adresse": {
+                                            "adresse": "Klasatjønnveien 30",
+                                            "postnummer": "5172",
+                                            "poststed": "LODDEFJORD",
+                                            "kommunenummer": "1201",
+                                            "kommune": "BERGEN",
+                                            "landkode": "NO",
+                                            "land": "Norge"
+                                        },
+                                        "naringskoder": [
+                                            {
+                                                "kode": "41.200",
+                                                "beskrivelse": "Oppføring av bygninger"
+                                            }
+                                        ]
+                                    }
+                                }
+                            ]
+                        }
+                    }
+
+                """.trimIndent()
+
+                mockString("/search-api/underenhet/_search", stillingsSokRespons)
+        restTemplate.postForObject ("$localBaseUrl/search-api/underenhet/_search", HttpEntity("{}", HttpHeaders()), String::class.java).also {
             assertThat(it).isEqualTo(stillingsSokRespons)
         }
     }

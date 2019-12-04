@@ -5,6 +5,7 @@ import no.nav.security.oidc.api.Protected
 import no.nav.security.oidc.context.OIDCRequestContextHolder
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.ResponseBody
 import org.springframework.web.bind.annotation.RestController
 import java.util.*
 
@@ -14,6 +15,7 @@ import java.util.*
 class InnloggetBrukerController(private val contextHolder: OIDCRequestContextHolder) {
 
     @GetMapping
+
     fun hentInnloggetBruker(): InnloggetBruker =
             contextHolder.oidcValidationContext.getClaims(ISSUER_ISSO)
                     .run {
@@ -24,6 +26,7 @@ class InnloggetBrukerController(private val contextHolder: OIDCRequestContextHol
                     }
 
     @GetMapping("/token-expiring")
+
     fun isExpiringToken(): Boolean =
             contextHolder.oidcValidationContext.hasValidTokenFor(ISSUER_ISSO) &&
                     Date(System.currentTimeMillis() + 5 * 60000)

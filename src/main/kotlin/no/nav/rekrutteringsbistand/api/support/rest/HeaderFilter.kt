@@ -1,5 +1,6 @@
 package no.nav.rekrutteringsbistand.api.support.rest
 
+import com.github.tomakehurst.wiremock.extension.responsetemplating.TemplateCacheKey
 import no.nav.rekrutteringsbistand.api.support.withAddedHeaders
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
