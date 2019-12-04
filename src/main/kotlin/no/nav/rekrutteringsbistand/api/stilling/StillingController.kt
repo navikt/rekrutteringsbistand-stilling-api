@@ -49,7 +49,7 @@ class StillingController(
     fun hentStillinger(request: HttpServletRequest): ResponseEntity<Page<StillingMedStillingsinfo>> {
         return ResponseEntity.ok().body(stillingService.hentStillinger(
                 "${externalConfiguration.stillingApi.url}/rekrutteringsbistand/api/v1/ads",
-                URLDecoder.decode(request.queryString, StandardCharsets.UTF_8)
+                if(request.queryString != null) URLDecoder.decode(request.queryString, StandardCharsets.UTF_8) else null
 
         ))
     }
@@ -58,7 +58,7 @@ class StillingController(
     fun hentMineStillinger(request: HttpServletRequest): ResponseEntity<Page<StillingMedStillingsinfo>> {
         return ResponseEntity.ok().body(stillingService.hentStillinger(
                 "${externalConfiguration.stillingApi.url}/rekrutteringsbistand/api/v1/ads/rekrutteringsbistand/minestillinger",
-                URLDecoder.decode(request.queryString, StandardCharsets.UTF_8)
+                if(request.queryString != null) URLDecoder.decode(request.queryString, StandardCharsets.UTF_8) else null
         ))
     }
 
