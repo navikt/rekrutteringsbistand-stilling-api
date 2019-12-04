@@ -11,7 +11,10 @@ import no.nav.rekrutteringsbistand.api.support.config.ExternalConfiguration
 import no.nav.rekrutteringsbistand.api.support.rest.RestResponseEntityExceptionHandler
 import no.nav.rekrutteringsbistand.api.support.toMultiValueMap
 import org.springframework.core.ParameterizedTypeReference
-import org.springframework.http.*
+import org.springframework.http.HttpEntity
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpMethod
+import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.util.UriComponentsBuilder
@@ -41,51 +44,26 @@ class StillingService(
     }
 
     fun opprettStilling(stilling: Stilling, queryString: String?): StillingMedStillingsinfo {
-        val url = "${externalConfiguration.stillingApi.url}/api/v1/ads"
+        val url = "${externalConfiguration.stillingApi.url}/rekrutteringsbistand/api/v1/ads"
         LOG.debug("Oppdaterer stilling med url $url/$queryString")
-
-        // TODO Are: Rydd. Prøver å finne ut nøyaktig hvor vi får broken pipe feilen fra.
-        val x: ResponseEntity<StillingMedStillingsinfo> = try {
-            restTemplate.exchange(
-                    url + queryString,
-                    HttpMethod.POST,
-                    HttpEntity(stilling, headers()),
-                    StillingMedStillingsinfo::class.java
-            )
-        } catch (e: Exception) {
-            LOG.info("Debugging, prøver å finne 'broken pipe'", e)
-            throw e
-        }
-
-        var y: StillingMedStillingsinfo? = null
-        try {
-            y = x.body
-        } catch (e: Exception) {
-            LOG.info("Debugging, prøver å finne 'broken pipe'", e)
-        }
-
-        val opprinneligStilling: StillingMedStillingsinfo = y
+        val opprinneligStilling: StillingMedStillingsinfo = restTemplate.exchange(
+                url + if (queryString != null) "?$queryString" else "",
+                HttpMethod.POST,
+                HttpEntity(stilling, headers()),
+                StillingMedStillingsinfo::class.java
+        )
+                .body
                 ?: throw RestResponseEntityExceptionHandler.NoContentException("Tom body fra opprett stilling")
-
-        // TODO Are rydd
-//        val opprinneligStilling: StillingMedStillingsinfo = restTemplate.exchange(
-//                url + queryString,
-//                HttpMethod.POST,
-//                HttpEntity(stilling, headers()),
-//                StillingMedStillingsinfo::class.java
-//        )
-//                .body
-//                ?: throw RestResponseEntityExceptionHandler.NoContentException("Tom body fra opprett stilling")
 
         val stillingsinfo: Option<Stillingsinfo> = hentStillingsinfo(opprinneligStilling)
         return stillingsinfo.map { opprinneligStilling.copy(rekruttering = it.asDto()) }.getOrElse { opprinneligStilling }
     }
 
     fun oppdaterStilling(uuid: String, stilling: Stilling, queryString: String?): StillingMedStillingsinfo? {
-        val url = "${externalConfiguration.stillingApi.url}/api/v1/ads/${uuid}"
+        val url = "${externalConfiguration.stillingApi.url}/rekrutteringsbistand/api/v1/ads/${uuid}"
         LOG.debug("oppretter stilling med url $url/$queryString")
         val opprinneligStilling: StillingMedStillingsinfo = restTemplate.exchange(
-                url + queryString,
+                url +  if (queryString != null) "?$queryString" else "",
                 HttpMethod.PUT,
                 HttpEntity(stilling, headers()),
                 StillingMedStillingsinfo::class.java
