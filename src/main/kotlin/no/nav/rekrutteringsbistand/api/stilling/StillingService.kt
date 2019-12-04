@@ -47,7 +47,7 @@ class StillingService(
         val url = "${externalConfiguration.stillingApi.url}/rekrutteringsbistand/api/v1/ads"
         LOG.debug("Oppdaterer stilling med url $url/$queryString")
         val opprinneligStilling: StillingMedStillingsinfo = restTemplate.exchange(
-                url + queryString,
+                url + (queryString ?: ""),
                 HttpMethod.POST,
                 HttpEntity(stilling, headers()),
                 StillingMedStillingsinfo::class.java
