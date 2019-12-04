@@ -48,8 +48,8 @@ class AppConfig {
     @Bean
     fun restTemplate(): RestTemplate {
         val restTemplate = RestTemplateBuilder()
-                .setConnectTimeout(Duration.ofMillis(5000))
-                .setReadTimeout(Duration.ofMillis(30000))
+                .setConnectTimeout(Duration.ofSeconds(10))
+                .setReadTimeout(Duration.ofMinutes(1))
                 .build()
         restTemplate.messageConverters.add(0, StringHttpMessageConverter(StandardCharsets.UTF_8))
         return restTemplate
