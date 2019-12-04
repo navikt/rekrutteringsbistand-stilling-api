@@ -49,7 +49,8 @@ class StillingController(
     fun hentStillinger(request: HttpServletRequest): ResponseEntity<Page<StillingMedStillingsinfo>> {
         return ResponseEntity.ok().body(stillingService.hentStillinger(
                 "${externalConfiguration.stillingApi.url}/rekrutteringsbistand/api/v1/ads",
-                request.queryString
+                URLDecoder.decode(request.queryString, StandardCharsets.UTF_8)
+
         ))
     }
 
