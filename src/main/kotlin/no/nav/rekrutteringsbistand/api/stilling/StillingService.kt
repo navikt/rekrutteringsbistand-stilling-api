@@ -44,7 +44,7 @@ class StillingService(
     }
 
     fun opprettStilling(stilling: Stilling, queryString: String?): StillingMedStillingsinfo {
-        val url = "${externalConfiguration.stillingApi.url}/api/v1/ads"
+        val url = "${externalConfiguration.stillingApi.url}/rekrutteringsbistand/api/v1/ads"
         LOG.debug("Oppdaterer stilling med url $url/$queryString")
         val opprinneligStilling: StillingMedStillingsinfo = restTemplate.exchange(
                 url + queryString,
@@ -60,7 +60,7 @@ class StillingService(
     }
 
     fun oppdaterStilling(uuid: String, stilling: Stilling, queryString: String?): StillingMedStillingsinfo? {
-        val url = "${externalConfiguration.stillingApi.url}/api/v1/ads/${uuid}"
+        val url = "${externalConfiguration.stillingApi.url}/rekrutteringsbistand/api/v1/ads/${uuid}"
         LOG.debug("oppretter stilling med url $url/$queryString")
         val opprinneligStilling: StillingMedStillingsinfo = restTemplate.exchange(
                 url + queryString,
