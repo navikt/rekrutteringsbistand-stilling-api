@@ -18,7 +18,10 @@ import java.io.IOException
 class RestResponseEntityExceptionHandler : ResponseEntityExceptionHandler() {
 
     @ExceptionHandler(OIDCUnauthorizedException::class)
-    protected fun håndterUinnlogget(): ResponseEntity<String> {
+    protected fun håndterUinnlogget(e: Exception, webRequest: WebRequest): ResponseEntity<String> {
+        val request = (webRequest as ServletWebRequest).request
+        val msg = "Unauthorized. requestURI=${request.requestURI}, HTTP method=${request.method}"
+        LOG.info(msg, e)
         return ResponseEntity
                 .status(HttpStatus.UNAUTHORIZED)
                 .body("You are not authorized to access this resource")
@@ -26,18 +29,20 @@ class RestResponseEntityExceptionHandler : ResponseEntityExceptionHandler() {
 
     @ExceptionHandler(IOException::class, ResourceAccessException::class)
     protected fun håndterIOException(e: Exception, webRequest: WebRequest): ResponseEntity<String> {
-        val uri = (webRequest as ServletWebRequest).request.requestURI
-        LOG.error("Håndterer IOException, uri: $uri", e)
+        val request = (webRequest as ServletWebRequest).request
+        val msg = "IO error. requestURI=${request.requestURI}, HTTP method=${request.method}"
+        LOG.error(msg, e)
         return ResponseEntity
-                .status(HttpStatus.BAD_GATEWAY)
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body("Connection error")
     }
 
     @ExceptionHandler(value = [EmptyResultDataAccessException::class, NoContentException::class])
     @ResponseBody
+    @Deprecated("Bruk arrow.core.Option eller en tom collection istedenfor. Exceptions for kontrollflyt som ikke er feilsituasjoner er et anti-pattern.")
     protected fun handleNoContent(e: RuntimeException, webRequest: WebRequest): ResponseEntity<Any> {
         val uri = (webRequest as ServletWebRequest).request.requestURI
-        LOG.error("Ikke innhold: $uri")
+        LOG.info("Ikke innhold: $uri")
         return ResponseEntity
                 .status(HttpStatus.NO_CONTENT)
                 .body(uri)

@@ -24,9 +24,13 @@
         <root level="INFO">
             <appender-ref ref="consoleJsonAppender"/>
         </root>
+
+        <logger name="no.nav.rekrutteringsbistand.api" level="DEBUG"/>
     </springProfile>
+
     <springProfile name="local">
         <include resource="org/springframework/boot/logging/logback/base.xml"/>
         <logger name="org.springframework.web" level="DEBUG"/>
+        <logger name="no.nav.rekrutteringsbistand.api" level="TRACE"/>
     </springProfile>
 </configuration>
