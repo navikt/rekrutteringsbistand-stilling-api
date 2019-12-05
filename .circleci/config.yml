@@ -72,6 +72,7 @@ workflows:
             branches:
               only:
                 - master
+                - charencoding-i-proxymetoder # <- Your feature/fix branch name here <-
       - godkjenn-til-prod:
           type: approval
           requires:
