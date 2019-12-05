@@ -5,7 +5,8 @@ import no.nav.rekrutteringsbistand.api.support.config.ExternalConfiguration
 import no.nav.rekrutteringsbistand.api.support.rest.RestProxy
 import no.nav.security.oidc.api.Protected
 import no.nav.security.oidc.api.Unprotected
-import org.springframework.http.*
+import org.springframework.http.HttpMethod
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
@@ -31,12 +32,16 @@ class StillingController(
 
     @RequestMapping("/rekrutteringsbistand/api/v1/**")
     fun proxyGetTilStillingsApi(method: HttpMethod, request: HttpServletRequest, @RequestBody(required = false) body: String?): ResponseEntity<String> {
-        return restProxy.proxyJsonRequest(method, request, Configuration.ROOT_URL, body ?: "", externalConfiguration.stillingApi.url)
+        return restProxy.proxyJsonRequest(method, request, Configuration.ROOT_URL, body
+                ?: "", externalConfiguration.stillingApi.url)
     }
 
     @RequestMapping("/search-api/**")
-    private fun proxySokTilStillingsApi(method: HttpMethod, request: HttpServletRequest, @RequestBody body: String?): ResponseEntity<String> {
-        return restProxy.proxyJsonRequest(method, request, Configuration.ROOT_URL, body ?: "", externalConfiguration.stillingApi.url)
+    private fun proxySokTilStillingsApi(method: HttpMethod, request: HttpServletRequest, @RequestBody requestBody: String?): ResponseEntity<String> {
+        val respons = restProxy.proxyJsonRequest(method, request, Configuration.ROOT_URL, requestBody
+                ?: "", externalConfiguration.stillingApi.url) // TODO Are ""?
+        val responsBody: String = respons.body ?: ""
+        return ResponseEntity(responsBody, respons.statusCode)
     }
 
     @Unprotected // Fordi kandidatsøk har hentet stillinger uten token frem til nå.
@@ -49,7 +54,7 @@ class StillingController(
     fun hentStillinger(request: HttpServletRequest): ResponseEntity<Page<StillingMedStillingsinfo>> {
         return ResponseEntity.ok().body(stillingService.hentStillinger(
                 "${externalConfiguration.stillingApi.url}/rekrutteringsbistand/api/v1/ads",
-                if(request.queryString != null) URLDecoder.decode(request.queryString, StandardCharsets.UTF_8) else null
+                if (request.queryString != null) URLDecoder.decode(request.queryString, StandardCharsets.UTF_8) else null
 
         ))
     }
@@ -58,7 +63,7 @@ class StillingController(
     fun hentMineStillinger(request: HttpServletRequest): ResponseEntity<Page<StillingMedStillingsinfo>> {
         return ResponseEntity.ok().body(stillingService.hentStillinger(
                 "${externalConfiguration.stillingApi.url}/rekrutteringsbistand/api/v1/ads/rekrutteringsbistand/minestillinger",
-                if(request.queryString != null) URLDecoder.decode(request.queryString, StandardCharsets.UTF_8) else null
+                if (request.queryString != null) URLDecoder.decode(request.queryString, StandardCharsets.UTF_8) else null
         ))
     }
 
