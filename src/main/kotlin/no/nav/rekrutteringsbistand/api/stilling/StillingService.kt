@@ -56,7 +56,7 @@ class StillingService(
                     .body
                     ?: throw RestResponseEntityExceptionHandler.NoContentException("Tom body fra opprett stilling")
         } catch (e: Exception) {
-            LOG.info("Debugging broken pipe i opprettStilling")
+            LOG.info("Debugging broken pipe i opprettStilling", e)
             throw e
         }
         val stillingsinfo: Option<Stillingsinfo> = hentStillingsinfo(opprinneligStilling)
@@ -76,7 +76,7 @@ class StillingService(
                     .body
                     ?: throw RestResponseEntityExceptionHandler.NoContentException("Tom body fra oppdater stilling")
         } catch (e: Exception) {
-            LOG.info("Debugging broken pipe i oppdaterStilling")
+            LOG.info("Debugging broken pipe i oppdaterStilling", e)
             throw e
         }
 
