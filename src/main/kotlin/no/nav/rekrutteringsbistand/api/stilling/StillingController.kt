@@ -43,7 +43,7 @@ class StillingController(
 
     @Unprotected // Fordi kandidatsøk har hentet stillinger uten token frem til nå.
     @GetMapping("/rekrutteringsbistand/api/v1/stilling/{uuid}")
-    fun hentStilling(@PathVariable uuid: String, request: HttpServletRequest): StillingMedStillingsinfo {
+    fun hentStilling(@PathVariable uuid: String): StillingMedStillingsinfo {
         return stillingService.hentStilling(uuid)
     }
 
