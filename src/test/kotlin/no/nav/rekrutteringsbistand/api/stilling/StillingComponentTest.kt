@@ -6,10 +6,12 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.options
 import com.github.tomakehurst.wiremock.junit.WireMockRule
-import no.nav.rekrutteringsbistand.api.Testdata.enAnnenStilling
-import no.nav.rekrutteringsbistand.api.Testdata.enAnnenStillingsinfo
-import no.nav.rekrutteringsbistand.api.Testdata.enStilling
-import no.nav.rekrutteringsbistand.api.Testdata.enStillingsinfo
+import no.nav.rekrutteringsbistand.api.data.ElasticSearchResult
+import no.nav.rekrutteringsbistand.api.data.Testdata.enAnnenStilling
+import no.nav.rekrutteringsbistand.api.data.Testdata.enAnnenStillingsinfo
+import no.nav.rekrutteringsbistand.api.data.Testdata.enStilling
+import no.nav.rekrutteringsbistand.api.data.Testdata.enStillingsinfo
+import no.nav.rekrutteringsbistand.api.data.Testdata.etElasticSearchResultat
 import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.After
@@ -80,50 +82,10 @@ internal class StillingComponentTest {
 
     @Test
     fun `Søk skal videresende HTTP respons body med norske tegn fra pam-ad-api uendret`() {
-        val stillingsSokResponsMedNorskeBokstaver =
-                """
-                    {
-                        "took": 52,
-                        "timed_out": false,
-                        "_shards": { "total": 3, "successful": 3, "skipped": 0, "failed": 0 },
-                        "hits": {
-                            "total": { "value": 2182, "relation": "eq" },
-                            "max_score": 10.240799,
-                            "hits": [
-                                {
-                                    "_index": "underenhet20191204",
-                                    "_type": "_doc",
-                                    "_id": "914163854",
-                                    "_score": 10.240799,
-                                    "_source": {
-                                        "organisasjonsnummer": "914163854",
-                                        "navn": "NÆS & NÅS AS",
-                                        "organisasjonsform": "BEDR",
-                                        "antallAnsatte": 6,
-                                        "overordnetEnhet": "914134390",
-                                        "adresse": {
-                                            "adresse": "Klasatjønnveien 30",
-                                            "postnummer": "5172",
-                                            "poststed": "LODDEFJORD",
-                                            "kommunenummer": "1201",
-                                            "kommune": "BERGEN",
-                                            "landkode": "NO",
-                                            "land": "Norge"
-                                        },
-                                        "naringskoder": [
-                                            {
-                                                "kode": "41.200",
-                                                "beskrivelse": "Oppføring av bygninger"
-                                            }
-                                        ]
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                """.trimIndent()
-        mockString("/search-api/underenhet/_search", stillingsSokResponsMedNorskeBokstaver)
-        restTemplate.postForObject("$localBaseUrl/search-api/underenhet/_search", HttpEntity("{}", HttpHeaders()), String::class.java).also {
+        val stillingsSokResponsMedNorskeBokstaver = etElasticSearchResultat;
+
+        mockPost("/search-api/underenhet/_search", stillingsSokResponsMedNorskeBokstaver)
+        restTemplate.postForObject("$localBaseUrl/search-api/underenhet/_search", HttpEntity("{}", HttpHeaders()), ElasticSearchResult::class.java).also {
             assertThat(it).isEqualTo(stillingsSokResponsMedNorskeBokstaver)
         }
     }
@@ -243,7 +205,7 @@ internal class StillingComponentTest {
     }
 
 
-    private fun mockPost(urlPath: String, body: StillingMedStillingsinfo) {
+    private fun mockPost(urlPath: String, body: Any) {
         wiremock.stubFor(
                 post(urlPathMatching(urlPath))
                         .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))

@@ -2,8 +2,8 @@ package no.nav.rekrutteringsbistand.api.stillingsinfo
 
 import arrow.core.Some
 import arrow.core.getOrElse
-import no.nav.rekrutteringsbistand.api.Testdata.enStillingsinfo
-import no.nav.rekrutteringsbistand.api.Testdata.enStillingsinfoOppdatering
+import no.nav.rekrutteringsbistand.api.data.Testdata.enStillingsinfo
+import no.nav.rekrutteringsbistand.api.data.Testdata.enStillingsinfoOppdatering
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.fail
 import org.junit.After

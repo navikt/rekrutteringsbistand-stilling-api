@@ -1,6 +1,6 @@
 package no.nav.rekrutteringsbistand.api.autorisasjon
 
-import no.nav.rekrutteringsbistand.api.Testdata.enVeileder
+import no.nav.rekrutteringsbistand.api.data.Testdata.enVeileder
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
