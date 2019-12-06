@@ -6,6 +6,7 @@ import no.nav.rekrutteringsbistand.api.support.rest.RestProxy
 import no.nav.security.oidc.api.Protected
 import no.nav.security.oidc.api.Unprotected
 import org.springframework.http.HttpMethod
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.net.URLDecoder
@@ -47,25 +48,44 @@ class StillingController(
     @Unprotected // Fordi kandidatsøk har hentet stillinger uten token frem til nå.
     @GetMapping("/rekrutteringsbistand/api/v1/stilling/{uuid}")
     fun hentStilling(@PathVariable uuid: String, request: HttpServletRequest): ResponseEntity<StillingMedStillingsinfo> {
-        return ResponseEntity.ok().body(stillingService.hentStilling(uuid))
+        return if (Math.random() > 0.5) { // TODO Are rydd
+
+
+            ResponseEntity.ok().body(stillingService.hentStilling(uuid))
+        } else {
+            if (Math.random() > 0.5) ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build<StillingMedStillingsinfo>()
+            else ResponseEntity.status(HttpStatus.BAD_REQUEST).build<StillingMedStillingsinfo>()
+        }
     }
 
     @GetMapping("/rekrutteringsbistand/api/v1/ads")
     fun hentStillinger(request: HttpServletRequest): ResponseEntity<Page<StillingMedStillingsinfo>> {
-        return ResponseEntity.ok().body(stillingService.hentStillinger(
-                "${externalConfiguration.stillingApi.url}/rekrutteringsbistand/api/v1/ads",
-                if (request.queryString != null) URLDecoder.decode(request.queryString, StandardCharsets.UTF_8) else null
+        return if (Math.random() > 0.5) { // TODO Are rydd
 
-        ))
+            ResponseEntity.ok().body(stillingService.hentStillinger(
+                    "${externalConfiguration.stillingApi.url}/rekrutteringsbistand/api/v1/ads",
+                    if (request.queryString != null) URLDecoder.decode(request.queryString, StandardCharsets.UTF_8) else null
+
+            ))
+        } else {
+            if (Math.random() > 0.5) ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build<Page<StillingMedStillingsinfo>>()
+            else ResponseEntity.status(HttpStatus.BAD_REQUEST).build<Page<StillingMedStillingsinfo>>()
+        }
     }
 
     @GetMapping("/rekrutteringsbistand/api/v1/ads/rekrutteringsbistand/minestillinger")
     fun hentMineStillinger(request: HttpServletRequest): ResponseEntity<Page<StillingMedStillingsinfo>> {
-        return ResponseEntity.ok().body(stillingService.hentStillinger(
-                "${externalConfiguration.stillingApi.url}/rekrutteringsbistand/api/v1/ads/rekrutteringsbistand/minestillinger",
-                if (request.queryString != null) URLDecoder.decode(request.queryString, StandardCharsets.UTF_8) else null
-        ))
-    }
+        return if (Math.random() > 0.5) { // TODO Are rydd
 
+            ResponseEntity.ok().body(stillingService.hentStillinger(
+                    "${externalConfiguration.stillingApi.url}/rekrutteringsbistand/api/v1/ads/rekrutteringsbistand/minestillinger",
+                    if (request.queryString != null) URLDecoder.decode(request.queryString, StandardCharsets.UTF_8) else null
+            ))
+
+        } else {
+            if (Math.random() > 0.5) ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build<Page<StillingMedStillingsinfo>>()
+            else ResponseEntity.status(HttpStatus.BAD_REQUEST).build<Page<StillingMedStillingsinfo>>()
+        }
+    }
 }
 
