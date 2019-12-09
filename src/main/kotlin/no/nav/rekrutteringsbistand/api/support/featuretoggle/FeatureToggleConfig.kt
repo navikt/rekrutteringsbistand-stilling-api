@@ -12,6 +12,10 @@ import org.springframework.context.annotation.Profile
 @Configuration
 class FeatureToggleConfig {
 
+    companion object {
+        const val OPPRETT_KANDIDATLISTE_KNAPP_TOGGLE = "rekrutteringsbistand.opprett-kandidatliste-knapp"
+    }
+
     @Profile("dev", "prod")
     @Bean
     fun unleash(
@@ -34,7 +38,7 @@ class FeatureToggleConfig {
     @Bean
     fun unleashMock(): Unleash {
         return FakeUnleash().apply {
-            enable("rekrutteringsbistand.opprett-kandidatliste-knapp")
+            enable(OPPRETT_KANDIDATLISTE_KNAPP_TOGGLE)
         }
     }
 }
