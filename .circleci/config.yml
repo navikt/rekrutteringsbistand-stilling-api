@@ -65,23 +65,13 @@ workflows:
     jobs:
       - bygg:
           context: NAIS deployment
-      - godkjenn-til-dev: # TODO Are slett
-          type: approval
-          requires:
-            - bygg
-          filters:
-            branches:
-              ignore:
-                - master
       - deploy-til-dev:
           requires:
             - bygg
-            - godkjenn-til-dev # TODO Are slett
           filters:
             branches:
               only:
                 - master
-                - Metrikker_for_overvaakning # TODO Are slett
       - godkjenn-til-prod:
           type: approval
           requires:
