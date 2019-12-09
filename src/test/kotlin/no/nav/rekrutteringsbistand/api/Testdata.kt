@@ -1,15 +1,14 @@
 package no.nav.rekrutteringsbistand.api
 
-import no.nav.rekrutteringsbistand.api.autorisasjon.InnloggetBruker
-import no.nav.rekrutteringsbistand.api.stilling.Stilling
+import no.nav.rekrutteringsbistand.api.autorisasjon.InnloggetVeileder
 import no.nav.rekrutteringsbistand.api.stilling.StillingMedStillingsinfo
 import no.nav.rekrutteringsbistand.api.stillingsinfo.*
 import java.time.LocalDateTime
 import java.util.*
 
 object Testdata {
-    val enVeileder = InnloggetBruker("Clark.Kent@nav.no", "Clark Kent", "C12345")
-    val enAnnenVeileder = InnloggetBruker("Lex.Luthor@nav.no", "Lex Luthor", "Y123123")
+    val enVeileder = InnloggetVeileder("Clark.Kent@nav.no", "Clark Kent", "C12345")
+    val enAnnenVeileder = InnloggetVeileder("Lex.Luthor@nav.no", "Lex Luthor", "Y123123")
 
     val enStilling = StillingMedStillingsinfo(
             rekruttering = null,
