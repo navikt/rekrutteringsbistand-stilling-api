@@ -59,7 +59,7 @@ class StillingController(
         val page: Page<StillingMedStillingsinfo> = stillingService.hentStillinger(url, queryString)
         val msg = "hentStillinger returnerer HTTP response 200 ok med Page<StillingMedStillingsinfo>, page.content.size=${page.content.size}, page.totalPages=${page.totalPages}, page.totalElements=${page.totalElements}"
         LOG.debug(msg)
-        try {
+        try { // TODO Are: Fjern try-catch
             return ResponseEntity.ok().body(page)
         } catch (e: Exception) {
             LOG.debug("hentStillinger forsøkte 'return ResponseEntity.ok().body(page)'", e)
