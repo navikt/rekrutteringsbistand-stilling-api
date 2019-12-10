@@ -25,14 +25,15 @@ class RestResponseEntityExceptionHandler : ResponseEntityExceptionHandler() {
                 .body("You are not authorized to access this resource")
     }
 
-    @ExceptionHandler(IOException::class, ResourceAccessException::class)
-    protected fun håndterIOException(e: Exception, request: HttpServletRequest): ResponseEntity<String> {
-        val msg = "IO error. requestURI=${request.requestURI}, HTTP method=${request.method}"
-        LOG.error(msg, e)
-        return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body("Connection error")
-    }
+    // TODO Are: Trenger vi denne egentlig?
+//    @ExceptionHandler(IOException::class, ResourceAccessException::class)
+//    protected fun håndterIOException(e: Exception, request: HttpServletRequest): ResponseEntity<String> {
+//        val msg = "IO error. requestURI=${request.requestURI}, HTTP method=${request.method}"
+//        LOG.error(msg, e)
+//        return ResponseEntity
+//                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+//                .body("Connection error")
+//    }
 
     @ExceptionHandler(value = [EmptyResultDataAccessException::class, NoContentException::class])
     @ResponseBody
