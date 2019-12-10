@@ -57,12 +57,12 @@ class StillingController(
         val queryString: String? = request.queryString?.let { URLDecoder.decode(it, StandardCharsets.UTF_8) }
         LOG.debug("hentStillinger bruker url=$url, queryString=$queryString")
         val page: Page<StillingMedStillingsinfo> = stillingService.hentStillinger(url, queryString)
-        val msg = "hentStillinger returnerer HTTP response 200 ok med Page<StillingMedStillingsinfo>, page.content.size=${page.content.size}, page.totalPages=${page.totalPages}, page.totalElements=${page.totalElements}"
+        val msg = "hentStillinger vil prøve å returnere HTTP response 200 ok med Page<StillingMedStillingsinfo>, page.content.size=${page.content.size}, page.totalPages=${page.totalPages}, page.totalElements=${page.totalElements}"
         LOG.debug(msg)
         try { // TODO Are: Fjern try-catch
             return ResponseEntity.ok().body(page)
         } catch (e: Exception) {
-            LOG.debug("hentStillinger forsøkte 'return ResponseEntity.ok().body(page)'", e)
+            LOG.debug("hentStillinger forsøkte 'return ResponseEntity.ok().body(page)'. hentStillinger bruker url=$url, queryString=$queryString", e)
             throw e
         }
     }
