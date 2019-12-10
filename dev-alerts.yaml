@@ -1,0 +1,49 @@
+# Kopiert fra https://doc.nais.io/observability/alerts/recommended_alerts
+apiVersion: "nais.io/v1alpha1"
+kind: "Alert"
+metadata:
+  name: rekrutteringsbistand-api
+  labels:
+    team: teamtag
+spec:
+  receivers:
+    slack:
+      channel: 'tag-inkludering-alerts-dev'
+      # prependText: '<!here>'
+  alerts:
+    - alert: Applikasjon nede
+      severity: danger
+      expr: up{app="rekrutteringsbistand-api", job="kubernetes-pods"} == 0
+      for: 2m
+      description: "App {{ $labels.app }} har ingen pods som er oppe i namespace {{ $labels.kubernetes_namespace }}"
+      action: "`kubectl describe pod {{ $labels.kubernetes_pod_name }} -n {{ $labels.kubernetes_namespace }}` for events, og `kubectl logs {{ $labels.kubernetes_pod_name }} -n {{ $labels.kubernetes_namespace }}` for logger"
+    - alert: Høy rate log level ERROR
+      severity: danger
+      expr: (100 * sum by (log_app, log_namespace) (rate(logd_messages_total{log_app="rekrutteringsbistand-api",log_level=~"Error"}[3m])) / sum by (log_app, log_namespace) (rate(logd_messages_total{log_app="rekrutteringsbistand-api"}[3m]))) > 1
+      for: 3m
+      action: "Sjekk loggene til app {{ $labels.log_app }} i namespace {{ $labels.log_namespace }}, for å se hvorfor det er så mye errors"
+    - alert: Høy rate log level WARNING
+      severity: danger
+      expr: (100 * sum by (log_app, log_namespace) (rate(logd_messages_total{log_app="rekrutteringsbistand-api",log_level=~"Warning"}[3m])) / sum by (log_app, log_namespace) (rate(logd_messages_total{log_app="rekrutteringsbistand-api"}[3m]))) > 10
+      for: 3m
+      action: "Sjekk loggene til app {{ $labels.log_app }} i namespace {{ $labels.log_namespace }}, for å se hvorfor det er så mye warnings"
+    - alert: Lav rate log level WARNING
+      severity: warning
+      expr: (100 * sum by (log_app, log_namespace) (rate(logd_messages_total{log_app="rekrutteringsbistand-api",log_level=~"Warning"}[3m])) / sum by (log_app, log_namespace) (rate(logd_messages_total{log_app="rekrutteringsbistand-api"}[3m]))) > 1
+      for: 3m
+      action: "Sjekk loggene til app {{ $labels.log_app }} i namespace {{ $labels.log_namespace }}, for å se hvorfor det forekommer warnings"
+    - alert: Feil i selftest
+      severity: danger
+      expr: selftests_aggregate_result_status{app="rekrutteringsbistand-api"} > 0
+      for: 1m
+      action: "Sjekk app {{ $labels.app }} i namespace {{ $labels.kubernetes_namespace }} sine selftest for å se hva som er galt"
+    - alert: Høy andel HTTP serverfeil (5xx responser)
+      severity: danger
+      expr: (100 * (sum by (backend) (rate(traefik_backend_requests_total{code=~"^5\\d\\d", backend=~"arbeidsgiver.nais.*/rekrutteringsbistand-api/*"}[3m])) / sum by (backend) (rate(traefik_backend_requests_total{backend=~"arbeidsgiver.nais.*/rekrutteringsbistand-api/*"}[3m])))) > 1
+      for: 3m
+      action: "Sjekk loggene for å se hvorfor {{ $labels.backend }} returnerer HTTP feilresponser"
+    - alert: Høy andel HTTP klientfeil (4xx responser)
+      severity: warning
+      expr: (100 * (sum by (backend) (rate(traefik_backend_requests_total{code=~"^4\\d\\d", backend=~"arbeidsgiver.nais.*/rekrutteringsbistand-api/*"}[3m])) / sum by (backend) (rate(traefik_backend_requests_total{backend=~"arbeidsgiver.nais.*/rekrutteringsbistand-api/*"}[3m])))) > 10
+      for: 3m
+      action: "Sjekk loggene for å se hvorfor {{ $labels.backend }} returnerer HTTP feilresponser"

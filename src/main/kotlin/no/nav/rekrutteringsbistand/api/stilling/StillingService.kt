@@ -45,7 +45,7 @@ class StillingService(
 
     fun opprettStilling(stilling: Stilling, queryString: String?): StillingMedStillingsinfo {
         val url = "${externalConfiguration.stillingApi.url}/rekrutteringsbistand/api/v1/ads"
-        LOG.debug("Oppdaterer stilling med url $url/$queryString")
+        LOG.debug("Oppretter stilling med URL=$url, queryString=$queryString")
         val opprinneligStilling: StillingMedStillingsinfo = try { // TODO Are: Fjern try-catch
             restTemplate.exchange(
                     url + if (queryString != null) "?$queryString" else "",
@@ -65,7 +65,7 @@ class StillingService(
 
     fun oppdaterStilling(uuid: String, stilling: Stilling, queryString: String?): StillingMedStillingsinfo? {
         val url = "${externalConfiguration.stillingApi.url}/rekrutteringsbistand/api/v1/ads/${uuid}"
-        LOG.debug("oppretter stilling med url $url/$queryString")
+        LOG.debug("Oppdaterer stilling med URL=$url, queryString=$queryString")
         val opprinneligStilling: StillingMedStillingsinfo = try { // TODO Are: Fjern try-catch
             restTemplate.exchange(
                     url + if (queryString != null) "?$queryString" else "",

@@ -75,7 +75,7 @@ workflows:
       - godkjenn-til-prod:
           type: approval
           requires:
-            - bygg
+            - deploy-til-dev
           filters:
             branches:
               only:

@@ -53,19 +53,19 @@ class StillingController(
     @GetMapping("/rekrutteringsbistand/api/v1/ads")
     fun hentStillinger(request: HttpServletRequest): ResponseEntity<Page<StillingMedStillingsinfo>> {
         return ResponseEntity.ok().body(stillingService.hentStillinger(
-                "${externalConfiguration.stillingApi.url}/rekrutteringsbistand/api/v1/ads",
-                if (request.queryString != null) URLDecoder.decode(request.queryString, StandardCharsets.UTF_8) else null
+                    "${externalConfiguration.stillingApi.url}/rekrutteringsbistand/api/v1/ads",
+                    if (request.queryString != null) URLDecoder.decode(request.queryString, StandardCharsets.UTF_8) else null
 
-        ))
+            ))
     }
 
     @GetMapping("/rekrutteringsbistand/api/v1/ads/rekrutteringsbistand/minestillinger")
     fun hentMineStillinger(request: HttpServletRequest): ResponseEntity<Page<StillingMedStillingsinfo>> {
         return ResponseEntity.ok().body(stillingService.hentStillinger(
-                "${externalConfiguration.stillingApi.url}/rekrutteringsbistand/api/v1/ads/rekrutteringsbistand/minestillinger",
-                if (request.queryString != null) URLDecoder.decode(request.queryString, StandardCharsets.UTF_8) else null
-        ))
-    }
+                    "${externalConfiguration.stillingApi.url}/rekrutteringsbistand/api/v1/ads/rekrutteringsbistand/minestillinger",
+                    if (request.queryString != null) URLDecoder.decode(request.queryString, StandardCharsets.UTF_8) else null
+            ))
+        }
 
 }
 

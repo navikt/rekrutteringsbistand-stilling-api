@@ -2,11 +2,13 @@ server:
   servlet.context-path: /rekrutteringsbistand-api
   port: 9501
 
-management.endpoints.web:
-  exposure.include: info, health, metrics, prometheus
-  base-path: /internal/actuator
-  flyway:
-    locations: classpath:/db/migration
+management:
+  endpoints.web:
+    exposure.include: info, health, metrics, prometheus
+    base-path: /internal/actuator
+    flyway:
+      locations: classpath:/db/migration
+  endpoint.health.show-details: always
 
 spring.profiles.active: local, stillingMock, kandidatlisteMock
 
