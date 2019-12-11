@@ -33,7 +33,7 @@ class StillingController(
 
     @RequestMapping("/rekrutteringsbistand/api/v1/**")
     fun proxyGetTilStillingsApi(method: HttpMethod, request: HttpServletRequest, @RequestBody(required = false) body: String?): ResponseEntity<String> {
-        LOG.info("Treffer 'proxyGetTilStillingsApi' med URL ${request.requestURL} og REST-metode ${method.name} med body-lengde ${body?.length ?: 0}");
+        LOG.debug("Treffer 'proxyGetTilStillingsApi' med URL ${request.requestURL} og HTTP-metode ${method.name} med body-lengde ${body?.length ?: 0}");
 
         return restProxy.proxyJsonRequest(method, request, Configuration.ROOT_URL, body
                 ?: "", externalConfiguration.stillingApi.url)
