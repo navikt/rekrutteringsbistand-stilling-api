@@ -55,16 +55,8 @@ class StillingController(
     fun hentStillinger(request: HttpServletRequest): ResponseEntity<Page<StillingMedStillingsinfo>> {
         val url = "${externalConfiguration.stillingApi.url}/rekrutteringsbistand/api/v1/ads"
         val queryString: String? = request.queryString?.let { URLDecoder.decode(it, StandardCharsets.UTF_8) }
-        LOG.debug("hentStillinger bruker url=$url, queryString=$queryString")
         val page: Page<StillingMedStillingsinfo> = stillingService.hentStillinger(url, queryString)
-        val msg = "hentStillinger vil prøve å returnere HTTP response 200 ok med Page<StillingMedStillingsinfo>, page.content.size=${page.content.size}, page.totalPages=${page.totalPages}, page.totalElements=${page.totalElements}"
-        LOG.debug(msg)
-        try { // TODO Are: Fjern try-catch
-            return ResponseEntity.ok().body(page)
-        } catch (e: Exception) {
-            LOG.debug("hentStillinger forsøkte 'return ResponseEntity.ok().body(page)'. hentStillinger bruker url=$url, queryString=$queryString", e)
-            throw e
-        }
+        return ResponseEntity.ok(page)
     }
 
     @GetMapping("/rekrutteringsbistand/api/v1/ads/rekrutteringsbistand/minestillinger")

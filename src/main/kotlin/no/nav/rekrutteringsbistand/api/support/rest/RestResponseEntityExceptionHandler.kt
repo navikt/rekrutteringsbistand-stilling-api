@@ -8,9 +8,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.ResponseBody
-import org.springframework.web.client.ResourceAccessException
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler
-import java.io.IOException
 import javax.servlet.http.HttpServletRequest
 
 @ControllerAdvice
@@ -24,16 +22,6 @@ class RestResponseEntityExceptionHandler : ResponseEntityExceptionHandler() {
                 .status(HttpStatus.UNAUTHORIZED)
                 .body("You are not authorized to access this resource")
     }
-
-    // TODO Are: Trenger vi denne egentlig?
-//    @ExceptionHandler(IOException::class, ResourceAccessException::class)
-//    protected fun håndterIOException(e: Exception, request: HttpServletRequest): ResponseEntity<String> {
-//        val msg = "IO error. requestURI=${request.requestURI}, HTTP method=${request.method}"
-//        LOG.error(msg, e)
-//        return ResponseEntity
-//                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-//                .body("Connection error")
-//    }
 
     @ExceptionHandler(value = [EmptyResultDataAccessException::class, NoContentException::class])
     @ResponseBody
