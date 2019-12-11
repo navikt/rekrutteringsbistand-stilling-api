@@ -1,6 +1,5 @@
 package no.nav.rekrutteringsbistand.api.stilling
 
-import no.nav.rekrutteringsbistand.api.support.LOG
 import no.nav.rekrutteringsbistand.api.support.config.Configuration
 import no.nav.rekrutteringsbistand.api.support.config.ExternalConfiguration
 import no.nav.rekrutteringsbistand.api.support.rest.RestProxy
@@ -21,7 +20,7 @@ class StillingController(
         val stillingService: StillingService
 ) {
 
-    @PostMapping("/rekrutteringsbistand/api/v1/ads/")
+    @PostMapping("/rekrutteringsbistand/api/v1/ads")
     fun proxyPostTilStillingsApi(request: HttpServletRequest, @RequestBody stilling: Stilling): ResponseEntity<StillingMedStillingsinfo> {
         return ResponseEntity.ok().body(stillingService.opprettStilling(stilling, request.queryString))
     }
@@ -33,8 +32,6 @@ class StillingController(
 
     @RequestMapping("/rekrutteringsbistand/api/v1/**")
     fun proxyGetTilStillingsApi(method: HttpMethod, request: HttpServletRequest, @RequestBody(required = false) body: String?): ResponseEntity<String> {
-        LOG.debug("Treffer 'proxyGetTilStillingsApi' med URL ${request.requestURL} og HTTP-metode ${method.name} med body-lengde ${body?.length ?: 0}");
-
         return restProxy.proxyJsonRequest(method, request, Configuration.ROOT_URL, body
                 ?: "", externalConfiguration.stillingApi.url)
     }
