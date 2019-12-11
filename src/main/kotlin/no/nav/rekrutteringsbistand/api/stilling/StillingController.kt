@@ -1,5 +1,6 @@
 package no.nav.rekrutteringsbistand.api.stilling
 
+import no.nav.rekrutteringsbistand.api.support.LOG
 import no.nav.rekrutteringsbistand.api.support.config.Configuration
 import no.nav.rekrutteringsbistand.api.support.config.ExternalConfiguration
 import no.nav.rekrutteringsbistand.api.support.rest.RestProxy
@@ -52,20 +53,19 @@ class StillingController(
 
     @GetMapping("/rekrutteringsbistand/api/v1/ads")
     fun hentStillinger(request: HttpServletRequest): ResponseEntity<Page<StillingMedStillingsinfo>> {
-        return ResponseEntity.ok().body(stillingService.hentStillinger(
-                    "${externalConfiguration.stillingApi.url}/rekrutteringsbistand/api/v1/ads",
-                    if (request.queryString != null) URLDecoder.decode(request.queryString, StandardCharsets.UTF_8) else null
-
-            ))
+        val url = "${externalConfiguration.stillingApi.url}/rekrutteringsbistand/api/v1/ads"
+        val queryString: String? = request.queryString?.let { URLDecoder.decode(it, StandardCharsets.UTF_8) }
+        val page: Page<StillingMedStillingsinfo> = stillingService.hentStillinger(url, queryString)
+        return ResponseEntity.ok(page)
     }
 
     @GetMapping("/rekrutteringsbistand/api/v1/ads/rekrutteringsbistand/minestillinger")
     fun hentMineStillinger(request: HttpServletRequest): ResponseEntity<Page<StillingMedStillingsinfo>> {
         return ResponseEntity.ok().body(stillingService.hentStillinger(
-                    "${externalConfiguration.stillingApi.url}/rekrutteringsbistand/api/v1/ads/rekrutteringsbistand/minestillinger",
-                    if (request.queryString != null) URLDecoder.decode(request.queryString, StandardCharsets.UTF_8) else null
-            ))
-        }
+                "${externalConfiguration.stillingApi.url}/rekrutteringsbistand/api/v1/ads/rekrutteringsbistand/minestillinger",
+                if (request.queryString != null) URLDecoder.decode(request.queryString, StandardCharsets.UTF_8) else null
+        ))
+    }
 
 }
 
