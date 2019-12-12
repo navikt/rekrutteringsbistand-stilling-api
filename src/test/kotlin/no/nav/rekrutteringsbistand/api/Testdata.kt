@@ -1,6 +1,7 @@
 package no.nav.rekrutteringsbistand.api
 
 import no.nav.rekrutteringsbistand.api.autorisasjon.InnloggetVeileder
+import no.nav.rekrutteringsbistand.api.stilling.Page
 import no.nav.rekrutteringsbistand.api.stilling.StillingMedStillingsinfo
 import no.nav.rekrutteringsbistand.api.stillingsinfo.*
 import java.time.LocalDateTime
@@ -57,5 +58,11 @@ object Testdata {
     val enStillingsinfoOppdatering = OppdaterStillingsinfo(
             stillingsinfoid = enStillingsinfo.stillingsinfoid,
             eier = Eier(navident = enAnnenVeileder.navIdent, navn = enAnnenVeileder.displayName)
+    )
+
+    val enPage = Page(
+            content = listOf(enStilling, enAnnenStilling),
+            totalElements = 2,
+            totalPages = 1
     )
 }
