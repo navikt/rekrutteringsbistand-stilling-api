@@ -6,7 +6,6 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.options
 import com.github.tomakehurst.wiremock.junit.WireMockRule
-import no.nav.rekrutteringsbistand.api.Testdata.enAnnenStilling
 import no.nav.rekrutteringsbistand.api.Testdata.enAnnenStillingsinfo
 import no.nav.rekrutteringsbistand.api.Testdata.enPage
 import no.nav.rekrutteringsbistand.api.Testdata.enStilling
@@ -57,7 +56,7 @@ internal class StillingComponentTest {
     }
 
     @Test
-    fun `hentStilling skal returnere en stilling uten stillingsinfo hvis det ikke er lagret`() {
+    fun `GET mot en stilling skal returnere en stilling uten stillingsinfo hvis det ikke er lagret`() {
         mockUtenAuthorization("/b2b/api/v1/ads/${enStilling.uuid}", enStilling)
         restTemplate.getForObject("$localBaseUrl/rekrutteringsbistand/api/v1/stilling/${enStilling.uuid}", StillingMedStillingsinfo::class.java).also {
             assertThat(it).isEqualTo(enStilling)
@@ -65,7 +64,7 @@ internal class StillingComponentTest {
     }
 
     @Test
-    fun `hentStilling skal returnere stilling beriket med stillingsinfo`() {
+    fun `GET mot en stilling skal returnere en stilling beriket med stillingsinfo`() {
         repository.lagre(enStillingsinfo)
 
         mockUtenAuthorization("/b2b/api/v1/ads/${enStilling.uuid}", enStilling)
@@ -77,7 +76,7 @@ internal class StillingComponentTest {
     }
 
     @Test
-    fun `Søk skal videresende HTTP respons body med norske tegn fra pam-ad-api uendret`() {
+    fun `POST mot søk skal videresende HTTP respons body med norske tegn fra pam-ad-api uendret`() {
         val stillingsSokResponsMedNorskeBokstaver =
                 """
                     {
@@ -127,7 +126,7 @@ internal class StillingComponentTest {
     }
 
     @Test
-    fun `Søk skal videresende HTTP error respons fra pam-ad-api uendret`() {
+    fun `POST mot søk skal videresende HTTP error respons fra pam-ad-api uendret`() {
         mockServerfeil("/search-api/underenhet/_search")
         restTemplate.exchange("$localBaseUrl/search-api/underenhet/_search", HttpMethod.POST, HttpEntity("{}", HttpHeaders()), String::class.java).also {
             assertThat(it.statusCode).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -136,7 +135,7 @@ internal class StillingComponentTest {
 
 
     @Test
-    fun `hentStillinger skal returnere stillinger beriket med stillingsinfo`() {
+    fun `GET mot stillinger skal returnere stillinger beriket med stillingsinfo`() {
         repository.lagre(enStillingsinfo)
         repository.lagre(enAnnenStillingsinfo)
 
@@ -154,7 +153,7 @@ internal class StillingComponentTest {
     }
 
     @Test
-    fun `opprettstilling skal returnere stilling`() {
+    fun `POST mot stillinger skal returnere stilling`() {
 
         mockPost("/rekrutteringsbistand/api/v1/ads", enStilling)
 
@@ -169,8 +168,7 @@ internal class StillingComponentTest {
     }
 
     @Test
-    fun `oppdaterstilling skal returnere stilling`() {
-
+    fun `PUT mot stilling skal returnere endret stilling`() {
         mockPut("/rekrutteringsbistand/api/v1/ads/${enStilling.uuid}", enStilling)
 
         restTemplate.exchange(
@@ -185,7 +183,7 @@ internal class StillingComponentTest {
     }
 
     @Test
-    fun `hentMineStillinger skal returnere HTTP 200 med mine stillinger uten stillingsinfo`() {
+    fun `GET mot mine stillinger skal returnere HTTP 200 med mine stillinger uten stillingsinfo`() {
         mock("/rekrutteringsbistand/api/v1/ads/rekrutteringsbistand/minestillinger", enPage)
 
         val respons: ResponseEntity<Page<StillingMedStillingsinfo>> = restTemplate.exchange(
@@ -200,7 +198,7 @@ internal class StillingComponentTest {
     }
 
     @Test
-    fun `hentMineStillinger skal returnere HTTP 200 med mine stillinger beriket med stillingsinfo`() {
+    fun `GET mot mine stillinger skal returnere HTTP 200 med mine stillinger med stillingsinfo`() {
         repository.lagre(enStillingsinfo)
         repository.lagre(enAnnenStillingsinfo)
 
