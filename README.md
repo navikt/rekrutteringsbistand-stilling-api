@@ -25,8 +25,8 @@ Start main i klassen RekrutteringsbistandApplication.
 
 # Overvåkning og observability
 * Prodfeil detekteres av [Nais-alerts](https://doc.nais.io/observability/alerts), som genererer meldinger i Slack-kanalen [#tag-inkludering-alerts-prod](https://nav-it.slack.com/archives/CR00PGB1P).
-** Alerts er definert i filen prod-alerts.yaml
-** For å se gjeldende (deployede) alerts, kjør kommandoen `kubectl describe alerts rekrutteringsbistand-api`
+  * Alerts er definert i filen prod-alerts.yaml
+  * For å se gjeldende (deployede) alerts, kjør kommandoen `kubectl describe alerts rekrutteringsbistand-api`
 * [Grafana-dashboard](https://grafana.adeo.no/d/odDKuXbWk/rekrutteringsbistand-api-prod-fss) viser tekniske metrikker
 * Kibana brukes for å lese applikasjonsloggen. [Eksempel på spørring](https://logs.adeo.no/s/read-only/app/kibana#/discover?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-4h,mode:quick,to:now))&_a=(columns:!(message,level,application,cluster,exception,namespace),index:'96e648c0-980a-11e9-830a-e17bbd64b4db',interval:auto,query:(language:lucene,query:'cluster:%20prod-fss%20AND%20application:%20rekrutteringsbistand-api%20AND%20(level:%20Warning%20OR%20level:%20Error)'),sort:!('@timestamp',desc)))
 
