@@ -220,10 +220,10 @@ internal class StillingComponentTest {
     @Test
     fun `DELETE mot stilling skal returnere HTTP 200 med stilling og status DELETED`() {
         val slettetStilling = enStillingUtenStillingsinfo.copy(status = "DELETED")
-        mock(HttpMethod.DELETE, "/rekrutteringsbistand/api/v1/ads/392c978d-a305-48f5-87b6-c0f7da6670ee", slettetStilling)
+        mock(HttpMethod.DELETE, "/rekrutteringsbistand/api/v1/ads/${slettetStilling.uuid}", slettetStilling)
 
         val respons: ResponseEntity<Stilling> = restTemplate.exchange(
-                "$localBaseUrl/rekrutteringsbistand/api/v1/ads/392c978d-a305-48f5-87b6-c0f7da6670ee",
+                "$localBaseUrl/rekrutteringsbistand/api/v1/ads/${slettetStilling.uuid}",
                 HttpMethod.DELETE,
                 HttpEntity("{}", HttpHeaders()),
                 Stilling::class.java
