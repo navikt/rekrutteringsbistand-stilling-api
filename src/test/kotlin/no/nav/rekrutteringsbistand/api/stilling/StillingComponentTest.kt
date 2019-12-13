@@ -9,6 +9,7 @@ import com.github.tomakehurst.wiremock.junit.WireMockRule
 import no.nav.rekrutteringsbistand.api.Testdata.enAnnenStillingsinfo
 import no.nav.rekrutteringsbistand.api.Testdata.enPage
 import no.nav.rekrutteringsbistand.api.Testdata.enStilling
+import no.nav.rekrutteringsbistand.api.Testdata.enStillingUtenStillingsinfo
 import no.nav.rekrutteringsbistand.api.Testdata.enStillingsinfo
 import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoRepository
 import org.assertj.core.api.Assertions.assertThat
@@ -139,7 +140,7 @@ internal class StillingComponentTest {
         repository.lagre(enStillingsinfo)
         repository.lagre(enAnnenStillingsinfo)
 
-        mock("/rekrutteringsbistand/api/v1/ads", enPage)
+        mock(HttpMethod.GET, "/rekrutteringsbistand/api/v1/ads", enPage)
 
         val stillinger: List<StillingMedStillingsinfo> = restTemplate.exchange(
                 "$localBaseUrl/rekrutteringsbistand/api/v1/ads",
@@ -155,7 +156,7 @@ internal class StillingComponentTest {
     @Test
     fun `POST mot stillinger skal returnere stilling`() {
 
-        mockPost("/rekrutteringsbistand/api/v1/ads", enStilling)
+        mock(HttpMethod.POST, "/rekrutteringsbistand/api/v1/ads", enStilling)
 
         restTemplate.postForObject(
                 "$localBaseUrl/rekrutteringsbistand/api/v1/ads",
@@ -169,7 +170,7 @@ internal class StillingComponentTest {
 
     @Test
     fun `PUT mot stilling skal returnere endret stilling`() {
-        mockPut("/rekrutteringsbistand/api/v1/ads/${enStilling.uuid}", enStilling)
+        mock(HttpMethod.PUT, "/rekrutteringsbistand/api/v1/ads/${enStilling.uuid}", enStilling)
 
         restTemplate.exchange(
                 "$localBaseUrl/rekrutteringsbistand/api/v1/ads/${enStilling.uuid}",
@@ -184,7 +185,7 @@ internal class StillingComponentTest {
 
     @Test
     fun `GET mot mine stillinger skal returnere HTTP 200 med mine stillinger uten stillingsinfo`() {
-        mock("/rekrutteringsbistand/api/v1/ads/rekrutteringsbistand/minestillinger", enPage)
+        mock(HttpMethod.GET, "/rekrutteringsbistand/api/v1/ads/rekrutteringsbistand/minestillinger", enPage)
 
         val respons: ResponseEntity<Page<StillingMedStillingsinfo>> = restTemplate.exchange(
                 "$localBaseUrl/rekrutteringsbistand/api/v1/ads/rekrutteringsbistand/minestillinger",
@@ -202,7 +203,7 @@ internal class StillingComponentTest {
         repository.lagre(enStillingsinfo)
         repository.lagre(enAnnenStillingsinfo)
 
-        mock("/rekrutteringsbistand/api/v1/ads/rekrutteringsbistand/minestillinger", enPage)
+        mock(HttpMethod.GET, "/rekrutteringsbistand/api/v1/ads/rekrutteringsbistand/minestillinger", enPage)
 
         val respons: ResponseEntity<Page<StillingMedStillingsinfo>> = restTemplate.exchange(
                 "$localBaseUrl/rekrutteringsbistand/api/v1/ads/rekrutteringsbistand/minestillinger",
@@ -216,9 +217,25 @@ internal class StillingComponentTest {
         assertThat(respons.body!!.content.last().rekruttering).isEqualTo(enAnnenStillingsinfo.asDto())
     }
 
-    private fun mock(urlPath: String, body: Any) {
+    @Test
+    fun `DELETE mot stilling skal returnere HTTP 200 med stilling og status DELETED`() {
+        val slettetStilling = enStillingUtenStillingsinfo.copy(status = "DELETED")
+        mock(HttpMethod.DELETE, "/rekrutteringsbistand/api/v1/ads/392c978d-a305-48f5-87b6-c0f7da6670ee", slettetStilling)
+
+        val respons: ResponseEntity<Stilling> = restTemplate.exchange(
+                "$localBaseUrl/rekrutteringsbistand/api/v1/ads/392c978d-a305-48f5-87b6-c0f7da6670ee",
+                HttpMethod.DELETE,
+                HttpEntity("{}", HttpHeaders()),
+                Stilling::class.java
+        )
+
+        assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)
+        assertThat(respons.body).isEqualTo(slettetStilling)
+    }
+
+    private fun mock(method: HttpMethod, urlPath: String, body: Any) {
         stubFor(
-                get(urlPathMatching(urlPath))
+                request(method.name, urlPathMatching(urlPath))
                         .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
                         .withHeader(ACCEPT, equalTo(APPLICATION_JSON_VALUE))
                         .withHeader(AUTHORIZATION, matching("Bearer .*}"))
@@ -264,32 +281,6 @@ internal class StillingComponentTest {
                                 .withHeader(CONNECTION, "close") // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
                                 .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
                         ))
-    }
-
-    private fun mockPost(urlPath: String, body: StillingMedStillingsinfo) {
-        stubFor(
-                post(urlPathMatching(urlPath))
-                        .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
-                        .withHeader(ACCEPT, equalTo(APPLICATION_JSON_VALUE))
-                        .withHeader(AUTHORIZATION, matching("Bearer .*}"))
-                        .willReturn(aResponse().withStatus(200)
-                                .withHeader(CONNECTION, "close") // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
-                                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-                                .withBody(objectMapper.writeValueAsString(body)))
-        )
-    }
-
-    private fun mockPut(urlPath: String, body: StillingMedStillingsinfo) {
-        stubFor(
-                put(urlPathMatching(urlPath))
-                        .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
-                        .withHeader(ACCEPT, equalTo(APPLICATION_JSON_VALUE))
-                        .withHeader(AUTHORIZATION, matching("Bearer .*}"))
-                        .willReturn(aResponse().withStatus(200)
-                                .withHeader(CONNECTION, "close") // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
-                                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-                                .withBody(objectMapper.writeValueAsString(body)))
-        )
     }
 
     @After
