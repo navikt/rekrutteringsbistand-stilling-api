@@ -2,6 +2,7 @@ package no.nav.rekrutteringsbistand.api
 
 import no.nav.rekrutteringsbistand.api.autorisasjon.InnloggetVeileder
 import no.nav.rekrutteringsbistand.api.stilling.Page
+import no.nav.rekrutteringsbistand.api.stilling.Stilling
 import no.nav.rekrutteringsbistand.api.stilling.StillingMedStillingsinfo
 import no.nav.rekrutteringsbistand.api.stillingsinfo.*
 import java.time.LocalDateTime
@@ -64,5 +65,30 @@ object Testdata {
             content = listOf(enStilling, enAnnenStilling),
             totalElements = 2,
             totalPages = 1
+    )
+
+    val enStillingUtenStillingsinfo = Stilling(
+            id = 1000,
+            uuid = UUID.randomUUID().toString(),
+            created = LocalDateTime.now(),
+            createdBy = "nss-admin",
+            updated = LocalDateTime.now(),
+            updatedBy = "nss-admin",
+            title = "testnss",
+            status = "ACTIVE",
+            privacy = "SHOW_ALL",
+            source = "ASS",
+            medium = "ASS",
+            reference = UUID.randomUUID().toString(),
+            published = LocalDateTime.now(),
+            expires = LocalDateTime.now(),
+            employer = null,
+            administration = null,
+            location = null,
+            publishedByAdmin = null,
+            businessName = null,
+            firstPublished = null,
+            deactivatedByExpiry = null,
+            activationOnPublishingDate = null
     )
 }

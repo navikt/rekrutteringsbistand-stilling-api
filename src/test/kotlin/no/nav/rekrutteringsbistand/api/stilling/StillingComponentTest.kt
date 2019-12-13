@@ -9,6 +9,7 @@ import com.github.tomakehurst.wiremock.junit.WireMockRule
 import no.nav.rekrutteringsbistand.api.Testdata.enAnnenStillingsinfo
 import no.nav.rekrutteringsbistand.api.Testdata.enPage
 import no.nav.rekrutteringsbistand.api.Testdata.enStilling
+import no.nav.rekrutteringsbistand.api.Testdata.enStillingUtenStillingsinfo
 import no.nav.rekrutteringsbistand.api.Testdata.enStillingsinfo
 import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoRepository
 import org.assertj.core.api.Assertions.assertThat
@@ -120,7 +121,7 @@ internal class StillingComponentTest {
                     }
                 """.trimIndent()
         mockString("/search-api/underenhet/_search", stillingsSokResponsMedNorskeBokstaver)
-        restTemplate.postForObject("$localBaseUrl/search-api/underenhet/_search", HttpEntity("{}", HttpHeaders()), String::class.java).also {
+        restTemplate.postForObject("$localBaseUrl/search-api/underenhet/_search", null, String::class.java).also {
             assertThat(it).isEqualTo(stillingsSokResponsMedNorskeBokstaver)
         }
     }
@@ -128,7 +129,7 @@ internal class StillingComponentTest {
     @Test
     fun `POST mot søk skal videresende HTTP error respons fra pam-ad-api uendret`() {
         mockServerfeil("/search-api/underenhet/_search")
-        restTemplate.exchange("$localBaseUrl/search-api/underenhet/_search", HttpMethod.POST, HttpEntity("{}", HttpHeaders()), String::class.java).also {
+        restTemplate.exchange("$localBaseUrl/search-api/underenhet/_search", HttpMethod.POST, null, String::class.java).also {
             assertThat(it.statusCode).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
         }
     }
@@ -139,7 +140,7 @@ internal class StillingComponentTest {
         repository.lagre(enStillingsinfo)
         repository.lagre(enAnnenStillingsinfo)
 
-        mock("/rekrutteringsbistand/api/v1/ads", enPage)
+        mock(HttpMethod.GET, "/rekrutteringsbistand/api/v1/ads", enPage)
 
         val stillinger: List<StillingMedStillingsinfo> = restTemplate.exchange(
                 "$localBaseUrl/rekrutteringsbistand/api/v1/ads",
@@ -155,7 +156,7 @@ internal class StillingComponentTest {
     @Test
     fun `POST mot stillinger skal returnere stilling`() {
 
-        mockPost("/rekrutteringsbistand/api/v1/ads", enStilling)
+        mock(HttpMethod.POST, "/rekrutteringsbistand/api/v1/ads", enStilling)
 
         restTemplate.postForObject(
                 "$localBaseUrl/rekrutteringsbistand/api/v1/ads",
@@ -169,7 +170,7 @@ internal class StillingComponentTest {
 
     @Test
     fun `PUT mot stilling skal returnere endret stilling`() {
-        mockPut("/rekrutteringsbistand/api/v1/ads/${enStilling.uuid}", enStilling)
+        mock(HttpMethod.PUT, "/rekrutteringsbistand/api/v1/ads/${enStilling.uuid}", enStilling)
 
         restTemplate.exchange(
                 "$localBaseUrl/rekrutteringsbistand/api/v1/ads/${enStilling.uuid}",
@@ -184,12 +185,12 @@ internal class StillingComponentTest {
 
     @Test
     fun `GET mot mine stillinger skal returnere HTTP 200 med mine stillinger uten stillingsinfo`() {
-        mock("/rekrutteringsbistand/api/v1/ads/rekrutteringsbistand/minestillinger", enPage)
+        mock(HttpMethod.GET, "/rekrutteringsbistand/api/v1/ads/rekrutteringsbistand/minestillinger", enPage)
 
         val respons: ResponseEntity<Page<StillingMedStillingsinfo>> = restTemplate.exchange(
                 "$localBaseUrl/rekrutteringsbistand/api/v1/ads/rekrutteringsbistand/minestillinger",
                 HttpMethod.GET,
-                HttpEntity("{}", HttpHeaders()),
+                null,
                 object : ParameterizedTypeReference<Page<StillingMedStillingsinfo>>() {}
         )
 
@@ -202,12 +203,12 @@ internal class StillingComponentTest {
         repository.lagre(enStillingsinfo)
         repository.lagre(enAnnenStillingsinfo)
 
-        mock("/rekrutteringsbistand/api/v1/ads/rekrutteringsbistand/minestillinger", enPage)
+        mock(HttpMethod.GET, "/rekrutteringsbistand/api/v1/ads/rekrutteringsbistand/minestillinger", enPage)
 
         val respons: ResponseEntity<Page<StillingMedStillingsinfo>> = restTemplate.exchange(
                 "$localBaseUrl/rekrutteringsbistand/api/v1/ads/rekrutteringsbistand/minestillinger",
                 HttpMethod.GET,
-                HttpEntity("{}", HttpHeaders()),
+                null,
                 object : ParameterizedTypeReference<Page<StillingMedStillingsinfo>>() {}
         )
 
@@ -216,20 +217,36 @@ internal class StillingComponentTest {
         assertThat(respons.body!!.content.last().rekruttering).isEqualTo(enAnnenStillingsinfo.asDto())
     }
 
-    private fun mock(urlPath: String, body: Any) {
+    @Test
+    fun `DELETE mot stilling skal returnere HTTP 200 med stilling og status DELETED`() {
+        val slettetStilling = enStillingUtenStillingsinfo.copy(status = "DELETED")
+        mock(HttpMethod.DELETE, "/rekrutteringsbistand/api/v1/ads/${slettetStilling.uuid}", slettetStilling)
+
+        val respons: ResponseEntity<Stilling> = restTemplate.exchange(
+                "$localBaseUrl/rekrutteringsbistand/api/v1/ads/${slettetStilling.uuid}",
+                HttpMethod.DELETE,
+                null,
+                Stilling::class.java
+        )
+
+        assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)
+        assertThat(respons.body).isEqualTo(slettetStilling)
+    }
+
+    private fun mock(method: HttpMethod, urlPath: String, responseBody: Any) {
         stubFor(
-                get(urlPathMatching(urlPath))
+                request(method.name, urlPathMatching(urlPath))
                         .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
                         .withHeader(ACCEPT, equalTo(APPLICATION_JSON_VALUE))
                         .withHeader(AUTHORIZATION, matching("Bearer .*}"))
                         .willReturn(aResponse().withStatus(200)
                                 .withHeader(CONNECTION, "close") // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
                                 .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-                                .withBody(objectMapper.writeValueAsString(body)))
+                                .withBody(objectMapper.writeValueAsString(responseBody)))
         )
     }
 
-    private fun mockUtenAuthorization(urlPath: String, body: Any) {
+    private fun mockUtenAuthorization(urlPath: String, responseBody: Any) {
         stubFor(
                 get(urlPathMatching(urlPath))
                         .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
@@ -237,11 +254,11 @@ internal class StillingComponentTest {
                         .willReturn(aResponse().withStatus(200)
                                 .withHeader(CONNECTION, "close") // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
                                 .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-                                .withBody(objectMapper.writeValueAsString(body)))
+                                .withBody(objectMapper.writeValueAsString(responseBody)))
         )
     }
 
-    private fun mockString(urlPath: String, body: String) {
+    private fun mockString(urlPath: String, responseBody: String) {
         stubFor(
                 post(urlPathMatching(urlPath))
                         .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
@@ -250,7 +267,7 @@ internal class StillingComponentTest {
                         .willReturn(aResponse().withStatus(200)
                                 .withHeader(CONNECTION, "close") // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
                                 .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-                                .withBody(body))
+                                .withBody(responseBody))
         )
     }
 
@@ -264,32 +281,6 @@ internal class StillingComponentTest {
                                 .withHeader(CONNECTION, "close") // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
                                 .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
                         ))
-    }
-
-    private fun mockPost(urlPath: String, body: StillingMedStillingsinfo) {
-        stubFor(
-                post(urlPathMatching(urlPath))
-                        .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
-                        .withHeader(ACCEPT, equalTo(APPLICATION_JSON_VALUE))
-                        .withHeader(AUTHORIZATION, matching("Bearer .*}"))
-                        .willReturn(aResponse().withStatus(200)
-                                .withHeader(CONNECTION, "close") // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
-                                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-                                .withBody(objectMapper.writeValueAsString(body)))
-        )
-    }
-
-    private fun mockPut(urlPath: String, body: StillingMedStillingsinfo) {
-        stubFor(
-                put(urlPathMatching(urlPath))
-                        .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
-                        .withHeader(ACCEPT, equalTo(APPLICATION_JSON_VALUE))
-                        .withHeader(AUTHORIZATION, matching("Bearer .*}"))
-                        .willReturn(aResponse().withStatus(200)
-                                .withHeader(CONNECTION, "close") // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
-                                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-                                .withBody(objectMapper.writeValueAsString(body)))
-        )
     }
 
     @After
