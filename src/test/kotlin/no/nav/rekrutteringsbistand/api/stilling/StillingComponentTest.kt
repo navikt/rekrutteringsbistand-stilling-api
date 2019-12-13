@@ -6,8 +6,8 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.options
 import com.github.tomakehurst.wiremock.junit.WireMockRule
-import no.nav.rekrutteringsbistand.api.Testdata.enAnnenStilling
 import no.nav.rekrutteringsbistand.api.Testdata.enAnnenStillingsinfo
+import no.nav.rekrutteringsbistand.api.Testdata.enPage
 import no.nav.rekrutteringsbistand.api.Testdata.enStilling
 import no.nav.rekrutteringsbistand.api.Testdata.enStillingsinfo
 import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoRepository
@@ -22,11 +22,8 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.core.ParameterizedTypeReference
-import org.springframework.http.HttpEntity
-import org.springframework.http.HttpHeaders
+import org.springframework.http.*
 import org.springframework.http.HttpHeaders.*
-import org.springframework.http.HttpMethod
-import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit4.SpringRunner
@@ -59,7 +56,7 @@ internal class StillingComponentTest {
     }
 
     @Test
-    fun `hentStilling skal returnere en stilling uten stillingsinfo hvis det ikke er lagret`() {
+    fun `GET mot en stilling skal returnere en stilling uten stillingsinfo hvis det ikke er lagret`() {
         mockUtenAuthorization("/b2b/api/v1/ads/${enStilling.uuid}", enStilling)
         restTemplate.getForObject("$localBaseUrl/rekrutteringsbistand/api/v1/stilling/${enStilling.uuid}", StillingMedStillingsinfo::class.java).also {
             assertThat(it).isEqualTo(enStilling)
@@ -67,7 +64,7 @@ internal class StillingComponentTest {
     }
 
     @Test
-    fun `hentStilling skal returnere stilling beriket med stillingsinfo`() {
+    fun `GET mot en stilling skal returnere en stilling beriket med stillingsinfo`() {
         repository.lagre(enStillingsinfo)
 
         mockUtenAuthorization("/b2b/api/v1/ads/${enStilling.uuid}", enStilling)
@@ -79,7 +76,7 @@ internal class StillingComponentTest {
     }
 
     @Test
-    fun `Søk skal videresende HTTP respons body med norske tegn fra pam-ad-api uendret`() {
+    fun `POST mot søk skal videresende HTTP respons body med norske tegn fra pam-ad-api uendret`() {
         val stillingsSokResponsMedNorskeBokstaver =
                 """
                     {
@@ -129,7 +126,7 @@ internal class StillingComponentTest {
     }
 
     @Test
-    fun `Søk skal videresende HTTP error respons fra pam-ad-api uendret`() {
+    fun `POST mot søk skal videresende HTTP error respons fra pam-ad-api uendret`() {
         mockServerfeil("/search-api/underenhet/_search")
         restTemplate.exchange("$localBaseUrl/search-api/underenhet/_search", HttpMethod.POST, HttpEntity("{}", HttpHeaders()), String::class.java).also {
             assertThat(it.statusCode).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -138,17 +135,11 @@ internal class StillingComponentTest {
 
 
     @Test
-    fun `hentStillinger skal returnere stillinger beriket med stillingsinfo`() {
+    fun `GET mot stillinger skal returnere stillinger beriket med stillingsinfo`() {
         repository.lagre(enStillingsinfo)
         repository.lagre(enAnnenStillingsinfo)
 
-        val opprinneligeStillinger = Page(
-                content = listOf(enStilling, enAnnenStilling),
-                totalElements = 2,
-                totalPages = 1
-        )
-
-        mock("/rekrutteringsbistand/api/v1/ads", opprinneligeStillinger)
+        mock("/rekrutteringsbistand/api/v1/ads", enPage)
 
         val stillinger: List<StillingMedStillingsinfo> = restTemplate.exchange(
                 "$localBaseUrl/rekrutteringsbistand/api/v1/ads",
@@ -162,12 +153,12 @@ internal class StillingComponentTest {
     }
 
     @Test
-    fun `opprettstilling skal returnere stilling`() {
+    fun `POST mot stillinger skal returnere stilling`() {
 
         mockPost("/rekrutteringsbistand/api/v1/ads", enStilling)
 
         restTemplate.postForObject(
-                "$localBaseUrl/rekrutteringsbistand/api/v1/ads/",
+                "$localBaseUrl/rekrutteringsbistand/api/v1/ads",
                 enStilling.copy(uuid = null),
                 StillingMedStillingsinfo::class.java
         ).also {
@@ -177,12 +168,11 @@ internal class StillingComponentTest {
     }
 
     @Test
-    fun `oppdaterstilling skal returnere stilling`() {
-
+    fun `PUT mot stilling skal returnere endret stilling`() {
         mockPut("/rekrutteringsbistand/api/v1/ads/${enStilling.uuid}", enStilling)
 
         restTemplate.exchange(
-                "$localBaseUrl/rekrutteringsbistand/api/v1/ads//${enStilling.uuid}",
+                "$localBaseUrl/rekrutteringsbistand/api/v1/ads/${enStilling.uuid}",
                 HttpMethod.PUT,
                 HttpEntity(enStilling.copy(uuid = null)),
                 StillingMedStillingsinfo::class.java
@@ -192,8 +182,42 @@ internal class StillingComponentTest {
         }
     }
 
+    @Test
+    fun `GET mot mine stillinger skal returnere HTTP 200 med mine stillinger uten stillingsinfo`() {
+        mock("/rekrutteringsbistand/api/v1/ads/rekrutteringsbistand/minestillinger", enPage)
+
+        val respons: ResponseEntity<Page<StillingMedStillingsinfo>> = restTemplate.exchange(
+                "$localBaseUrl/rekrutteringsbistand/api/v1/ads/rekrutteringsbistand/minestillinger",
+                HttpMethod.GET,
+                HttpEntity("{}", HttpHeaders()),
+                object : ParameterizedTypeReference<Page<StillingMedStillingsinfo>>() {}
+        )
+
+        assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)
+        assertThat(respons.body).isEqualTo(enPage)
+    }
+
+    @Test
+    fun `GET mot mine stillinger skal returnere HTTP 200 med mine stillinger med stillingsinfo`() {
+        repository.lagre(enStillingsinfo)
+        repository.lagre(enAnnenStillingsinfo)
+
+        mock("/rekrutteringsbistand/api/v1/ads/rekrutteringsbistand/minestillinger", enPage)
+
+        val respons: ResponseEntity<Page<StillingMedStillingsinfo>> = restTemplate.exchange(
+                "$localBaseUrl/rekrutteringsbistand/api/v1/ads/rekrutteringsbistand/minestillinger",
+                HttpMethod.GET,
+                HttpEntity("{}", HttpHeaders()),
+                object : ParameterizedTypeReference<Page<StillingMedStillingsinfo>>() {}
+        )
+
+        assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)
+        assertThat(respons.body!!.content.first().rekruttering).isEqualTo(enStillingsinfo.asDto())
+        assertThat(respons.body!!.content.last().rekruttering).isEqualTo(enAnnenStillingsinfo.asDto())
+    }
+
     private fun mock(urlPath: String, body: Any) {
-        wiremock.stubFor(
+        stubFor(
                 get(urlPathMatching(urlPath))
                         .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
                         .withHeader(ACCEPT, equalTo(APPLICATION_JSON_VALUE))
@@ -206,7 +230,7 @@ internal class StillingComponentTest {
     }
 
     private fun mockUtenAuthorization(urlPath: String, body: Any) {
-        wiremock.stubFor(
+        stubFor(
                 get(urlPathMatching(urlPath))
                         .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
                         .withHeader(ACCEPT, equalTo(APPLICATION_JSON_VALUE))
@@ -218,7 +242,7 @@ internal class StillingComponentTest {
     }
 
     private fun mockString(urlPath: String, body: String) {
-        wiremock.stubFor(
+        stubFor(
                 post(urlPathMatching(urlPath))
                         .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
                         .withHeader(ACCEPT, equalTo(APPLICATION_JSON_VALUE))
@@ -231,7 +255,7 @@ internal class StillingComponentTest {
     }
 
     private fun mockServerfeil(urlPath: String) {
-        wiremock.stubFor(
+        stubFor(
                 post(urlPathMatching(urlPath))
                         .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
                         .withHeader(ACCEPT, equalTo(APPLICATION_JSON_VALUE))
@@ -242,9 +266,8 @@ internal class StillingComponentTest {
                         ))
     }
 
-
     private fun mockPost(urlPath: String, body: StillingMedStillingsinfo) {
-        wiremock.stubFor(
+        stubFor(
                 post(urlPathMatching(urlPath))
                         .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
                         .withHeader(ACCEPT, equalTo(APPLICATION_JSON_VALUE))
@@ -257,7 +280,7 @@ internal class StillingComponentTest {
     }
 
     private fun mockPut(urlPath: String, body: StillingMedStillingsinfo) {
-        wiremock.stubFor(
+        stubFor(
                 put(urlPathMatching(urlPath))
                         .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
                         .withHeader(ACCEPT, equalTo(APPLICATION_JSON_VALUE))
