@@ -1,22 +1,24 @@
-server.servlet.context-path: /rekrutteringsbistand-api
-
-management.endpoints.web:
-  exposure.include: info, health, metrics, prometheus
-  base-path: /internal/actuator
-  flyway:
-    locations: classpath:/db/migration
-
 server:
+  servlet.context-path: /rekrutteringsbistand-api
   port: 9501
 
-spring:
-  profiles:
-    active: local, stillingMock, kandidatlisteMock
+management:
+  endpoints.web:
+    exposure.include: info, health, metrics, prometheus
+    base-path: /internal/actuator
+    flyway:
+      locations: classpath:/db/migration
+  endpoint.health.show-details: always
+
+spring.profiles.active: local, stillingMock, kandidatlisteMock
 
 ---
 
 spring:
   profiles: local
+
+nais.cluster-name: na
+
 no.nav.security.oidc:
   issuers: isso
   issuer.isso:
@@ -52,16 +54,17 @@ no.nav.security.oidc:
     proxyurl: http://webproxy.nais:8088
 
 external:
-  stilling-api:
-    url: https://pam-ad-api.nais.preprod.local
-  kandidatliste-api:
-    url: https://pam-kandidatsok-api-q0.nais.preprod.local/pam-kandidatsok-api/rest/veileder/stilling
+  stilling-api.url: https://pam-ad-api.nais.preprod.local
+  kandidatliste-api.url: https://pam-kandidatsok-api-q0.nais.preprod.local/pam-kandidatsok-api/rest/veileder/stilling
+  unleash.url: https://unleash.nais.adeo.no/api/
 
 database:
   navn: rekrutteringsbistand
   url: jdbc:postgresql://b27dbvl008.preprod.local:5432/rekrutteringsbistand
 
 vault.mount-path: postgresql/preprod-fss
+
+nais.cluster-name: ${NAIS_CLUSTER_NAME}
 
 ---
 
@@ -76,13 +79,14 @@ no.nav.security.oidc:
     proxyurl: http://webproxy.nais:8088
 
 external:
-  stilling-api:
-    url: https://pam-ad-api.nais.adeo.no
-  kandidatliste-api:
-    url: https://pam-kandidatsok-api.nais.adeo.no/pam-kandidatsok-api/rest/veileder/stilling
+  stilling-api.url: https://pam-ad-api.nais.adeo.no
+  kandidatliste-api.url: https://pam-kandidatsok-api.nais.adeo.no/pam-kandidatsok-api/rest/veileder/stilling
+  unleash.url: https://unleash.nais.adeo.no/api/
 
 database:
   navn: rekrutteringsbistand
   url: jdbc:postgresql://A01DBVL010.adeo.no:5432/rekrutteringsbistand
 
 vault.mount-path: postgresql/prod-fss
+
+nais.cluster-name: ${NAIS_CLUSTER_NAME}

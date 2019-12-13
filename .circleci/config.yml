@@ -57,7 +57,7 @@ commands:
       - checkout
       - run:
           name: Deploy til << parameters.cluster >>
-          command: deployment-cli deploy create --cluster=<< parameters.cluster >> --repository=navikt/rekrutteringsbistand-api --team=teamtag --resource=<< parameters.nais-yaml >> --version=$CIRCLE_SHA1 --ref=$CIRCLE_BRANCH
+          command: deployment-cli deploy create --cluster=<< parameters.cluster >> --repository=navikt/rekrutteringsbistand-api --team=teamtag --resource=<< parameters.nais-yaml >> --version=$CIRCLE_SHA1 --ref=$CIRCLE_SHA1
 
 workflows:
   version: 2.1
@@ -75,7 +75,7 @@ workflows:
       - godkjenn-til-prod:
           type: approval
           requires:
-            - bygg
+            - deploy-til-dev
           filters:
             branches:
               only:

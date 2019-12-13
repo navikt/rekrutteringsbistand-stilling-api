@@ -14,7 +14,7 @@ import org.springframework.test.context.junit4.SpringRunner
 @RunWith(SpringRunner::class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("local")
-internal class InnloggetBrukerComponentTest {
+internal class InnloggetVeilederComponentTest {
 
     @LocalServerPort
     var port = 0
@@ -30,7 +30,7 @@ internal class InnloggetBrukerComponentTest {
 
     @Test
     fun hentInnloggetBrukerReturnererBruker() {
-        restTemplate.getForObject("${localBaseUrl()}/rekrutteringsbistand/api/v1/reportee", InnloggetBruker::class.java).apply {
+        restTemplate.getForObject("${localBaseUrl()}/rekrutteringsbistand/api/v1/reportee", InnloggetVeileder::class.java).apply {
             assertThat(this).isEqualTo(enVeileder)
         }
     }

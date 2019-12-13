@@ -20,7 +20,7 @@ class StillingController(
         val stillingService: StillingService
 ) {
 
-    @PostMapping("/rekrutteringsbistand/api/v1/ads/")
+    @PostMapping("/rekrutteringsbistand/api/v1/ads")
     fun proxyPostTilStillingsApi(request: HttpServletRequest, @RequestBody stilling: Stilling): ResponseEntity<StillingMedStillingsinfo> {
         return ResponseEntity.ok().body(stillingService.opprettStilling(stilling, request.queryString))
     }
@@ -32,8 +32,10 @@ class StillingController(
 
     @RequestMapping("/rekrutteringsbistand/api/v1/**")
     fun proxyGetTilStillingsApi(method: HttpMethod, request: HttpServletRequest, @RequestBody(required = false) body: String?): ResponseEntity<String> {
-        return restProxy.proxyJsonRequest(method, request, Configuration.ROOT_URL, body
+        val respons =  restProxy.proxyJsonRequest(method, request, Configuration.ROOT_URL, body
                 ?: "", externalConfiguration.stillingApi.url)
+        val responsBody: String = respons.body ?: ""
+        return ResponseEntity(responsBody, respons.statusCode)
     }
 
     @RequestMapping("/search-api/**")
@@ -52,11 +54,10 @@ class StillingController(
 
     @GetMapping("/rekrutteringsbistand/api/v1/ads")
     fun hentStillinger(request: HttpServletRequest): ResponseEntity<Page<StillingMedStillingsinfo>> {
-        return ResponseEntity.ok().body(stillingService.hentStillinger(
-                "${externalConfiguration.stillingApi.url}/rekrutteringsbistand/api/v1/ads",
-                if (request.queryString != null) URLDecoder.decode(request.queryString, StandardCharsets.UTF_8) else null
-
-        ))
+        val url = "${externalConfiguration.stillingApi.url}/rekrutteringsbistand/api/v1/ads"
+        val queryString: String? = request.queryString?.let { URLDecoder.decode(it, StandardCharsets.UTF_8) }
+        val page: Page<StillingMedStillingsinfo> = stillingService.hentStillinger(url, queryString)
+        return ResponseEntity.ok(page)
     }
 
     @GetMapping("/rekrutteringsbistand/api/v1/ads/rekrutteringsbistand/minestillinger")
