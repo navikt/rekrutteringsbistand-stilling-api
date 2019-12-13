@@ -233,7 +233,7 @@ internal class StillingComponentTest {
         assertThat(respons.body).isEqualTo(slettetStilling)
     }
 
-    private fun mock(method: HttpMethod, urlPath: String, body: Any) {
+    private fun mock(method: HttpMethod, urlPath: String, responseBody: Any) {
         stubFor(
                 request(method.name, urlPathMatching(urlPath))
                         .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
@@ -242,11 +242,11 @@ internal class StillingComponentTest {
                         .willReturn(aResponse().withStatus(200)
                                 .withHeader(CONNECTION, "close") // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
                                 .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-                                .withBody(objectMapper.writeValueAsString(body)))
+                                .withBody(objectMapper.writeValueAsString(responseBody)))
         )
     }
 
-    private fun mockUtenAuthorization(urlPath: String, body: Any) {
+    private fun mockUtenAuthorization(urlPath: String, responseBody: Any) {
         stubFor(
                 get(urlPathMatching(urlPath))
                         .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
@@ -254,11 +254,11 @@ internal class StillingComponentTest {
                         .willReturn(aResponse().withStatus(200)
                                 .withHeader(CONNECTION, "close") // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
                                 .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-                                .withBody(objectMapper.writeValueAsString(body)))
+                                .withBody(objectMapper.writeValueAsString(responseBody)))
         )
     }
 
-    private fun mockString(urlPath: String, body: String) {
+    private fun mockString(urlPath: String, responseBody: String) {
         stubFor(
                 post(urlPathMatching(urlPath))
                         .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
@@ -267,7 +267,7 @@ internal class StillingComponentTest {
                         .willReturn(aResponse().withStatus(200)
                                 .withHeader(CONNECTION, "close") // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
                                 .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-                                .withBody(body))
+                                .withBody(responseBody))
         )
     }
 
