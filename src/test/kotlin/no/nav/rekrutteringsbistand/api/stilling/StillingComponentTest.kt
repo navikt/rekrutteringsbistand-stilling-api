@@ -121,7 +121,7 @@ internal class StillingComponentTest {
                     }
                 """.trimIndent()
         mockString("/search-api/underenhet/_search", stillingsSokResponsMedNorskeBokstaver)
-        restTemplate.postForObject("$localBaseUrl/search-api/underenhet/_search", HttpEntity("{}", HttpHeaders()), String::class.java).also {
+        restTemplate.postForObject("$localBaseUrl/search-api/underenhet/_search", null, String::class.java).also {
             assertThat(it).isEqualTo(stillingsSokResponsMedNorskeBokstaver)
         }
     }
@@ -129,7 +129,7 @@ internal class StillingComponentTest {
     @Test
     fun `POST mot søk skal videresende HTTP error respons fra pam-ad-api uendret`() {
         mockServerfeil("/search-api/underenhet/_search")
-        restTemplate.exchange("$localBaseUrl/search-api/underenhet/_search", HttpMethod.POST, HttpEntity("{}", HttpHeaders()), String::class.java).also {
+        restTemplate.exchange("$localBaseUrl/search-api/underenhet/_search", HttpMethod.POST, null, String::class.java).also {
             assertThat(it.statusCode).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
         }
     }
@@ -190,7 +190,7 @@ internal class StillingComponentTest {
         val respons: ResponseEntity<Page<StillingMedStillingsinfo>> = restTemplate.exchange(
                 "$localBaseUrl/rekrutteringsbistand/api/v1/ads/rekrutteringsbistand/minestillinger",
                 HttpMethod.GET,
-                HttpEntity("{}", HttpHeaders()),
+                null,
                 object : ParameterizedTypeReference<Page<StillingMedStillingsinfo>>() {}
         )
 
@@ -208,7 +208,7 @@ internal class StillingComponentTest {
         val respons: ResponseEntity<Page<StillingMedStillingsinfo>> = restTemplate.exchange(
                 "$localBaseUrl/rekrutteringsbistand/api/v1/ads/rekrutteringsbistand/minestillinger",
                 HttpMethod.GET,
-                HttpEntity("{}", HttpHeaders()),
+                null,
                 object : ParameterizedTypeReference<Page<StillingMedStillingsinfo>>() {}
         )
 
@@ -225,7 +225,7 @@ internal class StillingComponentTest {
         val respons: ResponseEntity<Stilling> = restTemplate.exchange(
                 "$localBaseUrl/rekrutteringsbistand/api/v1/ads/${slettetStilling.uuid}",
                 HttpMethod.DELETE,
-                HttpEntity("{}", HttpHeaders()),
+                null,
                 Stilling::class.java
         )
 
