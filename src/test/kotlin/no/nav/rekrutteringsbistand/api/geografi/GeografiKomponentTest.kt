@@ -132,15 +132,16 @@ internal class GeografiKomponentTest {
                    ]
                 """.trimIndent()
         mockString("/rekrutteringsbistand/api/v1/geography/counties", fylkerespons)
-        restTemplate.postForObject("$localBaseUrl/rekrutteringsbistand/api/v1/geography/counties", HttpEntity("{}", HttpHeaders()), String::class.java).also {
-            assertThat(it).isEqualTo(fylkerespons)
+        restTemplate.getForEntity("$localBaseUrl/rekrutteringsbistand/api/v1/geography/counties", String::class.java).also {
+            assertThat(it.statusCode).isEqualTo(HttpStatus.OK)
+            assertThat(it.body).isEqualTo(fylkerespons)
         }
     }
 
     @Test
     fun `GET mot municipals skal returnere HTTP 200 med kommuner`() {
         mockString("/rekrutteringsbistand/api/v1/geography/municipals", kommunerJson);
-        restTemplate.postForEntity("$localBaseUrl/rekrutteringsbistand/api/v1/geography/municipals", null, String::class.java).also {
+        restTemplate.getForEntity("$localBaseUrl/rekrutteringsbistand/api/v1/geography/municipals", String::class.java).also {
             assertThat(it.statusCode).isEqualTo(HttpStatus.OK)
             assertThat(it.body).isEqualTo(kommunerJson)
         };
@@ -149,7 +150,7 @@ internal class GeografiKomponentTest {
     @Test
     fun `GET mot categories-with-altnames skal returnere HTTP 200 med STYRK-kategorier`() {
         mockString("/rekrutteringsbistand/api/v1/categories-with-altnames", styrkkoderJson);
-        restTemplate.postForEntity("$localBaseUrl/rekrutteringsbistand/api/v1/categories-with-altnames", null, String::class.java).also {
+        restTemplate.getForEntity("$localBaseUrl/rekrutteringsbistand/api/v1/categories-with-altnames", String::class.java).also {
             assertThat(it.statusCode).isEqualTo(HttpStatus.OK)
             assertThat(it.body).isEqualTo(styrkkoderJson)
         }
@@ -158,7 +159,7 @@ internal class GeografiKomponentTest {
     @Test
     fun `GET mot postdata skal returnere HTTP 200 med informasjon om postnumre`() {
         mockString("/rekrutteringsbistand/api/v1/postdata", postnumreJson);
-        restTemplate.postForEntity("$localBaseUrl/rekrutteringsbistand/api/v1/postdata", null, String::class.java).also {
+        restTemplate.getForEntity("$localBaseUrl/rekrutteringsbistand/api/v1/postdata", String::class.java).also {
             assertThat(it.statusCode).isEqualTo(HttpStatus.OK)
             assertThat(it.body).isEqualTo(postnumreJson)
         }
@@ -166,7 +167,7 @@ internal class GeografiKomponentTest {
 
     private fun mockString(urlPath: String, body: String) {
         wiremock.stubFor(
-                WireMock.post(WireMock.urlPathMatching(urlPath))
+                WireMock.get(WireMock.urlPathMatching(urlPath))
                         .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
                         .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
                         .withHeader(HttpHeaders.AUTHORIZATION, WireMock.matching("Bearer .*}"))
