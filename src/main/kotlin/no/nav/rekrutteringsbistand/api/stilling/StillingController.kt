@@ -49,12 +49,10 @@ class StillingController(
     }
 
     @PostMapping("/search-api/underenhet/_search")
-    private fun postSokTilPamAdApi(method: HttpMethod, request: HttpServletRequest, @RequestBody requestBody: String?): ResponseEntity<String> {
+    private fun postSokTilPamAdApi(method: HttpMethod, request: HttpServletRequest, @RequestBody requestBody: String): ResponseEntity<String> {
         LOG.debug("Mottok $method til ${request.requestURI}")
-        val respons = restProxy.proxyJsonRequest(method, request, Configuration.ROOT_URL, requestBody
-                ?: "", externalConfiguration.stillingApi.url) // TODO Are ""?
-        val responsBody: String = respons.body ?: ""
-        return ResponseEntity(responsBody, respons.statusCode)
+        val respons = restProxy.proxyJsonRequest(method, request, Configuration.ROOT_URL, requestBody, externalConfiguration.stillingApi.url)
+        return ResponseEntity(respons.body, respons.statusCode)
     }
 
     @Unprotected // Fordi kandidatsøk har hentet stillinger uten token frem til nå.
