@@ -28,13 +28,12 @@ class RestProxy(val restTemplate: RestTemplate, val tokenUtils: TokenUtils) {
                          targetUrl: String): ResponseEntity<String> {
         val url = buildProxyTargetUrl(request, stripPathPrefix, targetUrl)
         LOG.debug("Proxy til URL=$url, HTTP-metode=$method")
-        val response = restTemplate.exchange(
+        return restTemplate.exchange(
                 url,
                 method,
                 HttpEntity(body, proxyHeaders()),
-                String::class.java)
-        LOG.debug("Mottok response.body=${response.body}")
-        return response
+                String::class.java
+        )
     }
 
 
@@ -46,7 +45,6 @@ class RestProxy(val restTemplate: RestTemplate, val tokenUtils: TokenUtils) {
             ).toMultiValueMap()
 
     private fun buildProxyTargetUrl(request: HttpServletRequest, stripPrefix: String, targetUrl: String): URI {
-        LOG.debug("proxy til url {}", targetUrl)
         return UriComponentsBuilder.fromUriString(targetUrl)
                 .path(request.requestURI.substring(stripPrefix.length))
                 .replaceQuery(request.queryString)
