@@ -24,22 +24,27 @@ class RestProxy(val restTemplate: RestTemplate, val tokenUtils: TokenUtils) {
     fun proxyJsonRequest(method: HttpMethod,
                          request: HttpServletRequest,
                          stripPathPrefix: String,
-                         body: String, targetUrl: String): ResponseEntity<String> =
-        restTemplate.exchange(
-                buildProxyTargetUrl(request, stripPathPrefix, targetUrl),
+                         body: String,
+                         targetUrl: String): ResponseEntity<String> {
+        val url = buildProxyTargetUrl(request, stripPathPrefix, targetUrl)
+        LOG.debug("Proxy til URL=$url, HTTP-metode=$method")
+        return restTemplate.exchange(
+                url,
                 method,
-                HttpEntity(body, proxyHeaders(request)),
-                String::class.java)
+                HttpEntity(body, proxyHeaders()),
+                String::class.java
+        )
+    }
 
-    fun proxyHeaders(request: HttpServletRequest): MultiValueMap<String, String> =
+
+    private fun proxyHeaders(): MultiValueMap<String, String> =
             mapOf(
                     CONTENT_TYPE to APPLICATION_JSON_VALUE,
                     ACCEPT to APPLICATION_JSON_VALUE,
                     AUTHORIZATION to "Bearer ${tokenUtils.hentOidcToken()}}"
             ).toMultiValueMap()
 
-    protected fun buildProxyTargetUrl(request: HttpServletRequest, stripPrefix: String, targetUrl: String): URI {
-        LOG.debug("proxy til url {}", targetUrl)
+    private fun buildProxyTargetUrl(request: HttpServletRequest, stripPrefix: String, targetUrl: String): URI {
         return UriComponentsBuilder.fromUriString(targetUrl)
                 .path(request.requestURI.substring(stripPrefix.length))
                 .replaceQuery(request.queryString)
