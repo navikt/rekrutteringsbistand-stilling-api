@@ -6,6 +6,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.options
 import com.github.tomakehurst.wiremock.junit.WireMockRule
+import no.nav.rekrutteringsbistand.api.Testdata.anyJsonRequestEntity
 import no.nav.rekrutteringsbistand.api.Testdata.enAnnenStillingsinfo
 import no.nav.rekrutteringsbistand.api.Testdata.enPage
 import no.nav.rekrutteringsbistand.api.Testdata.enStilling
@@ -23,9 +24,12 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.core.ParameterizedTypeReference
-import org.springframework.http.*
+import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders.*
+import org.springframework.http.HttpMethod
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
+import org.springframework.http.ResponseEntity
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit4.SpringRunner
 
@@ -121,7 +125,7 @@ internal class StillingComponentTest {
                     }
                 """.trimIndent()
         mockString("/search-api/underenhet/_search", stillingsSokResponsMedNorskeBokstaver)
-        restTemplate.postForObject("$localBaseUrl/search-api/underenhet/_search", null, String::class.java).also {
+        restTemplate.postForObject("$localBaseUrl/search-api/underenhet/_search", anyJsonRequestEntity, String::class.java).also {
             assertThat(it).isEqualTo(stillingsSokResponsMedNorskeBokstaver)
         }
     }
@@ -129,7 +133,7 @@ internal class StillingComponentTest {
     @Test
     fun `POST mot søk skal videresende HTTP error respons fra pam-ad-api uendret`() {
         mockServerfeil("/search-api/underenhet/_search")
-        restTemplate.exchange("$localBaseUrl/search-api/underenhet/_search", HttpMethod.POST, null, String::class.java).also {
+        restTemplate.exchange("$localBaseUrl/search-api/underenhet/_search", HttpMethod.POST, anyJsonRequestEntity, String::class.java).also {
             assertThat(it.statusCode).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
         }
     }
