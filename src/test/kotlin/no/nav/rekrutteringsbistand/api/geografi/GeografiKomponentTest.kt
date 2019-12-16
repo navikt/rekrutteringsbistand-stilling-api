@@ -4,7 +4,7 @@ import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.github.tomakehurst.wiremock.junit.WireMockRule
 import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoRepository
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -15,6 +15,7 @@ import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit4.SpringRunner
@@ -131,14 +132,42 @@ internal class GeografiKomponentTest {
                    ]
                 """.trimIndent()
         mockString("/rekrutteringsbistand/api/v1/geography/counties", fylkerespons)
-        restTemplate.postForObject("$localBaseUrl/rekrutteringsbistand/api/v1/geography/counties", HttpEntity("{}", HttpHeaders()), String::class.java).also {
-            Assertions.assertThat(it).isEqualTo(fylkerespons)
+        restTemplate.getForEntity("$localBaseUrl/rekrutteringsbistand/api/v1/geography/counties", String::class.java).also {
+            assertThat(it.statusCode).isEqualTo(HttpStatus.OK)
+            assertThat(it.body).isEqualTo(fylkerespons)
+        }
+    }
+
+    @Test
+    fun `GET mot municipals skal returnere HTTP 200 med kommuner`() {
+        mockString("/rekrutteringsbistand/api/v1/geography/municipals", kommunerJson);
+        restTemplate.getForEntity("$localBaseUrl/rekrutteringsbistand/api/v1/geography/municipals", String::class.java).also {
+            assertThat(it.statusCode).isEqualTo(HttpStatus.OK)
+            assertThat(it.body).isEqualTo(kommunerJson)
+        };
+    }
+
+    @Test
+    fun `GET mot categories-with-altnames skal returnere HTTP 200 med STYRK-kategorier`() {
+        mockString("/rekrutteringsbistand/api/v1/categories-with-altnames", styrkkoderJson);
+        restTemplate.getForEntity("$localBaseUrl/rekrutteringsbistand/api/v1/categories-with-altnames", String::class.java).also {
+            assertThat(it.statusCode).isEqualTo(HttpStatus.OK)
+            assertThat(it.body).isEqualTo(styrkkoderJson)
+        }
+    }
+
+    @Test
+    fun `GET mot postdata skal returnere HTTP 200 med informasjon om postnumre`() {
+        mockString("/rekrutteringsbistand/api/v1/postdata", postnumreJson);
+        restTemplate.getForEntity("$localBaseUrl/rekrutteringsbistand/api/v1/postdata", String::class.java).also {
+            assertThat(it.statusCode).isEqualTo(HttpStatus.OK)
+            assertThat(it.body).isEqualTo(postnumreJson)
         }
     }
 
     private fun mockString(urlPath: String, body: String) {
         wiremock.stubFor(
-                WireMock.post(WireMock.urlPathMatching(urlPath))
+                WireMock.get(WireMock.urlPathMatching(urlPath))
                         .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
                         .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
                         .withHeader(HttpHeaders.AUTHORIZATION, WireMock.matching("Bearer .*}"))
@@ -148,5 +177,52 @@ internal class GeografiKomponentTest {
                                 .withBody(body))
         )
     }
+
+    private val kommunerJson = """
+            [
+                {
+                    "code": "1818",
+                    "name": "HERØY (NORDLAND)",
+                    "countyCode": "18"
+                },
+                {
+                    "code": "1903",
+                    "name": "HARSTAD",
+                    "countyCode": "19"
+                }
+            ]
+        """.trimIndent()
+
+    private val styrkkoderJson = """
+            [
+                {
+                    "id": 393,
+                    "code": "1311.21",
+                    "categoryType": "STYRK08NAV",
+                    "name": "Fylkesgartner",
+                    "description": null,
+                    "parentId": 372,
+                    "alternativeNames": []
+                }
+            ]
+        """.trimIndent()
+
+    private val postnumreJson = """
+            [
+                {
+                    "postalCode": "4971",
+                    "city": "SUNDEBRU",
+                    "municipality": {
+                        "code": "0911",
+                        "name": "GJERSTAD",
+                        "countyCode": "09"
+                    },
+                    "county": {
+                        "code": "09",
+                        "name": "AUST-AGDER"
+                    }
+                }
+            ]
+        """.trimIndent()
 }
 
