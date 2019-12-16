@@ -4,7 +4,7 @@ import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.github.tomakehurst.wiremock.junit.WireMockRule
 import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoRepository
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -15,6 +15,7 @@ import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit4.SpringRunner
@@ -40,7 +41,7 @@ internal class GeografiKomponentTest {
     }
 
     @Test
-    fun `GET mot counties skal returnere fylker`() {
+    fun `Skal kunne hente fylker`() {
         val fylkerespons =
                 """
                    [
@@ -132,13 +133,51 @@ internal class GeografiKomponentTest {
                 """.trimIndent()
         mockString("/rekrutteringsbistand/api/v1/geography/counties", fylkerespons)
         restTemplate.postForObject("$localBaseUrl/rekrutteringsbistand/api/v1/geography/counties", HttpEntity("{}", HttpHeaders()), String::class.java).also {
-            Assertions.assertThat(it).isEqualTo(fylkerespons)
+            assertThat(it).isEqualTo(fylkerespons)
         }
     }
 
     @Test
-    fun `GET mot municipals skal returnere kommuner`() {
-        val respons = """
+    fun `GET mot municipals skal returnere HTTP 200 med kommuner`() {
+        mockString("/rekrutteringsbistand/api/v1/geography/municipals", kommunerJson);
+        restTemplate.postForEntity("$localBaseUrl/rekrutteringsbistand/api/v1/geography/municipals", null, String::class.java).also {
+            assertThat(it.statusCode).isEqualTo(HttpStatus.OK)
+            assertThat(it.body).isEqualTo(kommunerJson)
+        };
+    }
+
+    @Test
+    fun `GET mot categories-with-altnames skal returnere HTTP 200 med STYRK-kategorier`() {
+        mockString("/rekrutteringsbistand/api/v1/categories-with-altnames", styrkkoderJson);
+        restTemplate.postForEntity("$localBaseUrl/rekrutteringsbistand/api/v1/categories-with-altnames", null, String::class.java).also {
+            assertThat(it.statusCode).isEqualTo(HttpStatus.OK)
+            assertThat(it.body).isEqualTo(styrkkoderJson)
+        }
+    }
+
+    @Test
+    fun `GET mot postdata skal returnere HTTP 200 med informasjon om postnumre`() {
+        mockString("/rekrutteringsbistand/api/v1/postdata", postnumreJson);
+        restTemplate.postForEntity("$localBaseUrl/rekrutteringsbistand/api/v1/postdata", null, String::class.java).also {
+            assertThat(it.statusCode).isEqualTo(HttpStatus.OK)
+            assertThat(it.body).isEqualTo(postnumreJson)
+        }
+    }
+
+    private fun mockString(urlPath: String, body: String) {
+        wiremock.stubFor(
+                WireMock.post(WireMock.urlPathMatching(urlPath))
+                        .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
+                        .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
+                        .withHeader(HttpHeaders.AUTHORIZATION, WireMock.matching("Bearer .*}"))
+                        .willReturn(WireMock.aResponse().withStatus(200)
+                                .withHeader(HttpHeaders.CONNECTION, "close") // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
+                                .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                                .withBody(body))
+        )
+    }
+
+    private val kommunerJson = """
             [
                 {
                     "code": "1818",
@@ -153,15 +192,7 @@ internal class GeografiKomponentTest {
             ]
         """.trimIndent()
 
-        mockString("/rekrutteringsbistand/api/v1/geography/municipals", respons);
-        restTemplate.postForObject("$localBaseUrl/rekrutteringsbistand/api/v1/geography/municipals", HttpEntity("{}", HttpHeaders()), String::class.java).also {
-            Assertions.assertThat(it).isEqualTo(respons)
-        }
-    }
-
-    @Test
-    fun `GET mot categories-with-altnames skal returnere STYRK-kategorier`() {
-        val respons = """
+    private val styrkkoderJson = """
             [
                 {
                     "id": 393,
@@ -173,18 +204,9 @@ internal class GeografiKomponentTest {
                     "alternativeNames": []
                 }
             ]
-
         """.trimIndent()
 
-        mockString("/rekrutteringsbistand/api/v1/categories-with-altnames", respons);
-        restTemplate.postForObject("$localBaseUrl/rekrutteringsbistand/api/v1/categories-with-altnames", HttpEntity("{}", HttpHeaders()), String::class.java).also {
-            Assertions.assertThat(it).isEqualTo(respons)
-        }
-    }
-
-    @Test
-    fun `GET mot postdata skal returnere informasjon om postnumre`() {
-        val respons = """
+    private val postnumreJson = """
             [
                 {
                     "postalCode": "4971",
@@ -201,24 +223,5 @@ internal class GeografiKomponentTest {
                 }
             ]
         """.trimIndent()
-
-        mockString("/rekrutteringsbistand/api/v1/postdata", respons);
-        restTemplate.postForObject("$localBaseUrl/rekrutteringsbistand/api/v1/postdata", HttpEntity("{}", HttpHeaders()), String::class.java).also {
-            Assertions.assertThat(it).isEqualTo(respons)
-        }
-    }
-
-    private fun mockString(urlPath: String, body: String) {
-        wiremock.stubFor(
-                WireMock.post(WireMock.urlPathMatching(urlPath))
-                        .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
-                        .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
-                        .withHeader(HttpHeaders.AUTHORIZATION, WireMock.matching("Bearer .*}"))
-                        .willReturn(WireMock.aResponse().withStatus(200)
-                                .withHeader(HttpHeaders.CONNECTION, "close") // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
-                                .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                                .withBody(body))
-        )
-    }
 }
 
