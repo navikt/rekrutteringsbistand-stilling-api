@@ -40,7 +40,7 @@ internal class GeografiKomponentTest {
     }
 
     @Test
-    fun `Skal kunne hente fylker`() {
+    fun `GET mot counties skal returnere fylker`() {
         val fylkerespons =
                 """
                    [
@@ -133,6 +133,78 @@ internal class GeografiKomponentTest {
         mockString("/rekrutteringsbistand/api/v1/geography/counties", fylkerespons)
         restTemplate.postForObject("$localBaseUrl/rekrutteringsbistand/api/v1/geography/counties", HttpEntity("{}", HttpHeaders()), String::class.java).also {
             Assertions.assertThat(it).isEqualTo(fylkerespons)
+        }
+    }
+
+    @Test
+    fun `GET mot municipals skal returnere kommuner`() {
+        val respons = """
+            [
+                {
+                    "code": "1818",
+                    "name": "HERØY (NORDLAND)",
+                    "countyCode": "18"
+                },
+                {
+                    "code": "1903",
+                    "name": "HARSTAD",
+                    "countyCode": "19"
+                }
+            ]
+        """.trimIndent()
+
+        mockString("/rekrutteringsbistand/api/v1/geography/municipals", respons);
+        restTemplate.postForObject("$localBaseUrl/rekrutteringsbistand/api/v1/geography/municipals", HttpEntity("{}", HttpHeaders()), String::class.java).also {
+            Assertions.assertThat(it).isEqualTo(respons)
+        }
+    }
+
+    @Test
+    fun `GET mot categories-with-altnames skal returnere STYRK-kategorier`() {
+        val respons = """
+            [
+                {
+                    "id": 393,
+                    "code": "1311.21",
+                    "categoryType": "STYRK08NAV",
+                    "name": "Fylkesgartner",
+                    "description": null,
+                    "parentId": 372,
+                    "alternativeNames": []
+                }
+            ]
+
+        """.trimIndent()
+
+        mockString("/rekrutteringsbistand/api/v1/categories-with-altnames", respons);
+        restTemplate.postForObject("$localBaseUrl/rekrutteringsbistand/api/v1/categories-with-altnames", HttpEntity("{}", HttpHeaders()), String::class.java).also {
+            Assertions.assertThat(it).isEqualTo(respons)
+        }
+    }
+
+    @Test
+    fun `GET mot postdata skal returnere informasjon om postnumre`() {
+        val respons = """
+            [
+                {
+                    "postalCode": "4971",
+                    "city": "SUNDEBRU",
+                    "municipality": {
+                        "code": "0911",
+                        "name": "GJERSTAD",
+                        "countyCode": "09"
+                    },
+                    "county": {
+                        "code": "09",
+                        "name": "AUST-AGDER"
+                    }
+                }
+            ]
+        """.trimIndent()
+
+        mockString("/rekrutteringsbistand/api/v1/postdata", respons);
+        restTemplate.postForObject("$localBaseUrl/rekrutteringsbistand/api/v1/postdata", HttpEntity("{}", HttpHeaders()), String::class.java).also {
+            Assertions.assertThat(it).isEqualTo(respons)
         }
     }
 
