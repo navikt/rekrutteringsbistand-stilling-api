@@ -11,8 +11,8 @@ import org.junit.runner.RunWith
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.boot.web.server.LocalServerPort
-import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit4.SpringRunner
@@ -38,25 +38,54 @@ internal class GeografiKomponentTest {
     }
 
     @Test
-    fun `Skal kunne hente fylker`() {
+    fun `GET mot counties skal returnere HTTP 200 med fylker`() {
         mockString("/rekrutteringsbistand/api/v1/geography/counties", fylkeResponsBody)
-        restTemplate.postForObject("$localBaseUrl/rekrutteringsbistand/api/v1/geography/counties", HttpEntity("{}", HttpHeaders()), String::class.java).also {
-            assertThat(it).isEqualTo(fylkeResponsBody)
+        restTemplate.getForEntity("$localBaseUrl/rekrutteringsbistand/api/v1/geography/counties", String::class.java).also {
+            assertThat(it.statusCode).isEqualTo(HttpStatus.OK)
+            assertThat(it.body).isEqualTo(fylkeResponsBody)
         }
     }
 
     @Test
-    fun `Skal kunne hente land`() {
+    fun `GET mot countries skal returnere HTTP 200 med land`() {
         mockString("/rekrutteringsbistand/api/v1/geography/countries", landResponsBody)
-        restTemplate.postForObject("$localBaseUrl/rekrutteringsbistand/api/v1/geography/countries", HttpEntity(null, HttpHeaders()), String::class.java).also {
-            assertThat(it).isEqualTo(landResponsBody)
+        restTemplate.getForEntity("$localBaseUrl/rekrutteringsbistand/api/v1/geography/countries", String::class.java).also {
+            assertThat(it.statusCode).isEqualTo(HttpStatus.OK)
+            assertThat(it.body).isEqualTo(landResponsBody)
+        }
+    }
+
+    @Test
+    fun `GET mot municipals skal returnere HTTP 200 med kommuner`() {
+        mockString("/rekrutteringsbistand/api/v1/geography/municipals", kommunerJson)
+        restTemplate.getForEntity("$localBaseUrl/rekrutteringsbistand/api/v1/geography/municipals", String::class.java).also {
+            assertThat(it.statusCode).isEqualTo(HttpStatus.OK)
+            assertThat(it.body).isEqualTo(kommunerJson)
+        }
+    }
+
+    @Test
+    fun `GET mot categories-with-altnames skal returnere HTTP 200 med STYRK-kategorier`() {
+        mockString("/rekrutteringsbistand/api/v1/categories-with-altnames", styrkkoderJson)
+        restTemplate.getForEntity("$localBaseUrl/rekrutteringsbistand/api/v1/categories-with-altnames", String::class.java).also {
+            assertThat(it.statusCode).isEqualTo(HttpStatus.OK)
+            assertThat(it.body).isEqualTo(styrkkoderJson)
+        }
+    }
+
+    @Test
+    fun `GET mot postdata skal returnere HTTP 200 med informasjon om postnumre`() {
+        mockString("/rekrutteringsbistand/api/v1/postdata", postnumreJson);
+        restTemplate.getForEntity("$localBaseUrl/rekrutteringsbistand/api/v1/postdata", String::class.java).also {
+            assertThat(it.statusCode).isEqualTo(HttpStatus.OK)
+            assertThat(it.body).isEqualTo(postnumreJson)
         }
     }
 
 
     private fun mockString(urlPath: String, responseBody: String) {
         wiremock.stubFor(
-                WireMock.post(WireMock.urlPathMatching(urlPath))
+                WireMock.get(WireMock.urlPathMatching(urlPath))
                         .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
                         .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
                         .withHeader(HttpHeaders.AUTHORIZATION, WireMock.matching("Bearer .*}"))
@@ -74,5 +103,51 @@ internal class GeografiKomponentTest {
     private val fylkeResponsBody = """
        [{"code":"02","name":"AKERSHUS"},{"code":"03","name":"OSLO"},{"code":"09","name":"AUST-AGDER"},{"code":"06","name":"BUSKERUD"},{"code":"08","name":"TELEMARK"},{"code":"23","name":"KONTINENTALSOKKELEN"},{"code":"05","name":"OPPLAND"},{"code":"15","name":"MØRE OG ROMSDAL"},{"code":"11","name":"ROGALAND"},{"code":"12","name":"HORDALAND"},{"code":"18","name":"NORDLAND"},{"code":"20","name":"FINNMARK"},{"code":"14","name":"SOGN OG FJORDANE"},{"code":"21","name":"SVALBARD"},{"code":"04","name":"HEDMARK"},{"code":"50","name":"TRØNDELAG"},{"code":"22","name":"JAN MAYEN"},{"code":"19","name":"TROMS"},{"code":"10","name":"VEST-AGDER"},{"code":"07","name":"VESTFOLD"},{"code":"01","name":"ØSTFOLD"}]
        """.trimIndent()
-}
 
+    private val kommunerJson = """
+            [
+                {
+                    "code": "1818",
+                    "name": "HERØY (NORDLAND)",
+                    "countyCode": "18"
+                },
+                {
+                    "code": "1903",
+                    "name": "HARSTAD",
+                    "countyCode": "19"
+                }
+            ]
+        """.trimIndent()
+
+    private val styrkkoderJson = """
+            [
+                {
+                    "id": 393,
+                    "code": "1311.21",
+                    "categoryType": "STYRK08NAV",
+                    "name": "Fylkesgartner",
+                    "description": null,
+                    "parentId": 372,
+                    "alternativeNames": []
+                }
+            ]
+        """.trimIndent()
+
+    private val postnumreJson = """
+            [
+                {
+                    "postalCode": "4971",
+                    "city": "SUNDEBRU",
+                    "municipality": {
+                        "code": "0911",
+                        "name": "GJERSTAD",
+                        "countyCode": "09"
+                    },
+                    "county": {
+                        "code": "09",
+                        "name": "AUST-AGDER"
+                    }
+                }
+            ]
+        """.trimIndent()
+}
