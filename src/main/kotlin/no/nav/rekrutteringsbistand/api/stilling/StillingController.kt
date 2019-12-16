@@ -1,5 +1,6 @@
 package no.nav.rekrutteringsbistand.api.stilling
 
+import no.nav.rekrutteringsbistand.api.support.LOG
 import no.nav.rekrutteringsbistand.api.support.config.Configuration
 import no.nav.rekrutteringsbistand.api.support.config.ExternalConfiguration
 import no.nav.rekrutteringsbistand.api.support.rest.RestProxy
@@ -32,7 +33,7 @@ class StillingController(
 
     @RequestMapping("/rekrutteringsbistand/api/v1/**")
     fun proxyGetTilStillingsApi(method: HttpMethod, request: HttpServletRequest, @RequestBody(required = false) body: String?): ResponseEntity<String> {
-        val respons =  restProxy.proxyJsonRequest(method, request, Configuration.ROOT_URL, body
+        val respons = restProxy.proxyJsonRequest(method, request, Configuration.ROOT_URL, body
                 ?: "", externalConfiguration.stillingApi.url)
         val responsBody: String = respons.body ?: ""
         return ResponseEntity(responsBody, respons.statusCode)
@@ -40,6 +41,16 @@ class StillingController(
 
     @RequestMapping("/search-api/**")
     private fun proxySokTilStillingsApi(method: HttpMethod, request: HttpServletRequest, @RequestBody requestBody: String?): ResponseEntity<String> {
+        LOG.debug("Mottok $method til '/search-api/**' (${request.requestURI})")
+        val respons = restProxy.proxyJsonRequest(method, request, Configuration.ROOT_URL, requestBody
+                ?: "", externalConfiguration.stillingApi.url) // TODO Are ""?
+        val responsBody: String = respons.body ?: ""
+        return ResponseEntity(responsBody, respons.statusCode)
+    }
+
+    @PostMapping("/search-api/underenhet/_search")
+    private fun postSokTilPamAdApi(method: HttpMethod, request: HttpServletRequest, @RequestBody requestBody: String?): ResponseEntity<String> {
+        LOG.debug("Mottok $method til ${request.requestURI}")
         val respons = restProxy.proxyJsonRequest(method, request, Configuration.ROOT_URL, requestBody
                 ?: "", externalConfiguration.stillingApi.url) // TODO Are ""?
         val responsBody: String = respons.body ?: ""
