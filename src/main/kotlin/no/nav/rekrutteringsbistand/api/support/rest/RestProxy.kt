@@ -24,7 +24,7 @@ class RestProxy(val restTemplate: RestTemplate, val tokenUtils: TokenUtils) {
     fun proxyJsonRequest(method: HttpMethod,
                          request: HttpServletRequest,
                          stripPathPrefix: String,
-                         body: String,
+                         body: String?,
                          targetUrl: String): ResponseEntity<String> {
         val url = buildProxyTargetUrl(request, stripPathPrefix, targetUrl)
         LOG.debug("Proxy til URL=$url, HTTP-metode=$method")
