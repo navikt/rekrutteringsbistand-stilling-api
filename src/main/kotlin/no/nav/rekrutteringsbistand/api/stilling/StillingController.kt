@@ -7,6 +7,7 @@ import no.nav.rekrutteringsbistand.api.support.rest.RestProxy
 import no.nav.security.oidc.api.Protected
 import no.nav.security.oidc.api.Unprotected
 import org.springframework.http.HttpMethod
+import org.springframework.http.HttpMethod.POST
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.net.URLDecoder
@@ -49,9 +50,9 @@ class StillingController(
     }
 
     @PostMapping("/search-api/underenhet/_search")
-    private fun postSokTilPamAdApi(method: HttpMethod, request: HttpServletRequest, @RequestBody requestBody: String): ResponseEntity<String> {
-        LOG.debug("Mottok $method til ${request.requestURI}")
-        val respons = restProxy.proxyJsonRequest(method, request, Configuration.ROOT_URL, requestBody, externalConfiguration.stillingApi.url)
+    private fun postSokTilPamAdApi(request: HttpServletRequest, @RequestBody requestBody: String): ResponseEntity<String> {
+        LOG.debug("Mottok ${request.method} til ${request.requestURI}")
+        val respons = restProxy.proxyJsonRequest(POST, request, Configuration.ROOT_URL, requestBody, externalConfiguration.stillingApi.url)
         return ResponseEntity(respons.body, respons.statusCode)
     }
 
