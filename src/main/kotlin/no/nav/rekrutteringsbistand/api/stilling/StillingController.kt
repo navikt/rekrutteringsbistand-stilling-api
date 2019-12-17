@@ -6,8 +6,7 @@ import no.nav.rekrutteringsbistand.api.support.rest.RestProxy
 import no.nav.security.oidc.api.Protected
 import no.nav.security.oidc.api.Unprotected
 import org.springframework.http.HttpMethod
-import org.springframework.http.HttpMethod.GET
-import org.springframework.http.HttpMethod.POST
+import org.springframework.http.HttpMethod.*
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.net.URLDecoder
@@ -34,8 +33,16 @@ class StillingController(
         return ResponseEntity.ok().body(stillingService.oppdaterStilling(uuid, stilling, request.queryString))
     }
 
+    @DeleteMapping("/rekrutteringsbistand/api/v1/ads")
+    fun proxyDeleteTilStillingsApi(request: HttpServletRequest): ResponseEntity<String> {
+        LOG.debug("Mottok ${request.method} til ${request.requestURI}")
+        val respons = restProxy.proxyJsonRequest(DELETE, request, replaceInUrl, null, externalConfiguration.stillingApi.url)
+        return ResponseEntity(respons.body, respons.statusCode)
+    }
+
     @RequestMapping("/rekrutteringsbistand/api/v1/**")
     fun proxyGetTilStillingsApi(method: HttpMethod, request: HttpServletRequest, @RequestBody(required = false) body: String?): ResponseEntity<String> {
+        LOG.debug("Deprecated: Mottok $method til '/search-api/**' (${request.requestURI})")
         val respons = restProxy.proxyJsonRequest(method, request, replaceInUrl, body
                 ?: "", externalConfiguration.stillingApi.url)
         val responsBody: String = respons.body ?: ""
