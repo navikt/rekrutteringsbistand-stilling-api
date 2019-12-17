@@ -1,18 +1,18 @@
 package no.nav.rekrutteringsbistand.api.stilling
 
 import no.nav.rekrutteringsbistand.api.support.LOG
-import no.nav.rekrutteringsbistand.api.support.config.Configuration
 import no.nav.rekrutteringsbistand.api.support.config.ExternalConfiguration
 import no.nav.rekrutteringsbistand.api.support.rest.RestProxy
 import no.nav.security.oidc.api.Protected
 import no.nav.security.oidc.api.Unprotected
 import org.springframework.http.HttpMethod
-import org.springframework.http.HttpMethod.POST
+import org.springframework.http.HttpMethod.*
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 import javax.servlet.http.HttpServletRequest
+
 
 @RestController
 @Protected
@@ -21,6 +21,7 @@ class StillingController(
         val externalConfiguration: ExternalConfiguration,
         val stillingService: StillingService
 ) {
+
 
     @PostMapping("/rekrutteringsbistand/api/v1/ads")
     fun proxyPostTilStillingsApi(request: HttpServletRequest, @RequestBody stilling: Stilling): ResponseEntity<StillingMedStillingsinfo> {
@@ -32,27 +33,43 @@ class StillingController(
         return ResponseEntity.ok().body(stillingService.oppdaterStilling(uuid, stilling, request.queryString))
     }
 
+    @DeleteMapping("/rekrutteringsbistand/api/v1/ads")
+    fun proxyDeleteTilStillingsApi(request: HttpServletRequest): ResponseEntity<String> {
+        LOG.debug("Mottok ${request.method} til ${request.requestURI}")
+        val respons = restProxy.proxyJsonRequest(DELETE, request, replaceInUrl, null, externalConfiguration.stillingApi.url)
+        return ResponseEntity(respons.body, respons.statusCode)
+    }
+
     @RequestMapping("/rekrutteringsbistand/api/v1/**")
     fun proxyGetTilStillingsApi(method: HttpMethod, request: HttpServletRequest, @RequestBody(required = false) body: String?): ResponseEntity<String> {
-        val respons = restProxy.proxyJsonRequest(method, request, Configuration.ROOT_URL, body
+        LOG.debug("Deprecated: Mottok $method til '/rekrutteringsbistand/api/v1/**' (${request.requestURI})")
+        val respons = restProxy.proxyJsonRequest(method, request, replaceInUrl, body
                 ?: "", externalConfiguration.stillingApi.url)
         val responsBody: String = respons.body ?: ""
         return ResponseEntity(responsBody, respons.statusCode)
     }
 
     @RequestMapping("/search-api/**")
+    @Deprecated("Skal erstattes av mer eksplisitte/spesifikke endepunktmetoder")
     private fun proxySokTilStillingsApi(method: HttpMethod, request: HttpServletRequest, @RequestBody requestBody: String?): ResponseEntity<String> {
-        LOG.debug("Mottok $method til '/search-api/**' (${request.requestURI})")
-        val respons = restProxy.proxyJsonRequest(method, request, Configuration.ROOT_URL, requestBody
+        LOG.debug("Deprecated: Mottok $method til '/search-api/**' (${request.requestURI})")
+        val respons = restProxy.proxyJsonRequest(method, request, replaceInUrl, requestBody
                 ?: "", externalConfiguration.stillingApi.url) // TODO Are ""?
         val responsBody: String = respons.body ?: ""
         return ResponseEntity(responsBody, respons.statusCode)
     }
 
+    @GetMapping("/search-api/underenhet/_search")
+    private fun getSokTilPamAdApi(request: HttpServletRequest): ResponseEntity<String> {
+        LOG.debug("Mottok ${request.method} til ${request.requestURI}")
+        val respons = restProxy.proxyJsonRequest(GET, request, replaceInUrl, null, externalConfiguration.stillingApi.url)
+        return ResponseEntity(respons.body, respons.statusCode)
+    }
+
     @PostMapping("/search-api/underenhet/_search")
     private fun postSokTilPamAdApi(request: HttpServletRequest, @RequestBody requestBody: String): ResponseEntity<String> {
         LOG.debug("Mottok ${request.method} til ${request.requestURI}")
-        val respons = restProxy.proxyJsonRequest(POST, request, Configuration.ROOT_URL, requestBody, externalConfiguration.stillingApi.url)
+        val respons = restProxy.proxyJsonRequest(POST, request, replaceInUrl, requestBody, externalConfiguration.stillingApi.url)
         return ResponseEntity(respons.body, respons.statusCode)
     }
 
@@ -80,3 +97,4 @@ class StillingController(
 
 }
 
+private const val replaceInUrl = "/rekrutteringsbistand-api"
