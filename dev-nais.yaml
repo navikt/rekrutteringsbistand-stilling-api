@@ -4,10 +4,10 @@ metadata:
   name: rekrutteringsbistand-api
   namespace: default
   labels:
-    team: teamtag
+    team: {{team}}
 spec:
-  image: navikt/rekrutteringsbistand-api:{{version}}
-  team: teamtag
+  image: {{version}}
+  team: {{team}}
   port: 9501
   ingresses:
     - https://arbeidsgiver.nais.preprod.local/rekrutteringsbistand-api/
