@@ -63,10 +63,10 @@ workflows:
           context: tag-ci
           requires:
             - bygg
-          filters:
-            branches:
-              only:
-                - master
+          # filters:
+            # branches:
+              # only:
+                # - master
       - godkjenn-til-prod:
           type: approval
           requires:
