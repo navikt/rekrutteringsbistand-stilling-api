@@ -6,7 +6,6 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.options
 import com.github.tomakehurst.wiremock.junit.WireMockRule
-import no.nav.rekrutteringsbistand.api.Testdata.anyJsonRequestEntity
 import no.nav.rekrutteringsbistand.api.Testdata.enAnnenStillingsinfo
 import no.nav.rekrutteringsbistand.api.Testdata.enPage
 import no.nav.rekrutteringsbistand.api.Testdata.enStilling
@@ -79,65 +78,6 @@ internal class StillingComponentTest {
             assertThat(it.uuid).isEqualTo(enStillingsinfo.stillingsid.asString())
         }
     }
-
-    @Test
-    fun `POST mot søk skal videresende HTTP respons body med norske tegn fra pam-ad-api uendret`() {
-        val stillingsSokResponsMedNorskeBokstaver =
-                """
-                    {
-                        "took": 52,
-                        "timed_out": false,
-                        "_shards": { "total": 3, "successful": 3, "skipped": 0, "failed": 0 },
-                        "hits": {
-                            "total": { "value": 2182, "relation": "eq" },
-                            "max_score": 10.240799,
-                            "hits": [
-                                {
-                                    "_index": "underenhet20191204",
-                                    "_type": "_doc",
-                                    "_id": "914163854",
-                                    "_score": 10.240799,
-                                    "_source": {
-                                        "organisasjonsnummer": "914163854",
-                                        "navn": "NÆS & NÅS AS",
-                                        "organisasjonsform": "BEDR",
-                                        "antallAnsatte": 6,
-                                        "overordnetEnhet": "914134390",
-                                        "adresse": {
-                                            "adresse": "Klasatjønnveien 30",
-                                            "postnummer": "5172",
-                                            "poststed": "LODDEFJORD",
-                                            "kommunenummer": "1201",
-                                            "kommune": "BERGEN",
-                                            "landkode": "NO",
-                                            "land": "Norge"
-                                        },
-                                        "naringskoder": [
-                                            {
-                                                "kode": "41.200",
-                                                "beskrivelse": "Oppføring av bygninger"
-                                            }
-                                        ]
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                """.trimIndent()
-        mockString("/search-api/underenhet/_search", stillingsSokResponsMedNorskeBokstaver)
-        restTemplate.postForObject("$localBaseUrl/search-api/underenhet/_search", anyJsonRequestEntity, String::class.java).also {
-            assertThat(it).isEqualTo(stillingsSokResponsMedNorskeBokstaver)
-        }
-    }
-
-    @Test
-    fun `POST mot søk skal videresende HTTP error respons fra pam-ad-api uendret`() {
-        mockServerfeil("/search-api/underenhet/_search")
-        restTemplate.exchange("$localBaseUrl/search-api/underenhet/_search", HttpMethod.POST, anyJsonRequestEntity, String::class.java).also {
-            assertThat(it.statusCode).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
-        }
-    }
-
 
     @Test
     fun `GET mot stillinger skal returnere stillinger beriket med stillingsinfo`() {
@@ -260,31 +200,6 @@ internal class StillingComponentTest {
                                 .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
                                 .withBody(objectMapper.writeValueAsString(responseBody)))
         )
-    }
-
-    private fun mockString(urlPath: String, responseBody: String) {
-        stubFor(
-                post(urlPathMatching(urlPath))
-                        .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
-                        .withHeader(ACCEPT, equalTo(APPLICATION_JSON_VALUE))
-                        .withHeader(AUTHORIZATION, matching("Bearer .*}"))
-                        .willReturn(aResponse().withStatus(200)
-                                .withHeader(CONNECTION, "close") // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
-                                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-                                .withBody(responseBody))
-        )
-    }
-
-    private fun mockServerfeil(urlPath: String) {
-        stubFor(
-                post(urlPathMatching(urlPath))
-                        .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
-                        .withHeader(ACCEPT, equalTo(APPLICATION_JSON_VALUE))
-                        .withHeader(AUTHORIZATION, matching("Bearer .*}"))
-                        .willReturn(serverError()
-                                .withHeader(CONNECTION, "close") // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
-                                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-                        ))
     }
 
     @After
