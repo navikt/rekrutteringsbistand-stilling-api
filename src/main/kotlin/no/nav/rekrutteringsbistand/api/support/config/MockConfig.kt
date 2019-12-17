@@ -16,7 +16,7 @@ import org.springframework.http.MediaType
 @Configuration
 class MockConfig {
 
-    @Bean
+    @Bean(name = ["StillingWireMock"])
     fun wireMockServer(): WireMockServer {
         return WireMockServer(wireMockConfig()
                 .notifier(ConsoleNotifier(true))
@@ -28,7 +28,6 @@ class MockConfig {
             stubFor(categoriesTypeahead())
             stubFor(postdata())
             stubFor(municipals())
-            stubFor(mappingBuilderSok())
             start()
             LOG.info("Startet WireMock på port ${port()}")
         }
@@ -103,16 +102,6 @@ class MockConfig {
                     .willReturn(WireMock.aResponse().withStatus(200)
                             .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                             .withBody(municipalsResponse))
-        }
-
-        fun mappingBuilderSok(): MappingBuilder {
-            return WireMock.post(WireMock.urlPathMatching("/search-api/underenhet/_search"))
-                    .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
-                    .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
-                    .withHeader(HttpHeaders.AUTHORIZATION, WireMock.matching("Bearer .*}"))
-                    .willReturn(WireMock.aResponse().withStatus(200)
-                            .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                            .withBody(sokResponse))
         }
 
         private val stillingerResponse = """
@@ -609,69 +598,5 @@ class MockConfig {
             ]
         """.trimIndent()
 
-        val sokResponse = """
-            {
-                "took": 19,
-                "timed_out": false,
-                "_shards": { "total": 5, "successful": 5, "skipped": 0, "failed": 0 },
-                "hits": {
-                    "total": 2,
-                    "max_score": 17.936558,
-                    "hits": [
-                        {
-                            "_index": "underenhet20190816",
-                            "_type": "underenhet",
-                            "_id": "976434099",
-                            "_score": 17.936558,
-                            "_source": {
-                                "organisasjonsnummer": "976434099",
-                                "navn": "TULLEKONTORET AS",
-                                "organisasjonsform": "BEDR",
-                                "antallAnsatte": 1,
-                                "overordnetEnhet": "912819973",
-                                "adresse": {
-                                    "adresse": "Lilleakerveien 37D",
-                                    "postnummer": "0284",
-                                    "poststed": "OSLO",
-                                    "kommunenummer": "0301",
-                                    "kommune": "OSLO",
-                                    "landkode": "NO",
-                                    "land": "Norge"
-                                },
-                                "naringskoder": [
-                                    {
-                                        "kode": "90.012",
-                                        "beskrivelse": "Utovende kunstnere og underholdningsvirksomhet innen scenekunst"
-                                    }
-                                ]
-                            }
-                        },
-                        {
-                            "_index": "underenhet20190816",
-                            "_type": "underenhet",
-                            "_id": "921730810",
-                            "_score": 17.93613,
-                            "_source": {
-                                "organisasjonsnummer": "921730810",
-                                "navn": "TULLEKUNSTNEREN MARTINSEN",
-                                "organisasjonsform": "BEDR",
-                                "antallAnsatte": 0,
-                                "overordnetEnhet": "921323824",
-                                "adresse": {
-                                    "adresse": "Skytterdalen 7",
-                                    "postnummer": "1337",
-                                    "poststed": "SANDVIKA",
-                                    "kommunenummer": "0219",
-                                    "kommune": "ASKER",
-                                    "landkode": "NO",
-                                    "land": "Norge"
-                                },
-                                "naringskoder": [{ "kode": "43.341", "beskrivelse": "Malerarbeid" }]
-                            }
-                        }
-                    ]
-                }
-            }
-        """.trimIndent()
     }
 }

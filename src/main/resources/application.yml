@@ -10,7 +10,7 @@ management:
       locations: classpath:/db/migration
   endpoint.health.show-details: always
 
-spring.profiles.active: local, stillingMock, kandidatlisteMock
+spring.profiles.active: local, stillingMock, kandidatlisteMock, sokMock
 
 ---
 
@@ -32,6 +32,7 @@ spring.h2.console:
 
 external:
   stilling-api.url: http://localhost:9914
+  sok-api.url: http://localhost:9934
   kandidatliste-api.url: http://localhost:9924/pam-kandidatsok-api/rest/veileder/stilling
 
 ---
@@ -40,6 +41,7 @@ spring:
   profiles: eksternStilling
 external:
   stilling-api.url: http://localhost:9014
+  sok-api.url: http://localhost:9934
 
 ---
 
@@ -55,6 +57,7 @@ no.nav.security.oidc:
 
 external:
   stilling-api.url: https://pam-ad-api.nais.preprod.local
+  sok-api.url: https://pam-ad-api.nais.preprod.local
   kandidatliste-api.url: https://pam-kandidatsok-api-q0.nais.preprod.local/pam-kandidatsok-api/rest/veileder/stilling
   unleash.url: https://unleash.nais.adeo.no/api/
 
@@ -80,6 +83,7 @@ no.nav.security.oidc:
 
 external:
   stilling-api.url: https://pam-ad-api.nais.adeo.no
+  sok-api.url: https://pam-ad-api.nais.adeo.no
   kandidatliste-api.url: https://pam-kandidatsok-api.nais.adeo.no/pam-kandidatsok-api/rest/veileder/stilling
   unleash.url: https://unleash.nais.adeo.no/api/
 

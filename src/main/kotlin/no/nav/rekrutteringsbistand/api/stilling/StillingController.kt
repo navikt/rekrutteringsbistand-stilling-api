@@ -36,7 +36,7 @@ class StillingController(
     private fun proxySokTilStillingsApi(method: HttpMethod, request: HttpServletRequest, @RequestBody requestBody: String?): ResponseEntity<String> {
         LOG.debug("Deprecated: Mottok $method til '/search-api/**' (${request.requestURI})")
         val respons = restProxy.proxyJsonRequest(method, request, replaceInUrl, requestBody
-                ?: "", externalConfiguration.stillingApi.url) // TODO Are ""?
+                ?: "", externalConfiguration.sokApi.url) // TODO Are ""?
         val responsBody: String = respons.body ?: ""
         return ResponseEntity(responsBody, respons.statusCode)
     }
@@ -75,14 +75,14 @@ class StillingController(
     @GetMapping("/search-api/underenhet/_search")
     private fun getSokTilPamAdApi(request: HttpServletRequest): ResponseEntity<String> {
         LOG.debug("Mottok ${request.method} til ${request.requestURI}")
-        val respons = restProxy.proxyJsonRequest(GET, request, replaceInUrl, null, externalConfiguration.stillingApi.url)
+        val respons = restProxy.proxyJsonRequest(GET, request, replaceInUrl, null, externalConfiguration.sokApi.url)
         return ResponseEntity(respons.body, respons.statusCode)
     }
 
     @PostMapping("/search-api/underenhet/_search")
     private fun postSokTilPamAdApi(request: HttpServletRequest, @RequestBody requestBody: String): ResponseEntity<String> {
         LOG.debug("Mottok ${request.method} til ${request.requestURI}")
-        val respons = restProxy.proxyJsonRequest(POST, request, replaceInUrl, requestBody, externalConfiguration.stillingApi.url)
+        val respons = restProxy.proxyJsonRequest(POST, request, replaceInUrl, requestBody, externalConfiguration.sokApi.url)
         return ResponseEntity(respons.body, respons.statusCode)
     }
 
