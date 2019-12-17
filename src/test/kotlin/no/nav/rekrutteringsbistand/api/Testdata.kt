@@ -5,6 +5,10 @@ import no.nav.rekrutteringsbistand.api.stilling.Page
 import no.nav.rekrutteringsbistand.api.stilling.Stilling
 import no.nav.rekrutteringsbistand.api.stilling.StillingMedStillingsinfo
 import no.nav.rekrutteringsbistand.api.stillingsinfo.*
+import no.nav.rekrutteringsbistand.api.support.toMultiValueMap
+import org.springframework.http.HttpEntity
+import org.springframework.http.HttpHeaders
+import org.springframework.http.MediaType
 import java.time.LocalDateTime
 import java.util.*
 
@@ -91,4 +95,13 @@ object Testdata {
             deactivatedByExpiry = null,
             activationOnPublishingDate = null
     )
+
+    val anyJsonRequestEntity: HttpEntity<String> by lazy {
+        val requestHeaders = mapOf(
+                HttpHeaders.CONTENT_TYPE to MediaType.APPLICATION_JSON_VALUE,
+                HttpHeaders.ACCEPT to MediaType.APPLICATION_JSON_VALUE,
+                HttpHeaders.AUTHORIZATION to "Bearer .*}").toMultiValueMap()
+        val dummyRequestBody = "{}"
+        HttpEntity(dummyRequestBody, requestHeaders)
+    }
 }
