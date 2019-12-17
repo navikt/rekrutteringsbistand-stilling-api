@@ -40,6 +40,20 @@ class StillingController(
         return ResponseEntity(respons.body, respons.statusCode)
     }
 
+    @GetMapping("/rekrutteringsbistand-api/rekrutteringsbistand/api/v1/geography/municipals")
+    fun proxyGetMunicipals(method: HttpMethod, request: HttpServletRequest): ResponseEntity<String> {
+        LOG.debug("Mottok ${request.method} til ${request.requestURI}")
+        val respons = restProxy.proxyJsonRequest(method, request, replaceInUrl, null, externalConfiguration.stillingApi.url)
+        return ResponseEntity(respons.body, respons.statusCode)
+    }
+
+    @GetMapping("/rekrutteringsbistand-api/rekrutteringsbistand/api/v1/geography/counties")
+    fun proxyGetCounties(method: HttpMethod, request: HttpServletRequest): ResponseEntity<String> {
+        LOG.debug("Mottok ${request.method} til ${request.requestURI}")
+        val respons = restProxy.proxyJsonRequest(method, request, replaceInUrl, null, externalConfiguration.stillingApi.url)
+        return ResponseEntity(respons.body, respons.statusCode)
+    }
+
     @RequestMapping("/rekrutteringsbistand/api/v1/**")
     fun proxyGetTilStillingsApi(method: HttpMethod, request: HttpServletRequest, @RequestBody(required = false) body: String?): ResponseEntity<String> {
         LOG.debug("Deprecated: Mottok $method til '/rekrutteringsbistand/api/v1/**' (${request.requestURI})")
