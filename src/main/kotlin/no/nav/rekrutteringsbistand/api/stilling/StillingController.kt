@@ -42,7 +42,7 @@ class StillingController(
 
     @RequestMapping("/rekrutteringsbistand/api/v1/**")
     fun proxyGetTilStillingsApi(method: HttpMethod, request: HttpServletRequest, @RequestBody(required = false) body: String?): ResponseEntity<String> {
-        LOG.debug("Deprecated: Mottok $method til '/search-api/**' (${request.requestURI})")
+        LOG.debug("Deprecated: Mottok $method til '/rekrutteringsbistand/api/v1/**' (${request.requestURI})")
         val respons = restProxy.proxyJsonRequest(method, request, replaceInUrl, body
                 ?: "", externalConfiguration.stillingApi.url)
         val responsBody: String = respons.body ?: ""
