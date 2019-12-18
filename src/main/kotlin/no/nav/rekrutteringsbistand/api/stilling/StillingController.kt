@@ -58,35 +58,35 @@ class StillingController(
         return ResponseEntity(respons.body, respons.statusCode)
     }
 
-    @GetMapping("/rekrutteringsbistand-api/rekrutteringsbistand/api/v1/geography/municipals")
+    @GetMapping("/rekrutteringsbistand/api/v1/geography/municipals")
     fun proxyGetMunicipals(request: HttpServletRequest): ResponseEntity<String> {
         LOG.debug("Mottok ${request.method} til ${request.requestURI}")
         val respons = restProxy.proxyJsonRequest(GET, request, replaceInUrl, null, externalConfiguration.stillingApi.url)
         return ResponseEntity(respons.body, respons.statusCode)
     }
 
-    @GetMapping("/rekrutteringsbistand-api/rekrutteringsbistand/api/v1/geography/counties")
+    @GetMapping("/rekrutteringsbistand/api/v1/geography/counties")
     fun proxyGetCounties(request: HttpServletRequest): ResponseEntity<String> {
         LOG.debug("Mottok ${request.method} til ${request.requestURI}")
         val respons = restProxy.proxyJsonRequest(GET, request, replaceInUrl, null, externalConfiguration.stillingApi.url)
         return ResponseEntity(respons.body, respons.statusCode)
     }
 
-    @GetMapping("/rekrutteringsbistand-api/rekrutteringsbistand/api/v1/geography/countries")
+    @GetMapping("/rekrutteringsbistand/api/v1/geography/countries")
     fun proxyGetCountries(request: HttpServletRequest): ResponseEntity<String> {
         LOG.debug("Mottok ${request.method} til ${request.requestURI}")
         val respons = restProxy.proxyJsonRequest(GET, request, replaceInUrl, null, externalConfiguration.stillingApi.url)
         return ResponseEntity(respons.body, respons.statusCode)
     }
 
-    @GetMapping("/rekrutteringsbistand-api/rekrutteringsbistand/api/v1/categories-with-altnames")
+    @GetMapping("/rekrutteringsbistand/api/v1/categories-with-altnames")
     fun proxyGetCategoriesWithAltnames(request: HttpServletRequest): ResponseEntity<String> {
         LOG.debug("Mottok ${request.method} til ${request.requestURI}")
         val respons = restProxy.proxyJsonRequest(GET, request, replaceInUrl, null, externalConfiguration.stillingApi.url)
         return ResponseEntity(respons.body, respons.statusCode)
     }
 
-    @GetMapping("/rekrutteringsbistand-api/rekrutteringsbistand/api/v1/postdata")
+    @GetMapping("/rekrutteringsbistand/api/v1/postdata")
     fun proxyGetPostdata(request: HttpServletRequest): ResponseEntity<String> {
         LOG.debug("Mottok ${request.method} til ${request.requestURI}")
         val respons = restProxy.proxyJsonRequest(GET, request, replaceInUrl, null, externalConfiguration.stillingApi.url)
