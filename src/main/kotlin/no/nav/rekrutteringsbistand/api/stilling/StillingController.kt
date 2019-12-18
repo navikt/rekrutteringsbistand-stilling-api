@@ -1,5 +1,9 @@
 package no.nav.rekrutteringsbistand.api.stilling
 
+import arrow.core.None
+import arrow.core.Some
+import arrow.core.getOrElse
+import arrow.core.toOption
 import no.nav.rekrutteringsbistand.api.support.LOG
 import no.nav.rekrutteringsbistand.api.support.config.ExternalConfiguration
 import no.nav.rekrutteringsbistand.api.support.rest.RestProxy
@@ -24,7 +28,9 @@ class StillingController(
     @RequestMapping("/rekrutteringsbistand/api/v1/**")
     @Deprecated("Skal erstattes av mer eksplisitte/spesifikke endepunktmetoder")
     fun proxyGetTilStillingsApi(method: HttpMethod, request: HttpServletRequest, @RequestBody(required = false) body: String?): ResponseEntity<String> {
-        LOG.debug("Deprecated: Mottok $method til '/rekrutteringsbistand/api/v1/**' (${request.requestURI})")
+        val slashQueryString: String = request.queryString.toOption().map { it.trim() }.flatMap { if (it.isEmpty()) None else Some(it) }.map { "/$it" }.getOrElse { "" }
+        val uriWithQueryString = request.requestURI.trimEnd { it == '/' } + slashQueryString
+        LOG.debug("Deprecated: Mottok $method til '/rekrutteringsbistand/api/v1/**' ($uriWithQueryString)")
         val respons = restProxy.proxyJsonRequest(method, request, replaceInUrl, body
                 ?: "", externalConfiguration.stillingApi.url)
         val responsBody: String = respons.body ?: ""
@@ -34,7 +40,9 @@ class StillingController(
     @RequestMapping("/search-api/**")
     @Deprecated("Skal erstattes av mer eksplisitte/spesifikke endepunktmetoder")
     private fun proxySokTilStillingsApi(method: HttpMethod, request: HttpServletRequest, @RequestBody requestBody: String?): ResponseEntity<String> {
-        LOG.debug("Deprecated: Mottok $method til '/search-api/**' (${request.requestURI})")
+        val slashQueryString: String = request.queryString.toOption().map { it.trim() }.flatMap { if (it.isEmpty()) None else Some(it) }.map { "/$it" }.getOrElse { "" }
+        val uriWithQueryString = request.requestURI.trimEnd { it == '/' } + slashQueryString
+        LOG.debug("Deprecated: Mottok $method til '/search-api/**' ($uriWithQueryString)")
         val respons = restProxy.proxyJsonRequest(method, request, replaceInUrl, requestBody
                 ?: "", externalConfiguration.sokApi.url) // TODO Are ""?
         val responsBody: String = respons.body ?: ""
@@ -51,42 +59,42 @@ class StillingController(
         return ResponseEntity.ok().body(stillingService.oppdaterStilling(uuid, stilling, request.queryString))
     }
 
-    @DeleteMapping("/rekrutteringsbistand/api/v1/ads")
+    @DeleteMapping("/rekrutteringsbistand/api/v1/ads/*")
     fun proxyDeleteTilStillingsApi(request: HttpServletRequest): ResponseEntity<String> {
         LOG.debug("Mottok ${request.method} til ${request.requestURI}")
         val respons = restProxy.proxyJsonRequest(DELETE, request, replaceInUrl, null, externalConfiguration.stillingApi.url)
         return ResponseEntity(respons.body, respons.statusCode)
     }
 
-    @GetMapping("/rekrutteringsbistand-api/rekrutteringsbistand/api/v1/geography/municipals")
+    @GetMapping("/rekrutteringsbistand/api/v1/geography/municipals")
     fun proxyGetMunicipals(request: HttpServletRequest): ResponseEntity<String> {
         LOG.debug("Mottok ${request.method} til ${request.requestURI}")
         val respons = restProxy.proxyJsonRequest(GET, request, replaceInUrl, null, externalConfiguration.stillingApi.url)
         return ResponseEntity(respons.body, respons.statusCode)
     }
 
-    @GetMapping("/rekrutteringsbistand-api/rekrutteringsbistand/api/v1/geography/counties")
+    @GetMapping("/rekrutteringsbistand/api/v1/geography/counties")
     fun proxyGetCounties(request: HttpServletRequest): ResponseEntity<String> {
         LOG.debug("Mottok ${request.method} til ${request.requestURI}")
         val respons = restProxy.proxyJsonRequest(GET, request, replaceInUrl, null, externalConfiguration.stillingApi.url)
         return ResponseEntity(respons.body, respons.statusCode)
     }
 
-    @GetMapping("/rekrutteringsbistand-api/rekrutteringsbistand/api/v1/geography/countries")
+    @GetMapping("/rekrutteringsbistand/api/v1/geography/countries")
     fun proxyGetCountries(request: HttpServletRequest): ResponseEntity<String> {
         LOG.debug("Mottok ${request.method} til ${request.requestURI}")
         val respons = restProxy.proxyJsonRequest(GET, request, replaceInUrl, null, externalConfiguration.stillingApi.url)
         return ResponseEntity(respons.body, respons.statusCode)
     }
 
-    @GetMapping("/rekrutteringsbistand-api/rekrutteringsbistand/api/v1/categories-with-altnames")
+    @GetMapping("/rekrutteringsbistand/api/v1/categories-with-altnames")
     fun proxyGetCategoriesWithAltnames(request: HttpServletRequest): ResponseEntity<String> {
         LOG.debug("Mottok ${request.method} til ${request.requestURI}")
         val respons = restProxy.proxyJsonRequest(GET, request, replaceInUrl, null, externalConfiguration.stillingApi.url)
         return ResponseEntity(respons.body, respons.statusCode)
     }
 
-    @GetMapping("/rekrutteringsbistand-api/rekrutteringsbistand/api/v1/postdata")
+    @GetMapping("/rekrutteringsbistand/api/v1/postdata")
     fun proxyGetPostdata(request: HttpServletRequest): ResponseEntity<String> {
         LOG.debug("Mottok ${request.method} til ${request.requestURI}")
         val respons = restProxy.proxyJsonRequest(GET, request, replaceInUrl, null, externalConfiguration.stillingApi.url)
