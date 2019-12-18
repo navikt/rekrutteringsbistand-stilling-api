@@ -67,7 +67,6 @@ class StillingController(
     }
 
     @GetMapping("/rekrutteringsbistand/api/v1/geography/municipals")
-
     fun proxyGetMunicipals(request: HttpServletRequest): ResponseEntity<String> {
         LOG.debug("Mottok ${request.method} til ${request.requestURI}")
         val respons = restProxy.proxyJsonRequest(GET, request, replaceInUrl, null, externalConfiguration.stillingApi.url)
