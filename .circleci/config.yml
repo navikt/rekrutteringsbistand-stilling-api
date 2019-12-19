@@ -47,7 +47,7 @@ jobs:
             - prod-nais.yaml
             - prod-alerts.yaml
             - Dockerfile
-            - /target/rekrutteringsbistand-api-0.0.1-SNAPSHOT.jar
+            - target/rekrutteringsbistand-api-0.0.1-SNAPSHOT.jar
 
   deploy-to-dev:
     docker:
