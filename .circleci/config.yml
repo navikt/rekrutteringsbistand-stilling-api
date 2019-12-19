@@ -95,10 +95,10 @@ workflows:
                 - circleci-massasje
                 ##### ##### ##### ##### #####
       - approve-for-prod:
-          name: "Approve to prod-fss"
+          name: "Approve for prod-fss"
           type: approval
           requires:
-            - "deploy-to-dev"
+            - "Deploy to dev-fss"
           filters:
             branches:
               only:
@@ -107,7 +107,7 @@ workflows:
           name: "Deploy to prod-fss"
           context: tag-ci # Needed for Docker Hub credentials and GITHUB_PRIVATE_KEY. Would rather like to use context "NAIS deploy"
           requires:
-            - "approve-for-prod"
+            - "Approve to prod-fss"
           filters:
             branches:
               only:
