@@ -107,7 +107,7 @@ workflows:
           name: "Deploy to prod-fss"
           context: tag-ci # Needed for Docker Hub credentials and GITHUB_PRIVATE_KEY. Would rather like to use context "NAIS deploy"
           requires:
-            - "Approve to prod-fss"
+            - "Approve for prod-fss"
           filters:
             branches:
               only:
