@@ -15,7 +15,7 @@ commands:
 jobs:
   build:
     docker:
-      - image: circleci/openjdk:11
+      - image: circleci/openjdk:14-jdk-buster
     environment:
       MAVEN_OPTS: -Xmx3200m
     steps:
@@ -46,6 +46,7 @@ jobs:
             - dev-alerts.yaml
             - prod-nais.yaml
             - prod-alerts.yaml
+            - import-vault-token.sh
             - Dockerfile
             - target/rekrutteringsbistand-api-0.0.1-SNAPSHOT.jar
 
