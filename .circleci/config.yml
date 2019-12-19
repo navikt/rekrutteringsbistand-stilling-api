@@ -1,87 +1,111 @@
 version: 2.1
-orbs:
-  nais: navikt/nais-deployment@dev:master
+
+commands:
+  docker-build-and-push:
+    steps:
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - run:
+          name: docker build
+          command: docker build -t "navikt/$CIRCLE_PROJECT_REPONAME:$CIRCLE_SHA1" .
+      - run:
+          name: docker push
+          command: echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_LOGIN" --password-stdin && docker push "navikt/$CIRCLE_PROJECT_REPONAME:$CIRCLE_SHA1"
 
 jobs:
-  bygg:
+  build:
     docker:
-      - image: circleci/openjdk:11
+      - image: circleci/openjdk:14-jdk-buster
+    environment:
+      MAVEN_OPTS: -Xmx3200m
     steps:
       - checkout
+      # Download and cache Maven dependencies
       - restore_cache:
           keys:
+            # fallback to using the latest cache if no exact match is found
             - maven-repo-v1-{{ .Branch }}-{{ checksum "pom.xml" }}
             - maven-repo-v1-{{ .Branch }}-
             - maven-repo-v1-
       - run:
-          name: Bygger med Maven
-          command: mvn clean package
+          name: Build with Maven
+          command: mvn package
       - save_cache:
           paths:
             - ~/.m2
           key: maven-repo-v1-{{ .Branch }}-{{ checksum "pom.xml" }}
-      - nais/docker:
-          image: navikt/rekrutteringsbistand-api
-
-  deploy-til-dev:
-    docker:
-      - image: navikt/deployment-cli:0.4.2
-    steps:
-      - checkout
+      - setup_remote_docker:
+          docker_layer_caching: true
       - run:
-          name: Unpack Private Key
-          command: echo $GITHUB_PRIVATE_KEY | base64 -d > .circleci/github.key.pem
-      - nais/deploy-with-gh-app:
-          repo: navikt/rekrutteringsbistand-api
-          image: navikt/rekrutteringsbistand-api
-          github-app-id: 43789
-          nais-template: dev-nais.yaml
-          environment: dev-fss
-          team: teamtag
+          name: Verify that Docker image can be built
+          command: docker build -t "navikt/$CIRCLE_PROJECT_REPONAME:$CIRCLE_SHA1" .
+      - persist_to_workspace:
+          root: .
+          paths:
+            - dev-nais.yaml
+            - dev-alerts.yaml
+            - prod-nais.yaml
+            - prod-alerts.yaml
+            - Dockerfile
+            - /target/rekrutteringsbistand-api-0.0.1-SNAPSHOT.jar
 
-  deploy-til-prod:
+  deployToTest:
     docker:
-      - image: navikt/deployment-cli:0.4.2
+      - image: navikt/deployment-cli:v0.4.2
     steps:
-      - checkout
+      - attach_workspace:
+          at: .
+      - docker-build-and-push
+      - run: echo $GITHUB_PRIVATE_KEY | base64 -d | dos2unix > .circleci/github.key.pem # Handle MS Windows linebreak
       - run:
-          name: Unpack Private Key
-          command: echo $GITHUB_PRIVATE_KEY | base64 -d > .circleci/github.key.pem
-      - nais/deploy-with-gh-app:
-          repo: navikt/rekrutteringsbistand-api
-          image: navikt/rekrutteringsbistand-api
-          github-app-id: 43789
-          nais-template: prod-nais.yaml
-          environment: prod-fss
-          team: teamtag
+          name: dev-fss deployment
+          command: deployment-cli deploy create --cluster dev-fss --resource dev-nais.yaml \
+            --version navikt/$CIRCLE_PROJECT_REPONAME:$CIRCLE_SHA1 --repository navikt/$CIRCLE_PROJECT_REPONAME --team teamtag --ref $CIRCLE_SHA1 --appid 43789 --key .circleci/github.key.pem
+      - run: rm .circleci/github.key.pem
 
+  deployToProd:
+    docker:
+      - image: navikt/deployment-cli:v0.4.2
+    steps:
+      - attach_workspace:
+          at: .
+      - docker-build-and-push
+      - run: echo $GITHUB_PRIVATE_KEY | base64 -d | dos2unix > .circleci/github.key.pem # Handle MS Windows linebreak
+      - run:
+          name: prod-fss deployment
+          command: deployment-cli deploy create --cluster prod-fss --resource prod-nais.yaml \
+            --version navikt/$CIRCLE_PROJECT_REPONAME:$CIRCLE_SHA1 --repository navikt/$CIRCLE_PROJECT_REPONAME --team teamtag --ref $CIRCLE_SHA1 --appid 43789 --key .circleci/github.key.pem
+      - run: rm .circleci/github.key.pem
 
 workflows:
-  version: 2.1
-  bygg_og_deploy:
+  version: 2
+  my-workflow:
     jobs:
-      - bygg:
-          context: NAIS deployment
-      - deploy-til-dev:
-          context: tag-ci
-          requires:
-            - bygg
+      - build
+      - deployToTest:
+          name: "Deploy to cluster dev-fss"
+          context: tag-ci # Needed for Docker Hub credentials and GITHUB_PRIVATE_KEY. Would rather like to use context "NAIS deploy"          requires:
+            - build
           filters:
             branches:
               only:
                 - master
-      - godkjenn-til-prod:
+                ##### DEVELOPERS: Name your feature branch here if you want to deploy it to cluster dev-fss #####
+                - circleci-massasje
+                ##### ##### ##### ##### #####
+      - approveForProd:
           type: approval
           requires:
-            - deploy-til-dev
+            - deployToTest
           filters:
             branches:
               only:
                 - master
-      - deploy-til-prod:
-          context: tag-ci
+      - deployToProd:
+          name: "Deploy to cluster prod-fss"
+          context: tag-ci # Needed for Docker Hub credentials and GITHUB_PRIVATE_KEY. Would rather like to use context "NAIS deploy"
           requires:
-            - godkjenn-til-prod
+            - approveForProd
           filters:
             branches:
               only:

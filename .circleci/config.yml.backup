@@ -1,0 +1,91 @@
+version: 2.1
+orbs:
+  nais: navikt/nais-deployment@3.2.0
+
+jobs:
+  bygg:
+    docker:
+      - image: circleci/openjdk:14-jdk-buster
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - maven-repo-v1-{{ .Branch }}-{{ checksum "pom.xml" }}
+            - maven-repo-v1-{{ .Branch }}-
+            - maven-repo-v1-
+      - run:
+          name: Bygger med Maven
+          command: mvn clean package
+      - save_cache:
+          paths:
+            - ~/.m2
+          key: maven-repo-v1-{{ .Branch }}-{{ checksum "pom.xml" }}
+      - nais/docker:
+          image: navikt/rekrutteringsbistand-api
+
+  deploy-til-dev:
+    docker:
+      - image: navikt/deployment-cli:0.4.2
+    steps:
+      - checkout
+      - run:
+          name: Unpack Private Key
+          command: echo $GITHUB_PRIVATE_KEY | base64 -d > .circleci/github.key.pem
+      - nais/deploy-with-gh-app:
+          repo: navikt/rekrutteringsbistand-api
+          image: navikt/rekrutteringsbistand-api
+          github-app-id: 43789
+          nais-template: dev-nais.yaml
+          environment: dev-fss
+          team: teamtag
+      - run:
+          name: Deploy alerts
+          command: echo $GITHUB_PRIVATE_KEY | base64 -d > .circleci/github.key.pem
+
+  deploy-til-prod:
+    docker:
+      - image: navikt/deployment-cli:0.4.2
+    steps:
+      - checkout
+      - run:
+          name: Unpack Private Key
+          command: echo $GITHUB_PRIVATE_KEY | base64 -d > .circleci/github.key.pem
+      - nais/deploy-with-gh-app:
+          repo: navikt/rekrutteringsbistand-api
+          image: navikt/rekrutteringsbistand-api
+          github-app-id: 43789
+          nais-template: prod-nais.yaml
+          environment: prod-fss
+          team: teamtag
+
+
+workflows:
+  version: 2.1
+  bygg_og_deploy:
+    jobs:
+      - bygg:
+          context: NAIS deployment
+      - deploy-til-dev:
+          context: tag-ci
+          requires:
+            - bygg
+          filters:
+            branches:
+              only:
+                - master
+      - godkjenn-til-prod:
+          type: approval
+          requires:
+            - deploy-til-dev
+          filters:
+            branches:
+              only:
+                - master
+      - deploy-til-prod:
+          context: tag-ci
+          requires:
+            - godkjenn-til-prod
+          filters:
+            branches:
+              only:
+                - master
