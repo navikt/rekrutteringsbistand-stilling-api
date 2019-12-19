@@ -84,7 +84,8 @@ workflows:
       - build
       - deployToTest:
           name: "Deploy to cluster dev-fss"
-          context: tag-ci # Needed for Docker Hub credentials and GITHUB_PRIVATE_KEY. Would rather like to use context "NAIS deploy"          requires:
+          context: tag-ci # Needed for Docker Hub credentials and GITHUB_PRIVATE_KEY. Would rather like to use context "NAIS deploy"
+          requires:
             - build
           filters:
             branches:
