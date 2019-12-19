@@ -97,7 +97,7 @@ workflows:
       - approve-for-prod:
           type: approval
           requires:
-            - deploy-to-dev
+            - build
           filters:
             branches:
               only:
