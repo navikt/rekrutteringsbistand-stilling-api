@@ -70,8 +70,8 @@ jobs:
             --owner="navikt" \
             --repository="$CIRCLE_PROJECT_REPONAME" \
             --ref="$CIRCLE_SHA1"
-            --resource="dev-nais.yaml" \
-            --resource="dev-alerts.yaml" \
+            --resource="nais/dev-nais.yaml" \
+            --resource="nais/dev-alerts.yaml" \
             --var="team=teamtag" \
             --var="docker-image-full-name=navikt/$CIRCLE_PROJECT_REPONAME:$CIRCLE_SHA1" \
             --wait=true
@@ -95,8 +95,8 @@ jobs:
             --owner="navikt" \
             --repository="$CIRCLE_PROJECT_REPONAME" \
             --ref="$CIRCLE_SHA1"
-            --resource="prod-nais.yaml" \
-            --resource="prod-alerts.yaml" \
+            --resource="nais/prod-nais.yaml" \
+            --resource="nais/prod-alerts.yaml" \
             --var="team=teamtag" \
             --var="docker-image-full-name=navikt/$CIRCLE_PROJECT_REPONAME:$CIRCLE_SHA1" \
             --wait=true
