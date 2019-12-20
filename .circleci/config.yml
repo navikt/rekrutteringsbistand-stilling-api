@@ -6,8 +6,8 @@ commands:
       - run:
           name: Are all my files here?
           command: find *
-#      - setup_remote_docker:
-#          docker_layer_caching: false # Disabled because of licencing/payment issues, see https://nav-it.slack.com/archives/C60FFACN5/p1576837811048600
+      - setup_remote_docker:
+          docker_layer_caching: false # Disabled because of licencing/payment issues, see https://nav-it.slack.com/archives/C60FFACN5/p1576837811048600
       - run:
           name: docker build
           command: docker build -t "navikt/$CIRCLE_PROJECT_REPONAME:$CIRCLE_SHA1" .
@@ -54,23 +54,17 @@ jobs:
 
   deploy-to-dev:
     docker:
-      - image: navikt/deployment:v1
+      - image: circleci/openjdk:14-jdk-buster
     steps:
       - attach_workspace:
           at: .
-      - setup_remote_docker:
-          docker_layer_caching: false # Disabled because of licencing/payment issues, see https://nav-it.slack.com/archives/C60FFACN5/p1576837811048600
-      - run:
-          name: docker build
-          command: docker build -t "navikt/$CIRCLE_PROJECT_REPONAME:$CIRCLE_SHA1" .
-      - run:
-          name: docker push
-          command: echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_LOGIN" --password-stdin && docker push "navikt/$CIRCLE_PROJECT_REPONAME:$CIRCLE_SHA1"
-      #- docker-build-and-push
+      - docker-build-and-push
       #      - run: echo $GITHUB_PRIVATE_KEY | base64 -d | dos2unix > .circleci/github.key.pem # Handle MS Windows linebreak
       - run:
           name: dev-fss deployment
-          command: deploy \
+          command: docker run -it --rm navikt/deployment:v1 \
+            -v $(pwd):/nais /
+            /app/deploy \
             --apikey="$NAIS_DEPLOY_APIKEY" \
             --cluster="dev-fss" \
             --owner="navikt" \
@@ -85,7 +79,7 @@ jobs:
 
   deploy-to-prod:
     docker:
-      - image: navikt/deployment-cli:0.4.2
+      - image: circleci/openjdk:14-jdk-buster
     steps:
       - attach_workspace:
           at: .
@@ -93,7 +87,9 @@ jobs:
       #      - run: echo $GITHUB_PRIVATE_KEY | base64 -d | dos2unix > .circleci/github.key.pem # Handle MS Windows linebreak
       - run:
           name: prod-fss deployment
-          command: deploy \
+          command: docker run -it --rm navikt/deployment:v1 \
+            -v $(pwd):/nais /
+            /app/deploy \
             --apikey="$NAIS_DEPLOY_APIKEY" \
             --cluster="prod-fss" \
             --owner="navikt" \
