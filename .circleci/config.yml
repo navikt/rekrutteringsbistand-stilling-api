@@ -3,11 +3,11 @@ version: 2.1
 commands:
   docker-build-and-push:
     steps:
-      - setup_remote_docker:
-          docker_layer_caching: false # Disabled because of licencing/payment issues, see https://nav-it.slack.com/archives/C60FFACN5/p1576837811048600
       - run:
           name: Are all my files here?
           command: find *
+#      - setup_remote_docker:
+#          docker_layer_caching: false # Disabled because of licencing/payment issues, see https://nav-it.slack.com/archives/C60FFACN5/p1576837811048600
       - run:
           name: docker build
           command: docker build -t "navikt/$CIRCLE_PROJECT_REPONAME:$CIRCLE_SHA1" .
@@ -58,6 +58,8 @@ jobs:
     steps:
       - attach_workspace:
           at: .
+      - setup_remote_docker:
+          docker_layer_caching: false # Disabled because of licencing/payment issues, see https://nav-it.slack.com/archives/C60FFACN5/p1576837811048600
       - docker-build-and-push
       #      - run: echo $GITHUB_PRIVATE_KEY | base64 -d | dos2unix > .circleci/github.key.pem # Handle MS Windows linebreak
       - run:
@@ -112,9 +114,10 @@ workflows:
             branches:
               only:
                 - master
-                ##### DEVELOPERS: Name your feature branch here if you want to deploy it to cluster dev-fss #####
+                #########################
+                # DEVELOPER: Name your feature branch here if you want to deploy it to cluster dev-fss
                 - circleci-massasje
-                ##### ##### ##### ##### #####
+                #########################
       - approve-for-prod:
           name: "Approve for prod-fss"
           type: approval
