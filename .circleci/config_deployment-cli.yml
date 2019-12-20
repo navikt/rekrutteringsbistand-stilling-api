@@ -3,8 +3,9 @@ version: 2.1
 commands:
   docker-build-and-push:
     steps:
-      - setup_remote_docker:
-          docker_layer_caching: true
+# Disabled because of licencing/payment issues, see https://nav-it.slack.com/archives/C60FFACN5/p1576837811048600
+#      - setup_remote_docker:
+#          docker_layer_caching: true
       - run:
           name: docker build
           command: docker build -t "navikt/$CIRCLE_PROJECT_REPONAME:$CIRCLE_SHA1" .
@@ -20,7 +21,6 @@ jobs:
       MAVEN_OPTS: -Xmx3200m
     steps:
       - checkout
-      # Download and cache Maven dependencies
       - restore_cache:
           keys:
             # fallback to using the latest cache if no exact match is found
@@ -34,8 +34,9 @@ jobs:
           paths:
             - ~/.m2
           key: maven-repo-v1-{{ .Branch }}-{{ checksum "pom.xml" }}
-      - setup_remote_docker:
-          docker_layer_caching: true
+      # Disabled because of licencing/payment issues, see https://nav-it.slack.com/archives/C60FFACN5/p1576837811048600
+      #      - setup_remote_docker:
+      #          docker_layer_caching: true
       - run:
           name: Verify that Docker image can be built
           command: docker build -t "navikt/$CIRCLE_PROJECT_REPONAME:$CIRCLE_SHA1" .
@@ -80,7 +81,7 @@ jobs:
 
 workflows:
   version: 2
-  my-workflow:
+  the-workflow:
     jobs:
       - build
       - deploy-to-dev:
