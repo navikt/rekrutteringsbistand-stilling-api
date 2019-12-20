@@ -6,6 +6,9 @@ commands:
       - setup_remote_docker:
           docker_layer_caching: false # Disabled because of licencing/payment issues, see https://nav-it.slack.com/archives/C60FFACN5/p1576837811048600
       - run:
+          name: Are all my files here?
+          command: find *
+      - run:
           name: docker build
           command: docker build -t "navikt/$CIRCLE_PROJECT_REPONAME:$CIRCLE_SHA1" .
       - run:
@@ -56,7 +59,7 @@ jobs:
       - attach_workspace:
           at: .
       - docker-build-and-push
-#      - run: echo $GITHUB_PRIVATE_KEY | base64 -d | dos2unix > .circleci/github.key.pem # Handle MS Windows linebreak
+      #      - run: echo $GITHUB_PRIVATE_KEY | base64 -d | dos2unix > .circleci/github.key.pem # Handle MS Windows linebreak
       - run:
           name: dev-fss deployment
           command: deploy \
@@ -70,7 +73,7 @@ jobs:
             --var="team=teamtag" \
             --var="docker-image-full-name=navikt/$CIRCLE_PROJECT_REPONAME:$CIRCLE_SHA1" \
             --wait=true
-#      - run: rm .circleci/github.key.pem
+  #      - run: rm .circleci/github.key.pem
 
   deploy-to-prod:
     docker:
@@ -78,8 +81,8 @@ jobs:
     steps:
       - attach_workspace:
           at: .
-#      - docker-build-and-push # Disabled while this is done in job deploy-to-dev and deploy-to-dev is required in the workflow
-#      - run: echo $GITHUB_PRIVATE_KEY | base64 -d | dos2unix > .circleci/github.key.pem # Handle MS Windows linebreak
+      #      - docker-build-and-push # Disabled while this is done in job deploy-to-dev and deploy-to-dev is required in the workflow
+      #      - run: echo $GITHUB_PRIVATE_KEY | base64 -d | dos2unix > .circleci/github.key.pem # Handle MS Windows linebreak
       - run:
           name: prod-fss deployment
           command: deploy \
@@ -97,7 +100,7 @@ jobs:
 
 workflows:
   version: 2
-  the-workflow:
+  workflow:
     jobs:
       - build
       - deploy-to-dev:
