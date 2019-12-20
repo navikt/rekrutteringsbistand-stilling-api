@@ -102,7 +102,7 @@ workflows:
       - build
       - deploy-to-dev:
           name: "Deploy to dev-fss"
-          context: "NAIS deploy"
+          context: "NAIS deployment"
           requires:
             - build
           filters:
@@ -123,7 +123,7 @@ workflows:
                 - master
       - deploy-to-prod:
           name: "Deploy to prod-fss"
-          context: "NAIS deploy"
+          context: "NAIS deployment"
           requires:
             - "Approve for prod-fss"
           filters:
