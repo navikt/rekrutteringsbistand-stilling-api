@@ -1,0 +1,132 @@
+version: 2.1
+
+commands:
+  docker-build-and-push:
+    steps:
+      - setup_remote_docker:
+          docker_layer_caching: false # Disabled because of licencing/payment issues, see https://nav-it.slack.com/archives/C60FFACN5/p1576837811048600
+      - run:
+          name: docker build
+          command: docker build -t "navikt/$CIRCLE_PROJECT_REPONAME:$CIRCLE_SHA1" .
+      - run:
+          name: docker push
+          command: echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_LOGIN" --password-stdin && docker push "navikt/$CIRCLE_PROJECT_REPONAME:$CIRCLE_SHA1"
+
+jobs:
+  build:
+    docker:
+      - image: circleci/openjdk:14-jdk-buster
+    environment:
+      MAVEN_OPTS: -Xmx3200m
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            # fallback to using the latest cache if no exact match is found
+            - maven-repo-v1-{{ .Branch }}-{{ checksum "pom.xml" }}
+            - maven-repo-v1-{{ .Branch }}-
+            - maven-repo-v1-
+      - run:
+          name: Build with Maven
+          command: mvn package
+      - save_cache:
+          paths:
+            - ~/.m2
+          key: maven-repo-v1-{{ .Branch }}-{{ checksum "pom.xml" }}
+      - setup_remote_docker:
+          docker_layer_caching: false # Disabled because of licencing/payment issues, see https://nav-it.slack.com/archives/C60FFACN5/p1576837811048600
+      - run:
+          name: Verify that Docker image can be built
+          command: docker build -t "navikt/$CIRCLE_PROJECT_REPONAME:$CIRCLE_SHA1" .
+      - persist_to_workspace:
+          root: .
+          paths:
+            - dev-nais.yaml
+            - dev-alerts.yaml
+            - prod-nais.yaml
+            - prod-alerts.yaml
+            - import-vault-token.sh
+            - Dockerfile
+            - target/rekrutteringsbistand-api-0.0.1-SNAPSHOT.jar
+
+  deploy-to-dev:
+    docker:
+      - image: navikt/deployment:v1
+    steps:
+      - attach_workspace:
+          at: .
+      - docker-build-and-push
+#      - run: echo $GITHUB_PRIVATE_KEY | base64 -d | dos2unix > .circleci/github.key.pem # Handle MS Windows linebreak
+      - run:
+          name: dev-fss deployment
+          command: deploy \
+            --apikey="$NAIS_DEPLOY_APIKEY" \
+            --cluster="dev-fss" \
+            --owner="navikt" \
+            --repository="$CIRCLE_PROJECT_REPONAME" \
+            --ref="$CIRCLE_SHA1"
+            --resource="dev-nais.yaml" \
+            --resource="dev-alerts.yaml" \
+            --var="team=teamtag" \
+            --var="docker-image-full-name=navikt/$CIRCLE_PROJECT_REPONAME:$CIRCLE_SHA1" \
+            --wait=true
+#      - run: rm .circleci/github.key.pem
+
+  deploy-to-prod:
+    docker:
+      - image: navikt/deployment-cli:0.4.2
+    steps:
+      - attach_workspace:
+          at: .
+#      - docker-build-and-push # Disabled while this is done in job deploy-to-dev and deploy-to-dev is required in the workflow
+#      - run: echo $GITHUB_PRIVATE_KEY | base64 -d | dos2unix > .circleci/github.key.pem # Handle MS Windows linebreak
+      - run:
+          name: prod-fss deployment
+          command: deploy \
+            --apikey="$NAIS_DEPLOY_APIKEY" \
+            --cluster="prod-fss" \
+            --owner="navikt" \
+            --repository="$CIRCLE_PROJECT_REPONAME" \
+            --ref="$CIRCLE_SHA1"
+            --resource="prod-nais.yaml" \
+            --resource="prod-alerts.yaml" \
+            --var="team=teamtag" \
+            --var="docker-image-full-name=navikt/$CIRCLE_PROJECT_REPONAME:$CIRCLE_SHA1" \
+            --wait=true
+#      - run: rm .circleci/github.key.pem
+
+workflows:
+  version: 2
+  the-workflow:
+    jobs:
+      - build
+      - deploy-to-dev:
+          name: "Deploy to dev-fss"
+          context: "NAIS deploy"
+          requires:
+            - build
+          filters:
+            branches:
+              only:
+                - master
+                ##### DEVELOPERS: Name your feature branch here if you want to deploy it to cluster dev-fss #####
+                - circleci-massasje
+                ##### ##### ##### ##### #####
+      - approve-for-prod:
+          name: "Approve for prod-fss"
+          type: approval
+          requires:
+            - "Deploy to dev-fss"
+          filters:
+            branches:
+              only:
+                - master
+      - deploy-to-prod:
+          name: "Deploy to prod-fss"
+          context: "NAIS deploy"
+          requires:
+            - "Approve for prod-fss"
+          filters:
+            branches:
+              only:
+                - master
