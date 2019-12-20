@@ -60,7 +60,13 @@ jobs:
           at: .
       - setup_remote_docker:
           docker_layer_caching: false # Disabled because of licencing/payment issues, see https://nav-it.slack.com/archives/C60FFACN5/p1576837811048600
-      - docker-build-and-push
+      - run:
+          name: docker build
+          command: docker build -t "navikt/$CIRCLE_PROJECT_REPONAME:$CIRCLE_SHA1" .
+      - run:
+          name: docker push
+          command: echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_LOGIN" --password-stdin && docker push "navikt/$CIRCLE_PROJECT_REPONAME:$CIRCLE_SHA1"
+      #- docker-build-and-push
       #      - run: echo $GITHUB_PRIVATE_KEY | base64 -d | dos2unix > .circleci/github.key.pem # Handle MS Windows linebreak
       - run:
           name: dev-fss deployment
