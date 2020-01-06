@@ -87,7 +87,7 @@ internal class StillingComponentTest {
         repository.lagre(enStillingsinfo)
         repository.lagre(enAnnenStillingsinfo)
 
-        mock(HttpMethod.GET, "/rekrutteringsbistand/api/v1/ads", enPage)
+        mock(HttpMethod.GET, "/api/v1/ads", enPage)
 
         val stillinger: List<StillingMedStillingsinfo> = restTemplate.exchange(
                 "$localBaseUrl/rekrutteringsbistand/api/v1/ads",
@@ -152,7 +152,7 @@ internal class StillingComponentTest {
     @Test
     fun `DELETE mot stilling med kandidatlistefeil skal returnere status 500`() {
         val slettetStilling = enStillingUtenStillingsinfo.copy(status = "DELETED")
-        mock(HttpMethod.DELETE, "/rekrutteringsbistand/api/v1/ads/${slettetStilling.uuid}", slettetStilling)
+        mock(HttpMethod.DELETE, "/api/v1/ads/${slettetStilling.uuid}", slettetStilling)
         mockKandidatlisteOppdateringFeiler()
 
         restTemplate.exchange(
@@ -170,7 +170,7 @@ internal class StillingComponentTest {
 
     @Test
     fun `GET mot mine stillinger skal returnere HTTP 200 med mine stillinger uten stillingsinfo`() {
-        mock(HttpMethod.GET, "/rekrutteringsbistand/api/v1/ads/rekrutteringsbistand/minestillinger", enPage)
+        mock(HttpMethod.GET, "/api/v1/ads/rekrutteringsbistand/minestillinger", enPage)
 
         val respons: ResponseEntity<Page<StillingMedStillingsinfo>> = restTemplate.exchange(
                 "$localBaseUrl/rekrutteringsbistand/api/v1/ads/rekrutteringsbistand/minestillinger",
@@ -188,7 +188,7 @@ internal class StillingComponentTest {
         repository.lagre(enStillingsinfo)
         repository.lagre(enAnnenStillingsinfo)
 
-        mock(HttpMethod.GET, "/rekrutteringsbistand/api/v1/ads/rekrutteringsbistand/minestillinger", enPage)
+        mock(HttpMethod.GET, "/api/v1/ads/rekrutteringsbistand/minestillinger", enPage)
 
         val respons: ResponseEntity<Page<StillingMedStillingsinfo>> = restTemplate.exchange(
                 "$localBaseUrl/rekrutteringsbistand/api/v1/ads/rekrutteringsbistand/minestillinger",
@@ -205,7 +205,7 @@ internal class StillingComponentTest {
     @Test
     fun `DELETE mot stilling skal returnere HTTP 200 med stilling og status DELETED`() {
         val slettetStilling = enStillingUtenStillingsinfo.copy(status = "DELETED")
-        mock(HttpMethod.DELETE, "/rekrutteringsbistand/api/v1/ads/${slettetStilling.uuid}", slettetStilling)
+        mock(HttpMethod.DELETE, "/api/v1/ads/${slettetStilling.uuid}", slettetStilling)
         mockKandidatlisteOppdatering()
 
         val respons: ResponseEntity<Stilling> = restTemplate.exchange(

@@ -82,7 +82,7 @@ class StillingService(
     }
 
     fun slettStilling(uuid: String, request: HttpServletRequest): ResponseEntity<String> {
-        val respons = restProxy.proxyJsonRequest(HttpMethod.DELETE, request, "/rekrutteringsbistand-api", null, externalConfiguration.stillingApi.url)
+        val respons = restProxy.proxyJsonRequest(HttpMethod.DELETE, request, "/rekrutteringsbistand-api/rekrutteringsbistand", null, externalConfiguration.stillingApi.url)
         kandidatlisteKlient.oppdaterKandidatliste(Stillingsid(uuid))
         return respons
     }

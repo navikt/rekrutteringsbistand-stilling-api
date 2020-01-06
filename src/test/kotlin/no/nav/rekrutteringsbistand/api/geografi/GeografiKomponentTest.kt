@@ -39,7 +39,7 @@ internal class GeografiKomponentTest {
 
     @Test
     fun `GET mot counties skal returnere HTTP 200 med fylker`() {
-        mockString("/rekrutteringsbistand/api/v1/geography/counties", fylkeResponsBody)
+        mockString("/api/v1/geography/counties", fylkeResponsBody)
         restTemplate.getForEntity("$localBaseUrl/rekrutteringsbistand/api/v1/geography/counties", String::class.java).also {
             assertThat(it.statusCode).isEqualTo(HttpStatus.OK)
             assertThat(it.body).isEqualTo(fylkeResponsBody)
@@ -48,7 +48,7 @@ internal class GeografiKomponentTest {
 
     @Test
     fun `GET mot countries skal returnere HTTP 200 med land`() {
-        mockString("/rekrutteringsbistand/api/v1/geography/countries", landResponsBody)
+        mockString("/api/v1/geography/countries", landResponsBody)
         restTemplate.getForEntity("$localBaseUrl/rekrutteringsbistand/api/v1/geography/countries", String::class.java).also {
             assertThat(it.statusCode).isEqualTo(HttpStatus.OK)
             assertThat(it.body).isEqualTo(landResponsBody)
@@ -57,7 +57,7 @@ internal class GeografiKomponentTest {
 
     @Test
     fun `GET mot municipals skal returnere HTTP 200 med kommuner`() {
-        mockString("/rekrutteringsbistand/api/v1/geography/municipals", kommunerJson)
+        mockString("/api/v1/geography/municipals", kommunerJson)
         restTemplate.getForEntity("$localBaseUrl/rekrutteringsbistand/api/v1/geography/municipals", String::class.java).also {
             assertThat(it.statusCode).isEqualTo(HttpStatus.OK)
             assertThat(it.body).isEqualTo(kommunerJson)
@@ -66,7 +66,7 @@ internal class GeografiKomponentTest {
 
     @Test
     fun `GET mot categories-with-altnames skal returnere HTTP 200 med STYRK-kategorier`() {
-        mockString("/rekrutteringsbistand/api/v1/categories-with-altnames", styrkkoderJson)
+        mockString("/api/v1/categories-with-altnames", styrkkoderJson)
         restTemplate.getForEntity("$localBaseUrl/rekrutteringsbistand/api/v1/categories-with-altnames", String::class.java).also {
             assertThat(it.statusCode).isEqualTo(HttpStatus.OK)
             assertThat(it.body).isEqualTo(styrkkoderJson)
@@ -75,7 +75,7 @@ internal class GeografiKomponentTest {
 
     @Test
     fun `GET mot postdata skal returnere HTTP 200 med informasjon om postnumre`() {
-        mockString("/rekrutteringsbistand/api/v1/postdata", postnumreJson);
+        mockString("/api/v1/postdata", postnumreJson);
         restTemplate.getForEntity("$localBaseUrl/rekrutteringsbistand/api/v1/postdata", String::class.java).also {
             assertThat(it.statusCode).isEqualTo(HttpStatus.OK)
             assertThat(it.body).isEqualTo(postnumreJson)

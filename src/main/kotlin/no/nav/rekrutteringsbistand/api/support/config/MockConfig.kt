@@ -37,7 +37,7 @@ class MockConfig {
 
     companion object {
         fun hentStillinger(): MappingBuilder {
-            return WireMock.get(WireMock.urlPathMatching("/rekrutteringsbistand/api/v1/ads"))
+            return WireMock.get(WireMock.urlPathMatching("/api/v1/ads"))
                     .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
                     .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
                     .withHeader(HttpHeaders.AUTHORIZATION, WireMock.matching("Bearer .*}"))
@@ -47,7 +47,7 @@ class MockConfig {
         }
 
         fun hentStilling(): MappingBuilder {
-            return WireMock.get(WireMock.urlPathMatching("/rekrutteringsbistand/api/v1/ads/ee82f29c-51a9-4ca3-994d-45e3ab0e8204"))
+            return WireMock.get(WireMock.urlPathMatching("/api/v1/ads/ee82f29c-51a9-4ca3-994d-45e3ab0e8204"))
                     .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
                     .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
                     .withHeader(HttpHeaders.AUTHORIZATION, WireMock.matching("Bearer .*}"))
@@ -57,7 +57,7 @@ class MockConfig {
         }
 
         fun postStilling(): MappingBuilder {
-            return WireMock.post(WireMock.urlPathMatching("/rekrutteringsbistand/api/v1/ads"))
+            return WireMock.post(WireMock.urlPathMatching("/api/v1/ads"))
                     .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
                     .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
                     .withHeader(HttpHeaders.AUTHORIZATION, WireMock.matching("Bearer .*}"))
@@ -67,7 +67,7 @@ class MockConfig {
         }
 
         fun putStilling(): MappingBuilder {
-            return WireMock.put(WireMock.urlPathMatching("/rekrutteringsbistand/api/v1/ads/ee82f29c-51a9-4ca3-994d-45e3ab0e8204"))
+            return WireMock.put(WireMock.urlPathMatching("/api/v1/ads/ee82f29c-51a9-4ca3-994d-45e3ab0e8204"))
                     .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
                     .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
                     .withHeader(HttpHeaders.AUTHORIZATION, WireMock.matching("Bearer .*}"))
@@ -77,7 +77,7 @@ class MockConfig {
         }
 
         fun categoriesTypeahead(): MappingBuilder {
-            return WireMock.get(WireMock.urlPathMatching("/rekrutteringsbistand/api/v1/categories-with-altnames/"))
+            return WireMock.get(WireMock.urlPathMatching("/api/v1/categories-with-altnames/"))
                     .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
                     .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
                     .withHeader(HttpHeaders.AUTHORIZATION, WireMock.matching("Bearer .*}"))
@@ -87,7 +87,7 @@ class MockConfig {
         }
 
         fun postdata(): MappingBuilder {
-            return WireMock.get(WireMock.urlPathMatching("/rekrutteringsbistand/api/v1/postdata/"))
+            return WireMock.get(WireMock.urlPathMatching("/api/v1/postdata/"))
                     .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
                     .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
                     .withHeader(HttpHeaders.AUTHORIZATION, WireMock.matching("Bearer .*}"))
@@ -97,7 +97,7 @@ class MockConfig {
         }
 
         fun municipals(): MappingBuilder {
-            return WireMock.get(WireMock.urlPathMatching("/rekrutteringsbistand/api/v1/geography/municipals"))
+            return WireMock.get(WireMock.urlPathMatching("/api/v1/geography/municipals"))
                     .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
                     .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
                     .withHeader(HttpHeaders.AUTHORIZATION, WireMock.matching("Bearer .*}"))
@@ -107,7 +107,7 @@ class MockConfig {
         }
 
         fun countries(): MappingBuilder {
-            return WireMock.get(WireMock.urlPathMatching("/rekrutteringsbistand/api/v1/geography/countries"))
+            return WireMock.get(WireMock.urlPathMatching("/api/v1/geography/countries"))
                     .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
                     .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
                     .withHeader(HttpHeaders.AUTHORIZATION, WireMock.matching("Bearer .*}"))
@@ -117,7 +117,7 @@ class MockConfig {
         }
 
         fun counties(): MappingBuilder {
-            return WireMock.get(WireMock.urlPathMatching("/rekrutteringsbistand/api/v1/geography/counties"))
+            return WireMock.get(WireMock.urlPathMatching("/api/v1/geography/counties"))
                     .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
                     .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
                     .withHeader(HttpHeaders.AUTHORIZATION, WireMock.matching("Bearer .*}"))

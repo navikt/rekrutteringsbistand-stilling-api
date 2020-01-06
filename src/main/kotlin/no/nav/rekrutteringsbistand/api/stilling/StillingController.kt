@@ -31,7 +31,7 @@ class StillingController(
         val slashQueryString: String = request.queryString.toOption().map { it.trim() }.flatMap { if (it.isEmpty()) None else Some(it) }.map { "/$it" }.getOrElse { "" }
         val uriWithQueryString = request.requestURI.trimEnd { it == '/' } + slashQueryString
         LOG.debug("Deprecated: Mottok $method til '/rekrutteringsbistand/api/v1/**' ($uriWithQueryString)")
-        val respons = restProxy.proxyJsonRequest(method, request, replaceInUrl, body
+        val respons = restProxy.proxyJsonRequest(method, request, replaceRekrutteringsbistandInUrl, body
                 ?: "", externalConfiguration.stillingApi.url)
         val responsBody: String = respons.body ?: ""
         return ResponseEntity(responsBody, respons.statusCode)
@@ -72,35 +72,35 @@ class StillingController(
     @GetMapping("/rekrutteringsbistand/api/v1/geography/municipals")
     fun proxyGetMunicipals(request: HttpServletRequest): ResponseEntity<String> {
         LOG.debug("Mottok ${request.method} til ${request.requestURI}")
-        val respons = restProxy.proxyJsonRequest(GET, request, replaceInUrl, null, externalConfiguration.stillingApi.url)
+        val respons = restProxy.proxyJsonRequest(GET, request, replaceRekrutteringsbistandInUrl, null, externalConfiguration.stillingApi.url)
         return ResponseEntity(respons.body, respons.statusCode)
     }
 
     @GetMapping("/rekrutteringsbistand/api/v1/geography/counties")
     fun proxyGetCounties(request: HttpServletRequest): ResponseEntity<String> {
         LOG.debug("Mottok ${request.method} til ${request.requestURI}")
-        val respons = restProxy.proxyJsonRequest(GET, request, replaceInUrl, null, externalConfiguration.stillingApi.url)
+        val respons = restProxy.proxyJsonRequest(GET, request, replaceRekrutteringsbistandInUrl, null, externalConfiguration.stillingApi.url)
         return ResponseEntity(respons.body, respons.statusCode)
     }
 
     @GetMapping("/rekrutteringsbistand/api/v1/geography/countries")
     fun proxyGetCountries(request: HttpServletRequest): ResponseEntity<String> {
         LOG.debug("Mottok ${request.method} til ${request.requestURI}")
-        val respons = restProxy.proxyJsonRequest(GET, request, replaceInUrl, null, externalConfiguration.stillingApi.url)
+        val respons = restProxy.proxyJsonRequest(GET, request, replaceRekrutteringsbistandInUrl, null, externalConfiguration.stillingApi.url)
         return ResponseEntity(respons.body, respons.statusCode)
     }
 
     @GetMapping("/rekrutteringsbistand/api/v1/categories-with-altnames")
     fun proxyGetCategoriesWithAltnames(request: HttpServletRequest): ResponseEntity<String> {
         LOG.debug("Mottok ${request.method} til ${request.requestURI}")
-        val respons = restProxy.proxyJsonRequest(GET, request, replaceInUrl, null, externalConfiguration.stillingApi.url)
+        val respons = restProxy.proxyJsonRequest(GET, request, replaceRekrutteringsbistandInUrl, null, externalConfiguration.stillingApi.url)
         return ResponseEntity(respons.body, respons.statusCode)
     }
 
     @GetMapping("/rekrutteringsbistand/api/v1/postdata")
     fun proxyGetPostdata(request: HttpServletRequest): ResponseEntity<String> {
         LOG.debug("Mottok ${request.method} til ${request.requestURI}")
-        val respons = restProxy.proxyJsonRequest(GET, request, replaceInUrl, null, externalConfiguration.stillingApi.url)
+        val respons = restProxy.proxyJsonRequest(GET, request, replaceRekrutteringsbistandInUrl, null, externalConfiguration.stillingApi.url)
         return ResponseEntity(respons.body, respons.statusCode)
     }
 
@@ -126,7 +126,7 @@ class StillingController(
 
     @GetMapping("/rekrutteringsbistand/api/v1/ads")
     fun hentStillinger(request: HttpServletRequest): ResponseEntity<Page<StillingMedStillingsinfo>> {
-        val url = "${externalConfiguration.stillingApi.url}/rekrutteringsbistand/api/v1/ads"
+        val url = "${externalConfiguration.stillingApi.url}/api/v1/ads"
         val queryString: String? = request.queryString?.let { URLDecoder.decode(it, StandardCharsets.UTF_8) }
         val page: Page<StillingMedStillingsinfo> = stillingService.hentStillinger(url, queryString)
         return ResponseEntity.ok(page)
@@ -135,7 +135,7 @@ class StillingController(
     @GetMapping("/rekrutteringsbistand/api/v1/ads/rekrutteringsbistand/minestillinger")
     fun hentMineStillinger(request: HttpServletRequest): ResponseEntity<Page<StillingMedStillingsinfo>> {
         return ResponseEntity.ok().body(stillingService.hentStillinger(
-                "${externalConfiguration.stillingApi.url}/rekrutteringsbistand/api/v1/ads/rekrutteringsbistand/minestillinger",
+                "${externalConfiguration.stillingApi.url}/api/v1/ads/rekrutteringsbistand/minestillinger",
                 if (request.queryString != null) URLDecoder.decode(request.queryString, StandardCharsets.UTF_8) else null
         ))
     }
@@ -143,3 +143,4 @@ class StillingController(
 }
 
 private const val replaceInUrl = "/rekrutteringsbistand-api"
+private const val replaceRekrutteringsbistandInUrl = "/rekrutteringsbistand-api/rekrutteringsbistand"
