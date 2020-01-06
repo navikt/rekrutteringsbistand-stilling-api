@@ -51,18 +51,21 @@ class StillingController(
 
     @PostMapping("/rekrutteringsbistand/api/v1/ads")
     fun proxyPostTilStillingsApi(request: HttpServletRequest, @RequestBody stilling: Stilling): ResponseEntity<StillingMedStillingsinfo> {
-        return ResponseEntity.ok().body(stillingService.opprettStilling(stilling, request.queryString))
+        val opprettetStilling = stillingService.opprettStilling(stilling, request.queryString)
+        return ResponseEntity.ok().body(opprettetStilling)
     }
 
     @PutMapping("/rekrutteringsbistand/api/v1/ads/{uuid}")
     fun proxyPutTilStillingsApi(@PathVariable uuid: String, request: HttpServletRequest, @RequestBody stilling: Stilling): ResponseEntity<StillingMedStillingsinfo> {
-        return ResponseEntity.ok().body(stillingService.oppdaterStilling(uuid, stilling, request.queryString))
+        val oppdatertStilling = stillingService.oppdaterStilling(uuid, stilling, request.queryString)
+        return ResponseEntity.ok().body(oppdatertStilling)
     }
 
-    @DeleteMapping("/rekrutteringsbistand/api/v1/ads/*")
-    fun proxyDeleteTilStillingsApi(request: HttpServletRequest): ResponseEntity<String> {
+    @DeleteMapping("/rekrutteringsbistand/api/v1/ads/{uuid}")
+    fun proxyDeleteTilStillingsApi(request: HttpServletRequest, @PathVariable(value = "uuid") uuid: String): ResponseEntity<String> {
         LOG.debug("Mottok ${request.method} til ${request.requestURI}")
-        val respons = restProxy.proxyJsonRequest(DELETE, request, replaceInUrl, null, externalConfiguration.stillingApi.url)
+        val respons: ResponseEntity<String> = stillingService.slettStilling(uuid, request)
+
         return ResponseEntity(respons.body, respons.statusCode)
     }
 

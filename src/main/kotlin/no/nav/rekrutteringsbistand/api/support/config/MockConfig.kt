@@ -28,6 +28,8 @@ class MockConfig {
             stubFor(categoriesTypeahead())
             stubFor(postdata())
             stubFor(municipals())
+            stubFor(countries())
+            stubFor(counties())
             start()
             LOG.info("Startet WireMock på port ${port()}")
         }
@@ -102,6 +104,26 @@ class MockConfig {
                     .willReturn(WireMock.aResponse().withStatus(200)
                             .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                             .withBody(municipalsResponse))
+        }
+
+        fun countries(): MappingBuilder {
+            return WireMock.get(WireMock.urlPathMatching("/rekrutteringsbistand/api/v1/geography/countries"))
+                    .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
+                    .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
+                    .withHeader(HttpHeaders.AUTHORIZATION, WireMock.matching("Bearer .*}"))
+                    .willReturn(WireMock.aResponse().withStatus(200)
+                            .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                            .withBody(countriesResponse))
+        }
+
+        fun counties(): MappingBuilder {
+            return WireMock.get(WireMock.urlPathMatching("/rekrutteringsbistand/api/v1/geography/counties"))
+                    .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
+                    .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
+                    .withHeader(HttpHeaders.AUTHORIZATION, WireMock.matching("Bearer .*}"))
+                    .willReturn(WireMock.aResponse().withStatus(200)
+                            .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                            .withBody(countiesResponse))
         }
 
         private val stillingerResponse = """
@@ -598,5 +620,30 @@ class MockConfig {
             ]
         """.trimIndent()
 
+        private val countriesResponse = """
+            [
+               {
+                  "code":"AD",
+                  "name":"Andorra"
+               }, 
+               {
+                  "code":"NO",
+                  "name":"Norge"
+               }
+            ]
+        """.trimIndent()
+
+        private val countiesResponse = """
+            [
+               {
+                  "code":"03",
+                  "name":"OSLO"
+               }, 
+               {
+                  "code":"42",
+                  "name":"Agder"
+               }
+            ]
+        """.trimIndent()
     }
 }

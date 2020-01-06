@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.github.tomakehurst.wiremock.client.WireMock.*
-import com.github.tomakehurst.wiremock.core.WireMockConfiguration.options
+import com.github.tomakehurst.wiremock.http.Fault
 import com.github.tomakehurst.wiremock.junit.WireMockRule
 import no.nav.rekrutteringsbistand.api.Testdata.enAnnenStillingsinfo
 import no.nav.rekrutteringsbistand.api.Testdata.enPage
@@ -38,7 +38,10 @@ import org.springframework.test.context.junit4.SpringRunner
 internal class StillingComponentTest {
 
     @get:Rule
-    val wiremock = WireMockRule(options().port(9914))
+    val wiremock = WireMockRule(9914)
+
+    @get:Rule
+    val wiremockKandidatliste = WireMockRule(9924)
 
     @LocalServerPort
     var port = 0
@@ -100,7 +103,8 @@ internal class StillingComponentTest {
     @Test
     fun `POST mot stillinger skal returnere stilling`() {
 
-        mock(HttpMethod.POST, "/rekrutteringsbistand/api/v1/ads", enStilling)
+        mock(HttpMethod.POST, "/api/v1/ads", enStilling)
+        mockKandidatlisteOppdatering()
 
         restTemplate.postForObject(
                 "$localBaseUrl/rekrutteringsbistand/api/v1/ads",
@@ -114,7 +118,8 @@ internal class StillingComponentTest {
 
     @Test
     fun `PUT mot stilling skal returnere endret stilling`() {
-        mock(HttpMethod.PUT, "/rekrutteringsbistand/api/v1/ads/${enStilling.uuid}", enStilling)
+        mock(HttpMethod.PUT,  "/api/v1/ads/${enStilling.uuid}", enStilling)
+        mockKandidatlisteOppdatering()
 
         restTemplate.exchange(
                 "$localBaseUrl/rekrutteringsbistand/api/v1/ads/${enStilling.uuid}",
@@ -125,6 +130,42 @@ internal class StillingComponentTest {
             assertThat(it!!.uuid).isNotEmpty()
             assertThat(it.copy(uuid = null)).isEqualTo(enStilling.copy(uuid = null))
         }
+    }
+
+    @Test
+    fun `PUT mot stilling med kandidatlistefeil skal returnere status 500`() {
+        mock(HttpMethod.PUT,  "/api/v1/ads/${enStilling.uuid}", enStilling)
+        mockKandidatlisteOppdateringFeiler()
+
+        restTemplate.exchange(
+                "$localBaseUrl/rekrutteringsbistand/api/v1/ads/${enStilling.uuid}",
+                HttpMethod.PUT,
+                HttpEntity(enStilling.copy(uuid = null)),
+                StillingMedStillingsinfo::class.java
+        ).also {
+            assertThat(it.statusCode).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
+            assertThat(it.hasBody()).isTrue()
+            assertThat(it.body?.status).isEqualTo("500")
+        }
+    }
+
+    @Test
+    fun `DELETE mot stilling med kandidatlistefeil skal returnere status 500`() {
+        val slettetStilling = enStillingUtenStillingsinfo.copy(status = "DELETED")
+        mock(HttpMethod.DELETE, "/rekrutteringsbistand/api/v1/ads/${slettetStilling.uuid}", slettetStilling)
+        mockKandidatlisteOppdateringFeiler()
+
+        restTemplate.exchange(
+                "$localBaseUrl/rekrutteringsbistand/api/v1/ads/${enStillingUtenStillingsinfo.uuid}",
+                HttpMethod.DELETE,
+                HttpEntity(enStilling.copy(uuid = null)),
+                Stilling::class.java
+        ).also {
+            assertThat(it.statusCode).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
+            assertThat(it.hasBody()).isTrue()
+            assertThat(it.body?.status).isEqualTo("500")
+        }
+
     }
 
     @Test
@@ -165,6 +206,7 @@ internal class StillingComponentTest {
     fun `DELETE mot stilling skal returnere HTTP 200 med stilling og status DELETED`() {
         val slettetStilling = enStillingUtenStillingsinfo.copy(status = "DELETED")
         mock(HttpMethod.DELETE, "/rekrutteringsbistand/api/v1/ads/${slettetStilling.uuid}", slettetStilling)
+        mockKandidatlisteOppdatering()
 
         val respons: ResponseEntity<Stilling> = restTemplate.exchange(
                 "$localBaseUrl/rekrutteringsbistand/api/v1/ads/${slettetStilling.uuid}",
@@ -178,7 +220,7 @@ internal class StillingComponentTest {
     }
 
     private fun mock(method: HttpMethod, urlPath: String, responseBody: Any) {
-        stubFor(
+        wiremock.stubFor(
                 request(method.name, urlPathMatching(urlPath))
                         .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
                         .withHeader(ACCEPT, equalTo(APPLICATION_JSON_VALUE))
@@ -191,7 +233,7 @@ internal class StillingComponentTest {
     }
 
     private fun mockUtenAuthorization(urlPath: String, responseBody: Any) {
-        stubFor(
+        wiremock.stubFor(
                 get(urlPathMatching(urlPath))
                         .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
                         .withHeader(ACCEPT, equalTo(APPLICATION_JSON_VALUE))
@@ -199,6 +241,30 @@ internal class StillingComponentTest {
                                 .withHeader(CONNECTION, "close") // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
                                 .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
                                 .withBody(objectMapper.writeValueAsString(responseBody)))
+        )
+    }
+
+    private fun mockKandidatlisteOppdatering() {
+        wiremockKandidatliste.stubFor(
+                put(urlPathMatching("/pam-kandidatsok-api/rest/veileder/stilling/.*/kandidatliste"))
+                        .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
+                        .withHeader(ACCEPT, equalTo(APPLICATION_JSON_VALUE))
+                        .willReturn(aResponse().withStatus(HttpStatus.NO_CONTENT.value())
+                                .withHeader(CONNECTION, "close") // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
+                                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE))
+        )
+    }
+
+    private fun mockKandidatlisteOppdateringFeiler() {
+        wiremockKandidatliste.stubFor(
+                put(urlPathMatching("/pam-kandidatsok-api/rest/veileder/stilling/.*/kandidatliste"))
+                        .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
+                        .withHeader(ACCEPT, equalTo(APPLICATION_JSON_VALUE))
+                        .willReturn(aResponse()
+                                .withHeader(CONNECTION, "close") // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
+                                .withFault(Fault.MALFORMED_RESPONSE_CHUNK)
+                        )
+
         )
     }
 

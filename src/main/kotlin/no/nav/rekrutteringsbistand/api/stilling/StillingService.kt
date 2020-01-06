@@ -3,27 +3,30 @@ package no.nav.rekrutteringsbistand.api.stilling
 import arrow.core.Option
 import arrow.core.getOrElse
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
+import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteKlient
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsid
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsinfo
 import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoService
 import no.nav.rekrutteringsbistand.api.support.config.ExternalConfiguration
+import no.nav.rekrutteringsbistand.api.support.rest.RestProxy
 import no.nav.rekrutteringsbistand.api.support.rest.RestResponseEntityExceptionHandler
 import no.nav.rekrutteringsbistand.api.support.toMultiValueMap
 import org.springframework.core.ParameterizedTypeReference
-import org.springframework.http.HttpEntity
-import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpMethod
-import org.springframework.http.MediaType
+import org.springframework.http.*
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.util.UriComponentsBuilder
+import java.lang.IllegalArgumentException
+import javax.servlet.http.HttpServletRequest
 
 @Service
 class StillingService(
         val restTemplate: RestTemplate,
         val externalConfiguration: ExternalConfiguration,
         val stillingsinfoService: StillingsinfoService,
-        val tokenUtils: TokenUtils
+        val tokenUtils: TokenUtils,
+        val kandidatlisteKlient: KandidatlisteKlient,
+        val restProxy: RestProxy
 ) {
 
     fun hentStilling(uuid: String): StillingMedStillingsinfo {
@@ -42,7 +45,7 @@ class StillingService(
     }
 
     fun opprettStilling(stilling: Stilling, queryString: String?): StillingMedStillingsinfo {
-        val url = "${externalConfiguration.stillingApi.url}/rekrutteringsbistand/api/v1/ads"
+        val url = "${externalConfiguration.stillingApi.url}/api/v1/ads"
         val opprinneligStilling: StillingMedStillingsinfo = restTemplate.exchange(
                 url + if (queryString != null) "?$queryString" else "",
                 HttpMethod.POST,
@@ -52,12 +55,15 @@ class StillingService(
                 .body
                 ?: throw RestResponseEntityExceptionHandler.NoContentException("Tom body fra opprett stilling")
 
+        val id = opprinneligStilling.uuid?.let { Stillingsid(it) }
+                ?: throw IllegalArgumentException("Mangler stilling uuid")
+        kandidatlisteKlient.oppdaterKandidatliste(id)
         val stillingsinfo: Option<Stillingsinfo> = hentStillingsinfo(opprinneligStilling)
         return stillingsinfo.map { opprinneligStilling.copy(rekruttering = it.asDto()) }.getOrElse { opprinneligStilling }
     }
 
     fun oppdaterStilling(uuid: String, stilling: Stilling, queryString: String?): StillingMedStillingsinfo? {
-        val url = "${externalConfiguration.stillingApi.url}/rekrutteringsbistand/api/v1/ads/${uuid}"
+        val url = "${externalConfiguration.stillingApi.url}/api/v1/ads/${uuid}"
         val opprinneligStilling: StillingMedStillingsinfo = restTemplate.exchange(
                 url + if (queryString != null) "?$queryString" else "",
                 HttpMethod.PUT,
@@ -67,8 +73,18 @@ class StillingService(
                 .body
                 ?: throw RestResponseEntityExceptionHandler.NoContentException("Tom body fra oppdater stilling")
 
+        val id = opprinneligStilling?.uuid?.let { Stillingsid(it) }
+                ?: throw IllegalArgumentException("Mangler stilling uuid")
+        kandidatlisteKlient.oppdaterKandidatliste(id)
+
         val stillingsinfo: Option<Stillingsinfo> = hentStillingsinfo(opprinneligStilling)
         return stillingsinfo.map { opprinneligStilling.copy(rekruttering = it.asDto()) }.getOrElse { opprinneligStilling }
+    }
+
+    fun slettStilling(uuid: String, request: HttpServletRequest): ResponseEntity<String> {
+        val respons = restProxy.proxyJsonRequest(HttpMethod.DELETE, request, "/rekrutteringsbistand-api", null, externalConfiguration.stillingApi.url)
+        kandidatlisteKlient.oppdaterKandidatliste(Stillingsid(uuid))
+        return respons
     }
 
     fun hentStillinger(url: String, queryString: String?): Page<StillingMedStillingsinfo> {
@@ -109,5 +125,6 @@ class StillingService(
                     HttpHeaders.CONTENT_TYPE to MediaType.APPLICATION_JSON_VALUE,
                     HttpHeaders.ACCEPT to MediaType.APPLICATION_JSON_VALUE
             ).toMultiValueMap()
+
 
 }
