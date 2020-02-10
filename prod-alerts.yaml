@@ -4,7 +4,7 @@ kind: "Alert"
 metadata:
   name: rekrutteringsbistand-api
   labels:
-    team: teamtag
+    team: arbeidsgiver
 spec:
   receivers:
     slack:
