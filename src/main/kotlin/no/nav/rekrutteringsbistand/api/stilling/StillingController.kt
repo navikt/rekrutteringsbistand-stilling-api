@@ -1,16 +1,12 @@
 package no.nav.rekrutteringsbistand.api.stilling
 
-import arrow.core.None
-import arrow.core.Some
-import arrow.core.getOrElse
-import arrow.core.toOption
 import no.nav.rekrutteringsbistand.api.support.LOG
 import no.nav.rekrutteringsbistand.api.support.config.ExternalConfiguration
 import no.nav.rekrutteringsbistand.api.support.rest.RestProxy
 import no.nav.security.oidc.api.Protected
 import no.nav.security.oidc.api.Unprotected
-import org.springframework.http.HttpMethod
-import org.springframework.http.HttpMethod.*
+import org.springframework.http.HttpMethod.GET
+import org.springframework.http.HttpMethod.POST
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.net.URLDecoder
@@ -25,29 +21,6 @@ class StillingController(
         val externalConfiguration: ExternalConfiguration,
         val stillingService: StillingService
 ) {
-    @RequestMapping("/rekrutteringsbistand/api/v1/**")
-    @Deprecated("Skal erstattes av mer eksplisitte/spesifikke endepunktmetoder")
-    fun proxyGetTilStillingsApi(method: HttpMethod, request: HttpServletRequest, @RequestBody(required = false) body: String?): ResponseEntity<String> {
-        val slashQueryString: String = request.queryString.toOption().map { it.trim() }.flatMap { if (it.isEmpty()) None else Some(it) }.map { "/$it" }.getOrElse { "" }
-        val uriWithQueryString = request.requestURI.trimEnd { it == '/' } + slashQueryString
-        LOG.debug("Deprecated: Mottok $method til '/rekrutteringsbistand/api/v1/**' ($uriWithQueryString)")
-        val respons = restProxy.proxyJsonRequest(method, request, replaceRekrutteringsbistandInUrl, body
-                ?: "", externalConfiguration.stillingApi.url)
-        val responsBody: String = respons.body ?: ""
-        return ResponseEntity(responsBody, respons.statusCode)
-    }
-
-    @RequestMapping("/search-api/**")
-    @Deprecated("Skal erstattes av mer eksplisitte/spesifikke endepunktmetoder")
-    private fun proxySokTilStillingsApi(method: HttpMethod, request: HttpServletRequest, @RequestBody requestBody: String?): ResponseEntity<String> {
-        val slashQueryString: String = request.queryString.toOption().map { it.trim() }.flatMap { if (it.isEmpty()) None else Some(it) }.map { "/$it" }.getOrElse { "" }
-        val uriWithQueryString = request.requestURI.trimEnd { it == '/' } + slashQueryString
-        LOG.debug("Deprecated: Mottok $method til '/search-api/**' ($uriWithQueryString)")
-        val respons = restProxy.proxyJsonRequest(method, request, replaceInUrl, requestBody
-                ?: "", externalConfiguration.sokApi.url) // TODO Are ""?
-        val responsBody: String = respons.body ?: ""
-        return ResponseEntity(responsBody, respons.statusCode)
-    }
 
     @PostMapping("/rekrutteringsbistand/api/v1/ads")
     fun proxyPostTilStillingsApi(request: HttpServletRequest, @RequestBody stilling: Stilling): ResponseEntity<StillingMedStillingsinfo> {
