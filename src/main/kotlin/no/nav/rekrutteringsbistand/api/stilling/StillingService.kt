@@ -16,7 +16,6 @@ import org.springframework.http.*
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.util.UriComponentsBuilder
-import java.lang.IllegalArgumentException
 import javax.servlet.http.HttpServletRequest
 
 @Service
@@ -73,10 +72,9 @@ class StillingService(
                 .body
                 ?: throw RestResponseEntityExceptionHandler.NoContentException("Tom body fra oppdater stilling")
 
-        val id = opprinneligStilling?.uuid?.let { Stillingsid(it) }
+        val id = opprinneligStilling.uuid?.let { Stillingsid(it) }
                 ?: throw IllegalArgumentException("Mangler stilling uuid")
         kandidatlisteKlient.oppdaterKandidatliste(id)
-
         val stillingsinfo: Option<Stillingsinfo> = hentStillingsinfo(opprinneligStilling)
         return stillingsinfo.map { opprinneligStilling.copy(rekruttering = it.asDto()) }.getOrElse { opprinneligStilling }
     }
