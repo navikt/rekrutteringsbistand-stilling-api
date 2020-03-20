@@ -15,25 +15,25 @@ class StillingControllerEkstern(
 ) {
     @GetMapping("/rekrutteringsbistand/ekstern/api/v1/stilling/{uuid}")
     fun hentStilling(@PathVariable uuid: String, request: HttpServletRequest): ResponseEntity<Stilling> {
-        val s = stillingService.hentStilling(uuid)
+        val stilling = stillingService.hentStilling(uuid)
 
         fun copyProps(vararg keys: String): Map<String, String> =
-                hashMapOf(*keys.filter { s.properties.get(it) != null }.map {
-                    it to (s.properties.get(it) ?: "")
+                hashMapOf(*keys.filter { stilling.properties.get(it) != null }.map {
+                    it to (stilling.properties.get(it) ?: "")
                 }.toTypedArray())
-        if (!"DIR".equals(s.source)) {
+        if (!"DIR".equals(stilling.source)) {
             return ResponseEntity.notFound().build()
         }
 
         return ResponseEntity.ok().body(
                 Stilling(
-                        title = s.title,
+                        title = stilling.title,
                         properties = copyProps(
                                 "adtext", "applicationdue", "applicationemail", "engagementtype", "jobarrangement", "extent", "workday",
                                 "workhours", "positioncount", "sector", "starttime", "employerhomepage", "employerdescription",
                                 "applicationurl", "jobtitle"
                         ),
-                        contactList = s.contactList.map {
+                        contactList = stilling.contactList.map {
                             Contact(
                                     name = it.name,
                                     email = it.email,
@@ -41,20 +41,20 @@ class StillingControllerEkstern(
                                     title = it.title
                             )
                         },
-                        location = s.location,
-                        employer = s.employer?.let {
+                        location = stilling.location,
+                        employer = stilling.employer?.let {
                             Arbeidsgiver(
                                     name = it.name,
                                     location = it.location,
                                     publicName = it.publicName
                             )
                         },
-                        updated = s.updated,
-                        medium = s.medium,
-                        businessName = s.businessName,
-                        status = s.status,
-                        id = s.id,
-                        uuid = s.uuid
+                        updated = stilling.updated,
+                        medium = stilling.medium,
+                        businessName = stilling.businessName,
+                        status = stilling.status,
+                        id = stilling.id,
+                        uuid = stilling.uuid
                 )
         )
     }
