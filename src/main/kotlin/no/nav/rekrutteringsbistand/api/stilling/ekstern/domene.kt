@@ -25,7 +25,6 @@ data class Stilling(
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Arbeidsgiver(
-        val mediaList: List<Media> = ArrayList(),
         val contactList: List<Contact> = ArrayList(),
         val location: Geografi?,
         val properties: Map<String, String> = HashMap(),

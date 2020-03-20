@@ -18,9 +18,10 @@ class StillingControllerEkstern(
         val stilling = stillingService.hentStilling(uuid)
 
         fun copyProps(vararg keys: String): Map<String, String> =
-                hashMapOf(*keys.filter { stilling.properties.get(it) != null }.map {
+                hashMapOf(*(keys.filter { stilling.properties.get(it) != null }.map {
                     it to (stilling.properties.get(it) ?: "")
-                }.toTypedArray())
+                }.toTypedArray()))
+
         if (!"DIR".equals(stilling.source)) {
             return ResponseEntity.notFound().build()
         }
@@ -31,7 +32,7 @@ class StillingControllerEkstern(
                         properties = copyProps(
                                 "adtext", "applicationdue", "applicationemail", "engagementtype", "jobarrangement", "extent", "workday",
                                 "workhours", "positioncount", "sector", "starttime", "employerhomepage", "employerdescription",
-                                "applicationurl", "jobtitle"
+                                "applicationurl", "jobtitle", "twitteraddress", "facebookpage", "linkedinpage"
                         ),
                         contactList = stilling.contactList.map {
                             Contact(
