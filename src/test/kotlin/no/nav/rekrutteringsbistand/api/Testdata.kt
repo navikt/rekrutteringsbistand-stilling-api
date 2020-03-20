@@ -39,7 +39,8 @@ object Testdata {
             businessName = null,
             firstPublished = null,
             deactivatedByExpiry = null,
-            activationOnPublishingDate = null
+            activationOnPublishingDate = null,
+            properties = hashMapOf("adtext" to "teksten")
     )
 
     val enAnnenStilling = enStilling.copy(
