@@ -118,7 +118,7 @@ internal class StillingComponentTest {
 
     @Test
     fun `PUT mot stilling skal returnere endret stilling`() {
-        mock(HttpMethod.PUT,  "/api/v1/ads/${enStilling.uuid}", enStilling)
+        mock(HttpMethod.PUT, "/api/v1/ads/${enStilling.uuid}", enStilling)
         mockKandidatlisteOppdatering()
 
         restTemplate.exchange(
@@ -134,7 +134,7 @@ internal class StillingComponentTest {
 
     @Test
     fun `PUT mot stilling med kandidatlistefeil skal returnere status 500`() {
-        mock(HttpMethod.PUT,  "/api/v1/ads/${enStilling.uuid}", enStilling)
+        mock(HttpMethod.PUT, "/api/v1/ads/${enStilling.uuid}", enStilling)
         mockKandidatlisteOppdateringFeiler()
 
         restTemplate.exchange(
@@ -232,7 +232,7 @@ internal class StillingComponentTest {
         )
     }
 
-    private fun mockUtenAuthorization(urlPath: String, responseBody: Any) {
+    fun mockUtenAuthorization(urlPath: String, responseBody: Any) {
         wiremock.stubFor(
                 get(urlPathMatching(urlPath))
                         .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
