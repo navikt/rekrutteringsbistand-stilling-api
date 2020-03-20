@@ -72,6 +72,12 @@ internal class StillingEksternComponentTest {
             title = enStilling.title,
             medium = enStilling.medium,
             employer = null,
-            location = enStilling.location
+            location = enStilling.location,
+            properties = enStilling.properties,
+            businessName = enStilling.businessName,
+            status = enStilling.status,
+            uuid = enStilling.uuid
+
+
     )
 }

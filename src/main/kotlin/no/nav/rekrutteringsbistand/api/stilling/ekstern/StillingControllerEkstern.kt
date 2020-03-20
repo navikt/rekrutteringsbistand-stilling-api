@@ -21,13 +21,17 @@ class StillingControllerEkstern(
                 hashMapOf(*keys.filter { s.properties.get(it) != null }.map {
                     it to (s.properties.get(it) ?: "")
                 }.toTypedArray())
+        if (!"DIR".equals(s.source)) {
+            return ResponseEntity.notFound().build()
+        }
 
         return ResponseEntity.ok().body(
                 Stilling(
                         title = s.title,
                         properties = copyProps(
                                 "adtext", "applicationdue", "applicationemail", "engagementtype", "jobarrangement", "extent", "workday",
-                                "workhours", "positioncount", "sector", "starttime", "employerhomepage", "employerdescription", "medium"
+                                "workhours", "positioncount", "sector", "starttime", "employerhomepage", "employerdescription",
+                                "applicationurl", "jobtitle"
                         ),
                         contactList = s.contactList.map {
                             Contact(
@@ -41,12 +45,16 @@ class StillingControllerEkstern(
                         employer = s.employer?.let {
                             Arbeidsgiver(
                                     name = it.name,
-                                    location = it.location
+                                    location = it.location,
+                                    publicName = it.publicName
                             )
                         },
                         updated = s.updated,
                         medium = s.medium,
-                        id = s.id
+                        businessName = s.businessName,
+                        status = s.status,
+                        id = s.id,
+                        uuid = s.uuid
                 )
         )
     }

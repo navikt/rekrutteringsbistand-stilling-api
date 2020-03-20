@@ -27,7 +27,7 @@ object Testdata {
             title = "testnss",
             status = "ACTIVE",
             privacy = "SHOW_ALL",
-            source = "ASS",
+            source = "DIR",
             medium = "ASS",
             reference = UUID.randomUUID().toString(),
             published = LocalDateTime.now(),

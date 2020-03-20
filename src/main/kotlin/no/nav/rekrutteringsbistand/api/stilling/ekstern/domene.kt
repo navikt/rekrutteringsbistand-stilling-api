@@ -11,11 +11,14 @@ import kotlin.collections.ArrayList
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Stilling(
         val id: Long?,
+        val uuid: String?,
         val updated: LocalDateTime?,
         val contactList: List<Contact> = ArrayList(),
         val title: String?,
         val medium: String?,
         val employer: Arbeidsgiver?,
+        val businessName: String?,
+        val status: String?,
         val location: Geografi?,
         val properties: Map<String, String> = HashMap()
 )
@@ -26,7 +29,8 @@ data class Arbeidsgiver(
         val contactList: List<Contact> = ArrayList(),
         val location: Geografi?,
         val properties: Map<String, String> = HashMap(),
-        val name: String?
+        val name: String?,
+        val publicName: String?
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
