@@ -76,8 +76,7 @@ internal class StillingEksternComponentTest {
             properties = enStilling.properties,
             businessName = enStilling.businessName,
             status = enStilling.status,
-            uuid = enStilling.uuid
-
-
+            uuid = enStilling.uuid,
+            source = enStilling.source
     )
 }

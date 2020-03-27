@@ -9,7 +9,6 @@ spec:
   receivers:
     slack:
       channel: 'inkludering-alerts-dev'
-      # prependText: '<!here>'
   alerts:
     - alert: Applikasjon nede
       severity: danger

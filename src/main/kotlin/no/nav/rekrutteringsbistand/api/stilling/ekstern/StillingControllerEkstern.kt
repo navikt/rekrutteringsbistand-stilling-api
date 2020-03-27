@@ -22,10 +22,6 @@ class StillingControllerEkstern(
                     it to (stilling.properties.get(it) ?: "")
                 }.toTypedArray()))
 
-        if (!"DIR".equals(stilling.source)) {
-            return ResponseEntity.notFound().build()
-        }
-
         return ResponseEntity.ok().body(
                 Stilling(
                         title = stilling.title,
@@ -55,7 +51,8 @@ class StillingControllerEkstern(
                         businessName = stilling.businessName,
                         status = stilling.status,
                         id = stilling.id,
-                        uuid = stilling.uuid
+                        uuid = stilling.uuid,
+                        source = stilling.source
                 )
         )
     }

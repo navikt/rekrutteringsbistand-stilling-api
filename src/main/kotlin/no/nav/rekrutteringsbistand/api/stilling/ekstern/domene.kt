@@ -20,7 +20,8 @@ data class Stilling(
         val businessName: String?,
         val status: String?,
         val location: Geografi?,
-        val properties: Map<String, String> = HashMap()
+        val properties: Map<String, String> = HashMap(),
+        val source: String?
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
