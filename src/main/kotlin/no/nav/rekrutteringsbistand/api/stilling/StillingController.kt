@@ -97,6 +97,12 @@ class StillingController(
         return ResponseEntity.ok().body(stillingService.hentStilling(uuid))
     }
 
+    @Unprotected // Fordi kandidatsøk har hentet stillinger uten token frem til nå.
+    @GetMapping("/rekrutteringsbistand/api/v1/stilling/stillingsnummer/{stillingsnummer}")
+    fun hentStillingAnnonsenummer(@PathVariable stillingsnummer: String, request: HttpServletRequest): ResponseEntity<StillingMedStillingsinfo> {
+        return ResponseEntity.ok().body(stillingService.hentStillingMedStillingsnummer(stillingsnummer));
+    }
+
     @GetMapping("/rekrutteringsbistand/api/v1/ads")
     fun hentStillinger(request: HttpServletRequest): ResponseEntity<Page<StillingMedStillingsinfo>> {
         val url = "${externalConfiguration.stillingApi.url}/api/v1/ads"
