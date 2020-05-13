@@ -70,18 +70,10 @@ workflows:
             branches:
               only:
                 - master
-      - godkjenn-til-prod:
-          type: approval
-          requires:
-            - deploy-til-dev
-          filters:
-            branches:
-              only:
-                - master
       - deploy-til-prod:
           context: tag-ci
           requires:
-            - godkjenn-til-prod
+            - bygg
           filters:
             branches:
               only:
