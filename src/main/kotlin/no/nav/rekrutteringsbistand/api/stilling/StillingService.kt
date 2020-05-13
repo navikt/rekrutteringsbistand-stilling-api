@@ -14,6 +14,7 @@ import no.nav.rekrutteringsbistand.api.support.toMultiValueMap
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.*
 import org.springframework.stereotype.Service
+import org.springframework.util.MultiValueMap
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.util.UriComponentsBuilder
 import javax.servlet.http.HttpServletRequest
@@ -44,7 +45,7 @@ class StillingService(
     }
 
     fun hentStillingMedStillingsnummer(stillingsnummer: String): StillingMedStillingsinfo {
-        val stillingPage = hent("${externalConfiguration.stillingApi.url}/b2b/api/v1/ads", "id=${stillingsnummer}")
+        val stillingPage = hent("${externalConfiguration.stillingApi.url}/b2b/api/v1/ads", "id=${stillingsnummer}", headersUtenToken())
 
         if(stillingPage == null || stillingPage.content.isEmpty()) {
             throw RestResponseEntityExceptionHandler.NoContentException("Fant ikke stilling")
@@ -98,7 +99,7 @@ class StillingService(
     }
 
     fun hentStillinger(url: String, queryString: String?): Page<StillingMedStillingsinfo> {
-        val opprinneligeStillingerPage: Page<StillingMedStillingsinfo> = hent(url, queryString)
+        val opprinneligeStillingerPage: Page<StillingMedStillingsinfo> = hent(url, queryString, headers())
                 ?: throw RestResponseEntityExceptionHandler.NoContentException("Fant ikke stillinger")
         val opprinneligeStillinger = opprinneligeStillingerPage.content
         val stillingsinfoer = opprinneligeStillinger.map(::hentStillingsinfo)
@@ -110,12 +111,12 @@ class StillingService(
         return info.map { opprinnelig.copy(rekruttering = it.asDto()) }.getOrElse { opprinnelig }
     }
 
-    private fun hent(url: String, queryString: String?): Page<StillingMedStillingsinfo>? {
+    private fun hent(url: String, queryString: String?, headers: MultiValueMap<String, String>): Page<StillingMedStillingsinfo>? {
         val withQueryParams: String = UriComponentsBuilder.fromHttpUrl(url).query(queryString).build().toString()
         return restTemplate.exchange(
                 withQueryParams,
                 HttpMethod.GET,
-                HttpEntity(null, headers()),
+                HttpEntity(null, headers),
                 object : ParameterizedTypeReference<Page<StillingMedStillingsinfo>>() {}
         ).body
     }
