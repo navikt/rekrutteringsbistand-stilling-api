@@ -43,6 +43,18 @@ class StillingService(
         return stillingsinfo.map { opprinneligStilling.copy(rekruttering = it.asDto()) }.getOrElse { opprinneligStilling }
     }
 
+    fun hentStillingMedStillingsnummer(stillingsnummer: String): StillingMedStillingsinfo {
+        val stillingPage = hent("${externalConfiguration.stillingApi.url}/b2b/api/v1/ads", "id=${stillingsnummer}")
+
+        if(stillingPage == null || stillingPage.content.isEmpty()) {
+            throw RestResponseEntityExceptionHandler.NoContentException("Fant ikke stilling")
+        } else {
+            val stilling = stillingPage.content.first()
+            val stillingsinfo: Option<Stillingsinfo> = hentStillingsinfo(stilling)
+            return stillingsinfo.map { stilling.copy(rekruttering = it.asDto()) }.getOrElse { stilling }
+        }
+    }
+
     fun opprettStilling(stilling: Stilling, queryString: String?): StillingMedStillingsinfo {
         val url = "${externalConfiguration.stillingApi.url}/api/v1/ads"
         val opprinneligStilling: StillingMedStillingsinfo = restTemplate.exchange(
