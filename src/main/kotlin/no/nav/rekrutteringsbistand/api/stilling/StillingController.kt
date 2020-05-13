@@ -99,7 +99,7 @@ class StillingController(
 
     @Unprotected // Fordi kandidatsøk har hentet stillinger uten token frem til nå.
     @GetMapping("/rekrutteringsbistand/api/v1/stilling/stillingsnummer/{stillingsnummer}")
-    fun hentStillingAnnonsenummer(@PathVariable stillingsnummer: String, request: HttpServletRequest): ResponseEntity<StillingMedStillingsinfo> {
+    fun hentStillingAnnonsenummer(@PathVariable stillingsnummer: String): ResponseEntity<StillingMedStillingsinfo> {
         return ResponseEntity.ok().body(stillingService.hentStillingMedStillingsnummer(stillingsnummer));
     }
 
