@@ -41,7 +41,7 @@ class StillingService(
                 ?: throw RestResponseEntityExceptionHandler.NoContentException("Fant ikke stilling")
 
         val stillingsinfo: Option<Stillingsinfo> = hentStillingsinfo(opprinneligStilling)
-        return stillingsinfo.map { opprinneligStilling.copy(rekruttering = it.asDto()) }.getOrElse { opprinneligStilling }
+        return stillingsinfo.map { opprinneligStilling.copy(rekruttering = it.asEierDto()) }.getOrElse { opprinneligStilling }
     }
 
     fun hentStillingMedStillingsnummer(stillingsnummer: String): StillingMedStillingsinfo {
@@ -52,7 +52,7 @@ class StillingService(
         } else {
             val stilling = stillingPage.content.first()
             val stillingsinfo: Option<Stillingsinfo> = hentStillingsinfo(stilling)
-            return stillingsinfo.map { stilling.copy(rekruttering = it.asDto()) }.getOrElse { stilling }
+            return stillingsinfo.map { stilling.copy(rekruttering = it.asEierDto()) }.getOrElse { stilling }
         }
     }
 
@@ -71,7 +71,7 @@ class StillingService(
                 ?: throw IllegalArgumentException("Mangler stilling uuid")
         kandidatlisteKlient.oppdaterKandidatliste(id)
         val stillingsinfo: Option<Stillingsinfo> = hentStillingsinfo(opprinneligStilling)
-        return stillingsinfo.map { opprinneligStilling.copy(rekruttering = it.asDto()) }.getOrElse { opprinneligStilling }
+        return stillingsinfo.map { opprinneligStilling.copy(rekruttering = it.asEierDto()) }.getOrElse { opprinneligStilling }
     }
 
     fun oppdaterStilling(uuid: String, stilling: Stilling, queryString: String?): StillingMedStillingsinfo? {
@@ -89,7 +89,7 @@ class StillingService(
                 ?: throw IllegalArgumentException("Mangler stilling uuid")
         kandidatlisteKlient.oppdaterKandidatliste(id)
         val stillingsinfo: Option<Stillingsinfo> = hentStillingsinfo(opprinneligStilling)
-        return stillingsinfo.map { opprinneligStilling.copy(rekruttering = it.asDto()) }.getOrElse { opprinneligStilling }
+        return stillingsinfo.map { opprinneligStilling.copy(rekruttering = it.asEierDto()) }.getOrElse { opprinneligStilling }
     }
 
     fun slettStilling(uuid: String, request: HttpServletRequest): ResponseEntity<String> {
@@ -108,7 +108,7 @@ class StillingService(
     }
 
     private fun leggPåStillingsinfo(info: Option<Stillingsinfo>, opprinnelig: StillingMedStillingsinfo): StillingMedStillingsinfo {
-        return info.map { opprinnelig.copy(rekruttering = it.asDto()) }.getOrElse { opprinnelig }
+        return info.map { opprinnelig.copy(rekruttering = it.asEierDto()) }.getOrElse { opprinnelig }
     }
 
     private fun hent(url: String, queryString: String?, headers: MultiValueMap<String, String>): Page<StillingMedStillingsinfo>? {

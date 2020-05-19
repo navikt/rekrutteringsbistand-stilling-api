@@ -61,7 +61,7 @@ object Testdata {
             stillingsid = Stillingsid(enAnnenStilling.uuid!!)
     )
 
-    val enStillingsinfoOppdatering = OppdaterStillingsinfo(
+    val enStillingsinfoOppdatering = OppdaterEier(
             stillingsinfoid = enStillingsinfo.stillingsinfoid,
             eier = Eier(navident = enAnnenVeileder.navIdent, navn = enAnnenVeileder.displayName)
     )

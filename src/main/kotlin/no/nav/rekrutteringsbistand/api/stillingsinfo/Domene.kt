@@ -10,8 +10,8 @@ data class Stillingsinfo(
         val eier: Eier
 ) {
 
-    fun asDto() =
-            StillingsinfoDto(
+    fun asEierDto() =
+            EierDto(
                     stillingsinfoid = this.stillingsinfoid.toString(),
                     stillingsid = this.stillingsid.toString(),
                     eierNavident = this.eier.navident,
@@ -27,16 +27,16 @@ data class Stillingsinfo(
 }
 
 
-data class OppdaterStillingsinfo(val stillingsinfoid: Stillingsinfoid, val eier: Eier)
+data class OppdaterEier(val stillingsinfoid: Stillingsinfoid, val eier: Eier)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class StillingsinfoDto(
+data class EierDto(
         val stillingsinfoid: String? = null,
         val stillingsid: String,
         val eierNavident: String,
         val eierNavn: String
 ) {
-    fun asStillingsinfo() =
+    fun asEier() =
             Stillingsinfo(
                     stillingsinfoid = Stillingsinfoid(verdi = this.stillingsinfoid
                             ?: throw IllegalArgumentException("Stillingsinfo må ha en stillingsinfoid")
@@ -45,8 +45,8 @@ data class StillingsinfoDto(
                     eier = Eier(navident = this.eierNavident, navn = this.eierNavn)
             )
 
-    fun asOppdaterStillingsinfo() =
-            OppdaterStillingsinfo(
+    fun asOppdaterEierinfo() =
+            OppdaterEier(
                     stillingsinfoid = Stillingsinfoid(verdi = this.stillingsinfoid
                             ?: throw IllegalArgumentException("Stillingsinfo må ha en stillingsinfoid")
                     ),

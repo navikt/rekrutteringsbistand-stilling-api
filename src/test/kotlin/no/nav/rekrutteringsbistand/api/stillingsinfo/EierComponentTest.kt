@@ -25,14 +25,13 @@ import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatus.NO_CONTENT
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
-import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit4.SpringRunner
 
 @RunWith(SpringRunner::class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("local")
-class StillingsinfoComponentTest {
+class EierComponentTest {
 
     @get:Rule
     val wiremock = WireMockRule(WireMockConfiguration.options().port(9924))
@@ -53,14 +52,14 @@ class StillingsinfoComponentTest {
     }
 
     @Test
-    fun `Henting av stillingsinfo basert på stilling skal returnere HTTP OK med lagret stillingsinfo`() {
+    fun `Henting av eier basert på stilling skal returnere HTTP OK med lagret stillingsinfo`() {
         repository.lagre(enStillingsinfo)
 
         val url = "$localBaseUrl/rekruttering/stilling/${enStillingsinfo.stillingsid}"
-        val stillingsinfoRespons = restTemplate.exchange(url, HttpMethod.GET, httpEntity(null), StillingsinfoDto::class.java)
+        val stillingsinfoRespons = restTemplate.exchange(url, HttpMethod.GET, httpEntity(null), EierDto::class.java)
 
         assertThat(stillingsinfoRespons.statusCode).isEqualTo(HttpStatus.OK)
-        assertThat(stillingsinfoRespons.body).isEqualTo(enStillingsinfo.asDto())
+        assertThat(stillingsinfoRespons.body).isEqualTo(enStillingsinfo.asEierDto())
     }
 
     @Test
@@ -68,23 +67,23 @@ class StillingsinfoComponentTest {
         repository.lagre(enStillingsinfo)
 
         val url = "$localBaseUrl/rekruttering/ident/${enStillingsinfo.eier.navident}"
-        val stillingsinfoRespons = restTemplate.exchange(url, HttpMethod.GET, httpEntity(null), object : ParameterizedTypeReference<List<StillingsinfoDto>>() {})
+        val stillingsinfoRespons = restTemplate.exchange(url, HttpMethod.GET, httpEntity(null), object : ParameterizedTypeReference<List<EierDto>>() {})
 
         assertThat(stillingsinfoRespons.statusCode).isEqualTo(HttpStatus.OK)
         stillingsinfoRespons.body.apply {
             assertThat(this).hasSize(1)
-            assertThat(this!![0]).isEqualTo(enStillingsinfo.asDto())
+            assertThat(this!![0]).isEqualTo(enStillingsinfo.asEierDto())
         }
     }
 
 
     @Test
     fun `Opprettelse av stillingsinfo skal returnere HTTP 201 med opprettet stillingsinfo`() {
-        val tilLagring = enStillingsinfo.asDto().copy(stillingsinfoid = null)
+        val tilLagring = enStillingsinfo.asEierDto().copy(stillingsinfoid = null)
         mockKandidatlisteOppdatering()
 
         val url = "$localBaseUrl/rekruttering"
-        val stillingsinfoRespons = restTemplate.postForEntity(url, httpEntity(tilLagring), StillingsinfoDto::class.java)
+        val stillingsinfoRespons = restTemplate.postForEntity(url, httpEntity(tilLagring), EierDto::class.java)
         val lagretStillingsinfo = repository.hentForStilling(enStillingsinfo.stillingsid).getOrElse { fail("fant ikke stillingen") }
 
         assertThat(stillingsinfoRespons.statusCode).isEqualTo(HttpStatus.CREATED)
@@ -102,11 +101,11 @@ class StillingsinfoComponentTest {
         val oppdatering = enStillingsinfo.copy(eier = Eier(navident = "endretIdent", navn = "endretNavn"))
         mockKandidatlisteOppdatering()
 
-        val oppdateringRespons = restTemplate.exchange("$localBaseUrl/rekruttering", HttpMethod.PUT, httpEntity(oppdatering.asDto()), StillingsinfoDto::class.java)
+        val oppdateringRespons = restTemplate.exchange("$localBaseUrl/rekruttering", HttpMethod.PUT, httpEntity(oppdatering.asEierDto()), EierDto::class.java)
         val lagretStillingsinfo = repository.hentForStilling(enStillingsinfo.stillingsid).getOrElse { fail("fant ikke stillingen") }
 
         assertThat(oppdateringRespons.statusCode).isEqualTo(HttpStatus.OK)
-        assertThat(oppdateringRespons.body).isEqualTo(lagretStillingsinfo.asDto())
+        assertThat(oppdateringRespons.body).isEqualTo(lagretStillingsinfo.asEierDto())
 
         repository.slett(lagretStillingsinfo.stillingsinfoid)
     }

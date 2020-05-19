@@ -1,9 +1,7 @@
 package no.nav.rekrutteringsbistand.api.stilling
 
-import arrow.core.Option
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsinfo
-import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoDto
+import no.nav.rekrutteringsbistand.api.stillingsinfo.EierDto
 import java.time.LocalDateTime
 import java.util.*
 import kotlin.collections.ArrayList
@@ -37,7 +35,7 @@ data class StillingMedStillingsinfo(
         val firstPublished: Boolean?,
         val deactivatedByExpiry: Boolean?,
         val activationOnPublishingDate: Boolean?,
-        val rekruttering: StillingsinfoDto?
+        val rekruttering: EierDto?
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
