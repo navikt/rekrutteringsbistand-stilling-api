@@ -13,40 +13,40 @@ import java.util.*
 @RestController
 @RequestMapping("/rekruttering")
 @Protected
-class StillingsinfoController(
+class EierController(
         val repo: StillingsinfoRepository,
         val kandidatlisteKlient: KandidatlisteKlient
 ) {
 
     @PostMapping
-    fun lagre(@RequestBody dto: StillingsinfoDto): ResponseEntity<StillingsinfoDto> {
+    fun lagre(@RequestBody dto: EierDto): ResponseEntity<EierDto> {
         if (dto.stillingsinfoid != null) throw BadRequestException("stillingsinfoid må være tom for post")
 
-        val stillingsInfo = dto.copy(stillingsinfoid = UUID.randomUUID().toString()).asStillingsinfo()
-        LOG.debug("lager ny stillingsinfo for stillinginfoid ${stillingsInfo.stillingsid} stillingid ${stillingsInfo.stillingsinfoid}")
+        val eierinfo = dto.copy(stillingsinfoid = UUID.randomUUID().toString()).asEier()
+        LOG.debug("lager ny eierinformasjon for stillinginfoid ${eierinfo.stillingsid} stillingid ${eierinfo.stillingsinfoid}")
 
-        repo.lagre(stillingsInfo)
-        kandidatlisteKlient.oppdaterKandidatliste(stillingsInfo.stillingsid)
-        return ResponseEntity.created(URI("/rekruttering/${stillingsInfo.stillingsinfoid.asString()}")).body(stillingsInfo.asDto())
+        repo.lagre(eierinfo)
+        kandidatlisteKlient.oppdaterKandidatliste(eierinfo.stillingsid)
+        return ResponseEntity.created(URI("/rekruttering/${eierinfo.stillingsinfoid.asString()}")).body(eierinfo.asEierDto())
     }
 
     @PutMapping
-    fun oppdater(@RequestBody dto: StillingsinfoDto): ResponseEntity<StillingsinfoDto> {
+    fun oppdater(@RequestBody dto: EierDto): ResponseEntity<EierDto> {
         if (dto.stillingsinfoid == null) throw BadRequestException("Stillingsinfoid må ha verdi for put")
 
-        LOG.debug("Oppdaterer stillingsinfo for stillingInfoid ${dto.asStillingsinfo().stillingsinfoid.asString()} stillingid  ${dto.asStillingsinfo().stillingsid.asString()}")
-        repo.oppdaterEierIdentOgEierNavn(dto.asOppdaterStillingsinfo())
-        kandidatlisteKlient.oppdaterKandidatliste(dto.asStillingsinfo().stillingsid)
+        LOG.debug("Oppdaterer eierinformasjon for stillingInfoid ${dto.asEier().stillingsinfoid.asString()} stillingid  ${dto.asEier().stillingsid.asString()}")
+        repo.oppdaterEierIdentOgEierNavn(dto.asOppdaterEierinfo())
+        kandidatlisteKlient.oppdaterKandidatliste(dto.asEier().stillingsid)
         return ResponseEntity.ok().body(dto)
     }
 
     @GetMapping("/stilling/{id}")
-    fun hentForStilling(@PathVariable id: String): StillingsinfoDto =
-            repo.hentForStilling(Stillingsid(id)).map { it.asDto() }.getOrElse { throw NotFoundException("Stilling id $id") }
+    fun hentForStilling(@PathVariable id: String): EierDto =
+            repo.hentForStilling(Stillingsid(id)).map { it.asEierDto() }.getOrElse { throw NotFoundException("Stilling id $id") }
 
     @GetMapping("/ident/{id}")
-    fun hentForIdent(@PathVariable id: String): Collection<StillingsinfoDto> =
-            repo.hentForIdent(id).map { it.asDto() }
+    fun hentForIdent(@PathVariable id: String): Collection<EierDto> =
+            repo.hentForIdent(id).map { it.asEierDto() }
 
 }
 

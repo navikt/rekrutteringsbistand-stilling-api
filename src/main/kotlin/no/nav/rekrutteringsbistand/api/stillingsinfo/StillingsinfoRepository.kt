@@ -25,7 +25,7 @@ class StillingsinfoRepository(
                     )
             )
 
-    fun oppdaterEierIdentOgEierNavn(oppdatering: OppdaterStillingsinfo) =
+    fun oppdaterEierIdentOgEierNavn(oppdatering: OppdaterEier) =
             jdbcTemplate.update(
                     "update $STILLINGSINFO set $EIER_NAVIDENT=:eier_navident, $EIER_NAVN=:eier_navn where $STILLINGSINFOID=:stillingsinfoid",
                     mapOf(

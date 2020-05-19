@@ -6,7 +6,6 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.http.Fault
 import com.github.tomakehurst.wiremock.junit.WireMockRule
-import com.github.tomakehurst.wiremock.matching.StringValuePattern
 import no.nav.rekrutteringsbistand.api.Testdata.enAnnenStillingsinfo
 import no.nav.rekrutteringsbistand.api.Testdata.enPage
 import no.nav.rekrutteringsbistand.api.Testdata.enStilling
@@ -78,7 +77,7 @@ internal class StillingComponentTest {
         mockUtenAuthorization("/b2b/api/v1/ads/${enStilling.uuid}", enStilling)
 
         restTemplate.getForObject("$localBaseUrl/rekrutteringsbistand/api/v1/stilling/${enStilling.uuid}", StillingMedStillingsinfo::class.java).also {
-            assertThat(it.rekruttering).isEqualTo(enStillingsinfo.asDto())
+            assertThat(it.rekruttering).isEqualTo(enStillingsinfo.asEierDto())
             assertThat(it.uuid).isEqualTo(enStillingsinfo.stillingsid.asString())
         }
     }
@@ -90,7 +89,7 @@ internal class StillingComponentTest {
         mockUtenAuthorization("/b2b/api/v1/ads?id=1000", Page(listOf(enStilling), 1, 1))
 
         restTemplate.getForObject("$localBaseUrl/rekrutteringsbistand/api/v1/stilling/stillingsnummer/${enStilling.id}", StillingMedStillingsinfo::class.java).also {
-            assertThat(it.rekruttering).isEqualTo(enStillingsinfo.asDto())
+            assertThat(it.rekruttering).isEqualTo(enStillingsinfo.asEierDto())
             assertThat(it.uuid).isEqualTo(enStillingsinfo.stillingsid.asString())
         }
     }
@@ -109,8 +108,8 @@ internal class StillingComponentTest {
                 object : ParameterizedTypeReference<Page<StillingMedStillingsinfo>>() {}
         ).body!!.content
 
-        assertThat(stillinger.first().rekruttering).isEqualTo(enStillingsinfo.asDto())
-        assertThat(stillinger.last().rekruttering).isEqualTo(enAnnenStillingsinfo.asDto())
+        assertThat(stillinger.first().rekruttering).isEqualTo(enStillingsinfo.asEierDto())
+        assertThat(stillinger.last().rekruttering).isEqualTo(enAnnenStillingsinfo.asEierDto())
     }
 
     @Test
@@ -211,8 +210,8 @@ internal class StillingComponentTest {
         )
 
         assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)
-        assertThat(respons.body!!.content.first().rekruttering).isEqualTo(enStillingsinfo.asDto())
-        assertThat(respons.body!!.content.last().rekruttering).isEqualTo(enAnnenStillingsinfo.asDto())
+        assertThat(respons.body!!.content.first().rekruttering).isEqualTo(enStillingsinfo.asEierDto())
+        assertThat(respons.body!!.content.last().rekruttering).isEqualTo(enAnnenStillingsinfo.asEierDto())
     }
 
     @Test
