@@ -47,7 +47,7 @@ class StillingService(
     fun hentStillingMedStillingsnummer(stillingsnummer: String): StillingMedStillingsinfo {
         val stillingPage = hent("${externalConfiguration.stillingApi.url}/b2b/api/v1/ads", "id=${stillingsnummer}", headersUtenToken())
 
-        if(stillingPage == null || stillingPage.content.isEmpty()) {
+        if (stillingPage == null || stillingPage.content.isEmpty()) {
             throw RestResponseEntityExceptionHandler.NoContentException("Fant ikke stilling")
         } else {
             val stilling = stillingPage.content.first()
@@ -87,7 +87,9 @@ class StillingService(
 
         val id = opprinneligStilling.uuid?.let { Stillingsid(it) }
                 ?: throw IllegalArgumentException("Mangler stilling uuid")
-        kandidatlisteKlient.oppdaterKandidatliste(id)
+        if (opprinneligStilling.rekruttering?.eierNavident != null || "DIR".equals(opprinneligStilling.source, false)) {
+            kandidatlisteKlient.oppdaterKandidatliste(id)
+        }
         val stillingsinfo: Option<Stillingsinfo> = hentStillingsinfo(opprinneligStilling)
         return stillingsinfo.map { opprinneligStilling.copy(rekruttering = it.asEierDto()) }.getOrElse { opprinneligStilling }
     }
