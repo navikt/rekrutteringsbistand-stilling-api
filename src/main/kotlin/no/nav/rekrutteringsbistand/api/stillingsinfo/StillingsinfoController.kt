@@ -22,7 +22,7 @@ class EierController(
     fun lagre(@RequestBody dto: EierDto): ResponseEntity<EierDto> {
         if (dto.stillingsinfoid != null) throw BadRequestException("stillingsinfoid må være tom for post")
 
-        val eierinfo = dto.copy(stillingsinfoid = UUID.randomUUID().toString()).asEier()
+        val eierinfo = dto.copy(stillingsinfoid = UUID.randomUUID().toString()).asStillinginfo()
         LOG.debug("lager ny eierinformasjon for stillinginfoid ${eierinfo.stillingsid} stillingid ${eierinfo.stillingsinfoid}")
 
         repo.lagre(eierinfo)
@@ -34,9 +34,9 @@ class EierController(
     fun oppdater(@RequestBody dto: EierDto): ResponseEntity<EierDto> {
         if (dto.stillingsinfoid == null) throw BadRequestException("Stillingsinfoid må ha verdi for put")
 
-        LOG.debug("Oppdaterer eierinformasjon for stillingInfoid ${dto.asEier().stillingsinfoid.asString()} stillingid  ${dto.asEier().stillingsid.asString()}")
+        LOG.debug("Oppdaterer eierinformasjon for stillingInfoid ${dto.asStillinginfo().stillingsinfoid.asString()} stillingid  ${dto.asStillinginfo().stillingsid.asString()}")
         repo.oppdaterEierIdentOgEierNavn(dto.asOppdaterEierinfo())
-        kandidatlisteKlient.oppdaterKandidatliste(dto.asEier().stillingsid)
+        kandidatlisteKlient.oppdaterKandidatliste(dto.asStillinginfo().stillingsid)
         return ResponseEntity.ok().body(dto)
     }
 

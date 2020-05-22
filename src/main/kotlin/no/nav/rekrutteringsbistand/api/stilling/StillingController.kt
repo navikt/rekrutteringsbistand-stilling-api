@@ -1,5 +1,6 @@
 package no.nav.rekrutteringsbistand.api.stilling
 
+import no.nav.rekrutteringsbistand.api.RekrutterinsbistandStillingDto
 import no.nav.rekrutteringsbistand.api.support.LOG
 import no.nav.rekrutteringsbistand.api.support.config.ExternalConfiguration
 import no.nav.rekrutteringsbistand.api.support.rest.RestProxy
@@ -29,8 +30,15 @@ class StillingController(
     }
 
     @PutMapping("/rekrutteringsbistand/api/v1/ads/{uuid}")
+    @Deprecated("Bruk putRekrutteringsbistandStilling")
     fun proxyPutTilStillingsApi(@PathVariable uuid: String, request: HttpServletRequest, @RequestBody stilling: Stilling): ResponseEntity<StillingMedStillingsinfo> {
         val oppdatertStilling = stillingService.oppdaterStilling(uuid, stilling, request.queryString)
+        return ResponseEntity.ok().body(oppdatertStilling)
+    }
+
+    @PutMapping("/rekrutteringsbistand/api/stilling/{uuid}")
+    fun putRekrutteringsbistandStilling(@PathVariable uuid: String, request: HttpServletRequest, @RequestBody rekrutterinsbistandStillingDto: RekrutterinsbistandStillingDto): ResponseEntity<RekrutterinsbistandStillingDto> {
+        val oppdatertStilling = stillingService.oppdaterRekrutterinsbistandStilling(uuid, rekrutterinsbistandStillingDto, request.queryString)
         return ResponseEntity.ok().body(oppdatertStilling)
     }
 
@@ -93,8 +101,15 @@ class StillingController(
 
     @Unprotected // Fordi kandidatsøk har hentet stillinger uten token frem til nå.
     @GetMapping("/rekrutteringsbistand/api/v1/stilling/{uuid}")
+    @Deprecated("Bruk hentRekrutteringsbistandStilling")
     fun hentStilling(@PathVariable uuid: String, request: HttpServletRequest): ResponseEntity<StillingMedStillingsinfo> {
         return ResponseEntity.ok().body(stillingService.hentStilling(uuid))
+    }
+
+    @Unprotected // Fordi kandidatsøk har hentet stillinger uten token frem til nå.
+    @GetMapping("/rekrutteringsbistand/api/stilling/{uuid}")
+    fun hentRekrutteringsbistandStilling(@PathVariable uuid: String, request: HttpServletRequest): ResponseEntity<RekrutterinsbistandStillingDto> {
+        return ResponseEntity.ok().body(stillingService.hentRekrutterinsbistandStilling(uuid))
     }
 
     @Unprotected // Fordi kandidatsøk har hentet stillinger uten token frem til nå.

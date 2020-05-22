@@ -20,8 +20,9 @@ class StillingsinfoRepository(
                     mapOf(
                             STILLINGSINFOID to stillingsinfo.stillingsinfoid.asString(),
                             STILLINGSID to stillingsinfo.stillingsid.asString(),
-                            EIER_NAVIDENT to stillingsinfo.eier.navident,
-                            EIER_NAVN to stillingsinfo.eier.navn
+                            EIER_NAVIDENT to stillingsinfo.eier?.navident,
+                            EIER_NAVN to stillingsinfo.eier?.navn,
+                            NOTAT to stillingsinfo.notat
                     )
             )
 
@@ -35,6 +36,17 @@ class StillingsinfoRepository(
                     )
 
             )
+
+    fun oppdaterNotat(oppdatering: OppdaterNotat) {
+        jdbcTemplate.update(
+                "update $STILLINGSINFO set $NOTAT=:notat where $STILLINGSINFOID=:stillingsinfoid",
+                mapOf(
+                        "stillingsinfoid" to oppdatering.stillingsinfoid.asString(),
+                        "notat" to oppdatering.notat
+                )
+
+        )
+    }
 
     fun hentForStilling(stillingId: Stillingsid): Option<Stillingsinfo> {
         val list = hentForStillinger(listOf(stillingId))
@@ -69,5 +81,6 @@ class StillingsinfoRepository(
         const val STILLINGSID = "stillingsid"
         const val EIER_NAVIDENT = "eier_navident"
         const val EIER_NAVN = "eier_navn"
+        const val NOTAT = "notat"
     }
 }
