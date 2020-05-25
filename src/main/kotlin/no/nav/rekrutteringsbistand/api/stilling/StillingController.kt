@@ -37,9 +37,9 @@ class StillingController(
         return ResponseEntity.ok().body(oppdatertStilling)
     }
 
-    @PutMapping("/rekrutteringsbistand/api/rekrutteringsbistandstilling/{uuid}")
-    fun putRekrutteringsbistandStilling(@PathVariable uuid: String, request: HttpServletRequest, @RequestBody rekrutterinsbistandStillingDto: OppdaterRekrutterinsbistandStillingDto): ResponseEntity<OppdaterRekrutterinsbistandStillingDto> {
-        val oppdatertStilling = stillingService.oppdaterRekrutterinsbistandStilling(uuid, rekrutterinsbistandStillingDto, request.queryString)
+    @PutMapping("/rekrutteringsbistand/api/rekrutteringsbistandstilling")
+    fun putRekrutteringsbistandStilling(request: HttpServletRequest, @RequestBody rekrutterinsbistandStillingDto: OppdaterRekrutterinsbistandStillingDto): ResponseEntity<OppdaterRekrutterinsbistandStillingDto> {
+        val oppdatertStilling = stillingService.oppdaterRekrutterinsbistandStilling(rekrutterinsbistandStillingDto, request.queryString)
         return ResponseEntity.ok().body(oppdatertStilling)
     }
 
@@ -130,7 +130,7 @@ class StillingController(
     @GetMapping("/rekrutteringsbistand/api/v1/ads/rekrutteringsbistand/minestillinger")
     fun hentMineStillinger(request: HttpServletRequest): ResponseEntity<Page<StillingMedStillingsinfo>> {
         return ResponseEntity.ok().body(stillingService.hentStillinger(
-                "${externalConfiguration.stillingApi.url}/api/v1/ads/rekrutteringsbistand/minestillinger",
+                 "${externalConfiguration.stillingApi.url}/api/v1/ads/rekrutteringsbistand/minestillinger",
                 if (request.queryString != null) URLDecoder.decode(request.queryString, StandardCharsets.UTF_8) else null
         ))
     }

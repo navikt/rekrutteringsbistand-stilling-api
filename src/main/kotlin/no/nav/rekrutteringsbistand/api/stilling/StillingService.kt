@@ -127,12 +127,12 @@ class StillingService(
         return stillingsinfo.map { opprinneligStilling.copy(rekruttering = it.asEierDto()) }.getOrElse { opprinneligStilling }
     }
 
-    fun oppdaterRekrutterinsbistandStilling(uuid: String, oppdaterRekrutterinsbistandStillingDto: OppdaterRekrutterinsbistandStillingDto, queryString: String?): OppdaterRekrutterinsbistandStillingDto {
-        val url = "${externalConfiguration.stillingApi.url}/api/v1/ads/${uuid}"
+    fun oppdaterRekrutterinsbistandStilling(dto: OppdaterRekrutterinsbistandStillingDto, queryString: String?): OppdaterRekrutterinsbistandStillingDto {
+        val url = "${externalConfiguration.stillingApi.url}/api/v1/ads/${dto.stilling.uuid}"
         val returnertStilling: Stilling = restTemplate.exchange(
                 url + if (queryString != null) "?$queryString" else "",
                 HttpMethod.PUT,
-                HttpEntity(oppdaterRekrutterinsbistandStillingDto.stilling, headers()),
+                HttpEntity(dto.stilling, headers()),
                 Stilling::class.java
         )
                 .body
@@ -148,12 +148,12 @@ class StillingService(
         val stillingsinfo: Option<Stillingsinfo> = hentStillingsinfo(returnertStilling)
 
         return stillingsinfo.map {
-            if (oppdaterRekrutterinsbistandStillingDto.notat != null) {
+            if (dto.notat != null) {
                 stillingsinfoService.oppdaterNotat(
                         stillingId = id,
                         oppdaterNotat = OppdaterNotat(
                                 stillingsinfoid = it.stillingsinfoid,
-                                notat = oppdaterRekrutterinsbistandStillingDto.notat
+                                notat = dto.notat
                         )
                 )
             }
@@ -161,22 +161,22 @@ class StillingService(
             OppdaterRekrutterinsbistandStillingDto(
                     stillingsinfoid = it.stillingsinfoid.asString(),
                     stilling = returnertStilling,
-                    notat = oppdaterRekrutterinsbistandStillingDto.notat)
+                    notat = dto.notat)
         }.getOrElse {
-            if (oppdaterRekrutterinsbistandStillingDto.notat != null) {
+            if (dto.notat != null) {
                 val stillingsinfoid = Stillingsinfoid(UUID.randomUUID().toString())
                 stillingsinfoService.lagre(
                         Stillingsinfo(
                                 stillingsinfoid = stillingsinfoid,
                                 stillingsid = id,
-                                notat = oppdaterRekrutterinsbistandStillingDto.notat,
+                                notat = dto.notat,
                                 eier = null
                         )
                 )
                 OppdaterRekrutterinsbistandStillingDto(
                         stillingsinfoid = stillingsinfoid.asString(),
                         stilling = returnertStilling,
-                        notat = oppdaterRekrutterinsbistandStillingDto.notat
+                        notat = dto.notat
                 )
             } else {
                 OppdaterRekrutterinsbistandStillingDto(

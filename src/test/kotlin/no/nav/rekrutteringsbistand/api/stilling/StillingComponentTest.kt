@@ -189,7 +189,7 @@ internal class StillingComponentTest {
         repository.lagre(enTredjeStillingsinfo.copy(notat = "gammelt notat"))
 
         restTemplate.exchange(
-                "$localBaseUrl/rekrutteringsbistand/api/rekrutteringsbistandstilling/${enRekrutterinsbistandStilling.stilling.uuid}",
+                "$localBaseUrl/rekrutteringsbistand/api/rekrutteringsbistandstilling",
                 HttpMethod.PUT,
                 HttpEntity(OppdaterRekrutterinsbistandStillingDto(
                         stillingsinfoid = enRekrutterinsbistandStilling.stilingsinfo?.stillingsinfoid,
@@ -213,7 +213,7 @@ internal class StillingComponentTest {
         repository.lagre(enStillinggsinfoUtenEier.copy(notat = null))
 
         restTemplate.exchange(
-                "$localBaseUrl/rekrutteringsbistand/api/rekrutteringsbistandstilling/${rekrutteringsbistandStilling.stilling.uuid}",
+                "$localBaseUrl/rekrutteringsbistand/api/rekrutteringsbistandstilling",
                 HttpMethod.PUT,
                 HttpEntity(OppdaterRekrutterinsbistandStillingDto(
                         stillingsinfoid = rekrutteringsbistandStilling.stilingsinfo?.stillingsinfoid,
@@ -236,7 +236,7 @@ internal class StillingComponentTest {
         mockKandidatlisteOppdatering()
 
         restTemplate.exchange(
-                "$localBaseUrl/rekrutteringsbistand/api/rekrutteringsbistandstilling/${rekrutteringsbistandStilling.stilling.uuid}",
+                "$localBaseUrl/rekrutteringsbistand/api/rekrutteringsbistandstilling",
                 HttpMethod.PUT,
                 HttpEntity(OppdaterRekrutterinsbistandStillingDto(
                         stillingsinfoid = rekrutteringsbistandStilling.stilingsinfo?.stillingsinfoid,
