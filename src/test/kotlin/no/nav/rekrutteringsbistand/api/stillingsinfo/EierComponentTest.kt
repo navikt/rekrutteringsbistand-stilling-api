@@ -71,8 +71,7 @@ class EierComponentTest {
 
         assertThat(stillingsinfoRespons.statusCode).isEqualTo(HttpStatus.OK)
         stillingsinfoRespons.body.apply {
-            assertThat(this).hasSize(1)
-            assertThat(this!![0]).isEqualTo(enStillingsinfo.asEierDto())
+            assertThat(this!!).contains(enStillingsinfo.asEierDto())
         }
     }
 

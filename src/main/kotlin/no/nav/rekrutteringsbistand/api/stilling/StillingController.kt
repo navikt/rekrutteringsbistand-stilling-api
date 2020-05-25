@@ -36,7 +36,7 @@ class StillingController(
         return ResponseEntity.ok().body(oppdatertStilling)
     }
 
-    @PutMapping("/rekrutteringsbistand/api/stilling/{uuid}")
+    @PutMapping("/rekrutteringsbistand/api/rekrutteringsbistandstilling/{uuid}")
     fun putRekrutteringsbistandStilling(@PathVariable uuid: String, request: HttpServletRequest, @RequestBody rekrutterinsbistandStillingDto: RekrutterinsbistandStillingDto): ResponseEntity<RekrutterinsbistandStillingDto> {
         val oppdatertStilling = stillingService.oppdaterRekrutterinsbistandStilling(uuid, rekrutterinsbistandStillingDto, request.queryString)
         return ResponseEntity.ok().body(oppdatertStilling)
@@ -107,7 +107,7 @@ class StillingController(
     }
 
     @Unprotected // Fordi kandidatsøk har hentet stillinger uten token frem til nå.
-    @GetMapping("/rekrutteringsbistand/api/stilling/{uuid}")
+    @GetMapping("/rekrutteringsbistand/api/rekrutteringsbistandstilling/{uuid}")
     fun hentRekrutteringsbistandStilling(@PathVariable uuid: String, request: HttpServletRequest): ResponseEntity<RekrutterinsbistandStillingDto> {
         return ResponseEntity.ok().body(stillingService.hentRekrutterinsbistandStilling(uuid))
     }
