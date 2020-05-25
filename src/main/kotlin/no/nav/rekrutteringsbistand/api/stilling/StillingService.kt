@@ -2,7 +2,8 @@ package no.nav.rekrutteringsbistand.api.stilling
 
 import arrow.core.Option
 import arrow.core.getOrElse
-import no.nav.rekrutteringsbistand.api.RekrutterinsbistandStillingDto
+import no.nav.rekrutteringsbistand.api.HentRekrutterinsbistandStillingDto
+import no.nav.rekrutteringsbistand.api.OppdaterRekrutterinsbistandStillingDto
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
 import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteKlient
 import no.nav.rekrutteringsbistand.api.stillingsinfo.*
@@ -45,7 +46,7 @@ class StillingService(
         return stillingsinfo.map { opprinneligStilling.copy(rekruttering = it.asEierDto()) }.getOrElse { opprinneligStilling }
     }
 
-    fun hentRekrutterinsbistandStilling(uuid: String): RekrutterinsbistandStillingDto {
+    fun hentRekrutterinsbistandStilling(uuid: String): HentRekrutterinsbistandStillingDto {
         val url = "${externalConfiguration.stillingApi.url}/b2b/api/v1/ads/$uuid"
         val returnertStilling: Stilling = restTemplate.exchange(
                 url,
@@ -59,17 +60,19 @@ class StillingService(
         val stillingsinfo: Option<Stillingsinfo> = hentStillingsinfo(returnertStilling)
 
         return stillingsinfo.map {
-            RekrutterinsbistandStillingDto(
-                    stillingsinfoid = it.stillingsinfoid.asString(),
-                    stilling = returnertStilling,
-                    notat = it.notat,
-                    eier = it.eier)
+            HentRekrutterinsbistandStillingDto(
+                    StillingsinfoDto(
+                            stillingsinfoid = it.stillingsinfoid.asString(),
+                            notat = it.notat,
+                            eier = it.eier,
+                            stillingsid = it.stillingsid.asString()
+                    ),
+                    stilling = returnertStilling
+                   )
         }.getOrElse {
-            RekrutterinsbistandStillingDto(
-                    stillingsinfoid = null,
-                    stilling = returnertStilling,
-                    notat = null,
-                    eier = null
+            HentRekrutterinsbistandStillingDto(
+                    null,
+                    stilling = returnertStilling
             )
         }
     }
@@ -124,12 +127,12 @@ class StillingService(
         return stillingsinfo.map { opprinneligStilling.copy(rekruttering = it.asEierDto()) }.getOrElse { opprinneligStilling }
     }
 
-    fun oppdaterRekrutterinsbistandStilling(uuid: String, rekrutterinsbistandStillingDto: RekrutterinsbistandStillingDto, queryString: String?): RekrutterinsbistandStillingDto {
+    fun oppdaterRekrutterinsbistandStilling(uuid: String, oppdaterRekrutterinsbistandStillingDto: OppdaterRekrutterinsbistandStillingDto, queryString: String?): OppdaterRekrutterinsbistandStillingDto {
         val url = "${externalConfiguration.stillingApi.url}/api/v1/ads/${uuid}"
         val returnertStilling: Stilling = restTemplate.exchange(
                 url + if (queryString != null) "?$queryString" else "",
                 HttpMethod.PUT,
-                HttpEntity(rekrutterinsbistandStillingDto.stilling, headers()),
+                HttpEntity(oppdaterRekrutterinsbistandStillingDto.stilling, headers()),
                 Stilling::class.java
         )
                 .body
@@ -145,47 +148,41 @@ class StillingService(
         val stillingsinfo: Option<Stillingsinfo> = hentStillingsinfo(returnertStilling)
 
         return stillingsinfo.map {
-            if (it.eier?.navident != null) {
-                kandidatlisteKlient.oppdaterKandidatliste(id)
-            }
-            if (rekrutterinsbistandStillingDto.notat != null) {
+            if (oppdaterRekrutterinsbistandStillingDto.notat != null) {
                 stillingsinfoService.oppdaterNotat(
                         stillingId = id,
                         oppdaterNotat = OppdaterNotat(
                                 stillingsinfoid = it.stillingsinfoid,
-                                notat = rekrutterinsbistandStillingDto.notat
+                                notat = oppdaterRekrutterinsbistandStillingDto.notat
                         )
                 )
             }
 
-            RekrutterinsbistandStillingDto(
+            OppdaterRekrutterinsbistandStillingDto(
                     stillingsinfoid = it.stillingsinfoid.asString(),
                     stilling = returnertStilling,
-                    notat = rekrutterinsbistandStillingDto.notat,
-                    eier = it.eier)
+                    notat = oppdaterRekrutterinsbistandStillingDto.notat)
         }.getOrElse {
-            if (rekrutterinsbistandStillingDto.notat != null) {
+            if (oppdaterRekrutterinsbistandStillingDto.notat != null) {
                 val stillingsinfoid = Stillingsinfoid(UUID.randomUUID().toString())
                 stillingsinfoService.lagre(
                         Stillingsinfo(
                                 stillingsinfoid = stillingsinfoid,
                                 stillingsid = id,
-                                eier = rekrutterinsbistandStillingDto.eier,
-                                notat = rekrutterinsbistandStillingDto.notat
+                                notat = oppdaterRekrutterinsbistandStillingDto.notat,
+                                eier = null
                         )
                 )
-                RekrutterinsbistandStillingDto(
+                OppdaterRekrutterinsbistandStillingDto(
                         stillingsinfoid = stillingsinfoid.asString(),
                         stilling = returnertStilling,
-                        notat = rekrutterinsbistandStillingDto.notat,
-                        eier = rekrutterinsbistandStillingDto.eier
+                        notat = oppdaterRekrutterinsbistandStillingDto.notat
                 )
             } else {
-                RekrutterinsbistandStillingDto(
+                OppdaterRekrutterinsbistandStillingDto(
                         stillingsinfoid = null,
                         stilling = returnertStilling,
-                        notat = rekrutterinsbistandStillingDto.notat,
-                        eier = rekrutterinsbistandStillingDto.eier
+                        notat = null
                 )
             }
         }

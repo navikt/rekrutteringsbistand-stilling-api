@@ -130,18 +130,24 @@ object Testdata {
             activationOnPublishingDate = null
     )
 
-    val enRekrutterinsbistandStilling = RekrutterinsbistandStillingDto(
-            stillingsinfoid = enTredjeStillingsinfo.stillingsinfoid.asString(),
-            stilling = enTredjeStilling.tilStilling(),
-            eier = Eier(navident = enVeileder.navIdent, navn = enVeileder.displayName),
-            notat = etNotat
-    )
+    val enRekrutterinsbistandStilling = HentRekrutterinsbistandStillingDto(
+            stilingsinfo = StillingsinfoDto(
+                    stillingsinfoid = enTredjeStillingsinfo.stillingsinfoid.asString(),
+                    eier = Eier(navident = enVeileder.navIdent, navn = enVeileder.displayName),
+                    notat = etNotat,
+                    stillingsid = enStilling.uuid!!
+            ),
+            stilling = enTredjeStilling.tilStilling()
 
-    val enRekrutterinsbistandStillingUtenEier = RekrutterinsbistandStillingDto(
-            stillingsinfoid = enStillinggsinfoUtenEier.stillingsinfoid.asString(),
-            stilling = enFjerdeStilling.tilStilling(),
-            eier = null,
-            notat = "etAnnetNotat"
+            )
+
+    val enRekrutterinsbistandStillingUtenEier = HentRekrutterinsbistandStillingDto(
+            stilingsinfo = StillingsinfoDto(
+                    stillingsinfoid = enStillinggsinfoUtenEier.stillingsinfoid.asString(),
+                    eier = null,
+                    notat = "etAnnetNotat",
+                    stillingsid = enStillinggsinfoUtenEier.stillingsid.asString()),
+            stilling = enFjerdeStilling.tilStilling()
     )
 
     val anyJsonRequestEntity: HttpEntity<String> by lazy {

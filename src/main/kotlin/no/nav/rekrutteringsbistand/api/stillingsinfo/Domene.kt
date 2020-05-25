@@ -29,7 +29,6 @@ data class Stillingsinfo(
     }
 }
 
-
 data class OppdaterEier(val stillingsinfoid: Stillingsinfoid, val eier: Eier)
 
 data class OppdaterNotat(val stillingsinfoid: Stillingsinfoid, val notat: String)
@@ -77,3 +76,10 @@ data class Stillingsid(val verdi: UUID) {
 }
 
 data class Eier(val navident: String?, val navn: String?)
+
+data class StillingsinfoDto(
+        val stillingsid: String,
+        val stillingsinfoid: String,
+        val notat: String?,
+        val eier: Eier?
+)

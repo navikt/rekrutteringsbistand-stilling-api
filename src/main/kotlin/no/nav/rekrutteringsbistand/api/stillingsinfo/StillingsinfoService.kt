@@ -16,5 +16,4 @@ class StillingsinfoService(private val repository: StillingsinfoRepository) {
         repository.lagre(stillingsinfo)
     }
 
-
 }
