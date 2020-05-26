@@ -6,13 +6,13 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.http.Fault
 import com.github.tomakehurst.wiremock.junit.WireMockRule
-import no.nav.rekrutteringsbistand.api.HentRekrutterinsbistandStillingDto
-import no.nav.rekrutteringsbistand.api.OppdaterRekrutterinsbistandStillingDto
+import no.nav.rekrutteringsbistand.api.HentRekrutteringsbistandStillingDto
+import no.nav.rekrutteringsbistand.api.OppdaterRekrutteringsbistandStillingDto
 import no.nav.rekrutteringsbistand.api.Testdata.enAnnenStillingsinfo
 import no.nav.rekrutteringsbistand.api.Testdata.enFjerdeStilling
 import no.nav.rekrutteringsbistand.api.Testdata.enPage
-import no.nav.rekrutteringsbistand.api.Testdata.enRekrutterinsbistandStilling
-import no.nav.rekrutteringsbistand.api.Testdata.enRekrutterinsbistandStillingUtenEier
+import no.nav.rekrutteringsbistand.api.Testdata.enRekrutteringsbistandStilling
+import no.nav.rekrutteringsbistand.api.Testdata.enRekrutteringsbistandStillingUtenEier
 import no.nav.rekrutteringsbistand.api.Testdata.enStilling
 import no.nav.rekrutteringsbistand.api.Testdata.enStillingUtenStillingsinfo
 import no.nav.rekrutteringsbistand.api.Testdata.enStillinggsinfoUtenEier
@@ -82,8 +82,8 @@ internal class StillingComponentTest {
     @Test
     fun `GET mot en rekrutteringsbistandstilling skal returnere en stilling uten stillingsinfo hvis det ikke er lagret`() {
         mockUtenAuthorization("/b2b/api/v1/ads/${enStilling.uuid}", enStilling)
-        restTemplate.getForObject("$localBaseUrl/rekrutteringsbistand/api/rekrutteringsbistandstilling/${enStilling.uuid}", HentRekrutterinsbistandStillingDto::class.java).also {
-            assertThat(it).isEqualTo(HentRekrutterinsbistandStillingDto(
+        restTemplate.getForObject("$localBaseUrl/rekrutteringsbistand/api/rekrutteringsbistandstilling/${enStilling.uuid}", HentRekrutteringsbistandStillingDto::class.java).also {
+            assertThat(it).isEqualTo(HentRekrutteringsbistandStillingDto(
                     stilling = enStilling.tilStilling(),
                     stilingsinfo = null
             ))
@@ -94,8 +94,8 @@ internal class StillingComponentTest {
     fun `GET mot en rekrutteringsbistandstilling skal returnere en stilling med stillingsinfo hvis det er lagret`() {
         mockUtenAuthorization("/b2b/api/v1/ads/${enStilling.uuid}", enStilling)
         repository.lagre(enStillingsinfo)
-        restTemplate.getForObject("$localBaseUrl/rekrutteringsbistand/api/rekrutteringsbistandstilling/${enStillingsinfo.stillingsid}", HentRekrutterinsbistandStillingDto::class.java).also {
-            assertThat(it).isEqualTo(HentRekrutterinsbistandStillingDto(
+        restTemplate.getForObject("$localBaseUrl/rekrutteringsbistand/api/rekrutteringsbistandstilling/${enStillingsinfo.stillingsid}", HentRekrutteringsbistandStillingDto::class.java).also {
+            assertThat(it).isEqualTo(HentRekrutteringsbistandStillingDto(
                     stilingsinfo = StillingsinfoDto(
                             stillingsinfoid = enStillingsinfo.stillingsinfoid.asString(),
                             eier = enStillingsinfo.eier,
@@ -184,30 +184,30 @@ internal class StillingComponentTest {
 
     @Test
     fun `PUT mot stilling med notat skal returnere endret stilling når stillingsinfo finnes`() {
-        mock(HttpMethod.PUT, "/api/v1/ads/${enRekrutterinsbistandStilling.stilling.uuid}", enTredjeStilling)
+        mock(HttpMethod.PUT, "/api/v1/ads/${enRekrutteringsbistandStilling.stilling.uuid}", enTredjeStilling)
         mockKandidatlisteOppdatering()
         repository.lagre(enTredjeStillingsinfo.copy(notat = "gammelt notat"))
 
         restTemplate.exchange(
                 "$localBaseUrl/rekrutteringsbistand/api/rekrutteringsbistandstilling",
                 HttpMethod.PUT,
-                HttpEntity(OppdaterRekrutterinsbistandStillingDto(
-                        stillingsinfoid = enRekrutterinsbistandStilling.stilingsinfo?.stillingsinfoid,
-                        notat = enRekrutterinsbistandStilling.stilingsinfo?.notat,
-                        stilling = enRekrutterinsbistandStilling.stilling
+                HttpEntity(OppdaterRekrutteringsbistandStillingDto(
+                        stillingsinfoid = enRekrutteringsbistandStilling.stilingsinfo?.stillingsinfoid,
+                        notat = enRekrutteringsbistandStilling.stilingsinfo?.notat,
+                        stilling = enRekrutteringsbistandStilling.stilling
                 )),
-                OppdaterRekrutterinsbistandStillingDto::class.java
+                OppdaterRekrutteringsbistandStillingDto::class.java
         ).body.also {
             assertThat(it!!.stilling.uuid).isNotEmpty()
-            assertThat(it.stilling.copy(uuid = null)).isEqualTo(enRekrutterinsbistandStilling.stilling.copy(uuid = null))
-            assertThat(it.notat).isEqualTo(enRekrutterinsbistandStilling.stilingsinfo?.notat)
-            assertThat(it.stillingsinfoid).isEqualTo(enRekrutterinsbistandStilling.stilingsinfo?.stillingsinfoid)
+            assertThat(it.stilling.copy(uuid = null)).isEqualTo(enRekrutteringsbistandStilling.stilling.copy(uuid = null))
+            assertThat(it.notat).isEqualTo(enRekrutteringsbistandStilling.stilingsinfo?.notat)
+            assertThat(it.stillingsinfoid).isEqualTo(enRekrutteringsbistandStilling.stilingsinfo?.stillingsinfoid)
         }
     }
 
     @Test
     fun `PUT mot stilling med notat skal returnere endret stilling når stillingsinfo ikke har eier`() {
-        val rekrutteringsbistandStilling = enRekrutterinsbistandStillingUtenEier
+        val rekrutteringsbistandStilling = enRekrutteringsbistandStillingUtenEier
         mock(HttpMethod.PUT, "/api/v1/ads/${rekrutteringsbistandStilling.stilling.uuid}", enFjerdeStilling)
         mockKandidatlisteOppdatering()
         repository.lagre(enStillinggsinfoUtenEier.copy(notat = null))
@@ -215,12 +215,12 @@ internal class StillingComponentTest {
         restTemplate.exchange(
                 "$localBaseUrl/rekrutteringsbistand/api/rekrutteringsbistandstilling",
                 HttpMethod.PUT,
-                HttpEntity(OppdaterRekrutterinsbistandStillingDto(
+                HttpEntity(OppdaterRekrutteringsbistandStillingDto(
                         stillingsinfoid = rekrutteringsbistandStilling.stilingsinfo?.stillingsinfoid,
                         notat = rekrutteringsbistandStilling.stilingsinfo?.notat,
                         stilling = rekrutteringsbistandStilling.stilling
                 )),
-                OppdaterRekrutterinsbistandStillingDto::class.java
+                OppdaterRekrutteringsbistandStillingDto::class.java
         ).body.also {
             assertThat(it!!.stilling.uuid).isNotEmpty()
             assertThat(it.stilling.copy(uuid = null)).isEqualTo(rekrutteringsbistandStilling.stilling.copy(uuid = null))
@@ -231,19 +231,19 @@ internal class StillingComponentTest {
 
     @Test
     fun `PUT mot stilling med notat skal returnere endret stilling når stillingsinfo ikke finnes`() {
-        val rekrutteringsbistandStilling = enRekrutterinsbistandStillingUtenEier
+        val rekrutteringsbistandStilling = enRekrutteringsbistandStillingUtenEier
         mock(HttpMethod.PUT, "/api/v1/ads/${rekrutteringsbistandStilling.stilling.uuid}", rekrutteringsbistandStilling.stilling)
         mockKandidatlisteOppdatering()
 
         restTemplate.exchange(
                 "$localBaseUrl/rekrutteringsbistand/api/rekrutteringsbistandstilling",
                 HttpMethod.PUT,
-                HttpEntity(OppdaterRekrutterinsbistandStillingDto(
+                HttpEntity(OppdaterRekrutteringsbistandStillingDto(
                         stillingsinfoid = rekrutteringsbistandStilling.stilingsinfo?.stillingsinfoid,
                         notat = rekrutteringsbistandStilling.stilingsinfo?.notat,
                         stilling = rekrutteringsbistandStilling.stilling
                 )),
-                OppdaterRekrutterinsbistandStillingDto::class.java
+                OppdaterRekrutteringsbistandStillingDto::class.java
         ).body.also {
             assertThat(it!!.stilling.uuid).isNotEmpty()
             assertThat(it.stilling.copy(uuid = null)).isEqualTo(rekrutteringsbistandStilling.stilling.copy(uuid = null))

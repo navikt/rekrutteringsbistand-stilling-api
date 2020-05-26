@@ -130,7 +130,7 @@ object Testdata {
             activationOnPublishingDate = null
     )
 
-    val enRekrutterinsbistandStilling = HentRekrutterinsbistandStillingDto(
+    val enRekrutteringsbistandStilling = HentRekrutteringsbistandStillingDto(
             stilingsinfo = StillingsinfoDto(
                     stillingsinfoid = enTredjeStillingsinfo.stillingsinfoid.asString(),
                     eier = Eier(navident = enVeileder.navIdent, navn = enVeileder.displayName),
@@ -141,7 +141,7 @@ object Testdata {
 
             )
 
-    val enRekrutterinsbistandStillingUtenEier = HentRekrutterinsbistandStillingDto(
+    val enRekrutteringsbistandStillingUtenEier = HentRekrutteringsbistandStillingDto(
             stilingsinfo = StillingsinfoDto(
                     stillingsinfoid = enStillinggsinfoUtenEier.stillingsinfoid.asString(),
                     eier = null,

@@ -2,8 +2,8 @@ package no.nav.rekrutteringsbistand.api.stilling
 
 import arrow.core.Option
 import arrow.core.getOrElse
-import no.nav.rekrutteringsbistand.api.HentRekrutterinsbistandStillingDto
-import no.nav.rekrutteringsbistand.api.OppdaterRekrutterinsbistandStillingDto
+import no.nav.rekrutteringsbistand.api.HentRekrutteringsbistandStillingDto
+import no.nav.rekrutteringsbistand.api.OppdaterRekrutteringsbistandStillingDto
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
 import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteKlient
 import no.nav.rekrutteringsbistand.api.stillingsinfo.*
@@ -30,7 +30,7 @@ class StillingService(
         val restProxy: RestProxy
 ) {
 
-    @Deprecated("Bruk hentRekrutterinsbistandStilling")
+    @Deprecated("Bruk hentRekrutteringsbistandStilling")
     fun hentStilling(uuid: String): StillingMedStillingsinfo {
         val url = "${externalConfiguration.stillingApi.url}/b2b/api/v1/ads/$uuid"
         val opprinneligStilling: StillingMedStillingsinfo = restTemplate.exchange(
@@ -46,7 +46,7 @@ class StillingService(
         return stillingsinfo.map { opprinneligStilling.copy(rekruttering = it.asEierDto()) }.getOrElse { opprinneligStilling }
     }
 
-    fun hentRekrutterinsbistandStilling(uuid: String): HentRekrutterinsbistandStillingDto {
+    fun hentRekrutteringsbistandStilling(uuid: String): HentRekrutteringsbistandStillingDto {
         val url = "${externalConfiguration.stillingApi.url}/b2b/api/v1/ads/$uuid"
         val returnertStilling: Stilling = restTemplate.exchange(
                 url,
@@ -60,7 +60,7 @@ class StillingService(
         val stillingsinfo: Option<Stillingsinfo> = hentStillingsinfo(returnertStilling)
 
         return stillingsinfo.map {
-            HentRekrutterinsbistandStillingDto(
+            HentRekrutteringsbistandStillingDto(
                     StillingsinfoDto(
                             stillingsinfoid = it.stillingsinfoid.asString(),
                             notat = it.notat,
@@ -70,7 +70,7 @@ class StillingService(
                     stilling = returnertStilling
                    )
         }.getOrElse {
-            HentRekrutterinsbistandStillingDto(
+            HentRekrutteringsbistandStillingDto(
                     null,
                     stilling = returnertStilling
             )
@@ -127,7 +127,7 @@ class StillingService(
         return stillingsinfo.map { opprinneligStilling.copy(rekruttering = it.asEierDto()) }.getOrElse { opprinneligStilling }
     }
 
-    fun oppdaterRekrutterinsbistandStilling(dto: OppdaterRekrutterinsbistandStillingDto, queryString: String?): OppdaterRekrutterinsbistandStillingDto {
+    fun oppdaterRekrutteringsbistandStilling(dto: OppdaterRekrutteringsbistandStillingDto, queryString: String?): OppdaterRekrutteringsbistandStillingDto {
         val url = "${externalConfiguration.stillingApi.url}/api/v1/ads/${dto.stilling.uuid}"
         val returnertStilling: Stilling = restTemplate.exchange(
                 url + if (queryString != null) "?$queryString" else "",
@@ -158,7 +158,7 @@ class StillingService(
                 )
             }
 
-            OppdaterRekrutterinsbistandStillingDto(
+            OppdaterRekrutteringsbistandStillingDto(
                     stillingsinfoid = it.stillingsinfoid.asString(),
                     stilling = returnertStilling,
                     notat = dto.notat)
@@ -173,13 +173,13 @@ class StillingService(
                                 eier = null
                         )
                 )
-                OppdaterRekrutterinsbistandStillingDto(
+                OppdaterRekrutteringsbistandStillingDto(
                         stillingsinfoid = stillingsinfoid.asString(),
                         stilling = returnertStilling,
                         notat = dto.notat
                 )
             } else {
-                OppdaterRekrutterinsbistandStillingDto(
+                OppdaterRekrutteringsbistandStillingDto(
                         stillingsinfoid = null,
                         stilling = returnertStilling,
                         notat = null
