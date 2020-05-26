@@ -43,22 +43,55 @@ object Testdata {
             properties = hashMapOf("adtext" to "teksten")
     )
 
+    val etNotat = "notatet"
+
     val enAnnenStilling = enStilling.copy(
             id = 1001,
             uuid = UUID.randomUUID().toString(),
-            reference = UUID.randomUUID().toString()
+            reference = UUID.randomUUID().toString(),
+            source = "ASS"
+    )
+
+    val enTredjeStilling = enStilling.copy(
+            id = 1002,
+            uuid = UUID.randomUUID().toString(),
+            reference = UUID.randomUUID().toString(),
+            source = "ASS"
+    )
+
+    val enFjerdeStilling = enStilling.copy(
+            id = 1003,
+            uuid = UUID.randomUUID().toString(),
+            reference = UUID.randomUUID().toString(),
+            source = "ASS"
     )
 
     val enStillingsinfo = Stillingsinfo(
             stillingsinfoid = Stillingsinfoid(UUID.randomUUID()),
             eier = Eier(navident = enVeileder.navIdent, navn = enVeileder.displayName),
-            stillingsid = Stillingsid(enStilling.uuid!!)
+            stillingsid = Stillingsid(enStilling.uuid!!),
+            notat = etNotat
     )
 
     val enAnnenStillingsinfo = Stillingsinfo(
             stillingsinfoid = Stillingsinfoid(UUID.randomUUID()),
             eier = Eier(navident = enVeileder.navIdent, navn = enVeileder.displayName),
-            stillingsid = Stillingsid(enAnnenStilling.uuid!!)
+            stillingsid = Stillingsid(enAnnenStilling.uuid!!),
+            notat = etNotat
+    )
+
+    val enTredjeStillingsinfo = Stillingsinfo(
+            stillingsinfoid = Stillingsinfoid(UUID.randomUUID()),
+            eier = Eier(navident = enVeileder.navIdent, navn = enVeileder.displayName),
+            stillingsid = Stillingsid(enTredjeStilling.uuid!!),
+            notat = etNotat
+    )
+
+    val enStillinggsinfoUtenEier = Stillingsinfo(
+            stillingsinfoid = Stillingsinfoid(UUID.randomUUID()),
+            eier = null,
+            stillingsid = Stillingsid(enFjerdeStilling.uuid!!),
+            notat = etNotat
     )
 
     val enStillingsinfoOppdatering = OppdaterEier(
@@ -95,6 +128,26 @@ object Testdata {
             firstPublished = null,
             deactivatedByExpiry = null,
             activationOnPublishingDate = null
+    )
+
+    val enRekrutteringsbistandStilling = HentRekrutteringsbistandStillingDto(
+            stilingsinfo = StillingsinfoDto(
+                    stillingsinfoid = enTredjeStillingsinfo.stillingsinfoid.asString(),
+                    eier = Eier(navident = enVeileder.navIdent, navn = enVeileder.displayName),
+                    notat = etNotat,
+                    stillingsid = enStilling.uuid!!
+            ),
+            stilling = enTredjeStilling.tilStilling()
+
+            )
+
+    val enRekrutteringsbistandStillingUtenEier = HentRekrutteringsbistandStillingDto(
+            stilingsinfo = StillingsinfoDto(
+                    stillingsinfoid = enStillinggsinfoUtenEier.stillingsinfoid.asString(),
+                    eier = null,
+                    notat = "etAnnetNotat",
+                    stillingsid = enStillinggsinfoUtenEier.stillingsid.asString()),
+            stilling = enFjerdeStilling.tilStilling()
     )
 
     val anyJsonRequestEntity: HttpEntity<String> by lazy {

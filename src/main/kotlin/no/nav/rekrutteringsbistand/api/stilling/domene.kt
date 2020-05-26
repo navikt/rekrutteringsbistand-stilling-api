@@ -36,7 +36,38 @@ data class StillingMedStillingsinfo(
         val deactivatedByExpiry: Boolean?,
         val activationOnPublishingDate: Boolean?,
         val rekruttering: EierDto?
-)
+) {
+    fun tilStilling(): Stilling =
+            Stilling(
+                    id = id,
+                    uuid = uuid,
+                    created = created,
+                    createdBy = createdBy,
+                    updated = updated,
+                    updatedBy = updatedBy,
+                    mediaList = mediaList,
+                    contactList = contactList,
+                    title = title,
+                    status = status,
+                    privacy = privacy,
+                    source = source,
+                    medium = medium,
+                    reference = reference,
+                    published = published,
+                    expires = expires,
+                    employer = employer,
+                    administration = administration,
+                    location = location,
+                    locationList = locationList,
+                    categoryList = categoryList,
+                    properties = properties,
+                    publishedByAdmin = publishedByAdmin,
+                    businessName = businessName,
+                    firstPublished = firstPublished,
+                    deactivatedByExpiry = deactivatedByExpiry,
+                    activationOnPublishingDate = activationOnPublishingDate
+            )
+}
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Stilling(
