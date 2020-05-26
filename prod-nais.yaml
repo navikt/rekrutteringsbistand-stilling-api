@@ -4,10 +4,9 @@ metadata:
   name: rekrutteringsbistand-api
   namespace: default
   labels:
-    team: {{team}}
+    team: arbeidsgiver
 spec:
   image: {{version}}
-  team: {{team}}
   port: 9501
   ingresses:
     - https://arbeidsgiver.nais.adeo.no/rekrutteringsbistand-api/
