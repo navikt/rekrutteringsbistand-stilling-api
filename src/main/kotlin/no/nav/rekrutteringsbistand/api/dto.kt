@@ -6,7 +6,7 @@ import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoDto
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class HentRekrutteringsbistandStillingDto(
-        val stilingsinfo: StillingsinfoDto?,
+        val stillingsinfo: StillingsinfoDto?,
         val stilling: Stilling
 )
 

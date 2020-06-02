@@ -85,7 +85,7 @@ internal class StillingComponentTest {
         restTemplate.getForObject("$localBaseUrl/rekrutteringsbistand/api/rekrutteringsbistandstilling/${enStilling.uuid}", HentRekrutteringsbistandStillingDto::class.java).also {
             assertThat(it).isEqualTo(HentRekrutteringsbistandStillingDto(
                     stilling = enStilling.tilStilling(),
-                    stilingsinfo = null
+                    stillingsinfo = null
             ))
         }
     }
@@ -96,7 +96,7 @@ internal class StillingComponentTest {
         repository.lagre(enStillingsinfo)
         restTemplate.getForObject("$localBaseUrl/rekrutteringsbistand/api/rekrutteringsbistandstilling/${enStillingsinfo.stillingsid}", HentRekrutteringsbistandStillingDto::class.java).also {
             assertThat(it).isEqualTo(HentRekrutteringsbistandStillingDto(
-                    stilingsinfo = StillingsinfoDto(
+                    stillingsinfo = StillingsinfoDto(
                             stillingsinfoid = enStillingsinfo.stillingsinfoid.asString(),
                             eier = enStillingsinfo.eier,
                             notat = enStillingsinfo.notat,
@@ -192,16 +192,16 @@ internal class StillingComponentTest {
                 "$localBaseUrl/rekrutteringsbistand/api/rekrutteringsbistandstilling",
                 HttpMethod.PUT,
                 HttpEntity(OppdaterRekrutteringsbistandStillingDto(
-                        stillingsinfoid = enRekrutteringsbistandStilling.stilingsinfo?.stillingsinfoid,
-                        notat = enRekrutteringsbistandStilling.stilingsinfo?.notat,
+                        stillingsinfoid = enRekrutteringsbistandStilling.stillingsinfo?.stillingsinfoid,
+                        notat = enRekrutteringsbistandStilling.stillingsinfo?.notat,
                         stilling = enRekrutteringsbistandStilling.stilling
                 )),
                 OppdaterRekrutteringsbistandStillingDto::class.java
         ).body.also {
             assertThat(it!!.stilling.uuid).isNotEmpty()
             assertThat(it.stilling.copy(uuid = null)).isEqualTo(enRekrutteringsbistandStilling.stilling.copy(uuid = null))
-            assertThat(it.notat).isEqualTo(enRekrutteringsbistandStilling.stilingsinfo?.notat)
-            assertThat(it.stillingsinfoid).isEqualTo(enRekrutteringsbistandStilling.stilingsinfo?.stillingsinfoid)
+            assertThat(it.notat).isEqualTo(enRekrutteringsbistandStilling.stillingsinfo?.notat)
+            assertThat(it.stillingsinfoid).isEqualTo(enRekrutteringsbistandStilling.stillingsinfo?.stillingsinfoid)
         }
     }
 
@@ -216,16 +216,16 @@ internal class StillingComponentTest {
                 "$localBaseUrl/rekrutteringsbistand/api/rekrutteringsbistandstilling",
                 HttpMethod.PUT,
                 HttpEntity(OppdaterRekrutteringsbistandStillingDto(
-                        stillingsinfoid = rekrutteringsbistandStilling.stilingsinfo?.stillingsinfoid,
-                        notat = rekrutteringsbistandStilling.stilingsinfo?.notat,
+                        stillingsinfoid = rekrutteringsbistandStilling.stillingsinfo?.stillingsinfoid,
+                        notat = rekrutteringsbistandStilling.stillingsinfo?.notat,
                         stilling = rekrutteringsbistandStilling.stilling
                 )),
                 OppdaterRekrutteringsbistandStillingDto::class.java
         ).body.also {
             assertThat(it!!.stilling.uuid).isNotEmpty()
             assertThat(it.stilling.copy(uuid = null)).isEqualTo(rekrutteringsbistandStilling.stilling.copy(uuid = null))
-            assertThat(it.notat).isEqualTo(rekrutteringsbistandStilling.stilingsinfo?.notat)
-            assertThat(it.stillingsinfoid).isEqualTo(rekrutteringsbistandStilling.stilingsinfo?.stillingsinfoid)
+            assertThat(it.notat).isEqualTo(rekrutteringsbistandStilling.stillingsinfo?.notat)
+            assertThat(it.stillingsinfoid).isEqualTo(rekrutteringsbistandStilling.stillingsinfo?.stillingsinfoid)
         }
     }
 
@@ -239,15 +239,15 @@ internal class StillingComponentTest {
                 "$localBaseUrl/rekrutteringsbistand/api/rekrutteringsbistandstilling",
                 HttpMethod.PUT,
                 HttpEntity(OppdaterRekrutteringsbistandStillingDto(
-                        stillingsinfoid = rekrutteringsbistandStilling.stilingsinfo?.stillingsinfoid,
-                        notat = rekrutteringsbistandStilling.stilingsinfo?.notat,
+                        stillingsinfoid = rekrutteringsbistandStilling.stillingsinfo?.stillingsinfoid,
+                        notat = rekrutteringsbistandStilling.stillingsinfo?.notat,
                         stilling = rekrutteringsbistandStilling.stilling
                 )),
                 OppdaterRekrutteringsbistandStillingDto::class.java
         ).body.also {
             assertThat(it!!.stilling.uuid).isNotEmpty()
             assertThat(it.stilling.copy(uuid = null)).isEqualTo(rekrutteringsbistandStilling.stilling.copy(uuid = null))
-            assertThat(it.notat).isEqualTo(rekrutteringsbistandStilling.stilingsinfo?.notat)
+            assertThat(it.notat).isEqualTo(rekrutteringsbistandStilling.stillingsinfo?.notat)
             assertThat(it.stillingsinfoid).isNotEmpty()
         }
     }

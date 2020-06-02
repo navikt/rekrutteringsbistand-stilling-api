@@ -131,7 +131,7 @@ object Testdata {
     )
 
     val enRekrutteringsbistandStilling = HentRekrutteringsbistandStillingDto(
-            stilingsinfo = StillingsinfoDto(
+            stillingsinfo = StillingsinfoDto(
                     stillingsinfoid = enTredjeStillingsinfo.stillingsinfoid.asString(),
                     eier = Eier(navident = enVeileder.navIdent, navn = enVeileder.displayName),
                     notat = etNotat,
@@ -142,7 +142,7 @@ object Testdata {
             )
 
     val enRekrutteringsbistandStillingUtenEier = HentRekrutteringsbistandStillingDto(
-            stilingsinfo = StillingsinfoDto(
+            stillingsinfo = StillingsinfoDto(
                     stillingsinfoid = enStillinggsinfoUtenEier.stillingsinfoid.asString(),
                     eier = null,
                     notat = "etAnnetNotat",
