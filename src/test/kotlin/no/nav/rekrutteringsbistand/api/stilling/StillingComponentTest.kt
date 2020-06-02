@@ -82,7 +82,7 @@ internal class StillingComponentTest {
     @Test
     fun `GET mot en rekrutteringsbistandstilling skal returnere en stilling uten stillingsinfo hvis det ikke er lagret`() {
         mockUtenAuthorization("/b2b/api/v1/ads/${enStilling.uuid}", enStilling)
-        restTemplate.getForObject("$localBaseUrl/rekrutteringsbistand/api/rekrutteringsbistandstilling/${enStilling.uuid}", HentRekrutteringsbistandStillingDto::class.java).also {
+        restTemplate.getForObject("$localBaseUrl/rekrutteringsbistandstilling/${enStilling.uuid}", HentRekrutteringsbistandStillingDto::class.java).also {
             assertThat(it).isEqualTo(HentRekrutteringsbistandStillingDto(
                     stilling = enStilling.tilStilling(),
                     stillingsinfo = null
@@ -94,7 +94,7 @@ internal class StillingComponentTest {
     fun `GET mot en rekrutteringsbistandstilling skal returnere en stilling med stillingsinfo hvis det er lagret`() {
         mockUtenAuthorization("/b2b/api/v1/ads/${enStilling.uuid}", enStilling)
         repository.lagre(enStillingsinfo)
-        restTemplate.getForObject("$localBaseUrl/rekrutteringsbistand/api/rekrutteringsbistandstilling/${enStillingsinfo.stillingsid}", HentRekrutteringsbistandStillingDto::class.java).also {
+        restTemplate.getForObject("$localBaseUrl/rekrutteringsbistandstilling/${enStillingsinfo.stillingsid}", HentRekrutteringsbistandStillingDto::class.java).also {
             assertThat(it).isEqualTo(HentRekrutteringsbistandStillingDto(
                     stillingsinfo = StillingsinfoDto(
                             stillingsinfoid = enStillingsinfo.stillingsinfoid.asString(),
@@ -189,7 +189,7 @@ internal class StillingComponentTest {
         repository.lagre(enTredjeStillingsinfo.copy(notat = "gammelt notat"))
 
         restTemplate.exchange(
-                "$localBaseUrl/rekrutteringsbistand/api/rekrutteringsbistandstilling",
+                "$localBaseUrl/rekrutteringsbistandstilling",
                 HttpMethod.PUT,
                 HttpEntity(OppdaterRekrutteringsbistandStillingDto(
                         stillingsinfoid = enRekrutteringsbistandStilling.stillingsinfo?.stillingsinfoid,
@@ -213,7 +213,7 @@ internal class StillingComponentTest {
         repository.lagre(enStillinggsinfoUtenEier.copy(notat = null))
 
         restTemplate.exchange(
-                "$localBaseUrl/rekrutteringsbistand/api/rekrutteringsbistandstilling",
+                "$localBaseUrl/rekrutteringsbistandstilling",
                 HttpMethod.PUT,
                 HttpEntity(OppdaterRekrutteringsbistandStillingDto(
                         stillingsinfoid = rekrutteringsbistandStilling.stillingsinfo?.stillingsinfoid,
@@ -236,7 +236,7 @@ internal class StillingComponentTest {
         mockKandidatlisteOppdatering()
 
         restTemplate.exchange(
-                "$localBaseUrl/rekrutteringsbistand/api/rekrutteringsbistandstilling",
+                "$localBaseUrl/rekrutteringsbistandstilling",
                 HttpMethod.PUT,
                 HttpEntity(OppdaterRekrutteringsbistandStillingDto(
                         stillingsinfoid = rekrutteringsbistandStilling.stillingsinfo?.stillingsinfoid,
