@@ -98,7 +98,8 @@ internal class StillingComponentTest {
             assertThat(it).isEqualTo(HentRekrutteringsbistandStillingDto(
                     stillingsinfo = StillingsinfoDto(
                             stillingsinfoid = enStillingsinfo.stillingsinfoid.asString(),
-                            eier = enStillingsinfo.eier,
+                            eierNavident = enStillingsinfo.eier?.navident,
+                            eierNavn = enStillingsinfo.eier?.navn,
                             notat = enStillingsinfo.notat,
                             stillingsid = enStillingsinfo.stillingsid.asString()
                     ),

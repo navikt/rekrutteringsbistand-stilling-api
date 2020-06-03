@@ -81,5 +81,6 @@ data class StillingsinfoDto(
         val stillingsid: String,
         val stillingsinfoid: String,
         val notat: String?,
-        val eier: Eier?
+        val eierNavident: String?,
+        val eierNavn: String?
 )

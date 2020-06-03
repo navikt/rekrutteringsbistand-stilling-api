@@ -64,7 +64,8 @@ class StillingService(
                     StillingsinfoDto(
                             stillingsinfoid = it.stillingsinfoid.asString(),
                             notat = it.notat,
-                            eier = it.eier,
+                            eierNavident= it.eier?.navident,
+                            eierNavn = it.eier?.navn,
                             stillingsid = it.stillingsid.asString()
                     ),
                     stilling = returnertStilling
