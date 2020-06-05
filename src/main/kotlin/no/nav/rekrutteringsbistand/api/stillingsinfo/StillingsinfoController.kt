@@ -22,12 +22,16 @@ class EierController(
     fun lagre(@RequestBody dto: EierDto): ResponseEntity<EierDto> {
         if (dto.stillingsinfoid != null) throw BadRequestException("stillingsinfoid må være tom for post")
 
-        val eierinfo = dto.copy(stillingsinfoid = UUID.randomUUID().toString()).asStillinginfo()
-        LOG.debug("lager ny eierinformasjon for stillinginfoid ${eierinfo.stillingsid} stillingid ${eierinfo.stillingsinfoid}")
-
-        repo.lagre(eierinfo)
-        kandidatlisteKlient.oppdaterKandidatliste(eierinfo.stillingsid)
-        return ResponseEntity.created(URI("/rekruttering/${eierinfo.stillingsinfoid.asString()}")).body(eierinfo.asEierDto())
+        return repo.hentForStilling(Stillingsid(dto.stillingsid))
+                .map {
+                    oppdater(dto.copy(stillingsinfoid = it.asEierDto().stillingsinfoid))
+                }.getOrElse {
+                    val dtoMedId = dto.copy(stillingsinfoid = UUID.randomUUID().toString())
+                    LOG.debug("lager ny eierinformasjon for stillinginfoid ${dtoMedId.stillingsid} stillingid ${dtoMedId.stillingsinfoid}")
+                    repo.lagre(dtoMedId.asStillinginfo())
+                    kandidatlisteKlient.oppdaterKandidatliste(Stillingsid(dto.stillingsid))
+                    ResponseEntity.created(URI("/rekruttering/${dtoMedId.stillingsinfoid}")).body(dtoMedId)
+                }
     }
 
     @PutMapping
