@@ -109,6 +109,22 @@ class EierComponentTest {
         repository.slett(lagretStillingsinfo.stillingsinfoid)
     }
 
+    @Test
+    fun `Lagring av stillingsinfo med eksisterende stillingsinfo skal returnere HTTP 200 med oppdatert stillingsinfo`() {
+        repository.lagre(enStillingsinfo)
+        val tilLagring = enStillingsinfo.asEierDto().copy(stillingsinfoid = null)
+        mockKandidatlisteOppdatering()
+
+        val url = "$localBaseUrl/rekruttering"
+        val stillingsinfoRespons = restTemplate.postForEntity(url, httpEntity(tilLagring), EierDto::class.java)
+        val lagretStillingsinfo = repository.hentForStilling(enStillingsinfo.stillingsid).getOrElse { fail("fant ikke stillingen") }
+
+        assertThat(stillingsinfoRespons.statusCode).isEqualTo(HttpStatus.OK)
+        assertThat(stillingsinfoRespons.body).isEqualTo(lagretStillingsinfo.asEierDto())
+
+        repository.slett(lagretStillingsinfo.stillingsinfoid)
+    }
+
     @After
     fun tearDown() {
         repository.slett(enStillingsinfo.stillingsinfoid)
