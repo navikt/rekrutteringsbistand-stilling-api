@@ -1,5 +1,4 @@
-# Kopiert fra https://doc.nais.io/observability/alerts/recommended_alerts
-apiVersion: "nais.io/v1alpha1"
+apiVersion: "nais.io/v1"
 kind: "Alert"
 metadata:
   name: rekrutteringsbistand-api
@@ -9,8 +8,9 @@ spec:
   receivers:
     slack:
       channel: 'inkludering-alerts-dev'
+      prependText: 'rekrutteringsbistand-api: '
   alerts:
-    - alert: Applikasjon nede
+    - alert: Applikasjonen er nede (ingen Kubernetes-pods er oppe)
       severity: danger
       expr: sum(up{app="rekrutteringsbistand-api", job="kubernetes-pods"}) == 0
       for: 2m
@@ -21,16 +21,11 @@ spec:
       expr: (100 * sum by (log_app, log_namespace) (rate(logd_messages_total{log_app="rekrutteringsbistand-api",log_level=~"Error"}[3m])) / sum by (log_app, log_namespace) (rate(logd_messages_total{log_app="rekrutteringsbistand-api"}[3m]))) > 1
       for: 3m
       action: "Sjekk loggene til app {{ $labels.log_app }} i namespace {{ $labels.log_namespace }}, for å se hvorfor det er så mye errors"
-    - alert: Høy økning log level WARNING
-      severity: danger
+    - alert: Økning log level WARNING
+      severity: warning
       expr: (100 * sum by (log_app, log_namespace) (rate(logd_messages_total{log_app="rekrutteringsbistand-api",log_level=~"Warning"}[3m])) / sum by (log_app, log_namespace) (rate(logd_messages_total{log_app="rekrutteringsbistand-api"}[3m]))) > 20
       for: 3m
       action: "Sjekk loggene til app {{ $labels.log_app }} i namespace {{ $labels.log_namespace }}, for å se hvorfor det er så mye warnings"
-    - alert: Lav økning log level WARNING
-      severity: warning
-      expr: (100 * sum by (log_app, log_namespace) (rate(logd_messages_total{log_app="rekrutteringsbistand-api",log_level=~"Warning"}[3m])) / sum by (log_app, log_namespace) (rate(logd_messages_total{log_app="rekrutteringsbistand-api"}[3m]))) > 1
-      for: 3m
-      action: "Sjekk loggene til app {{ $labels.log_app }} i namespace {{ $labels.log_namespace }}, for å se hvorfor det forekommer warnings"
     - alert: Feil i selftest
       severity: danger
       expr: selftests_aggregate_result_status{app="rekrutteringsbistand-api"} > 0
