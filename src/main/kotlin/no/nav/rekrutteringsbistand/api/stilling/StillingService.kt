@@ -40,7 +40,7 @@ class StillingService(
                 StillingMedStillingsinfo::class.java
         )
                 .body
-                ?: throw RestResponseEntityExceptionHandler.NoContentException("Fant ikke stilling")
+                ?: throw RestResponseEntityExceptionHandler.NoContentException("Fant ikke stilling på URL [$url]")
 
         val stillingsinfo: Option<Stillingsinfo> = hentStillingsinfo(opprinneligStilling)
         return stillingsinfo.map { opprinneligStilling.copy(rekruttering = it.asEierDto()) }.getOrElse { opprinneligStilling }
@@ -55,7 +55,7 @@ class StillingService(
                 Stilling::class.java
         )
                 .body
-                ?: throw RestResponseEntityExceptionHandler.NoContentException("Fant ikke stilling")
+                ?: throw RestResponseEntityExceptionHandler.NoContentException("Fant ikke stilling på URL [$url]")
 
         val stillingsinfo: Option<Stillingsinfo> = hentStillingsinfo(returnertStilling)
 
@@ -64,12 +64,12 @@ class StillingService(
                     StillingsinfoDto(
                             stillingsinfoid = it.stillingsinfoid.asString(),
                             notat = it.notat,
-                            eierNavident= it.eier?.navident,
+                            eierNavident = it.eier?.navident,
                             eierNavn = it.eier?.navn,
                             stillingsid = it.stillingsid.asString()
                     ),
                     stilling = returnertStilling
-                   )
+            )
         }.getOrElse {
             HentRekrutteringsbistandStillingDto(
                     null,
