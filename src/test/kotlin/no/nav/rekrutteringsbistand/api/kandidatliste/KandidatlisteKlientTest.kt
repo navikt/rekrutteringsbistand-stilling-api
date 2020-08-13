@@ -23,7 +23,7 @@ import java.util.*
 class KandidatlisteKlientTest {
 
     @get:Rule
-    val wiremock = WireMockRule(WireMockConfiguration.options().port(9924))
+    val wiremock = WireMockRule(WireMockConfiguration.options().port(8766))
 
     @Autowired
     lateinit var klient: KandidatlisteKlient

@@ -21,7 +21,7 @@ class KandidatlisteMockConfig {
     fun wireMockServer(): WireMockServer {
         return WireMockServer(WireMockConfiguration.wireMockConfig()
                 .notifier(ConsoleNotifier(true))
-                .port(9924)).apply {
+                .port(8766)).apply {
             stubFor(oppdaterKandidatliste())
             start()
             LOG.info("Startet WireMock på port ${port()}")

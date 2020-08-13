@@ -34,7 +34,7 @@ import org.springframework.test.context.junit4.SpringRunner
 class EierComponentTest {
 
     @get:Rule
-    val wiremock = WireMockRule(WireMockConfiguration.options().port(9924))
+    val wiremock = WireMockRule(WireMockConfiguration.options().port(8766))
 
     @LocalServerPort
     private var port = 0

@@ -50,7 +50,7 @@ internal class StillingComponentTest {
     val wiremock = WireMockRule(9914)
 
     @get:Rule
-    val wiremockKandidatliste = WireMockRule(9924)
+    val wiremockKandidatliste = WireMockRule(8766)
 
     @LocalServerPort
     var port = 0
