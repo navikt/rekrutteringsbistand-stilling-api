@@ -140,7 +140,7 @@ class EierComponentTest {
 
     private fun mockKandidatlisteOppdatering() {
         wiremock.stubFor(
-                put(urlPathMatching("/pam-kandidatsok-api/rest/veileder/stilling/.*/kandidatliste"))
+                put(urlPathMatching("/rekrutteringsbistand-kandidat-api/rest/veileder/stilling/.*/kandidatliste"))
                         .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
                         .withHeader(ACCEPT, equalTo(APPLICATION_JSON_VALUE))
                         .willReturn(aResponse().withStatus(NO_CONTENT.value())
