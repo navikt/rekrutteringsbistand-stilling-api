@@ -21,7 +21,7 @@ class KandidatlisteMockConfig {
     fun wireMockServer(): WireMockServer {
         return WireMockServer(WireMockConfiguration.wireMockConfig()
                 .notifier(ConsoleNotifier(true))
-                .port(9924)).apply {
+                .port(8766)).apply {
             stubFor(oppdaterKandidatliste())
             start()
             LOG.info("Startet WireMock på port ${port()}")
@@ -30,7 +30,7 @@ class KandidatlisteMockConfig {
 
     companion object {
         fun oppdaterKandidatliste(): MappingBuilder {
-            return WireMock.put(WireMock.urlPathMatching("/pam-kandidatsok-api/rest/veileder/stilling/.*/kandidatliste"))
+            return WireMock.put(WireMock.urlPathMatching("/rekrutteringsbistand-kandidat-api/rest/veileder/stilling/.*/kandidatliste"))
                     .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
                     .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
                     .willReturn(WireMock.aResponse().withStatus(HttpStatus.NO_CONTENT.value())

@@ -23,7 +23,7 @@ import java.util.*
 class KandidatlisteKlientTest {
 
     @get:Rule
-    val wiremock = WireMockRule(WireMockConfiguration.options().port(9924))
+    val wiremock = WireMockRule(WireMockConfiguration.options().port(8766))
 
     @Autowired
     lateinit var klient: KandidatlisteKlient
@@ -31,7 +31,7 @@ class KandidatlisteKlientTest {
     @Test
     fun `Skal sende oppdaterKandidatliste-request med riktig URL og headere`() {
         wiremock.stubFor(
-                put(urlPathMatching("/pam-kandidatsok-api/rest/veileder/stilling/.*/kandidatliste"))
+                put(urlPathMatching("/rekrutteringsbistand-kandidat-api/rest/veileder/stilling/.*/kandidatliste"))
                         .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
                         .withHeader(ACCEPT, equalTo(APPLICATION_JSON_VALUE))
                         .willReturn(aResponse().withStatus(NO_CONTENT.value())

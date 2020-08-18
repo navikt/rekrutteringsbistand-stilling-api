@@ -33,7 +33,7 @@ spring.h2.console:
 external:
   stilling-api.url: http://localhost:9914
   sok-api.url: http://localhost:9934
-  kandidatliste-api.url: http://localhost:9924/pam-kandidatsok-api/rest/veileder/stilling
+  kandidatliste-api.url: http://localhost:8766/rekrutteringsbistand-kandidat-api/rest/veileder/stilling
 
 ---
 
@@ -58,7 +58,7 @@ no.nav.security.oidc:
 external:
   stilling-api.url: https://pam-ad-api.nais.preprod.local
   sok-api.url: https://pam-ad-api.nais.preprod.local
-  kandidatliste-api.url: https://pam-kandidatsok-api-q0.nais.preprod.local/pam-kandidatsok-api/rest/veileder/stilling
+  kandidatliste-api.url: https://rekrutteringsbistand-kandidat-api.nais.preprod.local/rekrutteringsbistand-kandidat-api/rest/veileder/stilling
   unleash.url: https://unleash.nais.adeo.no/api/
 
 database:
@@ -84,7 +84,7 @@ no.nav.security.oidc:
 external:
   stilling-api.url: https://pam-ad-api.nais.adeo.no
   sok-api.url: https://pam-ad-api.nais.adeo.no
-  kandidatliste-api.url: https://pam-kandidatsok-api.nais.adeo.no/pam-kandidatsok-api/rest/veileder/stilling
+  kandidatliste-api.url: https://rekrutteringsbistand-kandidat-api.nais.adeo.no/rekrutteringsbistand-kandidat-api/rest/veileder/stilling
   unleash.url: https://unleash.nais.adeo.no/api/
 
 database:

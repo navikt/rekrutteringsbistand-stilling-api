@@ -50,7 +50,7 @@ internal class StillingComponentTest {
     val wiremock = WireMockRule(9914)
 
     @get:Rule
-    val wiremockKandidatliste = WireMockRule(9924)
+    val wiremockKandidatliste = WireMockRule(8766)
 
     @LocalServerPort
     var port = 0
@@ -367,7 +367,7 @@ internal class StillingComponentTest {
 
     private fun mockKandidatlisteOppdatering() {
         wiremockKandidatliste.stubFor(
-                put(urlPathMatching("/pam-kandidatsok-api/rest/veileder/stilling/.*/kandidatliste"))
+                put(urlPathMatching("/rekrutteringsbistand-kandidat-api/rest/veileder/stilling/.*/kandidatliste"))
                         .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
                         .withHeader(ACCEPT, equalTo(APPLICATION_JSON_VALUE))
                         .willReturn(aResponse().withStatus(HttpStatus.NO_CONTENT.value())
@@ -378,7 +378,7 @@ internal class StillingComponentTest {
 
     private fun mockKandidatlisteOppdateringFeiler() {
         wiremockKandidatliste.stubFor(
-                put(urlPathMatching("/pam-kandidatsok-api/rest/veileder/stilling/.*/kandidatliste"))
+                put(urlPathMatching("/rekrutteringsbistand-kandidat-api/rest/veileder/stilling/.*/kandidatliste"))
                         .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
                         .withHeader(ACCEPT, equalTo(APPLICATION_JSON_VALUE))
                         .willReturn(aResponse()

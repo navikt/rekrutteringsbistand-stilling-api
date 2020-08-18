@@ -34,7 +34,7 @@ import org.springframework.test.context.junit4.SpringRunner
 class EierComponentTest {
 
     @get:Rule
-    val wiremock = WireMockRule(WireMockConfiguration.options().port(9924))
+    val wiremock = WireMockRule(WireMockConfiguration.options().port(8766))
 
     @LocalServerPort
     private var port = 0
@@ -140,7 +140,7 @@ class EierComponentTest {
 
     private fun mockKandidatlisteOppdatering() {
         wiremock.stubFor(
-                put(urlPathMatching("/pam-kandidatsok-api/rest/veileder/stilling/.*/kandidatliste"))
+                put(urlPathMatching("/rekrutteringsbistand-kandidat-api/rest/veileder/stilling/.*/kandidatliste"))
                         .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
                         .withHeader(ACCEPT, equalTo(APPLICATION_JSON_VALUE))
                         .willReturn(aResponse().withStatus(NO_CONTENT.value())
