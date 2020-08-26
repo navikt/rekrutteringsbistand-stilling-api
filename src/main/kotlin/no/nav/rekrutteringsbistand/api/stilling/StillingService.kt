@@ -33,17 +33,23 @@ class StillingService(
     @Deprecated("Bruk hentRekrutteringsbistandStilling")
     fun hentStilling(uuid: String): StillingMedStillingsinfo {
         val url = "${externalConfiguration.stillingApi.url}/b2b/api/v1/ads/$uuid"
-        val opprinneligStilling: StillingMedStillingsinfo = restTemplate.exchange(
-                url,
-                HttpMethod.GET,
-                HttpEntity(null, headersUtenToken()),
-                StillingMedStillingsinfo::class.java
-        )
-                .body
-                ?: throw RestResponseEntityExceptionHandler.NoContentException("Fant ikke stilling på URL [$url]")
-
+        val opprinneligStilling: StillingMedStillingsinfo = hentStillingMedInfo(url)
         val stillingsinfo: Option<Stillingsinfo> = hentStillingsinfo(opprinneligStilling)
         return stillingsinfo.map { opprinneligStilling.copy(rekruttering = it.asEierDto()) }.getOrElse { opprinneligStilling }
+    }
+
+    private fun hentStillingMedInfo(url: String): StillingMedStillingsinfo {
+        val httpMethod = HttpMethod.GET
+        try {
+            return restTemplate.exchange(
+                    url,
+                    httpMethod,
+                    HttpEntity(null, headersUtenToken()),
+                    StillingMedStillingsinfo::class.java
+            ).body ?: throw RestResponseEntityExceptionHandler.NoContentException("Fant ikke stilling på URL [$url]")
+        } catch (e: Exception) {
+            throw Exception("Forsøkte HTTP-metode $httpMethod på URL $url", e)
+        }
     }
 
     fun hentRekrutteringsbistandStilling(uuid: String): HentRekrutteringsbistandStillingDto {
