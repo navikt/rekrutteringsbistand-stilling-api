@@ -10,9 +10,8 @@ import javax.servlet.http.HttpServletRequest
 
 @RestController
 @Unprotected
-class StillingControllerEkstern(
-        val stillingService: StillingService
-) {
+class StillingControllerEkstern(val stillingService: StillingService) {
+
     @GetMapping("/rekrutteringsbistand/ekstern/api/v1/stilling/{uuid}")
     fun hentStilling(@PathVariable uuid: String, request: HttpServletRequest): ResponseEntity<Stilling> {
         val stilling = stillingService.hentStilling(uuid)

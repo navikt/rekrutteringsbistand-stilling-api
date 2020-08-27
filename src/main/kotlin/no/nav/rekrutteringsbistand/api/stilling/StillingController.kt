@@ -10,6 +10,7 @@ import no.nav.security.oidc.api.Unprotected
 import org.springframework.http.HttpMethod.GET
 import org.springframework.http.HttpMethod.POST
 import org.springframework.http.ResponseEntity
+import org.springframework.http.ResponseEntity.ok
 import org.springframework.web.bind.annotation.*
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
@@ -27,20 +28,20 @@ class StillingController(
     @PostMapping("/rekrutteringsbistand/api/v1/ads")
     fun proxyPostTilStillingsApi(request: HttpServletRequest, @RequestBody stilling: Stilling): ResponseEntity<StillingMedStillingsinfo> {
         val opprettetStilling = stillingService.opprettStilling(stilling, request.queryString)
-        return ResponseEntity.ok().body(opprettetStilling)
+        return ok().body(opprettetStilling)
     }
 
     @PutMapping("/rekrutteringsbistand/api/v1/ads/{uuid}")
     @Deprecated("Bruk putRekrutteringsbistandStilling")
     fun proxyPutTilStillingsApi(@PathVariable uuid: String, request: HttpServletRequest, @RequestBody stilling: Stilling): ResponseEntity<StillingMedStillingsinfo> {
         val oppdatertStilling = stillingService.oppdaterStilling(uuid, stilling, request.queryString)
-        return ResponseEntity.ok().body(oppdatertStilling)
+        return ok().body(oppdatertStilling)
     }
 
     @PutMapping("/rekrutteringsbistandstilling")
     fun putRekrutteringsbistandStilling(request: HttpServletRequest, @RequestBody rekrutteringsbistandStillingDto: OppdaterRekrutteringsbistandStillingDto): ResponseEntity<OppdaterRekrutteringsbistandStillingDto> {
         val oppdatertStilling = stillingService.oppdaterRekrutteringsbistandStilling(rekrutteringsbistandStillingDto, request.queryString)
-        return ResponseEntity.ok().body(oppdatertStilling)
+        return ok().body(oppdatertStilling)
     }
 
     @DeleteMapping("/rekrutteringsbistand/api/v1/ads/{uuid}")
@@ -103,33 +104,30 @@ class StillingController(
     @Unprotected // Fordi kandidatsøk har hentet stillinger uten token frem til nå.
     @GetMapping("/rekrutteringsbistand/api/v1/stilling/{uuid}")
     @Deprecated("Bruk hentRekrutteringsbistandStilling")
-    fun hentStilling(@PathVariable uuid: String, request: HttpServletRequest): ResponseEntity<StillingMedStillingsinfo> {
-        return ResponseEntity.ok().body(stillingService.hentStilling(uuid))
-    }
+    fun hentStilling(@PathVariable uuid: String): ResponseEntity<StillingMedStillingsinfo> =
+            ok(stillingService.hentStilling(uuid))
 
     @Unprotected // Fordi kandidatsøk har hentet stillinger uten token frem til nå.
     @GetMapping("/rekrutteringsbistandstilling/{uuid}")
-    fun hentRekrutteringsbistandStilling(@PathVariable uuid: String, request: HttpServletRequest): ResponseEntity<HentRekrutteringsbistandStillingDto> {
-        return ResponseEntity.ok().body(stillingService.hentRekrutteringsbistandStilling(uuid))
-    }
+    fun hentRekrutteringsbistandStilling(@PathVariable uuid: String): ResponseEntity<HentRekrutteringsbistandStillingDto> =
+            ok(stillingService.hentRekrutteringsbistandStilling(uuid))
 
     @Unprotected // Fordi kandidatsøk har hentet stillinger uten token frem til nå.
     @GetMapping("/rekrutteringsbistand/api/v1/stilling/stillingsnummer/{stillingsnummer}")
-    fun hentStillingAnnonsenummer(@PathVariable stillingsnummer: String): ResponseEntity<StillingMedStillingsinfo> {
-        return ResponseEntity.ok().body(stillingService.hentStillingMedStillingsnummer(stillingsnummer));
-    }
+    fun hentStillingAnnonsenummer(@PathVariable stillingsnummer: String): ResponseEntity<StillingMedStillingsinfo> =
+            ok(stillingService.hentStillingMedStillingsnummer(stillingsnummer))
 
     @GetMapping("/rekrutteringsbistand/api/v1/ads")
     fun hentStillinger(request: HttpServletRequest): ResponseEntity<Page<StillingMedStillingsinfo>> {
         val url = "${externalConfiguration.stillingApi.url}/api/v1/ads"
         val queryString: String? = request.queryString?.let { URLDecoder.decode(it, StandardCharsets.UTF_8) }
         val page: Page<StillingMedStillingsinfo> = stillingService.hentStillinger(url, queryString)
-        return ResponseEntity.ok(page)
+        return ok(page)
     }
 
     @GetMapping("/rekrutteringsbistand/api/v1/ads/rekrutteringsbistand/minestillinger")
     fun hentMineStillinger(request: HttpServletRequest): ResponseEntity<Page<StillingMedStillingsinfo>> {
-        return ResponseEntity.ok().body(stillingService.hentStillinger(
+        return ok().body(stillingService.hentStillinger(
                  "${externalConfiguration.stillingApi.url}/api/v1/ads/rekrutteringsbistand/minestillinger",
                 if (request.queryString != null) URLDecoder.decode(request.queryString, StandardCharsets.UTF_8) else null
         ))
