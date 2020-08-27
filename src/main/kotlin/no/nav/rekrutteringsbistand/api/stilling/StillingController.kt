@@ -11,6 +11,7 @@ import org.springframework.http.HttpMethod.GET
 import org.springframework.http.HttpMethod.POST
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.client.RestClientResponseException
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 import javax.servlet.http.HttpServletRequest
@@ -103,14 +104,30 @@ class StillingController(
     @Unprotected // Fordi kandidatsøk har hentet stillinger uten token frem til nå.
     @GetMapping("/rekrutteringsbistand/api/v1/stilling/{uuid}")
     @Deprecated("Bruk hentRekrutteringsbistandStilling")
-    fun hentStilling(@PathVariable uuid: String, request: HttpServletRequest): ResponseEntity<StillingMedStillingsinfo> {
-        return ResponseEntity.ok().body(stillingService.hentStilling(uuid))
+    fun hentStilling(@PathVariable uuid: String, request: HttpServletRequest): ResponseEntity<Any> {
+        return try {
+            val stilling = stillingService.hentStilling(uuid)
+            ResponseEntity.ok(stilling)
+        } catch (e: RestClientResponseException) {
+            LOG.warn("Forsøkte å hente stilling med ID $uuid", e)
+            ResponseEntity
+                    .status(e.rawStatusCode)
+                    .body(e.responseBodyAsString)
+        }
     }
 
     @Unprotected // Fordi kandidatsøk har hentet stillinger uten token frem til nå.
     @GetMapping("/rekrutteringsbistandstilling/{uuid}")
-    fun hentRekrutteringsbistandStilling(@PathVariable uuid: String, request: HttpServletRequest): ResponseEntity<HentRekrutteringsbistandStillingDto> {
-        return ResponseEntity.ok().body(stillingService.hentRekrutteringsbistandStilling(uuid))
+    fun hentRekrutteringsbistandStilling(@PathVariable uuid: String, request: HttpServletRequest): ResponseEntity<Any> {
+        return try {
+            val stilling = stillingService.hentRekrutteringsbistandStilling(uuid)
+            ResponseEntity.ok(stilling)
+        } catch (e: RestClientResponseException) {
+            LOG.warn("Forsøkte å hente stilling med ID $uuid", e)
+            ResponseEntity
+                    .status(e.rawStatusCode)
+                    .body(e.responseBodyAsString)
+        }
     }
 
     @Unprotected // Fordi kandidatsøk har hentet stillinger uten token frem til nå.

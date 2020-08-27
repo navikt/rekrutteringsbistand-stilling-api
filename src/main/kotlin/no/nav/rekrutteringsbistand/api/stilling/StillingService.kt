@@ -16,6 +16,8 @@ import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.*
 import org.springframework.stereotype.Service
 import org.springframework.util.MultiValueMap
+import org.springframework.web.client.HttpClientErrorException
+import org.springframework.web.client.RestClientResponseException
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.util.UriComponentsBuilder
 import java.util.*
@@ -34,30 +36,24 @@ class StillingService(
     @Deprecated("Bruk hentRekrutteringsbistandStilling")
     fun hentStilling(uuid: String): StillingMedStillingsinfo {
         val url = "${externalConfiguration.stillingApi.url}/b2b/api/v1/ads/$uuid"
-        val opprinneligStilling: StillingMedStillingsinfo = hentStillingMedInfo(url)
+        val opprinneligStilling: StillingMedStillingsinfo = restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                HttpEntity(null, headersUtenToken()),
+                StillingMedStillingsinfo::class.java
+        ).body!!
         val stillingsinfo: Option<Stillingsinfo> = hentStillingsinfo(opprinneligStilling)
         return stillingsinfo.map { opprinneligStilling.copy(rekruttering = it.asEierDto()) }.getOrElse { opprinneligStilling }
     }
 
-    private fun hentStillingMedInfo(url: String): StillingMedStillingsinfo {
-        val httpMethod = HttpMethod.GET
-        try {
-            return restTemplate.exchange(
-                    url,
-                    httpMethod,
-                    HttpEntity(null, headersUtenToken()),
-                    StillingMedStillingsinfo::class.java
-            ).body!!
-
-        } catch (e: Exception) {
-            LOG.warn("Forsøkte HTTP-metode $httpMethod på URL $url", e)
-            throw e
-        }
-    }
-
     fun hentRekrutteringsbistandStilling(uuid: String): HentRekrutteringsbistandStillingDto {
         val url = "${externalConfiguration.stillingApi.url}/b2b/api/v1/ads/$uuid"
-        val opprinneligStilling: Stilling = hentOpprinneligStilling(url)
+        val opprinneligStilling: Stilling = restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                HttpEntity(null, headersUtenToken()),
+                Stilling::class.java
+        ).body!!
         val stillingsinfo: Option<Stillingsinfo> = hentStillingsinfo(opprinneligStilling)
 
         return stillingsinfo.map {
@@ -76,21 +72,6 @@ class StillingService(
                     null,
                     stilling = opprinneligStilling
             )
-        }
-    }
-
-    private fun hentOpprinneligStilling(url: String): Stilling {
-        val httpMethod = HttpMethod.GET
-        try {
-            return restTemplate.exchange(
-                    url,
-                    httpMethod,
-                    HttpEntity(null, headersUtenToken()),
-                    Stilling::class.java
-            ).body!!
-        } catch (e: Exception) {
-            LOG.warn("Forsøkte HTTP-metode $httpMethod på URL $url", e)
-            throw e
         }
     }
 
