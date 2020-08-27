@@ -1,8 +1,6 @@
 package no.nav.rekrutteringsbistand.api.stilling.ekstern
 
-import no.nav.rekrutteringsbistand.api.stilling.StillingMedStillingsinfo
 import no.nav.rekrutteringsbistand.api.stilling.StillingService
-import no.nav.rekrutteringsbistand.api.support.LOG
 import no.nav.security.oidc.api.Unprotected
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
@@ -15,7 +13,7 @@ import javax.servlet.http.HttpServletRequest
 class StillingControllerEkstern(val stillingService: StillingService) {
 
     @GetMapping("/rekrutteringsbistand/ekstern/api/v1/stilling/{uuid}")
-    fun hentStilling(@PathVariable uuid: String, request: HttpServletRequest): ResponseEntity<Any> {
+    fun henkStilling(@PathVariable uuid: String, request: HttpServletRequest): ResponseEntity<Stilling> {
         val stilling = stillingService.hentStilling(uuid)
 
         fun copyProps(vararg keys: String): Map<String, String> =

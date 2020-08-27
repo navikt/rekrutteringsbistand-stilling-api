@@ -12,7 +12,6 @@ import org.springframework.http.HttpMethod.POST
 import org.springframework.http.ResponseEntity
 import org.springframework.http.ResponseEntity.ok
 import org.springframework.web.bind.annotation.*
-import org.springframework.web.client.RestClientResponseException
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 import javax.servlet.http.HttpServletRequest
