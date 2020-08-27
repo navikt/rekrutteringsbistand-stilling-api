@@ -7,6 +7,7 @@ import no.nav.rekrutteringsbistand.api.OppdaterRekrutteringsbistandStillingDto
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
 import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteKlient
 import no.nav.rekrutteringsbistand.api.stillingsinfo.*
+import no.nav.rekrutteringsbistand.api.support.LOG
 import no.nav.rekrutteringsbistand.api.support.config.ExternalConfiguration
 import no.nav.rekrutteringsbistand.api.support.rest.RestProxy
 import no.nav.rekrutteringsbistand.api.support.rest.RestResponseEntityExceptionHandler
@@ -46,24 +47,18 @@ class StillingService(
                     httpMethod,
                     HttpEntity(null, headersUtenToken()),
                     StillingMedStillingsinfo::class.java
-            ).body ?: throw RestResponseEntityExceptionHandler.NoContentException("Fant ikke stilling på URL [$url]")
+            ).body!!
+
         } catch (e: Exception) {
-            throw Exception("Forsøkte HTTP-metode $httpMethod på URL $url", e)
+            LOG.warn("Forsøkte HTTP-metode $httpMethod på URL $url", e)
+            throw e
         }
     }
 
     fun hentRekrutteringsbistandStilling(uuid: String): HentRekrutteringsbistandStillingDto {
         val url = "${externalConfiguration.stillingApi.url}/b2b/api/v1/ads/$uuid"
-        val returnertStilling: Stilling = restTemplate.exchange(
-                url,
-                HttpMethod.GET,
-                HttpEntity(null, headersUtenToken()),
-                Stilling::class.java
-        )
-                .body
-                ?: throw RestResponseEntityExceptionHandler.NoContentException("Fant ikke stilling på URL [$url]")
-
-        val stillingsinfo: Option<Stillingsinfo> = hentStillingsinfo(returnertStilling)
+        val opprinneligStilling: Stilling = hentOpprinneligStilling(url)
+        val stillingsinfo: Option<Stillingsinfo> = hentStillingsinfo(opprinneligStilling)
 
         return stillingsinfo.map {
             HentRekrutteringsbistandStillingDto(
@@ -74,13 +69,28 @@ class StillingService(
                             eierNavn = it.eier?.navn,
                             stillingsid = it.stillingsid.asString()
                     ),
-                    stilling = returnertStilling
+                    stilling = opprinneligStilling
             )
         }.getOrElse {
             HentRekrutteringsbistandStillingDto(
                     null,
-                    stilling = returnertStilling
+                    stilling = opprinneligStilling
             )
+        }
+    }
+
+    private fun hentOpprinneligStilling(url: String): Stilling {
+        val httpMethod = HttpMethod.GET
+        try {
+            return restTemplate.exchange(
+                    url,
+                    httpMethod,
+                    HttpEntity(null, headersUtenToken()),
+                    Stilling::class.java
+            ).body!!
+        } catch (e: Exception) {
+            LOG.warn("Forsøkte HTTP-metode $httpMethod på URL $url", e)
+            throw e
         }
     }
 
