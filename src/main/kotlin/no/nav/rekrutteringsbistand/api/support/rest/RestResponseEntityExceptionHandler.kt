@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.ResponseBody
+import org.springframework.web.client.RestClientResponseException
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler
 import javax.servlet.http.HttpServletRequest
 
@@ -35,4 +36,13 @@ class RestResponseEntityExceptionHandler : ResponseEntityExceptionHandler() {
     }
 
     class NoContentException(message: String?) : RuntimeException(message)
+
+    @ExceptionHandler(value = [RestClientResponseException::class])
+    @ResponseBody
+    protected fun handleExceptionFraRestTemplate(e: RestClientResponseException, request: HttpServletRequest): ResponseEntity<String> {
+        LOG.warn("Default håndtering av exception fra restTemplate. requestURI=${request.requestURI}, HTTP method=${request.method}", e)
+        return ResponseEntity
+                .status(e.rawStatusCode)
+                .body(e.responseBodyAsString)
+    }
 }

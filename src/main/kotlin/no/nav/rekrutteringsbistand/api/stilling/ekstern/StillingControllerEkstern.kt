@@ -8,24 +8,15 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RestController
-import org.springframework.web.client.RestClientResponseException
 import javax.servlet.http.HttpServletRequest
 
 @RestController
 @Unprotected
-class StillingControllerEkstern(
-        val stillingService: StillingService
-) {
+class StillingControllerEkstern(val stillingService: StillingService) {
+
     @GetMapping("/rekrutteringsbistand/ekstern/api/v1/stilling/{uuid}")
     fun hentStilling(@PathVariable uuid: String, request: HttpServletRequest): ResponseEntity<Any> {
-        val stilling = try {
-            stillingService.hentStilling(uuid)
-        } catch (e: RestClientResponseException) {
-            LOG.warn("Forsøkte å hente stilling med ID $uuid", e)
-            return ResponseEntity
-                    .status(e.rawStatusCode)
-                    .body(e.responseBodyAsString)
-        }
+        val stilling = stillingService.hentStilling(uuid)
 
         fun copyProps(vararg keys: String): Map<String, String> =
                 hashMapOf(*(keys.filter { stilling.properties.get(it) != null }.map {
