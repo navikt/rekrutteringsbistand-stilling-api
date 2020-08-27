@@ -13,7 +13,7 @@ import javax.servlet.http.HttpServletRequest
 class StillingControllerEkstern(val stillingService: StillingService) {
 
     @GetMapping("/rekrutteringsbistand/ekstern/api/v1/stilling/{uuid}")
-    fun henkStilling(@PathVariable uuid: String, request: HttpServletRequest): ResponseEntity<Stilling> {
+    fun hentStilling(@PathVariable uuid: String, request: HttpServletRequest): ResponseEntity<Stilling> {
         val stilling = stillingService.hentStilling(uuid)
 
         fun copyProps(vararg keys: String): Map<String, String> =
