@@ -1,7 +1,7 @@
 package no.nav.rekrutteringsbistand.api.stilling.ekstern
 
 import no.nav.rekrutteringsbistand.api.stilling.StillingService
-import no.nav.security.oidc.api.Unprotected
+import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable

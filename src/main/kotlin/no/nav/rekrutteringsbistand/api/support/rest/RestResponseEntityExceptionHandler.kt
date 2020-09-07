@@ -1,7 +1,7 @@
 package no.nav.rekrutteringsbistand.api.support.rest
 
 import no.nav.rekrutteringsbistand.api.support.LOG
-import no.nav.security.spring.oidc.validation.interceptor.OIDCUnauthorizedException
+import no.nav.security.token.support.core.exceptions.JwtTokenValidatorException
 import org.springframework.dao.EmptyResultDataAccessException
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -15,7 +15,7 @@ import javax.servlet.http.HttpServletRequest
 @ControllerAdvice
 class RestResponseEntityExceptionHandler : ResponseEntityExceptionHandler() {
 
-    @ExceptionHandler(OIDCUnauthorizedException::class)
+    @ExceptionHandler(JwtTokenValidatorException::class)
     protected fun håndterUinnlogget(e: Exception, request: HttpServletRequest): ResponseEntity<String> {
         val msg = "Unauthorized. requestURI=${request.requestURI}, HTTP method=${request.method}"
         LOG.info(msg, e)
