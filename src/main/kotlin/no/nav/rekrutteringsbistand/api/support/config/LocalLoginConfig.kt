@@ -2,9 +2,9 @@ package no.nav.rekrutteringsbistand.api.support.config
 
 import com.nimbusds.jwt.JWTClaimsSet.Builder
 import net.minidev.json.JSONArray
-import no.nav.security.oidc.api.Unprotected
-import no.nav.security.oidc.test.support.JwtTokenGenerator.*
-import no.nav.security.oidc.test.support.spring.TokenGeneratorConfiguration
+import no.nav.security.token.support.core.api.Unprotected
+import no.nav.security.token.support.test.JwtTokenGenerator.*
+import no.nav.security.token.support.test.spring.TokenGeneratorConfiguration
 import org.springframework.context.annotation.Import
 import org.springframework.context.annotation.Profile
 import org.springframework.web.bind.annotation.GetMapping
@@ -58,6 +58,6 @@ class LocalLoginConfig {
 }
 
 object NAVGruppeRoller {
-    // These are not correct roles, its just for testing purposes, TODO find correct roles when we go to production.
+    // These are not correct roles, its just for testing purposes
     const val NSS_ADMIN: String = "174bec27-e954-453b-8486-4a80d9fc7636"
 }

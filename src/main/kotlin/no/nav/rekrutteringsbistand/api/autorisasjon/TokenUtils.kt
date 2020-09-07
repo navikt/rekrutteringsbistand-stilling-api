@@ -1,39 +1,39 @@
 package no.nav.rekrutteringsbistand.api.autorisasjon
 
 import java.util.*
-import no.nav.security.oidc.context.OIDCRequestContextHolder
+import no.nav.security.token.support.core.context.TokenValidationContextHolder
 import org.springframework.stereotype.Component
 
 @Component
-class TokenUtils(private val contextHolder: OIDCRequestContextHolder) {
+class TokenUtils(private val contextHolder: TokenValidationContextHolder) {
 
     companion object {
         const val ISSUER_ISSO = "isso"
     }
 
     fun hentInnloggetVeileder(): InnloggetVeileder {
-        return contextHolder.oidcValidationContext.getClaims(ISSUER_ISSO)
+        return contextHolder.tokenValidationContext.getClaims(ISSUER_ISSO)
                 .run {
                     InnloggetVeileder(
-                            userName = get("unique_name"),
-                            displayName = get("name"),
-                            navIdent = get("NAVident")
+                            userName = get("unique_name").toString(),
+                            displayName = get("name").toString(),
+                            navIdent = get("NAVident").toString()
                     )
                 }
     }
 
     fun tokenUtløper(): Boolean {
-        val hasValidToken = contextHolder.oidcValidationContext.hasValidTokenFor(ISSUER_ISSO)
-        val expirationTime = contextHolder.oidcValidationContext.getClaims(ISSUER_ISSO).claimSet.expirationTime
+        val hasValidToken = contextHolder.tokenValidationContext.hasTokenFor(ISSUER_ISSO)
+        val expirationTime = contextHolder.tokenValidationContext.getClaims(ISSUER_ISSO).expirationTime
         val inFiveMinutes = Date(System.currentTimeMillis() + 5 * 60000)
         return hasValidToken && inFiveMinutes.after(expirationTime)
     }
 
-    fun hentOidcToken(): String = contextHolder.oidcValidationContext.getToken(ISSUER_ISSO).idToken
+    fun hentOidcToken(): String = contextHolder.tokenValidationContext.getJwtToken(ISSUER_ISSO).tokenAsString
 
     fun harInnloggingsContext(): Boolean {
         return try {
-            contextHolder.oidcValidationContext
+            contextHolder.tokenValidationContext
             true
         } catch (exception: IllegalStateException) { // Kaster exception hvis man prøver å hente context utenfor et request initiert av en bruker
             false
