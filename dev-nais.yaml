@@ -10,6 +10,7 @@ spec:
   port: 9501
   ingresses:
     - https://arbeidsgiver.nais.preprod.local/rekrutteringsbistand-api/
+    - https://arbeidsgiver.dev.adeo.no/rekrutteringsbistand-api/
   liveness:
     path: /rekrutteringsbistand-api/internal/actuator/health
     initialDelay: 30
