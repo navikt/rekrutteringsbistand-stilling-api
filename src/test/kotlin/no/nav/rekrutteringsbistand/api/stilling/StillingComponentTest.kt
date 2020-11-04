@@ -378,14 +378,12 @@ internal class StillingComponentTest {
 
     private fun mockKandidatlisteOppdateringFeiler() {
         wiremockKandidatliste.stubFor(
-                put(urlPathMatching("/rekrutteringsbistand-kandidat-api/rest/veileder/stilling/.*/kandidatliste"))
+                put(urlPathMatching("/rekrutteringsbistand-kandidat-api/rest/veileder/stilling/.+/kandidatliste"))
                         .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
                         .withHeader(ACCEPT, equalTo(APPLICATION_JSON_VALUE))
-                        .willReturn(aResponse()
+                        .willReturn(aResponse().withStatus(HttpStatus.I_AM_A_TEAPOT.value())
                                 .withHeader(CONNECTION, "close") // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
-                                .withFault(Fault.MALFORMED_RESPONSE_CHUNK)
-                        )
-
+                                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE))
         )
     }
 
@@ -395,3 +393,4 @@ internal class StillingComponentTest {
         repository.slett(enAnnenStillingsinfo.stillingsinfoid)
     }
 }
+
