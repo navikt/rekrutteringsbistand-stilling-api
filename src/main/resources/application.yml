@@ -58,7 +58,7 @@ external:
   stilling-api.url: https://pam-ad-api.nais.preprod.local
   sok-api.url: https://pam-ad-api.nais.preprod.local
   kandidatliste-api.url: https://rekrutteringsbistand-kandidat-api.nais.preprod.local/rekrutteringsbistand-kandidat-api/rest/veileder/stilling
-  unleash.url: https://unleash.nais.adeo.no/api/
+  unleash.url: https://unleash.nais.io/api/
 
 database:
   navn: rekrutteringsbistand
@@ -84,7 +84,7 @@ external:
   stilling-api.url: https://pam-ad-api.nais.adeo.no
   sok-api.url: https://pam-ad-api.nais.adeo.no
   kandidatliste-api.url: https://rekrutteringsbistand-kandidat-api.nais.adeo.no/rekrutteringsbistand-kandidat-api/rest/veileder/stilling
-  unleash.url: https://unleash.nais.adeo.no/api/
+  unleash.url: https://unleash.nais.io/api/
 
 database:
   navn: rekrutteringsbistand
