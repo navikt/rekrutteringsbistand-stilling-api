@@ -265,8 +265,6 @@ internal class StillingComponentTest {
                 StillingMedStillingsinfo::class.java
         ).also {
             assertThat(it.statusCode).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
-            assertThat(it.hasBody()).isTrue()
-            assertThat(it.body?.status).isEqualTo("500")
         }
     }
 
@@ -283,8 +281,6 @@ internal class StillingComponentTest {
                 Stilling::class.java
         ).also {
             assertThat(it.statusCode).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
-            assertThat(it.hasBody()).isTrue()
-            assertThat(it.body?.status).isEqualTo("500")
         }
 
     }
@@ -381,9 +377,9 @@ internal class StillingComponentTest {
                 put(urlPathMatching("/rekrutteringsbistand-kandidat-api/rest/veileder/stilling/.+/kandidatliste"))
                         .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
                         .withHeader(ACCEPT, equalTo(APPLICATION_JSON_VALUE))
-                        .willReturn(aResponse().withStatus(HttpStatus.I_AM_A_TEAPOT.value())
+                        .willReturn(aResponse().withStatus(500)
                                 .withHeader(CONNECTION, "close") // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
-                                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE))
+                            )
         )
     }
 
@@ -393,4 +389,3 @@ internal class StillingComponentTest {
         repository.slett(enAnnenStillingsinfo.stillingsinfoid)
     }
 }
-

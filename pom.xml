@@ -22,16 +22,18 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>13</java.version>
-        <kotlin.version>1.4.10</kotlin.version>
+        <kotlin.version>1.4.20</kotlin.version>
         <arrow.version>0.10.3</arrow.version>
         <vault-jdbc.version>1.3.1</vault-jdbc.version>
         <logstash-logback-encoder.version>6.2</logstash-logback-encoder.version>
         <logback-syslog4j.version>1.0.0</logback-syslog4j.version>
-        <micrometer-registry-prometheus.version>1.5.6</micrometer-registry-prometheus.version>
+        <micrometer-registry-prometheus.version>1.6.1</micrometer-registry-prometheus.version>
         <wiremock.version>2.27.2</wiremock.version>
         <jackson-module-kotlin.version>2.10.1</jackson-module-kotlin.version>
         <springfox-swagger2.version>2.9.2</springfox-swagger2.version>
         <springfox-swagger-ui.version>2.9.2</springfox-swagger-ui.version>
+        <unleash.version>3.3.3</unleash.version>
+        <token-validation.version>1.3.1</token-validation.version>
     </properties>
 
     <dependencies>
@@ -111,12 +113,6 @@
         </dependency>
 
         <!-- Prometheus -->
-        <!-- Trenger vi denne? Tror ikke det. Are Husby, 2019-11-29 -->
-        <!--        <dependency>-->
-        <!--            <groupId>io.micrometer</groupId>-->
-        <!--            <artifactId>micrometer-core</artifactId>-->
-        <!--            <version>1.3.0</version>-->
-        <!--        </dependency>-->
         <dependency>
             <groupId>io.micrometer</groupId>
             <artifactId>micrometer-registry-prometheus</artifactId>
@@ -127,25 +123,18 @@
             <groupId>com.github.tomakehurst</groupId>
             <artifactId>wiremock-jre8</artifactId>
             <version>${wiremock.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.eclipse.jetty</groupId>
-                    <artifactId>jetty-webapp</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
 
         <dependency>
             <groupId>no.nav.security</groupId>
             <artifactId>token-validation-spring</artifactId>
-            <version>1.3.0</version>
+            <version>${token-validation.version}</version>
         </dependency>
         <dependency>
             <groupId>no.nav.security</groupId>
             <artifactId>token-validation-test-support</artifactId>
-            <version>1.3.0</version>
+            <version>${token-validation.version}</version>
         </dependency>
-
 
         <dependency>
             <groupId>com.fasterxml.jackson.module</groupId>
@@ -170,10 +159,9 @@
         <dependency>
             <groupId>no.finn.unleash</groupId>
             <artifactId>unleash-client-java</artifactId>
-            <version>3.2.10</version>
+            <version>${unleash.version}</version>
         </dependency>
     </dependencies>
-
 
     <build>
         <sourceDirectory>${project.basedir}/src/main/kotlin</sourceDirectory>
