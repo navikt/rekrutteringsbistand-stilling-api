@@ -48,7 +48,6 @@ class StillingController(
     fun proxyDeleteTilStillingsApi(request: HttpServletRequest, @PathVariable(value = "uuid") uuid: String): ResponseEntity<String> {
         LOG.debug("Mottok ${request.method} til ${request.requestURI}")
         val respons: ResponseEntity<String> = stillingService.slettStilling(uuid, request)
-
         return ResponseEntity(respons.body, respons.statusCode)
     }
 

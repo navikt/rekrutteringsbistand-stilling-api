@@ -265,8 +265,6 @@ internal class StillingComponentTest {
                 StillingMedStillingsinfo::class.java
         ).also {
             assertThat(it.statusCode).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
-            assertThat(it.hasBody()).isTrue()
-            assertThat(it.body?.status).isEqualTo("500")
         }
     }
 
@@ -283,8 +281,6 @@ internal class StillingComponentTest {
                 Stilling::class.java
         ).also {
             assertThat(it.statusCode).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
-            assertThat(it.hasBody()).isTrue()
-            assertThat(it.body?.status).isEqualTo("500")
         }
 
     }
@@ -378,14 +374,12 @@ internal class StillingComponentTest {
 
     private fun mockKandidatlisteOppdateringFeiler() {
         wiremockKandidatliste.stubFor(
-                put(urlPathMatching("/rekrutteringsbistand-kandidat-api/rest/veileder/stilling/.*/kandidatliste"))
+                put(urlPathMatching("/rekrutteringsbistand-kandidat-api/rest/veileder/stilling/.+/kandidatliste"))
                         .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
                         .withHeader(ACCEPT, equalTo(APPLICATION_JSON_VALUE))
-                        .willReturn(aResponse()
+                        .willReturn(aResponse().withStatus(500)
                                 .withHeader(CONNECTION, "close") // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
-                                .withFault(Fault.MALFORMED_RESPONSE_CHUNK)
-                        )
-
+                            )
         )
     }
 
