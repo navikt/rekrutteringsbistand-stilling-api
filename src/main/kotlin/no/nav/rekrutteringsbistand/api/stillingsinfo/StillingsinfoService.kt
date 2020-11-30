@@ -1,6 +1,6 @@
 package no.nav.rekrutteringsbistand.api.stillingsinfo
 
-import arrow.core.Option
+import no.nav.rekrutteringsbistand.api.Option
 import org.springframework.stereotype.Service
 
 @Service

@@ -1,9 +1,9 @@
 package no.nav.rekrutteringsbistand.api.stilling
 
-import arrow.core.Option
 import arrow.core.getOrElse
 import no.nav.rekrutteringsbistand.api.HentRekrutteringsbistandStillingDto
 import no.nav.rekrutteringsbistand.api.OppdaterRekrutteringsbistandStillingDto
+import no.nav.rekrutteringsbistand.api.Option
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
 import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteKlient
 import no.nav.rekrutteringsbistand.api.stillingsinfo.*

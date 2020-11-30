@@ -1,7 +1,7 @@
 package no.nav.rekrutteringsbistand.api.stillingsinfo
 
-import arrow.core.Some
 import arrow.core.getOrElse
+import no.nav.rekrutteringsbistand.api.Option
 import no.nav.rekrutteringsbistand.api.Testdata.enStillingsinfo
 import no.nav.rekrutteringsbistand.api.Testdata.enStillingsinfoOppdatering
 import org.assertj.core.api.Assertions.assertThat
@@ -27,9 +27,9 @@ class StillingsinfoRepositoryTest {
     @Test
     fun `Skal kunne lagre og hente ut stillingsinfo`() {
         repository.lagre(tilLagring)
-        val lagretRekrutteringsbistand = repository.hentForStilling(tilLagring.stillingsid)
+        val lagretRekrutteringsbistand: Option<Stillingsinfo> = repository.hentForStilling(tilLagring.stillingsid)
 
-        assertThat(lagretRekrutteringsbistand).isEqualTo(Some(tilLagring))
+        assertThat(lagretRekrutteringsbistand).isEqualTo(Option(tilLagring))
     }
 
     @Test
