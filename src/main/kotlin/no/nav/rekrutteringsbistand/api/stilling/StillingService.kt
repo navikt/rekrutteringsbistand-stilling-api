@@ -193,12 +193,25 @@ class StillingService(
     }
 
     fun hentStillinger(url: String, queryString: String?): Page<StillingMedStillingsinfo> {
+        val startAlt = System.currentTimeMillis()
+
+        val startHentFraArbplassen = System.currentTimeMillis()
         val opprinneligeStillingerPage: Page<StillingMedStillingsinfo> = hent(url, queryString, headers())
                 ?: throw RestResponseEntityExceptionHandler.NoContentException("Fant ikke stillinger")
+        val stoppHentFraArbplassen = System.currentTimeMillis()
+
         val opprinneligeStillinger = opprinneligeStillingerPage.content
+
+        val startBerikFraEgenDb = System.currentTimeMillis()
         val stillingsinfoer = opprinneligeStillinger.map(::hentStillingsinfo)
+        val stoppBerikFraEgenDb = System.currentTimeMillis()
+
         val newContent = stillingsinfoer.zip(opprinneligeStillinger, ::leggPåStillingsinfo)
-        return opprinneligeStillingerPage.copy(content = newContent)
+        val result = opprinneligeStillingerPage.copy(content = newContent)
+
+        val stoppAlt = System.currentTimeMillis()
+        LOG.info("Tidsmåling ms hentStillinger: ${stoppAlt - startAlt}, hentFraArbplassen: ${stoppHentFraArbplassen - startHentFraArbplassen}, berikFraEgenDb: ${stoppBerikFraEgenDb - startBerikFraEgenDb}")
+        return result
     }
 
     private fun leggPåStillingsinfo(info: Option<Stillingsinfo>, opprinnelig: StillingMedStillingsinfo): StillingMedStillingsinfo {
