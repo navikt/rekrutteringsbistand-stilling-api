@@ -1,9 +1,9 @@
 package no.nav.rekrutteringsbistand.api.stillingsinfo
 
 import arrow.core.getOrElse
-import no.nav.rekrutteringsbistand.api.Option
 import no.nav.rekrutteringsbistand.api.Testdata.enStillingsinfo
 import no.nav.rekrutteringsbistand.api.Testdata.enStillingsinfoOppdatering
+import no.nav.rekrutteringsbistand.api.option.Option
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.fail
 import org.junit.After
@@ -37,7 +37,8 @@ class StillingsinfoRepositoryTest {
         repository.lagre(tilLagring)
         repository.oppdaterEierIdentOgEierNavn(enStillingsinfoOppdatering)
 
-        val endretRekrutteringsbistand = repository.hentForStilling(tilLagring.stillingsid).getOrElse { fail("Testsetup") }
+        val endretRekrutteringsbistand =
+            repository.hentForStilling(tilLagring.stillingsid).getOrElse { fail("Testsetup") }
 
         assertThat(endretRekrutteringsbistand.eier?.navident).isEqualTo(enStillingsinfoOppdatering.eier.navident)
         assertThat(endretRekrutteringsbistand.eier?.navn).isEqualTo(enStillingsinfoOppdatering.eier.navn)
