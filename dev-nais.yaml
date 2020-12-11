@@ -26,3 +26,6 @@ spec:
     path: /rekrutteringsbistand-api/internal/actuator/prometheus
   vault:
     enabled: true
+  azure:
+    application:
+      enabled: true
