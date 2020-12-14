@@ -11,12 +11,20 @@ data class Stillingsinfo(
         val notat: String?
 ) {
 
-    fun asEierDto() =
-            EierDto(
-                    stillingsinfoid = this.stillingsinfoid.toString(),
-                    stillingsid = this.stillingsid.toString(),
-                    eierNavident = this.eier?.navident,
-                    eierNavn = this.eier?.navn)
+    fun asEierDto() = EierDto(
+        stillingsinfoid = this.stillingsinfoid.toString(),
+        stillingsid = this.stillingsid.toString(),
+        eierNavident = this.eier?.navident,
+        eierNavn = this.eier?.navn
+    )
+
+    fun asStillingsinfoDto() = StillingsinfoDto(
+        stillingsid = this.stillingsid.asString(),
+        stillingsinfoid = this.stillingsinfoid.toString(),
+        notat = this.notat,
+        eierNavident = this.eier?.navident,
+        eierNavn = this.eier?.navn
+    )
 
     companion object {
         fun fromDB(rs: ResultSet) =
