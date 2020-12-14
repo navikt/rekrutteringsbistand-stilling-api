@@ -100,18 +100,15 @@ class StillingController(
         return ResponseEntity(respons.body, respons.statusCode)
     }
 
-    @Unprotected // Fordi kandidatsøk har hentet stillinger uten token frem til nå.
     @GetMapping("/rekrutteringsbistand/api/v1/stilling/{uuid}")
     @Deprecated("Bruk hentRekrutteringsbistandStilling")
     fun hentStilling(@PathVariable uuid: String): ResponseEntity<StillingMedStillingsinfo> =
             ok(stillingService.hentStilling(uuid))
 
-    @Unprotected // Fordi kandidatsøk har hentet stillinger uten token frem til nå.
     @GetMapping("/rekrutteringsbistandstilling/{uuid}")
     fun hentRekrutteringsbistandStilling(@PathVariable uuid: String): ResponseEntity<HentRekrutteringsbistandStillingDto> =
             ok(stillingService.hentRekrutteringsbistandStilling(uuid))
 
-    @Unprotected // Fordi kandidatsøk har hentet stillinger uten token frem til nå.
     @GetMapping("/rekrutteringsbistand/api/v1/stilling/stillingsnummer/{stillingsnummer}")
     fun hentStillingAnnonsenummer(@PathVariable stillingsnummer: String): ResponseEntity<StillingMedStillingsinfo> =
             ok(stillingService.hentStillingMedStillingsnummer(stillingsnummer))
