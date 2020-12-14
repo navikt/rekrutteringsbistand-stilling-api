@@ -1,6 +1,8 @@
 package no.nav.rekrutteringsbistand.api.stillingsinfo.indekser
 
-import arrow.core.Either
+import no.nav.rekrutteringsbistand.api.option.None
+import no.nav.rekrutteringsbistand.api.option.Option
+import no.nav.rekrutteringsbistand.api.option.Some
 import no.nav.rekrutteringsbistand.api.stillingsinfo.*
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.ResponseEntity
@@ -13,11 +15,11 @@ class StillingsinfoIndekserController(val stillingsinfoService: StillingsinfoSer
 
     @GetMapping("/{stillingsId}")
     fun getStillingsInfo(@PathVariable stillingsId: Stillingsid): ResponseEntity<StillingsinfoDto> {
-        val stillingsinfo: Either<Unit, Stillingsinfo> = stillingsinfoService.hentForStilling(stillingsId)
+        val stillingsinfo: Option<Stillingsinfo> = stillingsinfoService.hentForStilling(stillingsId)
 
         return when (stillingsinfo) {
-            is Either.Left -> ResponseEntity.notFound().build()
-            is Either.Right -> ResponseEntity.ok(stillingsinfo.b.asStillingsinfoDto())
+            is None -> ResponseEntity.notFound().build()
+            is Some -> ResponseEntity.ok(stillingsinfo.b.asStillingsinfoDto())
         }
     }
 }
