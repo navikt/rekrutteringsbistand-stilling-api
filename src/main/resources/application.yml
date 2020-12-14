@@ -53,6 +53,9 @@ no.nav.security.jwt:
     accepted_audience: 38e07d31-659d-4595-939a-f18dce3446c5
     proxyurl: http://webproxy.nais:8088
     cookiename: isso-idtoken
+  issuer.azuread:
+    discoveryurl: https://login.microsoftonline.com/62366534-1ec3-4962-8869-9b5535279d0b/v2.0/.well-known/openid-configuration
+    accepted_audience: api://${AZURE_APP_CLIENT_ID}
 
 external:
   stilling-api.url: https://pam-ad-api.nais.preprod.local
@@ -79,6 +82,9 @@ no.nav.security.jwt:
     accepted_audience: 9b4e07a3-4f4c-4bab-b866-87f62dff480d
     proxyurl: http://webproxy.nais:8088
     cookiename: isso-idtoken
+  issuer.azuread:
+    discoveryurl: https://login.microsoftonline.com/62366534-1ec3-4962-8869-9b5535279d0b/v2.0/.well-known/openid-configuration
+    accepted_audience: api://${AZURE_APP_CLIENT_ID}
 
 external:
   stilling-api.url: https://pam-ad-api.nais.adeo.no
