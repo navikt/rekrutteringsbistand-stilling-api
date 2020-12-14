@@ -55,7 +55,7 @@ no.nav.security.jwt:
     cookiename: isso-idtoken
   issuer.azuread:
     discoveryurl: https://login.microsoftonline.com/62366534-1ec3-4962-8869-9b5535279d0b/v2.0/.well-known/openid-configuration
-    accepted_audience: api://${AZURE_APP_CLIENT_ID}
+    accepted_audience: ${AZURE_APP_CLIENT_ID}, api://${AZURE_APP_CLIENT_ID}
     proxyurl: http://webproxy.nais:8088
 
 external:
@@ -85,7 +85,7 @@ no.nav.security.jwt:
     cookiename: isso-idtoken
   issuer.azuread:
     discoveryurl: https://login.microsoftonline.com/62366534-1ec3-4962-8869-9b5535279d0b/v2.0/.well-known/openid-configuration
-    accepted_audience: api://${AZURE_APP_CLIENT_ID}
+    accepted_audience: ${AZURE_APP_CLIENT_ID}, api://${AZURE_APP_CLIENT_ID}
     proxyurl: http://webproxy.nais:8088
 
 external:
