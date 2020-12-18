@@ -1,5 +1,6 @@
 package no.nav.rekrutteringsbistand.api.kandidatliste
 
+import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsid
 import no.nav.rekrutteringsbistand.api.support.LOG
 import no.nav.rekrutteringsbistand.api.support.config.ExternalConfiguration
@@ -12,8 +13,9 @@ import java.net.URI
 
 @Component
 class KandidatlisteKlient(
-        val restTemplate: RestTemplate,
-        val externalConfiguration: ExternalConfiguration
+    val restTemplate: RestTemplate,
+    val externalConfiguration: ExternalConfiguration,
+    val tokenUtils: TokenUtils,
 ) {
 
     fun oppdaterKandidatliste(stillingsid: Stillingsid): ResponseEntity<Void> {
@@ -43,6 +45,7 @@ class KandidatlisteKlient(
     fun headers() =
             mapOf(
                     HttpHeaders.CONTENT_TYPE to MediaType.APPLICATION_JSON_VALUE,
-                    HttpHeaders.ACCEPT to MediaType.APPLICATION_JSON_VALUE
+                    HttpHeaders.ACCEPT to MediaType.APPLICATION_JSON_VALUE,
+                    HttpHeaders.AUTHORIZATION to "Bearer ${tokenUtils.hentOidcToken()}}"
             ).toMultiValueMap()
 }
