@@ -11,6 +11,7 @@ spec:
   ingresses:
     - https://arbeidsgiver.nais.preprod.local/rekrutteringsbistand-api/
     - https://rekrutteringsbistand-api.dev.intern.nav.no/rekrutteringsbistand-api/
+    - https://rekrutteringsbistand-api.dev-fss-pub.nais.io/rekrutteringsbistand-api/
   liveness:
     path: /rekrutteringsbistand-api/internal/actuator/health
     initialDelay: 30
