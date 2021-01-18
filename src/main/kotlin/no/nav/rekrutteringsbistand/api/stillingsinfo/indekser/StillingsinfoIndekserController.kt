@@ -22,4 +22,18 @@ class StillingsinfoIndekserController(val stillingsinfoService: StillingsinfoSer
             is Some -> ResponseEntity.ok(stillingsinfo.b.asStillingsinfoDto())
         }
     }
+
+    @PostMapping("/bulk")
+    fun getStillingsInfoBulk(@RequestBody inboundDto: BulkStillingsinfoInboundDto): ResponseEntity<List<StillingsinfoDto>> {
+        val stillingsIder = inboundDto.uuider.map { Stillingsid(it) }
+        val stillingsinfo: List<StillingsinfoDto> = stillingsinfoService
+            .hentForStillinger(stillingsIder)
+            .map { it.asStillingsinfoDto() }
+
+        return ResponseEntity.ok(stillingsinfo)
+    }
 }
+
+data class BulkStillingsinfoInboundDto(
+    val uuider: List<String>
+)
