@@ -15,9 +15,9 @@ class TokenUtils(private val contextHolder: TokenValidationContextHolder) {
         return contextHolder.tokenValidationContext.getClaims(ISSUER_ISSO)
                 .run {
                     InnloggetVeileder(
-                            userName = get("unique_name").toString(),
-                            displayName = get("name").toString(),
-                            navIdent = get("NAVident").toString()
+                            userName = getStringClaim("unique_name"),
+                            displayName = getStringClaim("name"),
+                            navIdent = getStringClaim("NAVident")
                     )
                 }
     }
