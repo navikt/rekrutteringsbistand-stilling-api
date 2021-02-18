@@ -14,7 +14,8 @@ class StillingControllerEkstern(val stillingService: StillingService) {
 
     @GetMapping("/rekrutteringsbistand/ekstern/api/v1/stilling/{uuid}")
     fun hentStilling(@PathVariable uuid: String, request: HttpServletRequest): ResponseEntity<Stilling> {
-        val stilling = stillingService.hentStilling(uuid)
+        val rekrutteringsbistandStilling = stillingService.hentRekrutteringsbistandStilling(uuid)
+        val stilling = rekrutteringsbistandStilling.stilling
 
         fun copyProps(vararg keys: String): Map<String, String> =
             hashMapOf(*(keys.filter { stilling.properties.get(it) != null }.map {
