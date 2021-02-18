@@ -42,41 +42,49 @@ internal class StillingEksternComponentTest {
     private val restTemplate = TestRestTemplate(TestRestTemplate.HttpClientOption.ENABLE_COOKIES)
 
     val objectMapper = ObjectMapper()
-            .registerModule(JavaTimeModule())
-            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+        .registerModule(JavaTimeModule())
+        .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
     @Test
     fun `GET mot en stilling skal returnere en stilling uten stillingsinfo hvis det ikke er lagret`() {
         mockUtenAuthorization("/b2b/api/v1/ads/${enStilling.uuid}", enStilling)
-        restTemplate.getForObject("$localBaseUrl/rekrutteringsbistand/ekstern/api/v1/stilling/${enStilling.uuid}", Stilling
-        ::class.java).also {
+        restTemplate.getForObject(
+            "$localBaseUrl/rekrutteringsbistand/ekstern/api/v1/stilling/${enStilling.uuid}", Stilling
+            ::class.java
+        ).also {
             assertThat(it).isEqualTo(enEksternStilling)
         }
     }
 
     fun mockUtenAuthorization(urlPath: String, responseBody: Any) {
         wiremock.stubFor(
-                get(urlPathMatching(urlPath))
-                        .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
-                        .withHeader(ACCEPT, equalTo(APPLICATION_JSON_VALUE))
-                        .willReturn(aResponse().withStatus(200)
-                                .withHeader(CONNECTION, "close") // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
-                                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-                                .withBody(objectMapper.writeValueAsString(responseBody)))
+            get(urlPathMatching(urlPath))
+                .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
+                .withHeader(ACCEPT, equalTo(APPLICATION_JSON_VALUE))
+                .willReturn(
+                    aResponse().withStatus(200)
+                        .withHeader(
+                            CONNECTION,
+                            "close"
+                        ) // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
+                        .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+                        .withBody(objectMapper.writeValueAsString(responseBody))
+                )
         )
     }
 
     val enEksternStilling = Stilling(
-            id = enStilling.id,
-            updated = enStilling.updated,
-            title = enStilling.title,
-            medium = enStilling.medium,
-            employer = null,
-            location = enStilling.location,
-            properties = enStilling.properties,
-            businessName = enStilling.businessName,
-            status = enStilling.status,
-            uuid = enStilling.uuid,
-            source = enStilling.source
+        id = enStilling.id,
+        updated = enStilling.updated,
+        title = enStilling.title,
+        medium = enStilling.medium,
+        employer = null,
+        location = enStilling.location,
+        properties = enStilling.properties,
+        businessName = enStilling.businessName,
+        status = enStilling.status,
+        uuid = enStilling.uuid,
+        source = enStilling.source,
+        privacy = enStilling.privacy
     )
 }

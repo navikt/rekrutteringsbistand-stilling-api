@@ -17,42 +17,58 @@ class StillingControllerEkstern(val stillingService: StillingService) {
         val stilling = stillingService.hentStilling(uuid)
 
         fun copyProps(vararg keys: String): Map<String, String> =
-                hashMapOf(*(keys.filter { stilling.properties.get(it) != null }.map {
-                    it to (stilling.properties.get(it) ?: "")
-                }.toTypedArray()))
+            hashMapOf(*(keys.filter { stilling.properties.get(it) != null }.map {
+                it to (stilling.properties.get(it) ?: "")
+            }.toTypedArray()))
 
         return ResponseEntity.ok().body(
-                Stilling(
-                        title = stilling.title,
-                        properties = copyProps(
-                                "adtext", "applicationdue", "applicationemail", "engagementtype", "jobarrangement", "extent", "workday",
-                                "workhours", "positioncount", "sector", "starttime", "employerhomepage", "employerdescription",
-                                "applicationurl", "jobtitle", "twitteraddress", "facebookpage", "linkedinpage"
-                        ),
-                        contactList = stilling.contactList.map {
-                            Contact(
-                                    name = it.name,
-                                    email = it.email,
-                                    phone = it.phone,
-                                    title = it.title
-                            )
-                        },
-                        location = stilling.location,
-                        employer = stilling.employer?.let {
-                            Arbeidsgiver(
-                                    name = it.name,
-                                    location = it.location,
-                                    publicName = it.publicName
-                            )
-                        },
-                        updated = stilling.updated,
-                        medium = stilling.medium,
-                        businessName = stilling.businessName,
-                        status = stilling.status,
-                        id = stilling.id,
-                        uuid = stilling.uuid,
-                        source = stilling.source
-                )
+            Stilling(
+                title = stilling.title,
+                properties = copyProps(
+                    "adtext",
+                    "applicationdue",
+                    "applicationemail",
+                    "engagementtype",
+                    "jobarrangement",
+                    "extent",
+                    "workday",
+                    "workhours",
+                    "positioncount",
+                    "sector",
+                    "starttime",
+                    "employerhomepage",
+                    "employerdescription",
+                    "applicationurl",
+                    "jobtitle",
+                    "twitteraddress",
+                    "facebookpage",
+                    "linkedinpage"
+                ),
+                contactList = stilling.contactList.map {
+                    Contact(
+                        name = it.name,
+                        email = it.email,
+                        phone = it.phone,
+                        title = it.title
+                    )
+                },
+                location = stilling.location,
+                employer = stilling.employer?.let {
+                    Arbeidsgiver(
+                        name = it.name,
+                        location = it.location,
+                        publicName = it.publicName
+                    )
+                },
+                updated = stilling.updated,
+                medium = stilling.medium,
+                businessName = stilling.businessName,
+                status = stilling.status,
+                id = stilling.id,
+                uuid = stilling.uuid,
+                source = stilling.source,
+                privacy = stilling.privacy
+            )
         )
     }
 }
