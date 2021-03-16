@@ -4,11 +4,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>no.nav.tag</groupId>
-    <artifactId>rekrutteringsbistand-api</artifactId>
+    <artifactId>rekrutteringsbistand-stilling-api</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <name>rekrutteringsbistand-api</name>
+    <name>rekrutteringsbistand-stilling-api</name>
     <description>API til rekrutteringsbistand-stilling</description>
 
     <parent>

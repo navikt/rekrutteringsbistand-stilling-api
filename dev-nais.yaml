@@ -1,7 +1,7 @@
 apiVersion: nais.io/v1alpha1
 kind: Application
 metadata:
-  name: rekrutteringsbistand-api
+  name: rekrutteringsbistand-stilling-api
   namespace: arbeidsgiver
   labels:
     team: arbeidsgiver
@@ -9,14 +9,13 @@ spec:
   image: {{version}}
   port: 9501
   ingresses:
-    - https://arbeidsgiver.nais.preprod.local/rekrutteringsbistand-api/
-    - https://rekrutteringsbistand-api.dev.intern.nav.no/rekrutteringsbistand-api/
-    - https://rekrutteringsbistand-api.dev-fss-pub.nais.io/rekrutteringsbistand-api/
+    - https://rekrutteringsbistand-stilling-api.dev.intern.nav.no
+    - https://rekrutteringsbistand-stilling-api.dev-fss-pub.nais.io
   liveness:
-    path: /rekrutteringsbistand-api/internal/actuator/health
+    path: /internal/actuator/health
     initialDelay: 30
   readiness:
-    path: /rekrutteringsbistand-api/internal/actuator/health
+    path: /internal/actuator/health
     initialDelay: 30
   webproxy: false
   env:
@@ -24,7 +23,7 @@ spec:
       value: dev
   prometheus:
     enabled: true
-    path: /rekrutteringsbistand-api/internal/actuator/prometheus
+    path: /internal/actuator/prometheus
   vault:
     enabled: true
   azure:
