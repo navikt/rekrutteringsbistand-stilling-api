@@ -9,6 +9,7 @@ spec:
   image: {{version}}
   port: 9501
   ingresses:
+    - https://rekrutteringsbistand-stilling-api.nais.preprod.local
     - https://rekrutteringsbistand-stilling-api.dev.intern.nav.no
     - https://rekrutteringsbistand-stilling-api.dev-fss-pub.nais.io
   liveness:
