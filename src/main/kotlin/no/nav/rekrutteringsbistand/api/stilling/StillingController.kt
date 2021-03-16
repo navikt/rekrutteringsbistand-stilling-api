@@ -89,14 +89,14 @@ class StillingController(
     @GetMapping("/search-api/underenhet/_search")
     private fun getSokTilPamAdApi(request: HttpServletRequest): ResponseEntity<String> {
         LOG.debug("Mottok ${request.method} til ${request.requestURI}")
-        val respons = restProxy.proxyJsonRequest(GET, request, replaceInUrl, null, externalConfiguration.sokApi.url)
+        val respons = restProxy.proxyJsonRequest(GET, request, "", null, externalConfiguration.sokApi.url)
         return ResponseEntity(respons.body, respons.statusCode)
     }
 
     @PostMapping("/search-api/underenhet/_search")
     private fun postSokTilPamAdApi(request: HttpServletRequest, @RequestBody requestBody: String): ResponseEntity<String> {
         LOG.debug("Mottok ${request.method} til ${request.requestURI}")
-        val respons = restProxy.proxyJsonRequest(POST, request, replaceInUrl, requestBody, externalConfiguration.sokApi.url)
+        val respons = restProxy.proxyJsonRequest(POST, request, "", requestBody, externalConfiguration.sokApi.url)
         return ResponseEntity(respons.body, respons.statusCode)
     }
 
@@ -131,5 +131,4 @@ class StillingController(
 
 }
 
-private const val replaceInUrl = "/rekrutteringsbistand-api"
-private const val replaceRekrutteringsbistandInUrl = "/rekrutteringsbistand-api/rekrutteringsbistand"
+private const val replaceRekrutteringsbistandInUrl = "/rekrutteringsbistand"

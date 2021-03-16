@@ -3,7 +3,7 @@ name: Build & deploy
 on: [push]
 
 env:
-  IMAGE: docker.pkg.github.com/${{ github.repository }}/rekrutteringsbistand-api:${{ github.sha }}
+  IMAGE: docker.pkg.github.com/${{ github.repository }}/rekrutteringsbistand-stilling-api:${{ github.sha }}
 
 jobs:
   test:

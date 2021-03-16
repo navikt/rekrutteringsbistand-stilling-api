@@ -24,8 +24,8 @@ class FeatureToggleConfig {
             @Value("\${spring.profiles.active}") profile: String
     ): Unleash {
         val config = UnleashConfig.builder()
-                .appName("rekrutteringsbistand-api")
-                .instanceId("rekrutteringsbistand-api-$profile")
+                .appName("rekrutteringsbistand-stilling-api")
+                .instanceId("rekrutteringsbistand-stilling-api-$profile")
                 .unleashAPI(unleashUrl)
                 .build()
         return DefaultUnleash(

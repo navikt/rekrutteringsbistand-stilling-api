@@ -196,7 +196,7 @@ class StillingService(
         val respons = restProxy.proxyJsonRequest(
             HttpMethod.DELETE,
             request,
-            "/rekrutteringsbistand-api/rekrutteringsbistand",
+            "/rekrutteringsbistand",
             null,
             externalConfiguration.stillingApi.url
         )

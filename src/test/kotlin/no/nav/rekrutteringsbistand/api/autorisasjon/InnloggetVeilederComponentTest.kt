@@ -19,7 +19,7 @@ internal class InnloggetVeilederComponentTest {
     @LocalServerPort
     var port = 0
 
-    private fun localBaseUrl(): String = "http://localhost:$port/rekrutteringsbistand-api"
+    private fun localBaseUrl(): String = "http://localhost:$port"
 
     private val restTemplate = TestRestTemplate(TestRestTemplate.HttpClientOption.ENABLE_COOKIES)
 

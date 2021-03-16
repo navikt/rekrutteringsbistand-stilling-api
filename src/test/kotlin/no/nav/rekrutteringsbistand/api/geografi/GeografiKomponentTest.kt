@@ -28,7 +28,7 @@ internal class GeografiKomponentTest {
     @LocalServerPort
     private var port = 0
 
-    val localBaseUrl by lazy { "http://localhost:$port/rekrutteringsbistand-api" }
+    val localBaseUrl by lazy { "http://localhost:$port" }
 
     private val restTemplate = TestRestTemplate(TestRestTemplate.HttpClientOption.ENABLE_COOKIES)
 
