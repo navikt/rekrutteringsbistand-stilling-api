@@ -34,3 +34,4 @@ spec:
     inbound:
       rules:
         - application: vis-stilling
+          cluster: dev-gcp
