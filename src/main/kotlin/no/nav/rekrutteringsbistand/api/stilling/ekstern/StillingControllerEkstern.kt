@@ -1,7 +1,7 @@
 package no.nav.rekrutteringsbistand.api.stilling.ekstern
 
 import no.nav.rekrutteringsbistand.api.stilling.StillingService
-import no.nav.security.token.support.core.api.Unprotected
+import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -9,11 +9,14 @@ import org.springframework.web.bind.annotation.RestController
 import javax.servlet.http.HttpServletRequest
 
 @RestController
-@Unprotected
+@ProtectedWithClaims(issuer = "azuread")
 class StillingControllerEkstern(val stillingService: StillingService) {
 
     @GetMapping("/rekrutteringsbistand/ekstern/api/v1/stilling/{uuid}")
     fun hentStilling(@PathVariable uuid: String, request: HttpServletRequest): ResponseEntity<Stilling> {
+
+        // TODO: Valider at kall kommer fra riktig applikasjon
+
         val stilling = stillingService.hentStilling(uuid)
 
         fun copyProps(vararg keys: String): Map<String, String> =

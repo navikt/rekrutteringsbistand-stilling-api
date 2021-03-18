@@ -18,10 +18,6 @@ spec:
   readiness:
     path: /rekrutteringsbistand-api/internal/actuator/health
     initialDelay: 30
-  webproxy: false
-  env:
-    - name: SPRING_PROFILES_ACTIVE
-      value: dev
   prometheus:
     enabled: true
     path: /rekrutteringsbistand-api/internal/actuator/prometheus
@@ -30,3 +26,11 @@ spec:
   azure:
     application:
       enabled: true
+  webproxy: false
+  env:
+    - name: SPRING_PROFILES_ACTIVE
+      value: dev
+    - name: VIS_STILLING_CLIENT_ID
+      value: 5ab7c506-0441-4cc0-96ad-55d26b346975
+    - name: REKRUTTERINGSBISTAND_STILLING_INDEKSER_CLIENT_ID
+      value: 5ab7c506-0441-4cc0-96ad-55d26b346975

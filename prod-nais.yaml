@@ -21,6 +21,7 @@ spec:
   env:
     - name: SPRING_PROFILES_ACTIVE
       value: prod
+#      TODO: Legg til clientIds for vis-stilling og rekbis-stilling-indekser
   prometheus:
     enabled: true
     path: /rekrutteringsbistand-api/internal/actuator/prometheus
