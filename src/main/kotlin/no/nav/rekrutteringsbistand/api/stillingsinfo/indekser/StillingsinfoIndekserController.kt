@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/indekser/stillingsinfo")
-@ProtectedWithClaims(issuer = "azuread") // TODO
+@ProtectedWithClaims(issuer = "azuread")
 class StillingsinfoIndekserController(
         val stillingsinfoService: StillingsinfoService,
         val authorizedPartyUtils: AuthorizedPartyUtils
@@ -17,9 +17,9 @@ class StillingsinfoIndekserController(
 
     @PostMapping("/bulk")
     fun getStillingsInfoBulk(@RequestBody inboundDto: BulkStillingsinfoInboundDto): ResponseEntity<List<StillingsinfoDto>> {
-
-
-        if (!authorizedPartyUtils.kallKommerFraStillingIndekser()) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+        if (!authorizedPartyUtils.kallKommerFraStillingIndekser()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+        }
 
         val stillingsIder = inboundDto.uuider.map { Stillingsid(it) }
         val stillingsinfo: List<StillingsinfoDto> = stillingsinfoService

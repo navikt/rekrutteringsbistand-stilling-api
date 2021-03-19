@@ -1,7 +1,9 @@
 package no.nav.rekrutteringsbistand.api.stilling.ekstern
 
+import no.nav.rekrutteringsbistand.api.autorisasjon.AuthorizedPartyUtils
 import no.nav.rekrutteringsbistand.api.stilling.StillingService
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -10,12 +12,17 @@ import javax.servlet.http.HttpServletRequest
 
 @RestController
 @ProtectedWithClaims(issuer = "azuread")
-class StillingControllerEkstern(val stillingService: StillingService) {
+class StillingControllerEkstern(
+        val stillingService: StillingService,
+        val authorizedPartyUtils: AuthorizedPartyUtils
+) {
 
     @GetMapping("/rekrutteringsbistand/ekstern/api/v1/stilling/{uuid}")
     fun hentStilling(@PathVariable uuid: String, request: HttpServletRequest): ResponseEntity<Stilling> {
 
-        // TODO: Valider at kall kommer fra riktig applikasjon
+        if (!authorizedPartyUtils.kallKommerFraVisStilling()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+        }
 
         val stilling = stillingService.hentStilling(uuid)
 

@@ -23,17 +23,10 @@ spec:
     path: /rekrutteringsbistand-api/internal/actuator/prometheus
   vault:
     enabled: true
+  webproxy: false
   azure:
     application:
       enabled: true
-  webproxy: false
-  env:
-    - name: SPRING_PROFILES_ACTIVE
-      value: dev
-    - name: VIS_STILLING_CLIENT_ID
-      value: 5ab7c506-0441-4cc0-96ad-55d26b346975
-    - name: REKRUTTERINGSBISTAND_STILLING_INDEKSER_CLIENT_ID
-      value: 5ab7c506-0441-4cc0-96ad-55d26b346975
   accessPolicy:
     inbound:
       rules:
@@ -41,3 +34,10 @@ spec:
           cluster: dev-gcp
         - application: rekrutteringsbistand-stilling-indekser
           cluster: dev-gcp
+  env:
+    - name: SPRING_PROFILES_ACTIVE
+      value: dev
+    - name: VIS_STILLING_CLIENT_ID
+      value: 5ab7c506-0441-4cc0-96ad-55d26b346975
+    - name: REKRUTTERINGSBISTAND_STILLING_INDEKSER_CLIENT_ID
+      value: a39eed0d-2f95-4384-b88e-55f9ebdf49ab
