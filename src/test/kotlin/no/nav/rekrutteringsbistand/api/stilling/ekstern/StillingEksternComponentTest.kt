@@ -6,17 +6,11 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.junit.WireMockRule
 import no.nav.rekrutteringsbistand.api.Testdata.enStilling
-import no.nav.rekrutteringsbistand.api.autorisasjon.azureAdIssuer
-import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoRepository
-import no.nav.rekrutteringsbistand.api.support.LOG
+import no.nav.rekrutteringsbistand.api.support.config.MockLogin
 import no.nav.rekrutteringsbistand.api.support.toMultiValueMap
-import no.nav.security.mock.oauth2.MockOAuth2Server
-import no.nav.security.mock.oauth2.token.DefaultOAuth2TokenCallback
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Rule
 import org.junit.Test
-import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.BeforeAll
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -35,13 +29,8 @@ import org.springframework.test.context.junit4.SpringRunner
 @ActiveProfiles("local")
 internal class StillingEksternComponentTest {
 
-    @Value("\${rekrutteringsbistand.stilling.indekser.client.id}")
-    private val clientIdTilStillingIndekser: String = ""
-
     @Value("\${vis-stilling.client.id}")
     private val clientIdTilVisStilling: String = ""
-
-    val mockOAuth2Server = MockOAuth2Server()
 
     @get:Rule
     val wiremock = WireMockRule(9914)
@@ -49,13 +38,13 @@ internal class StillingEksternComponentTest {
     @get:Rule
     val wiremockKandidatliste = WireMockRule(8766)
 
+    @Autowired
+    lateinit var mockLogin: MockLogin
+
     @LocalServerPort
     var port = 0
 
     val localBaseUrl by lazy { "http://localhost:$port/rekrutteringsbistand-api" }
-
-    @Autowired
-    lateinit var repository: StillingsinfoRepository
 
     private val restTemplate = TestRestTemplate(TestRestTemplate.HttpClientOption.ENABLE_COOKIES)
 
@@ -65,9 +54,9 @@ internal class StillingEksternComponentTest {
 
     @Test
     fun `GET mot en stilling skal returnere en stilling uten stillingsinfo hvis det ikke er lagret`() {
-        mockOAuth2Server.start(port = 18300)
-        val token = hentToken()
+        mockUtenAuthorization("/b2b/api/v1/ads/${enStilling.uuid}", enStilling)
 
+        val token = mockLogin.hentAzureAdMaskinTilMaskinToken(clientIdTilVisStilling)
 
         restTemplate.exchange(
                 "$localBaseUrl/rekrutteringsbistand/ekstern/api/v1/stilling/${enStilling.uuid}",
@@ -75,22 +64,10 @@ internal class StillingEksternComponentTest {
                 HttpEntity(null, mapOf(
                         AUTHORIZATION to "Bearer $token"
                 ).toMultiValueMap()),
-                Any::class.java
+                Stilling::class.java
         ).also {
-            assertThat(it).isEqualTo(enEksternStilling)
+            assertThat(it.body).isEqualTo(enEksternStilling)
         }
-
-        mockOAuth2Server.shutdown()
-    }
-
-    private fun hentToken(): String {
-        return mockOAuth2Server.issueToken(
-                azureAdIssuer,
-                clientIdTilVisStilling,
-                DefaultOAuth2TokenCallback(
-                        issuerId = azureAdIssuer
-                )
-        ).serialize()
     }
 
     fun mockUtenAuthorization(urlPath: String, responseBody: Any) {
