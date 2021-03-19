@@ -68,6 +68,7 @@ internal class StillingEksternComponentTest {
         mockOAuth2Server.start(port = 18300)
         val token = hentToken()
 
+
         restTemplate.exchange(
                 "$localBaseUrl/rekrutteringsbistand/ekstern/api/v1/stilling/${enStilling.uuid}",
                 HttpMethod.GET,

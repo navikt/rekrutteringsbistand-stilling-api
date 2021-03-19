@@ -11,7 +11,9 @@ import org.springframework.web.bind.annotation.RestController
 class InnloggetBrukerController(private val tokenUtils: TokenUtils) {
 
     @GetMapping
-    fun hentInnloggetVeileder(): InnloggetVeileder = tokenUtils.hentInnloggetVeileder()
+    fun hentInnloggetVeileder(): InnloggetVeileder {
+        return tokenUtils.hentInnloggetVeileder()
+    }
 
     @GetMapping("/token-expiring")
     fun tokenUtløper(): Boolean = tokenUtils.tokenUtløper()

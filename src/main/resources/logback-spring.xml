@@ -40,7 +40,7 @@
 
     <springProfile name="local">
         <include resource="org/springframework/boot/logging/logback/base.xml"/>
-        <logger name="org.springframework.web" level="DEBUG"/>
+        <logger name="org.springframework.web" level="INFO"/>
         <logger name="no.nav.rekrutteringsbistand.api" level="TRACE"/>
         <logger name="no.nav.security.token.support" level="DEBUG"/>
     </springProfile>

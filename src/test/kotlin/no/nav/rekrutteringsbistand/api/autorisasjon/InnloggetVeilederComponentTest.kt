@@ -25,7 +25,7 @@ internal class InnloggetVeilederComponentTest {
 
     @Before
     fun authenticateClient() {
-        restTemplate.getForObject("${localBaseUrl()}/local/cookie-isso", String::class.java)
+        restTemplate.getForEntity("${localBaseUrl()}/veileder-token-cookie", Unit::class.java)
     }
 
     @Test

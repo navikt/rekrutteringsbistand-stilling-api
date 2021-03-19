@@ -3,6 +3,7 @@ package no.nav.rekrutteringsbistand.api.support.config
 import com.nimbusds.jwt.JWTClaimsSet.Builder
 import net.minidev.json.JSONArray
 import no.nav.security.token.support.core.api.Unprotected
+import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import no.nav.security.token.support.test.JwtTokenGenerator.*
 import no.nav.security.token.support.test.spring.TokenGeneratorConfiguration
 import no.nav.security.token.support.spring.test.MockOAuth2ServerAutoConfiguration
@@ -19,8 +20,9 @@ import javax.servlet.http.Cookie
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
+// TODO: Delete
 @Profile("local")
-@Import(TokenGeneratorConfiguration::class)
+//@Import(TokenGeneratorConfiguration::class)
 @RestController
 @RequestMapping("/local")
 class LocalLoginConfig {

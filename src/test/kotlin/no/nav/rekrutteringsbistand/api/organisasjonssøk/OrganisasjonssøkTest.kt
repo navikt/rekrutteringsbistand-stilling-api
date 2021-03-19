@@ -32,7 +32,7 @@ internal class OrganisasjonssøkTest {
 
     @Before
     fun authenticateClient() {
-        restTemplate.getForObject("$localBaseUrl/local/cookie-isso", String::class.java)
+        restTemplate.getForObject("$localBaseUrl/veileder-token-cookie", Unit::class.java)
     }
 
     @Test
