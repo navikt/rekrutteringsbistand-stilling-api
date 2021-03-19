@@ -34,3 +34,10 @@ spec:
       value: 5ab7c506-0441-4cc0-96ad-55d26b346975
     - name: REKRUTTERINGSBISTAND_STILLING_INDEKSER_CLIENT_ID
       value: 5ab7c506-0441-4cc0-96ad-55d26b346975
+  accessPolicy:
+    inbound:
+      rules:
+        - application: vis-stilling
+          cluster: dev-gcp
+        - application: rekrutteringsbistand-stilling-indekser
+          cluster: dev-gcp
