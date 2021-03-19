@@ -3,6 +3,7 @@ package no.nav.rekrutteringsbistand.api.support.config
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.security.token.support.core.api.Unprotected
+import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import no.nav.security.token.support.spring.test.MockOAuth2ServerAutoConfiguration
 import org.springframework.context.annotation.Import
 import org.springframework.context.annotation.Profile
