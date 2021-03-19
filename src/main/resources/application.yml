@@ -24,6 +24,9 @@ no.nav.security.jwt:
     discoveryurl: http://metadata
     accepted_audience: aud-localhost
     cookiename: isso-localhost-idtoken
+  issuer.azuread:
+    discoveryurl: http://localhost:18300/azuread/.well-known/openid-configuration
+    accepted_audience: default
 
 spring.h2.console:
   enabled: true
@@ -33,6 +36,9 @@ external:
   stilling-api.url: http://localhost:9914
   sok-api.url: http://localhost:9934
   kandidatliste-api.url: http://localhost:8766/rekrutteringsbistand-kandidat-api/rest/veileder/stilling
+
+rekrutteringsbistand.stilling.indekser.client.id: lokalClientIdTilStillingIndekser
+vis-stilling.client.id: localClientIdTilVisStilling
 
 ---
 

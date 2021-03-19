@@ -5,6 +5,7 @@ import net.minidev.json.JSONArray
 import no.nav.security.token.support.core.api.Unprotected
 import no.nav.security.token.support.test.JwtTokenGenerator.*
 import no.nav.security.token.support.test.spring.TokenGeneratorConfiguration
+import no.nav.security.token.support.spring.test.MockOAuth2ServerAutoConfiguration
 import org.springframework.context.annotation.Import
 import org.springframework.context.annotation.Profile
 import org.springframework.web.bind.annotation.GetMapping

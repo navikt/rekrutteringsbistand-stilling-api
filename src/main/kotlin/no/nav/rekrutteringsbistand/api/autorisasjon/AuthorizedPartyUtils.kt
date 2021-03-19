@@ -1,16 +1,22 @@
 package no.nav.rekrutteringsbistand.api.autorisasjon
 
 import no.nav.security.token.support.core.context.TokenValidationContextHolder
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 
+const val azureAdIssuer = "azuread"
+
 @Component
-class AuthorizedPartyUtils(private val contextHolder: TokenValidationContextHolder) {
+class AuthorizedPartyUtils(
+        private val contextHolder: TokenValidationContextHolder,
+) {
+    private val authorizedPartyClaim = "azp"
 
-    val issuer = "azuread"
-    val authorizedPartyClaim = "azp"
+    @Value("\${rekrutteringsbistand.stilling.indekser.client.id}")
+    private val clientIdTilStillingIndekser: String = ""
 
-    val clientIdTilStillingIndekser: String = System.getenv("REKRUTTERINGSBISTAND_STILLING_INDEKSER_CLIENT_ID")
-    val clientIdTilVisStilling: String = System.getenv("VIS_STILLING_CLIENT_ID")
+    @Value("\${vis-stilling.client.id}")
+    private val clientIdTilVisStilling: String = ""
 
     fun kallKommerFraStillingIndekser(): Boolean {
         return clientIdTilKallendeApp() == clientIdTilStillingIndekser
@@ -21,6 +27,6 @@ class AuthorizedPartyUtils(private val contextHolder: TokenValidationContextHold
     }
 
     private fun clientIdTilKallendeApp(): String {
-        return contextHolder.tokenValidationContext.getClaims(issuer).getStringClaim(authorizedPartyClaim)
+        return contextHolder.tokenValidationContext.getClaims(azureAdIssuer).getStringClaim(authorizedPartyClaim)
     }
 }
