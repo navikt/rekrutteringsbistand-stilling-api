@@ -5,7 +5,6 @@ import no.nav.rekrutteringsbistand.api.autorisasjon.azureAdIssuer
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.security.mock.oauth2.token.DefaultOAuth2TokenCallback
 import no.nav.security.token.support.core.api.Unprotected
-import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import no.nav.security.token.support.spring.test.MockOAuth2ServerAutoConfiguration
 import org.springframework.context.annotation.Import
 import org.springframework.context.annotation.Profile
@@ -41,13 +40,7 @@ class MockLogin(val mockOauth2Server: MockOAuth2Server) {
         return mockOauth2Server.issueToken(
                 azureAdIssuer,
                 clientId,
-                DefaultOAuth2TokenCallback(
-                        // TODO: test uten
-                        issuerId = azureAdIssuer
-                )
+                DefaultOAuth2TokenCallback()
         ).serialize()
     }
-
-    // TODO
-    // eventuelt, hjelpemetode for å skaffe authorization headers
 }
