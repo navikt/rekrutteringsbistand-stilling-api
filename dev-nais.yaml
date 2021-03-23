@@ -30,3 +30,10 @@ spec:
   azure:
     application:
       enabled: true
+  accessPolicy:
+    inbound:
+      rules:
+        - application: vis-stilling
+          cluster: dev-gcp
+        - application: rekrutteringsbistand-stilling-indekser
+          cluster: dev-gcp
