@@ -54,7 +54,7 @@ no.nav.security.jwt:
     proxyurl: http://webproxy.nais:8088
     cookiename: isso-idtoken
   issuer.azuread:
-    discoveryurl: https://login.microsoftonline.com/62366534-1ec3-4962-8869-9b5535279d0b/v2.0/.well-known/openid-configuration
+    discoveryurl: ${AZURE_APP_WELL_KNOWN_URL}
     accepted_audience: ${AZURE_APP_CLIENT_ID}
     proxyurl: http://webproxy.nais:8088
 
@@ -84,7 +84,7 @@ no.nav.security.jwt:
     proxyurl: http://webproxy.nais:8088
     cookiename: isso-idtoken
   issuer.azuread:
-    discoveryurl: https://login.microsoftonline.com/62366534-1ec3-4962-8869-9b5535279d0b/v2.0/.well-known/openid-configuration
+    discoveryurl: ${AZURE_APP_WELL_KNOWN_URL}
     accepted_audience: ${AZURE_APP_CLIENT_ID}
     proxyurl: http://webproxy.nais:8088
 
