@@ -33,13 +33,12 @@ class StandardsøkTest {
         restTemplate.getForObject("$localBaseUrl/local/cookie-isso", String::class.java)
     }
 
-    @Ignore // TODO
     @Test
     fun `PUT til standardsøk skal lagre nytt standardsøk for navIdent hvis ingen søk er lagret fra før på denne personen`() {
         val standardsøkTilLagring = LagreStandardsøkDto("?fritekst=jalla&publisert=intern")
 
         val response: ResponseEntity<HentStandardsøkDto> = restTemplate.exchange(
-                "$localBaseUrl/standardsøk",
+                "$localBaseUrl/standardsok",
                 HttpMethod.PUT,
                 HttpEntity(standardsøkTilLagring),
                 HentStandardsøkDto::class.java
@@ -51,12 +50,11 @@ class StandardsøkTest {
         assertThat(response.body?.tidspunkt).isEqualToIgnoringSeconds(LocalDateTime.now())
     }
 
-    @Ignore // TODO
     @Test
     fun `PUT til standardsøk skal endre eksisterende standardsøk for navIdent hvis søk er lagret fra før på denne personen`() {
         val standardsøkTilLagring = LagreStandardsøkDto("?fritekst=jalla&publisert=intern")
         restTemplate.exchange(
-                "$localBaseUrl/standardsøk",
+                "$localBaseUrl/standardsok",
                 HttpMethod.PUT,
                 HttpEntity(standardsøkTilLagring),
                 HentStandardsøkDto::class.java
@@ -64,13 +62,13 @@ class StandardsøkTest {
 
         val nyttStandardsøkTilLagring = LagreStandardsøkDto("?publisert=intern")
         val response: ResponseEntity<HentStandardsøkDto> = restTemplate.exchange(
-                "$localBaseUrl/standardsøk",
+                "$localBaseUrl/standardsok",
                 HttpMethod.PUT,
                 HttpEntity(nyttStandardsøkTilLagring),
                 HentStandardsøkDto::class.java
         )
 
-        assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
+        assertThat(response.statusCode).isEqualTo(HttpStatus.CREATED)
         assertThat(response.body?.søk).isEqualTo(nyttStandardsøkTilLagring.søk)
         assertThat(response.body?.navIdent).isEqualTo("C12345")
         assertThat(response.body?.tidspunkt).isEqualToIgnoringSeconds(LocalDateTime.now())
