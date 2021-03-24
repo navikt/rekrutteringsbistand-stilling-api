@@ -9,14 +9,12 @@ import java.sql.ResultSet
 
 @Repository
 class StillingsinfoRepository(
-    val jdbcTemplate: NamedParameterJdbcTemplate,
-    simpleJdbcInsert: SimpleJdbcInsert
+        val namedJdbcTemplate: NamedParameterJdbcTemplate,
 ) {
-
-    val stillingsinfoInsert = simpleJdbcInsert.withTableName("Stillingsinfo").usingGeneratedKeyColumns("id")
+    val simpleJdbcInsert = SimpleJdbcInsert(namedJdbcTemplate.jdbcTemplate).withTableName("Stillingsinfo").usingGeneratedKeyColumns("id")
 
     fun lagre(stillingsinfo: Stillingsinfo) =
-        stillingsinfoInsert.executeAndReturnKey(
+        simpleJdbcInsert.executeAndReturnKey(
             mapOf(
                 STILLINGSINFOID to stillingsinfo.stillingsinfoid.asString(),
                 STILLINGSID to stillingsinfo.stillingsid.asString(),
@@ -27,7 +25,7 @@ class StillingsinfoRepository(
         )
 
     fun oppdaterEierIdentOgEierNavn(oppdatering: OppdaterEier) =
-        jdbcTemplate.update(
+        namedJdbcTemplate.update(
             "update $STILLINGSINFO set $EIER_NAVIDENT=:eier_navident, $EIER_NAVN=:eier_navn where $STILLINGSINFOID=:stillingsinfoid",
             mapOf(
                 "stillingsinfoid" to oppdatering.stillingsinfoid.asString(),
@@ -38,7 +36,7 @@ class StillingsinfoRepository(
         )
 
     fun oppdaterNotat(oppdatering: OppdaterNotat) {
-        jdbcTemplate.update(
+        namedJdbcTemplate.update(
             "update $STILLINGSINFO set $NOTAT=:notat where $STILLINGSINFOID=:stillingsinfoid",
             mapOf(
                 "stillingsinfoid" to oppdatering.stillingsinfoid.asString(),
@@ -56,7 +54,7 @@ class StillingsinfoRepository(
 
 
     fun hentForStillinger(stillingsider: List<Stillingsid>): List<Stillingsinfo> =
-        jdbcTemplate.query(
+        namedJdbcTemplate.query(
             "SELECT * FROM $STILLINGSINFO WHERE $STILLINGSID IN(:stillingsider)",
             MapSqlParameterSource("stillingsider", stillingsider.map { it.asString() }.joinToString(","))
         )
@@ -65,7 +63,7 @@ class StillingsinfoRepository(
         }
 
     fun hentForIdent(ident: String): Collection<Stillingsinfo> =
-        jdbcTemplate.query(
+        namedJdbcTemplate.query(
             "SELECT * FROM $STILLINGSINFO WHERE $EIER_NAVIDENT = :eier_navident",
             MapSqlParameterSource("eier_navident", ident)
         )
@@ -74,7 +72,7 @@ class StillingsinfoRepository(
         }
 
     fun slett(stillingsinfoid: Stillingsinfoid) =
-        jdbcTemplate.update(
+        namedJdbcTemplate.update(
             "DELETE FROM $STILLINGSINFO WHERE $STILLINGSINFOID = :stillingsinfoid",
             MapSqlParameterSource("stillingsinfoid", stillingsinfoid.asString())
         )

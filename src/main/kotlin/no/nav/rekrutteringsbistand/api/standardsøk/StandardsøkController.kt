@@ -1,10 +1,6 @@
 package no.nav.rekrutteringsbistand.api.standardsøk
 
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
-import no.nav.rekrutteringsbistand.api.stillingsinfo.Eier
-import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsid
-import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsinfo
-import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsinfoid
 import no.nav.security.token.support.core.api.Protected
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
