@@ -11,48 +11,49 @@ import java.time.LocalDateTime
 @Repository
 class StandardsøkRepository(
         val jdbcTemplate: NamedParameterJdbcTemplate,
-        simpleJdbcInsert: SimpleJdbcInsert
+        val simpleJdbcInsert: SimpleJdbcInsert
 ) {
-    val standardsøkInsert = simpleJdbcInsert.withTableName("lagret_sok").usingGeneratedKeyColumns("id")
-
-    fun oppdaterStandardsøk(lagreStandardsøkDto: LagreStandardsøkDto, navIdent: String): LagretStandardsøk {
+    fun oppdaterStandardsøk(lagreStandardsøkDto: LagreStandardsøkDto, navIdent: String): LagretStandardsøk? {
         val lagretStandardsøk = hentStandardsøk(navIdent)
-
-        if (lagretStandardsøk != null) {
-            return lagretStandardsøk
+        if (lagretStandardsøk == null) {
+            opprettStandardsøk(lagreStandardsøkDto, navIdent)
+        } else {
+            endreStandardsøk(lagreStandardsøkDto, lagretStandardsøk.id)
         }
 
-        lagreStandardsøk(lagreStandardsøkDto, navIdent)
-        val oppdatertStandardsøk = hentStandardsøk(navIdent)
-
-        if (oppdatertStandardsøk != null) {
-            return oppdatertStandardsøk
-        }
-
-        throw Exception("Kunne ikke lagre standardsøk")
+        return hentStandardsøk(navIdent)
     }
 
-    private fun lagreStandardsøk(lagreStandardsøkDto: LagreStandardsøkDto, navIdent: String) {
-        val id = standardsøkInsert.executeAndReturnKey(mapOf(
+    private fun opprettStandardsøk(lagreStandardsøkDto: LagreStandardsøkDto, navIdent: String): Int {
+        val insert = simpleJdbcInsert
+                .withTableName("lagret_sok")
+                .usingGeneratedKeyColumns("id")
+
+        return insert.executeAndReturnKey(mapOf(
                 "nav_ident" to navIdent,
                 "sok" to lagreStandardsøkDto.søk,
-                "tidspunkt" to LocalDateTime.now(),
-        ))
+                "tidspunkt" to LocalDateTime.now()
+        )).toInt()
+    }
 
-        LOG.info("Lagret med id $id")
+    private fun endreStandardsøk(lagreStandardsøkDto: LagreStandardsøkDto, id: String): Int {
+        return jdbcTemplate.update(
+                "UPDATE lagret_sok SET sok = :sok WHERE id = :id",
+                MapSqlParameterSource(mapOf(
+                        "sok" to lagreStandardsøkDto.søk,
+                        "id" to id
+                )),
+        )
     }
 
     fun hentStandardsøk(navIdent: String): LagretStandardsøk? {
         return jdbcTemplate.query(
-                "SELECT * FROM lagret_sok WHERE nav_ident = :nav_ident LIMIT 1",
-                MapSqlParameterSource("nav_ident", navIdent)
-        ) {
-            rs: ResultSet, _: Int -> LagretStandardsøk(
-                    id = rs.getString("id"),
-                    søk = rs.getString("sok"),
-                    navIdent = rs.getString("nav_ident"),
-                    tidspunkt = rs.getTimestamp("tidspunkt").toLocalDateTime()
-            )
+                "SELECT * FROM lagret_sok WHERE nav_ident = :nav_ident",
+                MapSqlParameterSource(mapOf(
+                        "nav_ident" to navIdent
+                ))
+        ) { rs: ResultSet, _: Int ->
+            LagretStandardsøk.fromDB(rs)
         }.firstOrNull()
     }
 }
