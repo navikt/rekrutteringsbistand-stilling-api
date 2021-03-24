@@ -47,7 +47,6 @@ class StandardsøkTest {
         assertThat(response.statusCode).isEqualTo(HttpStatus.CREATED)
         assertThat(response.body?.søk).isEqualTo(standardsøkTilLagring.søk)
         assertThat(response.body?.navIdent).isEqualTo("C12345")
-        assertThat(response.body?.tidspunkt).isEqualToIgnoringSeconds(LocalDateTime.now())
     }
 
     @Test
@@ -71,6 +70,5 @@ class StandardsøkTest {
         assertThat(response.statusCode).isEqualTo(HttpStatus.CREATED)
         assertThat(response.body?.søk).isEqualTo(nyttStandardsøkTilLagring.søk)
         assertThat(response.body?.navIdent).isEqualTo("C12345")
-        assertThat(response.body?.tidspunkt).isEqualToIgnoringSeconds(LocalDateTime.now())
     }
 }
