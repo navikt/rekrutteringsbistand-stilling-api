@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 
 @Controller
 class StandardsøkController {
+
 }
 
 data class LagreStandardsøkDto(val søk: String)
