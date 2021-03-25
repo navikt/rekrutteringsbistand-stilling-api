@@ -9,8 +9,8 @@ import org.springframework.boot.runApplication
     "org.springframework",
     "springfox.documentation.swagger.web.ApiResourceController"
 ])
-class RekrutteringsbistandApplication {
-    fun main(args: Array<String>) {
-        runApplication<RekrutteringsbistandApplication>(*args)
-    }
+class RekrutteringsbistandApplication
+
+fun main(args: Array<String>) {
+    runApplication<RekrutteringsbistandApplication>(*args)
 }
