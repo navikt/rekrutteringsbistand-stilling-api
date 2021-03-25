@@ -1,4 +1,4 @@
-package no.nav.rekrutteringsbistand.api.support.config
+package no.nav.rekrutteringsbistand.api.config
 
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
 import no.nav.rekrutteringsbistand.api.autorisasjon.azureAdIssuer
@@ -7,13 +7,11 @@ import no.nav.security.mock.oauth2.token.DefaultOAuth2TokenCallback
 import no.nav.security.token.support.core.api.Unprotected
 import no.nav.security.token.support.spring.test.MockOAuth2ServerAutoConfiguration
 import org.springframework.context.annotation.Import
-import org.springframework.context.annotation.Profile
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RestController
 import javax.servlet.http.Cookie
 import javax.servlet.http.HttpServletResponse
 
-@Profile("local")
 @Import(MockOAuth2ServerAutoConfiguration::class)
 @RestController
 class MockLogin(val mockOauth2Server: MockOAuth2Server) {

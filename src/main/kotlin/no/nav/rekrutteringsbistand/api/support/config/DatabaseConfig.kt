@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Profile
 import javax.sql.DataSource
 
 @Configuration
-@Profile("dev", "prod")
+@Profile("dev", "prod") // TODO: Kan ta bort profil her
 class DatabaseConfig {
 
     @Value("\${database.url}")

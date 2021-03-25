@@ -12,11 +12,7 @@ import org.springframework.context.annotation.Profile
 @Configuration
 class FeatureToggleConfig {
 
-    companion object {
-        const val OPPRETT_KANDIDATLISTE_KNAPP_TOGGLE = "rekrutteringsbistand.opprett-kandidatliste-knapp"
-    }
-
-    @Profile("dev", "prod")
+    @Profile("dev", "prod")// TODO: Kan ta bort profil her
     @Bean
     fun unleash(
             byClusterStrategy: ByClusterStrategy?,
@@ -32,13 +28,5 @@ class FeatureToggleConfig {
                 config,
                 byClusterStrategy
         )
-    }
-
-    @Profile("local")
-    @Bean
-    fun unleashMock(): Unleash {
-        return FakeUnleash().apply {
-            enable(OPPRETT_KANDIDATLISTE_KNAPP_TOGGLE)
-        }
     }
 }

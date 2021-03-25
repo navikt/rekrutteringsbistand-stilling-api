@@ -10,6 +10,7 @@ management:
       locations: classpath:/db/migration
   endpoint.health.show-details: always
 
+# TODO, fiks denne profilen
 spring.profiles.active: local, stillingMock, kandidatlisteMock, sokMock
 
 ---
