@@ -37,7 +37,7 @@ class StandardsøkRepository(
                 "UPDATE lagret_sok SET sok = :sok WHERE id = :id",
                 MapSqlParameterSource(mapOf(
                         "sok" to lagreStandardsøkDto.søk,
-                        "id" to id
+                        "id" to id.toBigInteger()
                 )),
         )
     }
