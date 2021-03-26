@@ -1,9 +1,9 @@
 package no.nav.rekrutteringsbistand.api
 
-import org.springframework.boot.builder.SpringApplicationBuilder
+import org.springframework.boot.runApplication
 
 fun main(args: Array<String>) {
-    SpringApplicationBuilder(RekrutteringsbistandApplication::class.java)
-        .profiles("default", "sokMock", "kandidatlisteMock", "stillingMock")
-        .run(*args)
+    runApplication<RekrutteringsbistandApplication>(*args) {
+        setAdditionalProfiles("default", "sokMock", "kandidatlisteMock", "stillingMock")
+    }
 }
