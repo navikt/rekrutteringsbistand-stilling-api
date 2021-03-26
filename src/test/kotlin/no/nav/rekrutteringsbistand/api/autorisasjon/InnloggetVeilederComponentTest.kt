@@ -33,11 +33,4 @@ internal class InnloggetVeilederComponentTest {
             assertThat(this).isEqualTo(enVeileder)
         }
     }
-
-    @Test
-    fun tokenLever() {
-        restTemplate.getForObject("${localBaseUrl()}/rekrutteringsbistand/api/v1/reportee/token-expiring", Boolean::class.java).apply {
-            assertThat(this).isFalse()
-        }
-    }
 }

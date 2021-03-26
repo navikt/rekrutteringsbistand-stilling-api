@@ -14,7 +14,4 @@ class InnloggetBrukerController(private val tokenUtils: TokenUtils) {
     fun hentInnloggetVeileder(): InnloggetVeileder {
         return tokenUtils.hentInnloggetVeileder()
     }
-
-    @GetMapping("/token-expiring")
-    fun tokenUtløper(): Boolean = tokenUtils.tokenUtløper()
 }
