@@ -34,9 +34,10 @@ class StandardsøkRepository(
 
     private fun endreStandardsøk(lagreStandardsøkDto: LagreStandardsøkDto, id: String): Int {
         return namedJdbcTemplate.update(
-                "UPDATE lagret_sok SET sok = :sok WHERE id = :id",
+                "UPDATE lagret_sok SET sok = :sok, tidspunkt = :tidspunkt WHERE id = :id",
                 MapSqlParameterSource(mapOf(
                         "sok" to lagreStandardsøkDto.søk,
+                        "tidspunkt" to LocalDateTime.now(),
                         "id" to id.toBigInteger()
                 )),
         )
