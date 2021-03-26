@@ -1,4 +1,4 @@
-package no.nav.rekrutteringsbistand.api.support.config
+package no.nav.rekrutteringsbistand.api.config
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.MappingBuilder

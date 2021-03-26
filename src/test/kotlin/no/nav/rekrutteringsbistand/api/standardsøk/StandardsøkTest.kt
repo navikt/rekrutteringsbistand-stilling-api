@@ -2,7 +2,6 @@ package no.nav.rekrutteringsbistand.api.standardsøk
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.springframework.boot.test.context.SpringBootTest
@@ -12,13 +11,10 @@ import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit4.SpringRunner
-import java.time.LocalDateTime
 
 @RunWith(SpringRunner::class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("local")
 class StandardsøkTest {
 
     @LocalServerPort
@@ -30,7 +26,7 @@ class StandardsøkTest {
 
     @Before
     fun authenticateClient() {
-        restTemplate.getForObject("$localBaseUrl/local/cookie-isso", String::class.java)
+        restTemplate.getForObject("$localBaseUrl/veileder-token-cookie", Unit::class.java)
     }
 
     @Test
@@ -47,7 +43,6 @@ class StandardsøkTest {
         assertThat(response.statusCode).isEqualTo(HttpStatus.CREATED)
         assertThat(response.body?.søk).isEqualTo(standardsøkTilLagring.søk)
         assertThat(response.body?.navIdent).isEqualTo("C12345")
-        assertThat(response.body?.tidspunkt).isEqualToIgnoringSeconds(LocalDateTime.now())
     }
 
     @Test
@@ -71,6 +66,5 @@ class StandardsøkTest {
         assertThat(response.statusCode).isEqualTo(HttpStatus.CREATED)
         assertThat(response.body?.søk).isEqualTo(nyttStandardsøkTilLagring.søk)
         assertThat(response.body?.navIdent).isEqualTo("C12345")
-        assertThat(response.body?.tidspunkt).isEqualToIgnoringSeconds(LocalDateTime.now())
     }
 }

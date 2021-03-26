@@ -6,24 +6,29 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.junit.WireMockRule
 import no.nav.rekrutteringsbistand.api.Testdata.enStilling
-import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoRepository
+import no.nav.rekrutteringsbistand.api.config.MockLogin
+import no.nav.rekrutteringsbistand.api.support.toMultiValueMap
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.boot.web.server.LocalServerPort
+import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders.*
+import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
-import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit4.SpringRunner
 
 @RunWith(SpringRunner::class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("local")
 internal class StillingEksternComponentTest {
+
+    @Value("\${vis-stilling.client.id}")
+    private val clientIdTilVisStilling: String = ""
 
     @get:Rule
     val wiremock = WireMockRule(9914)
@@ -31,13 +36,13 @@ internal class StillingEksternComponentTest {
     @get:Rule
     val wiremockKandidatliste = WireMockRule(8766)
 
+    @Autowired
+    lateinit var mockLogin: MockLogin
+
     @LocalServerPort
     var port = 0
 
     val localBaseUrl by lazy { "http://localhost:$port/rekrutteringsbistand-api" }
-
-    @Autowired
-    lateinit var repository: StillingsinfoRepository
 
     private val restTemplate = TestRestTemplate(TestRestTemplate.HttpClientOption.ENABLE_COOKIES)
 
@@ -48,9 +53,18 @@ internal class StillingEksternComponentTest {
     @Test
     fun `GET mot en stilling skal returnere en stilling uten stillingsinfo hvis det ikke er lagret`() {
         mockUtenAuthorization("/b2b/api/v1/ads/${enStilling.uuid}", enStilling)
-        restTemplate.getForObject("$localBaseUrl/rekrutteringsbistand/ekstern/api/v1/stilling/${enStilling.uuid}", Stilling
-        ::class.java).also {
-            assertThat(it).isEqualTo(enEksternStilling)
+
+        val token = mockLogin.hentAzureAdMaskinTilMaskinToken(clientIdTilVisStilling)
+
+        restTemplate.exchange(
+                "$localBaseUrl/rekrutteringsbistand/ekstern/api/v1/stilling/${enStilling.uuid}",
+                HttpMethod.GET,
+                HttpEntity(null, mapOf(
+                        AUTHORIZATION to "Bearer $token"
+                ).toMultiValueMap()),
+                Stilling::class.java
+        ).also {
+            assertThat(it.body).isEqualTo(enEksternStilling)
         }
     }
 

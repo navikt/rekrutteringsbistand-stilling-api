@@ -14,12 +14,10 @@ import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
-import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit4.SpringRunner
 
 @RunWith(SpringRunner::class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("local")
 internal class GeografiKomponentTest {
 
     @get:Rule
@@ -34,7 +32,7 @@ internal class GeografiKomponentTest {
 
     @Before
     fun authenticateClient() {
-        restTemplate.getForObject("$localBaseUrl/local/cookie-isso", String::class.java)
+        restTemplate.getForObject("$localBaseUrl/veileder-token-cookie", Unit::class.java)
     }
 
     @Test

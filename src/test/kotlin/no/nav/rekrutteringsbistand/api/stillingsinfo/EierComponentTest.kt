@@ -25,12 +25,10 @@ import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatus.NO_CONTENT
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
-import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit4.SpringRunner
 
 @RunWith(SpringRunner::class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("local")
 class EierComponentTest {
 
     @get:Rule
@@ -48,7 +46,7 @@ class EierComponentTest {
 
     @Before
     fun authenticateClient() {
-        restTemplate.getForObject("$localBaseUrl/local/cookie-isso", String::class.java)
+        restTemplate.getForObject("$localBaseUrl/veileder-token-cookie", Unit::class.java)
     }
 
     @Test

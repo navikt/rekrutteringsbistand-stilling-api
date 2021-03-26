@@ -18,10 +18,6 @@ spec:
   readiness:
     path: /rekrutteringsbistand-api/internal/actuator/health
     initialDelay: 30
-  webproxy: false
-  env:
-    - name: SPRING_PROFILES_ACTIVE
-      value: dev
   prometheus:
     enabled: true
     path: /rekrutteringsbistand-api/internal/actuator/prometheus
@@ -37,3 +33,11 @@ spec:
           cluster: dev-gcp
         - application: rekrutteringsbistand-stilling-indekser
           cluster: dev-gcp
+  webproxy: false
+  env:
+    - name: SPRING_PROFILES_ACTIVE
+      value: dev
+    - name: VIS_STILLING_CLIENT_ID
+      value: 4d3876c0-dfae-4bad-aecf-4415d549954a
+    - name: REKRUTTERINGSBISTAND_STILLING_INDEKSER_CLIENT_ID
+      value: 685a0f3d-2a60-42a3-944d-252bb2b1093f
