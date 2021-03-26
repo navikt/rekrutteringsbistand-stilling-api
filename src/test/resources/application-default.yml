@@ -1,0 +1,22 @@
+nais.cluster-name: na
+
+no.nav.security.jwt:
+  issuer.isso:
+    discoveryurl: http://localhost:${mock-oauth2-server.port}/isso/.well-known/openid-configuration
+    accepted_audience: default
+    cookiename: isso-idtoken
+  issuer.azuread:
+    discoveryurl: http://localhost:${mock-oauth2-server.port}/azuread/.well-known/openid-configuration
+    accepted_audience: default
+
+spring.h2.console:
+  enabled: true
+  path: /h2
+
+external:
+  stilling-api.url: http://localhost:9914
+  sok-api.url: http://localhost:9934
+  kandidatliste-api.url: http://localhost:8766/rekrutteringsbistand-kandidat-api/rest/veileder/stilling
+
+rekrutteringsbistand.stilling.indekser.client.id: lokalClientIdTilStillingIndekser
+vis-stilling.client.id: localClientIdTilVisStilling

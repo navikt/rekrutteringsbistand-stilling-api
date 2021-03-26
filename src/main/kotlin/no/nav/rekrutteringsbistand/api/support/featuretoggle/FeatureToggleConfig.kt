@@ -1,7 +1,6 @@
 package no.nav.rekrutteringsbistand.api.support.featuretoggle
 
 import no.finn.unleash.DefaultUnleash
-import no.finn.unleash.FakeUnleash
 import no.finn.unleash.Unleash
 import no.finn.unleash.util.UnleashConfig
 import org.springframework.beans.factory.annotation.Value
@@ -12,7 +11,7 @@ import org.springframework.context.annotation.Profile
 @Configuration
 class FeatureToggleConfig {
 
-    @Profile("dev", "prod")// TODO: Kan ta bort profil her
+    @Profile("dev", "prod")
     @Bean
     fun unleash(
             byClusterStrategy: ByClusterStrategy?,
