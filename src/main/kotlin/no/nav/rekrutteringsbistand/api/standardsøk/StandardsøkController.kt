@@ -5,10 +5,7 @@ import no.nav.security.token.support.core.api.Protected
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.PutMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import java.sql.ResultSet
 import java.time.LocalDateTime
 
@@ -21,12 +18,29 @@ class StandardsøkController(val standardsøkService: StandardsøkService, val t
     fun opprettEllerOppdaterStandardsøk(@RequestBody lagreStandardsøkDto: LagreStandardsøkDto): ResponseEntity<Any> {
         val lagretSøk = standardsøkService.oppdaterStandardsøk(lagreStandardsøkDto, tokenUtils.hentInnloggetVeileder().navIdent)
         if (lagretSøk != null) {
-            return ResponseEntity.status(HttpStatus.CREATED).body(
-                    HentStandardsøkDto(lagretSøk.søk, lagretSøk.navIdent, lagretSøk.tidspunkt)
-            )
+            return ResponseEntity
+                    .status(HttpStatus.CREATED)
+                    .body(HentStandardsøkDto(lagretSøk.søk, lagretSøk.navIdent, lagretSøk.tidspunkt))
         }
 
-        return ResponseEntity.status(500).body("Kunne ikke lagre standardsøk")
+        return ResponseEntity
+                .status(500)
+                .body("Kunne ikke lagre standardsøk")
+    }
+
+    @GetMapping
+    fun hentStandardsøk(): ResponseEntity<Any> {
+        val navIdent = tokenUtils.hentInnloggetVeileder().navIdent
+        val lagretSøk = standardsøkService.hentStandardsøk(navIdent)
+        if (lagretSøk != null) {
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body(HentStandardsøkDto(lagretSøk.søk, lagretSøk.navIdent, lagretSøk.tidspunkt))
+        }
+
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body("Fant ikke standardsøk på gitt ident $navIdent")
     }
 }
 
