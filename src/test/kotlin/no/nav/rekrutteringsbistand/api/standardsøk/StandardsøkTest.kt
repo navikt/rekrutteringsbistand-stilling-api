@@ -13,6 +13,7 @@ import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.test.context.junit4.SpringRunner
+import java.time.LocalDateTime
 
 @RunWith(SpringRunner::class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -47,6 +48,7 @@ class StandardsøkTest {
         assertThat(response.statusCode).isEqualTo(HttpStatus.CREATED)
         assertThat(response.body?.søk).isEqualTo(standardsøkTilLagring.søk)
         assertThat(response.body?.navIdent).isEqualTo("C12345")
+        assertThat(response.body?.tidspunkt).isBetween(LocalDateTime.now().minusSeconds(5), LocalDateTime.now())
     }
 
     @Test
@@ -65,6 +67,7 @@ class StandardsøkTest {
         assertThat(response.statusCode).isEqualTo(HttpStatus.CREATED)
         assertThat(response.body?.søk).isEqualTo(nyttStandardsøkTilLagring.søk)
         assertThat(response.body?.navIdent).isEqualTo("C12345")
+        assertThat(response.body?.tidspunkt).isBetween(LocalDateTime.now().minusSeconds(5), LocalDateTime.now())
     }
 
     @Test
