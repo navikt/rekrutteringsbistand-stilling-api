@@ -13,7 +13,6 @@ import org.springframework.test.context.junit4.SpringRunner
 
 @RunWith(SpringRunner::class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("local")
 internal class InnloggetVeilederComponentTest {
 
     @LocalServerPort
@@ -25,20 +24,13 @@ internal class InnloggetVeilederComponentTest {
 
     @Before
     fun authenticateClient() {
-        restTemplate.getForObject("${localBaseUrl()}/local/cookie-isso", String::class.java)
+        restTemplate.getForEntity("${localBaseUrl()}/veileder-token-cookie", Unit::class.java)
     }
 
     @Test
     fun hentInnloggetBrukerReturnererBruker() {
         restTemplate.getForObject("${localBaseUrl()}/rekrutteringsbistand/api/v1/reportee", InnloggetVeileder::class.java).apply {
             assertThat(this).isEqualTo(enVeileder)
-        }
-    }
-
-    @Test
-    fun tokenLever() {
-        restTemplate.getForObject("${localBaseUrl()}/rekrutteringsbistand/api/v1/reportee/token-expiring", Boolean::class.java).apply {
-            assertThat(this).isFalse()
         }
     }
 }

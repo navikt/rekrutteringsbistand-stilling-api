@@ -18,9 +18,6 @@ spec:
   readiness:
     path: /internal/actuator/health
     initialDelay: 30
-  env:
-    - name: SPRING_PROFILES_ACTIVE
-      value: prod
   prometheus:
     enabled: true
     path: /internal/actuator/prometheus
@@ -29,3 +26,17 @@ spec:
   azure:
     application:
       enabled: true
+  accessPolicy:
+    inbound:
+      rules:
+        - application: vis-stilling
+          cluster: prod-gcp
+        - application: rekrutteringsbistand-stilling-indekser
+          cluster: prod-gcp
+  env:
+    - name: SPRING_PROFILES_ACTIVE
+      value: prod
+    - name: VIS_STILLING_CLIENT_ID
+      value: d8e2c2ad-e073-43d1-8c1d-aa6fad6d7195
+    - name: REKRUTTERINGSBISTAND_STILLING_INDEKSER_CLIENT_ID
+      value: 1b0ecc97-08f6-423c-87ff-774167cd7c28

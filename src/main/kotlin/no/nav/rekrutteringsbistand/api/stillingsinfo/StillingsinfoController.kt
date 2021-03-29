@@ -4,6 +4,7 @@ import arrow.core.getOrElse
 import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteKlient
 import no.nav.rekrutteringsbistand.api.support.LOG
 import no.nav.security.token.support.core.api.Protected
+import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -12,7 +13,7 @@ import java.util.*
 
 @RestController
 @RequestMapping("/rekruttering")
-@Protected
+@ProtectedWithClaims(issuer = "isso")
 class EierController(
         val repo: StillingsinfoRepository,
         val kandidatlisteKlient: KandidatlisteKlient

@@ -9,12 +9,10 @@ import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit4.SpringRunner
 
 @RunWith(SpringRunner::class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("local")
 class FeatureToggleComponentTest {
 
     @LocalServerPort
@@ -26,7 +24,7 @@ class FeatureToggleComponentTest {
 
     @Before
     fun authenticateClient() {
-        restTemplate.getForObject("$localBaseUrl/local/cookie-isso", String::class.java)
+        restTemplate.getForObject("$localBaseUrl/veileder-token-cookie", Unit::class.java)
     }
 
     @Test
@@ -37,5 +35,3 @@ class FeatureToggleComponentTest {
         assertThat(respons.body).isTrue()
     }
 }
-
-
