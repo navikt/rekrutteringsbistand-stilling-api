@@ -18,7 +18,6 @@ spec:
   readiness:
     path: /internal/actuator/health
     initialDelay: 30
-  webproxy: false
   prometheus:
     enabled: true
     path: /internal/actuator/prometheus
@@ -34,6 +33,7 @@ spec:
           cluster: dev-gcp
         - application: rekrutteringsbistand-stilling-indekser
           cluster: dev-gcp
+  webproxy: false
   env:
     - name: SPRING_PROFILES_ACTIVE
       value: dev
