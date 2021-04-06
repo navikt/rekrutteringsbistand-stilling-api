@@ -53,7 +53,7 @@ internal class StillingComponentTest {
     @LocalServerPort
     var port = 0
 
-    val localBaseUrl by lazy { "http://localhost:$port/rekrutteringsbistand-api" }
+    val localBaseUrl by lazy { "http://localhost:$port" }
 
     @Autowired
     lateinit var repository: StillingsinfoRepository

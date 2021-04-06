@@ -3,7 +3,7 @@ name: Build & deploy
 on: [push]
 
 env:
-  IMAGE: docker.pkg.github.com/${{ github.repository }}/rekrutteringsbistand-api:${{ github.sha }}
+  IMAGE: docker.pkg.github.com/${{ github.repository }}/rekrutteringsbistand-stilling-api:${{ github.sha }}
 
 jobs:
   test:
@@ -29,7 +29,7 @@ jobs:
     #########################
     ### DEVELOPERS: Insert your feature branch name below (in addition to master) if you want to deploy it to dev
     #########################
-    if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/valider-token-fra-gcp'
+    if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/rename-app'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1

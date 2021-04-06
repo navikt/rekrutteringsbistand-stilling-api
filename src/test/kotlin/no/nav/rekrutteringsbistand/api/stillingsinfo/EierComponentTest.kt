@@ -37,7 +37,7 @@ class EierComponentTest {
     @LocalServerPort
     private var port = 0
 
-    val localBaseUrl by lazy { "http://localhost:$port/rekrutteringsbistand-api" }
+    val localBaseUrl by lazy { "http://localhost:$port" }
 
     val restTemplate = TestRestTemplate(ENABLE_COOKIES)
 

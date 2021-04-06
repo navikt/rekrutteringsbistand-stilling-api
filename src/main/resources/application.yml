@@ -1,5 +1,4 @@
 server:
-  servlet.context-path: /rekrutteringsbistand-api
   port: 9501
 
 management:
