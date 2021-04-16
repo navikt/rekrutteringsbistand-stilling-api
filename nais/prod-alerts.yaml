@@ -1,0 +1,25 @@
+apiVersion: "nais.io/v1"
+kind: "Alert"
+metadata:
+  name: rekrutteringsbistand-stilling-api
+  namespace: arbeidsgiver
+  labels:
+    team: arbeidsgiver
+spec:
+  receivers:
+    slack:
+      channel: 'inkludering-alerts-prod'
+  alerts:
+
+    - alert: rekrutteringsbistand-stilling-api er nede
+      severity: danger
+      expr: sum(up{app="rekrutteringsbistand-stilling-api", job="kubernetes-pods"}) == 0
+      for: 1s
+      description: "rekrutteringsbistand-stilling-api er nede"
+      action: "Sjekk logger: https://logs.adeo.no/goto/6e98b307ce6d261eb20ab0dfff4d1f82"
+
+    - alert: Det har skjedd en feil i rekrutteringsbistand-stilling-api
+      expr: sum(increase(logd_messages_total{log_app="rekrutteringsbistand-stilling-api", log_level="Error"}[10m])) > 0
+      for: 10s
+      description: "rekrutteringsbistand-stilling-api har logget en feil"
+      action: "Sjekk logger: https://logs.adeo.no/goto/bcd0617458cf2ea771d9599046c3469f"

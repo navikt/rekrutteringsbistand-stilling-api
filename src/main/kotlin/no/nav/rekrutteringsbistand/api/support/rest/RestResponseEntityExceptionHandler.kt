@@ -40,7 +40,7 @@ class RestResponseEntityExceptionHandler : ResponseEntityExceptionHandler() {
     @ExceptionHandler(value = [RestClientResponseException::class])
     @ResponseBody
     protected fun handleExceptionFraRestTemplate(e: RestClientResponseException, request: HttpServletRequest): ResponseEntity<String> {
-        LOG.warn("Default håndtering av exception fra restTemplate. requestURI=${request.requestURI}, HTTP method=${request.method}", e)
+        LOG.error("Default håndtering av exception fra restTemplate. requestURI=${request.requestURI}, HTTP method=${request.method}", e)
         return ResponseEntity
                 .status(e.rawStatusCode)
                 .body(e.responseBodyAsString)
