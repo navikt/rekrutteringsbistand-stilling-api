@@ -40,7 +40,13 @@ class RestResponseEntityExceptionHandler : ResponseEntityExceptionHandler() {
     @ExceptionHandler(value = [RestClientResponseException::class])
     @ResponseBody
     protected fun handleExceptionFraRestTemplate(e: RestClientResponseException, request: HttpServletRequest): ResponseEntity<String> {
-        LOG.error("Default håndtering av exception fra restTemplate. requestURI=${request.requestURI}, HTTP method=${request.method}", e)
+
+        if (e.rawStatusCode == 404) {
+            LOG.info("HTTP 404 fra RestTemplate, URI=${request.requestURI}, HTTP method=${request.method}", e)
+        } else {
+            LOG.error("Exception fra RestTemplate. status=${e.rawStatusCode} URI=${request.requestURI}, HTTP method=${request.method}", e)
+        }
+
         return ResponseEntity
                 .status(e.rawStatusCode)
                 .body(e.responseBodyAsString)
