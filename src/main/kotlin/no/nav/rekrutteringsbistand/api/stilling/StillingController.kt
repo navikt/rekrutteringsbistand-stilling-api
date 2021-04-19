@@ -113,14 +113,6 @@ class StillingController(
     fun hentStillingAnnonsenummer(@PathVariable stillingsnummer: String): ResponseEntity<StillingMedStillingsinfo> =
             ok(stillingService.hentStillingMedStillingsnummer(stillingsnummer))
 
-    @GetMapping("/rekrutteringsbistand/api/v1/ads")
-    fun hentStillinger(request: HttpServletRequest): ResponseEntity<Page<StillingMedStillingsinfo>> {
-        val url = "${externalConfiguration.stillingApi.url}/api/v1/ads"
-        val queryString: String? = request.queryString?.let { URLDecoder.decode(it, StandardCharsets.UTF_8) }
-        val page: Page<StillingMedStillingsinfo> = stillingService.hentStillinger(url, queryString)
-        return ok(page)
-    }
-
     @GetMapping("/rekrutteringsbistand/api/v1/ads/rekrutteringsbistand/minestillinger")
     fun hentMineStillinger(request: HttpServletRequest): ResponseEntity<Page<StillingMedStillingsinfo>> {
         return ok().body(stillingService.hentStillinger(

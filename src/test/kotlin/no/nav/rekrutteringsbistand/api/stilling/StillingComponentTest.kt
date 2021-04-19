@@ -132,24 +132,6 @@ internal class StillingComponentTest {
     }
 
     @Test
-    fun `GET mot stillinger skal returnere stillinger beriket med stillingsinfo`() {
-        repository.lagre(enStillingsinfo)
-        repository.lagre(enAnnenStillingsinfo)
-
-        mock(HttpMethod.GET, "/api/v1/ads", enPage)
-
-        val stillinger: List<StillingMedStillingsinfo> = restTemplate.exchange(
-                "$localBaseUrl/rekrutteringsbistand/api/v1/ads",
-                HttpMethod.GET,
-                null,
-                object : ParameterizedTypeReference<Page<StillingMedStillingsinfo>>() {}
-        ).body!!.content
-
-        assertThat(stillinger.first().rekruttering).isEqualTo(enStillingsinfo.asEierDto())
-        assertThat(stillinger.last().rekruttering).isEqualTo(enAnnenStillingsinfo.asEierDto())
-    }
-
-    @Test
     fun `POST mot stillinger skal returnere stilling`() {
 
         mock(HttpMethod.POST, "/api/v1/ads", enStilling)
