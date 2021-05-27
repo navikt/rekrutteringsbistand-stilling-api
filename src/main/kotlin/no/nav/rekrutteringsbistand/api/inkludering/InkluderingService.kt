@@ -9,5 +9,4 @@ class InkluderingService(private val inkluderingRepository: InkluderingRepositor
         inkluderingRepository.lagreInkludering(inkludering)
     }
 
-
 }

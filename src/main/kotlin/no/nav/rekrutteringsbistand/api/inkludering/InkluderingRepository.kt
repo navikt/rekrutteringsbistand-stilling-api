@@ -10,7 +10,6 @@ class InkluderingRepository (
 ) {
 
     fun lagreInkludering(inkludering: String) : Unit {
-        LOG.info("lagrer $inkludering")
+        LOG.info("Kaller lagreInkludering")
     }
-
 }

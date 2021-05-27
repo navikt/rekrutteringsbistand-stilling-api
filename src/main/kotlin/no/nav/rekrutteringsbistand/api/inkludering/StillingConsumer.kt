@@ -27,7 +27,7 @@ class StillingConsumer(
 
                 val stillinger = records.map { it.value() }
                 LOG.info("Stillinger mottatt: " + stillinger.size.toString())
-                inkluderingService.lagreInkludering("test")
+                inkluderingService.lagreInkludering("testLagreIDb")
                 consumer.commitSync()
 
                 LOG.info("Committet offset ${records.last().offset()} til Kafka")
