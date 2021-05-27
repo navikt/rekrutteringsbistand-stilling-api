@@ -1,8 +1,5 @@
 package no.nav.rekrutteringsbistand.api.inkludering
 
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import no.nav.pam.stilling.ext.avro.Ad
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.MockConsumer
@@ -15,15 +12,9 @@ fun mockConsumer(periodiskSendMeldinger: Boolean = true) = MockConsumer<String, 
     schedulePollTask {
         rebalance(listOf(topic))
         updateBeginningOffsets(mapOf(Pair(topic, 0)))
-
-        if (periodiskSendMeldinger) {
-            GlobalScope.launch {
-                var offset: Long = 0
-                while (!closed()) {
-                    addRecord(ConsumerRecord(stillingstopic, 0, offset++, enAd.uuid.toString(), enAd))
-                    delay(5_000)
-                }
-            }
-        }
+        var offset: Long = 0
+        addRecord(ConsumerRecord(stillingstopic, 0, offset++, enAd.uuid.toString(), enAd))
     }
+
+
 }
