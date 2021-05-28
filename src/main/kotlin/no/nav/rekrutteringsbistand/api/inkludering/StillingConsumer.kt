@@ -5,6 +5,7 @@ import no.nav.rekrutteringsbistand.api.support.LOG
 import org.apache.kafka.clients.consumer.Consumer
 import org.apache.kafka.clients.consumer.ConsumerRecords
 import org.apache.kafka.common.errors.WakeupException
+import org.springframework.stereotype.Component
 import rekrutteringsbistand.stilling.indekser.utils.Liveness
 import java.io.Closeable
 import java.time.Duration
