@@ -5,6 +5,7 @@ import no.nav.rekrutteringsbistand.api.support.LOG
 import org.apache.kafka.clients.consumer.Consumer
 import org.apache.kafka.clients.consumer.ConsumerRecords
 import org.apache.kafka.common.errors.WakeupException
+import org.springframework.context.annotation.Profile
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import rekrutteringsbistand.stilling.indekser.utils.Liveness
@@ -13,6 +14,7 @@ import java.time.Duration
 import javax.annotation.PreDestroy
 
 @Component
+@Profile(value= ["dev", "prod", "kafka"])
 class StillingConsumer(
         private val consumer: Consumer<String, Ad>,
         private val inkluderingService: InkluderingService

@@ -280,6 +280,7 @@
                         </goals>
                         <configuration>
                             <compileSourceRoots>${project.basedir}/src/main/java</compileSourceRoots>
+                            <compileSourceRoots>${project.build.directory}/generated-sources/avro</compileSourceRoots>
                         </configuration>
                     </execution>
                     <execution>
@@ -323,7 +324,7 @@
                         </goals>
                         <configuration>
                             <sourceDirectory>src/main/avro/</sourceDirectory>
-                            <outputDirectory>${project.build.directory}/generated-sources</outputDirectory>
+                            <outputDirectory>${project.build.directory}/generated-sources/avro</outputDirectory>
                         </configuration>
                     </execution>
                 </executions>
