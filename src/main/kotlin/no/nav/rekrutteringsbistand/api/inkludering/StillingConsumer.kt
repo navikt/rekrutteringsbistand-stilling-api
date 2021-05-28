@@ -5,6 +5,8 @@ import no.nav.rekrutteringsbistand.api.support.LOG
 import org.apache.kafka.clients.consumer.Consumer
 import org.apache.kafka.clients.consumer.ConsumerRecords
 import org.apache.kafka.common.errors.WakeupException
+import org.springframework.scheduling.annotation.Async
+import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import rekrutteringsbistand.stilling.indekser.utils.Liveness
 import java.io.Closeable
@@ -19,9 +21,9 @@ class StillingConsumer(
         private val inkluderingService: InkluderingService
 ) : Closeable {
 
-    @PostConstruct
+    @Scheduled(fixedRate = Long.MAX_VALUE)
     fun start() {
-        thread {
+
             try {
                 consumer.subscribe(listOf(stillingstopic))
                 LOG.info(
@@ -46,12 +48,13 @@ class StillingConsumer(
             } finally {
                 consumer.close()
             }
-        }
+
     }
 
     @PreDestroy
     override fun close() {
         // Vil kaste WakeupException i konsument slik at den stopper, thread-safe.
+        LOG.info("Kaller wakeup for topic $stillingstopic")
         consumer.wakeup()
     }
 }
