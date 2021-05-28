@@ -17,9 +17,4 @@ class InkluderingSpringConfig {
     @Profile("dev", "prod")
     fun kafkaConsumer(): Consumer<String, Ad> = KafkaConsumer(consumerConfig(1))
 
-    @Bean(destroyMethod = "close")
-    fun stillingKafkaConsumer(inkluderingService: InkluderingService, consumer: Consumer<String, Ad>): StillingConsumer =
-            StillingConsumer(consumer, inkluderingService).apply {
-                 thread{start()}
-            }
 }
