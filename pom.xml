@@ -192,7 +192,7 @@
         <dependency>
             <groupId>com.nimbusds</groupId>
             <artifactId>nimbus-jose-jwt</artifactId>
-            <version>8.20.1</version>
+            <version>8.21.1</version>
         </dependency>
         <!-- Det finnes 2.3-SNAPSHOT av json-smart publisert der ute i det ville,
              hvis et bibliotek bruker det vil vi token-validering feile.
