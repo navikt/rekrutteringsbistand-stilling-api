@@ -21,7 +21,7 @@ class StillingConsumer(
         private val inkluderingService: InkluderingService
 ) : Closeable {
 
-    @Scheduled(fixedRate = Long.MAX_VALUE)
+    @Scheduled(fixedRate = Long.MAX_VALUE) // Kjøres kun en gang, i egen tråd/task, ved startup
     fun start() {
 
             try {
