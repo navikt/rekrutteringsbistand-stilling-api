@@ -11,12 +11,11 @@ class InkluderingService(private val inkluderingRepository: InkluderingRepositor
         inkluderingRepository.lagreInkluderingBatch(inkluderingsmuligheter)
     }
 
-
     private fun toInkluderingsmuligheter(ad: Ad): Inkluderingsmuligheter {
         val tags: List<String> = ad.properties.any { it.key == "tags" }.toString()
                 .removePrefix("[")
                 .removeSuffix("]")
-                .split(',')
+                .split(", ")
 
 
         return Inkluderingsmuligheter(
