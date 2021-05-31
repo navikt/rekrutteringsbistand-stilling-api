@@ -8,7 +8,6 @@ import org.apache.kafka.common.errors.WakeupException
 import org.springframework.context.annotation.Profile
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
-import rekrutteringsbistand.stilling.indekser.utils.Liveness
 import java.io.Closeable
 import java.time.Duration
 import javax.annotation.PreDestroy
@@ -42,7 +41,7 @@ class StillingConsumer(
         } catch (exception: WakeupException) {
             LOG.info("Fikk beskjed om å lukke consument med groupId ${consumer.groupMetadata().groupId()}")
         } catch (exception: Exception) {
-            Liveness.kill("Noe galt skjedde i konsument", exception)
+            LOG.error("Noe galt skjedde i konsument, stopper stilling-konsument", exception)
         } finally {
             consumer.close()
         }
