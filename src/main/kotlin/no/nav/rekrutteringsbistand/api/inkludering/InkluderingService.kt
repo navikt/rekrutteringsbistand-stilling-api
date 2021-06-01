@@ -12,6 +12,7 @@ class InkluderingService(private val inkluderingRepository: InkluderingRepositor
     }
 
     private fun toInkluderingsmuligheter(ad: Ad): Inkluderingsmuligheter {
+        // TODO: Fiks
         val tags: List<String> = ad.properties.any { it.key == "tags" }.toString()
                 .removePrefix("[")
                 .removeSuffix("]")

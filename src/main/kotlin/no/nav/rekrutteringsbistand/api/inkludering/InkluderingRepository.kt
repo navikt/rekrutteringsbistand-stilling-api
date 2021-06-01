@@ -14,45 +14,50 @@ import java.sql.ResultSet
 
 @Repository
 class InkluderingRepository(
-        val namedJdbcTemplate: NamedParameterJdbcTemplate,
+    val namedJdbcTemplate: NamedParameterJdbcTemplate,
 ) {
 
     fun lagreInkluderingBatch(inkluderingsmuligheter: List<Inkluderingsmuligheter>) {
         LOG.info("Kaller lagreInkludering")
-        val batchupdate = namedJdbcTemplate.batchUpdate(
-                """INSERT INTO $inkluderingsmuligheterTabell($stillingsid, $tilretteleggingmuligheter, $virkemidler, $prioriterte_maalgrupper, $statlig_inkluderingsdugnad, $rad_opprettet) 
-                    |VALUES(:$stillingsid, :$tilretteleggingmuligheter, :$virkemidler, :$prioriterte_maalgrupper, :$statlig_inkluderingsdugnad, $rad_opprettet)
+        namedJdbcTemplate.batchUpdate(
+            """INSERT INTO $inkluderingsmuligheterTabell
+                    ($stillingsid, $tilretteleggingmuligheter, $virkemidler, $prioriterte_maalgrupper, $statlig_inkluderingsdugnad, $rad_opprettet) 
+                   VALUES
+                    (:$stillingsid, :$tilretteleggingmuligheter, :$virkemidler, :$prioriterte_maalgrupper, :$statlig_inkluderingsdugnad, $rad_opprettet)
                 """.trimMargin(),
-                inkluderingsmuligheter.map {
-                    MapSqlParameterSource(
-                            mapOf(
-                                    stillingsid to it.stillingsid,
-                                    tilretteleggingmuligheter to JSONArray.toJSONString(it.tilretteleggingmuligheter),
-                                    virkemidler to JSONArray.toJSONString(it.virkemidler),
-                                    prioriterte_maalgrupper to JSONArray.toJSONString(it.prioriterte_maalgrupper),
-                                    statlig_inkluderingsdugnad to it.statlig_inkluderingsdugnad
-                            )
+            inkluderingsmuligheter.map {
+                MapSqlParameterSource(
+                    mapOf(
+                        stillingsid to it.stillingsid,
+                        tilretteleggingmuligheter to JSONArray.toJSONString(it.tilretteleggingmuligheter),
+                        virkemidler to JSONArray.toJSONString(it.virkemidler),
+                        prioriterte_maalgrupper to JSONArray.toJSONString(it.prioriterte_maalgrupper),
+                        statlig_inkluderingsdugnad to it.statlig_inkluderingsdugnad
                     )
-                }.toTypedArray()
+                )
+            }.toTypedArray()
         )
     }
 
-    fun hentInkluderingForStillingId(stillingId: String) : Inkluderingsmuligheter{
+    fun hentInkluderingForStillingId(stillingId: String): Inkluderingsmuligheter? {
         namedJdbcTemplate.query(
-                "SELECT * FROM $inkluderingsmuligheterTabell WHERE $stillingId = :$stillingId",
+                "SELECT * FROM $inkluderingsmuligheterTabell WHERE ${DbFelt.stillingsid} = '$stillingId'",
                 MapSqlParameterSource("stillingsid", stillingId)
         )
         { rs: ResultSet, _: Int ->
             Inkluderingsmuligheter(
-                    stillingsid = rs.getString(stillingId),
-                    tilretteleggingmuligheter = ObjectMapper().readValue(rs.getString(tilretteleggingmuligheter), TypeReference<List<String>>(){})
+                stillingsid = rs.getString(stillingId),
+                tilretteleggingmuligheter = listOf(),
+                virkemidler = listOf(),
+                prioriterte_maalgrupper = listOf(),
+                statlig_inkluderingsdugnad = false
             )
-
         }
+
+        return null
     }
 
-    companion object {
-
+    companion object DbFelt {
         val inkluderingsmuligheterTabell = "INKLUDERINGSMULIGHETER"
         const val id = "id"
         const val stillingsid = "stillingsid"

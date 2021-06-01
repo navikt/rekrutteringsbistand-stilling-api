@@ -5,8 +5,10 @@ import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.MockConsumer
 import org.apache.kafka.clients.consumer.OffsetResetStrategy
 import org.apache.kafka.common.TopicPartition
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
@@ -19,10 +21,41 @@ import org.springframework.test.context.junit4.SpringRunner
 @ActiveProfiles(value = ["default", "kafka"])
 internal class InkluderingTest {
 
+    @Autowired
+    lateinit var mockConsumer: MockConsumer<String, Ad>
+
+    @Autowired
+    lateinit var inkluderingRepository: InkluderingRepository
+
     @Test
-    fun `skal sjekke at vi kan prosessere stillingsmeldinger for inkludering`() {
+    fun `Melding på Kafka-topic fører til at vi lagrer inkluderingsmuligheter i databasen`() {
+
+        val stilling = enAd
+
+        // Trigg melding på Kafka-topic
+        sendMelding(stilling)
+
+        // Hent ut inkluderingsmuligheter i databasen
+        val lagretInkluderingmuligheter = inkluderingRepository.hentInkluderingForStillingId(stilling.uuid.toString())
+
+        // Assert at feltene ser riktig ut
+//        assertThat(lagretInkluderingmuligheter.tilretteleggingmuligheter).contains("INKLUDERING")
+        // TODO: assert resten av verdiene
     }
 
+    @Test
+    fun `To meldinger på Kafka-topic fører til at vi lagrer to rader eller skal hente ut nyeste versjon`() {
+        TODO()
+    }
+
+    @Test
+    fun `Skal konvertere tilretteleggingsmuligheter`() {
+        TODO()
+    }
+
+    private fun sendMelding(ad: Ad) {
+        mockConsumer.addRecord(ConsumerRecord(stillingstopic, 0, 0, ad.uuid.toString(), ad))
+    }
 
     @TestConfiguration
     class MockInkluderingSpringConfig {
@@ -34,10 +67,8 @@ internal class InkluderingTest {
                 schedulePollTask {
                     rebalance(listOf(topic))
                     updateBeginningOffsets(mapOf(Pair(topic, 0)))
-                    addRecord(ConsumerRecord(stillingstopic, 0, 0, enAd.uuid.toString(), enAd))
                 }
             }
         }
     }
-
 }
