@@ -1,4 +1,4 @@
-CREATE TABLE INKLUDERINGSMULIGHETER (
+CREATE TABLE inkluderingsmuligheter (
     id BIGSERIAL PRIMARY KEY,
     stillingsid VARCHAR(36) NOT NULL,
     tilretteleggingmuligheter TEXT,

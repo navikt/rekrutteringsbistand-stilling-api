@@ -9,11 +9,11 @@ import org.springframework.context.annotation.Profile
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import java.io.Closeable
+import java.lang.RuntimeException
 import java.time.Duration
 import javax.annotation.PreDestroy
 
 @Component
-@Profile(value= ["dev", "prod", "kafka"])
 class StillingConsumer(
         private val consumer: Consumer<String, Ad>,
         private val inkluderingService: InkluderingService
@@ -30,11 +30,15 @@ class StillingConsumer(
             while (true) {
                 val records: ConsumerRecords<String, Ad> = consumer.poll(Duration.ofSeconds(5))
                 if (records.count() == 0) continue
+                else if(records.count() != 1) {
+                    throw RuntimeException("Forventet batchsize 1")
+                }
 
-                val stillinger = records.map { it.value() }
+                val stilling = records.map { it.value() }.first()
 
-                LOG.info("Stillinger mottatt: " + stillinger.size.toString())
-                inkluderingService.lagreInkludering(stillinger)
+                LOG.info("Stillinger mottatt: id:${stilling.uuid}")
+
+                inkluderingService.lagreInkludering(stilling)
                 consumer.commitSync()
 
                 LOG.info("Committet offset ${records.last().offset()} til Kafka")

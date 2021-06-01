@@ -18,7 +18,6 @@ import org.springframework.test.context.junit4.SpringRunner
 
 @RunWith(SpringRunner::class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles(value = ["default", "kafka"])
 internal class InkluderingTest {
 
     @Autowired
@@ -36,8 +35,9 @@ internal class InkluderingTest {
         sendMelding(stilling)
 
         // Hent ut inkluderingsmuligheter i databasen
+        Thread.sleep(3000)
         val lagretInkluderingmuligheter = inkluderingRepository.hentInkluderingForStillingId(stilling.uuid.toString())
-
+        println(lagretInkluderingmuligheter)
         // Assert at feltene ser riktig ut
 //        assertThat(lagretInkluderingmuligheter.tilretteleggingmuligheter).contains("INKLUDERING")
         // TODO: assert resten av verdiene
@@ -55,20 +55,5 @@ internal class InkluderingTest {
 
     private fun sendMelding(ad: Ad) {
         mockConsumer.addRecord(ConsumerRecord(stillingstopic, 0, 0, ad.uuid.toString(), ad))
-    }
-
-    @TestConfiguration
-    class MockInkluderingSpringConfig {
-
-        @Bean
-        fun kafkaMockConsumer(): MockConsumer<String, Ad> {
-            val topic = TopicPartition(stillingstopic, 0)
-            return MockConsumer<String, Ad>(OffsetResetStrategy.EARLIEST).apply {
-                schedulePollTask {
-                    rebalance(listOf(topic))
-                    updateBeginningOffsets(mapOf(Pair(topic, 0)))
-                }
-            }
-        }
     }
 }

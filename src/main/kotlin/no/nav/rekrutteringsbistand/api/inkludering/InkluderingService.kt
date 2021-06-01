@@ -6,12 +6,12 @@ import org.springframework.stereotype.Service
 @Service
 class InkluderingService(private val inkluderingRepository: InkluderingRepository) {
 
-    fun lagreInkludering(stillinger: List<Ad>) {
-        val inkluderingsmuligheter = stillinger.map { toInkluderingsmuligheter(it) }
-        inkluderingRepository.lagreInkluderingBatch(inkluderingsmuligheter)
+    fun lagreInkludering(ad: Ad) {
+        val inkluderingsmuligheter = toInkluderingsmuligheter(ad)
+        inkluderingRepository.lagreInkludering(inkluderingsmuligheter)
     }
 
-    private fun toInkluderingsmuligheter(ad: Ad): Inkluderingsmuligheter {
+    private fun toInkluderingsmuligheter(ad: Ad): Inkluderingsmulighet {
         // TODO: Fiks
         val tags: List<String> = ad.properties.any { it.key == "tags" }.toString()
                 .removePrefix("[")
@@ -19,7 +19,7 @@ class InkluderingService(private val inkluderingRepository: InkluderingRepositor
                 .split(", ")
 
 
-        return Inkluderingsmuligheter(
+        return Inkluderingsmulighet(
                 stillingsid = ad.uuid.toString(),
                 tilretteleggingmuligheter = tags.filter { it.startsWith("INKLUDERING__") },
                 virkemidler = tags.filter { it.startsWith("TILTAK_ELLER_VIRKEMIDDEL__") },
@@ -30,7 +30,7 @@ class InkluderingService(private val inkluderingRepository: InkluderingRepositor
     }
 }
 
-data class Inkluderingsmuligheter(
+data class Inkluderingsmulighet(
         val stillingsid: String,
         val tilretteleggingmuligheter: List<String>,
         val virkemidler: List<String>,
