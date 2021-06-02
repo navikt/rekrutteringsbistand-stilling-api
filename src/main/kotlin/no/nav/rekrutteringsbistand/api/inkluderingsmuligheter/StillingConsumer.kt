@@ -32,7 +32,7 @@ class StillingConsumer(
 
                 val stilling = records.map { it.value() }.first()
 
-                LOG.info("Stillinger mottatt: id:${stilling.uuid}")
+                LOG.info("Stilling mottatt, stillingsId: ${stilling.uuid}")
 
                 inkluderingsmuligheterService.lagreInkluderingsmuligheter(stilling)
                 consumer.commitSync()

@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Configuration
 
 @Configuration
 class MockConsumer {
+
     @Bean
     fun kafkaMockConsumer(): MockConsumer<String, Ad> {
         val topic = TopicPartition(stillingstopic, 0)
