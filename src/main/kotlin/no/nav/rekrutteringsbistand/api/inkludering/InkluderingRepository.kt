@@ -7,18 +7,26 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert
 import org.springframework.stereotype.Repository
 import java.sql.ResultSet
+import java.time.LocalDateTime
 
+data class Inkluderingsmulighet(
+    val stillingsid: String,
+    val tilretteleggingmuligheter: List<String>,
+    val virkemidler: List<String>,
+    val prioriterteMålgrupper: List<String>,
+    val statligInkluderingsdugnad: Boolean,
+    val radOpprettet: LocalDateTime,
+)
 
 @Repository
-class InkluderingRepository(
-    val namedJdbcTemplate: NamedParameterJdbcTemplate,
-) {
+class InkluderingRepository(val namedJdbcTemplate: NamedParameterJdbcTemplate) {
+
     val objectMapper = ObjectMapper()
     val simpleJdbcInsert = SimpleJdbcInsert(namedJdbcTemplate.jdbcTemplate)
         .withTableName(inkluderingsmuligheterTabell)
         .usingGeneratedKeyColumns("id")
 
-    fun lagreInkludering(inkluderingsmulighet: Inkluderingsmulighet): Number {
+    fun lagreInkluderingsmuligheter(inkluderingsmulighet: Inkluderingsmulighet): Number {
         val retur = simpleJdbcInsert.executeAndReturnKey(
             mapOf(
                 stillingsidFelt to inkluderingsmulighet.stillingsid,

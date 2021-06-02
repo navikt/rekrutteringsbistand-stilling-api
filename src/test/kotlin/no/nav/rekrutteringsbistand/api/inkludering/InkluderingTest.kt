@@ -1,9 +1,11 @@
 package no.nav.rekrutteringsbistand.api.inkludering
 
 import no.nav.pam.stilling.ext.avro.Ad
+import no.nav.rekrutteringsbistand.api.Testdata.enAd
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.MockConsumer
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -58,11 +60,13 @@ internal class InkluderingTest {
         assertThat(lagretInkluderingmulighet.radOpprettet).isBetween(LocalDateTime.now().minusSeconds(1), LocalDateTime.now())
     }
 
+    @Ignore
     @Test
     fun `To meldinger på Kafka-topic fører til at vi lagrer to rader eller skal hente ut nyeste versjon`() {
         TODO()
     }
 
+    @Ignore
     @Test
     fun `Skal konvertere tilretteleggingsmuligheter`() {
         TODO()

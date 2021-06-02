@@ -5,7 +5,6 @@ import no.nav.rekrutteringsbistand.api.support.LOG
 import org.apache.kafka.clients.consumer.Consumer
 import org.apache.kafka.clients.consumer.ConsumerRecords
 import org.apache.kafka.common.errors.WakeupException
-import org.springframework.context.annotation.Profile
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import java.io.Closeable
@@ -38,7 +37,7 @@ class StillingConsumer(
 
                 LOG.info("Stillinger mottatt: id:${stilling.uuid}")
 
-                inkluderingService.lagreInkludering(stilling)
+                inkluderingService.lagreInkluderingsmuligheter(stilling)
                 consumer.commitSync()
 
                 LOG.info("Committet offset ${records.last().offset()} til Kafka")

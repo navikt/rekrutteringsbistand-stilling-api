@@ -10,17 +10,17 @@ import java.time.LocalDateTime
 class InkluderingService(private val inkluderingRepository: InkluderingRepository) {
 
 
-    fun lagreInkludering(ad: Ad) {
-        val inkluderingsmuligheter = toInkluderingsmuligheter(ad)
-        inkluderingRepository.lagreInkludering(inkluderingsmuligheter)
+    fun lagreInkluderingsmuligheter(ad: Ad) {
+        val inkluderingsmuligheter = ad.toInkluderingsmuligheter()
+        inkluderingRepository.lagreInkluderingsmuligheter(inkluderingsmuligheter)
     }
 
-    private fun toInkluderingsmuligheter(ad: Ad): Inkluderingsmulighet {
-        val tagstring = ad.properties.first { it.key == "tags" }.value.toString()
-        val tags: List<String> = ObjectMapper().readValue(tagstring)
+    private fun Ad.toInkluderingsmuligheter(): Inkluderingsmulighet {
+        val tagsString = this.properties.first { it.key == "tags" }.value.toString()
+        val tags: List<String> = ObjectMapper().readValue(tagsString)
 
         return Inkluderingsmulighet(
-            stillingsid = ad.uuid.toString(),
+            stillingsid = this.uuid.toString(),
             tilretteleggingmuligheter = transformerTilNyttFormat(tags, "INKLUDERING"),
             virkemidler = transformerTilNyttFormat(tags, "TILTAK_ELLER_VIRKEMIDDEL"),
             prioriterteMålgrupper = transformerTilNyttFormat(tags, "PRIORITERT_MÅLGRUPPE"),
@@ -35,12 +35,3 @@ class InkluderingService(private val inkluderingRepository: InkluderingRepositor
             .map { if (it == kategori) "${it}_KATEGORI" else it.removePrefix("${kategori}__") }
     }
 }
-
-data class Inkluderingsmulighet(
-    val stillingsid: String,
-    val tilretteleggingmuligheter: List<String>,
-    val virkemidler: List<String>,
-    val prioriterteMålgrupper: List<String>,
-    val statligInkluderingsdugnad: Boolean,
-    val radOpprettet: LocalDateTime,
-)
