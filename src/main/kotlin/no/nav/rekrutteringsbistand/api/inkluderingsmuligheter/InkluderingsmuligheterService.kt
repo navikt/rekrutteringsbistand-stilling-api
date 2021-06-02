@@ -11,12 +11,7 @@ class InkluderingsmuligheterService(private val inkluderingsmuligheterRepository
 
     fun lagreInkluderingsmuligheter(ad: Ad) {
         val inkluderingsmuligheter = ad.toInkluderingsmuligheter()
-        if (
-                inkluderingsmuligheter != null
-                && inkluderingsmuligheter.harInkludering()
-                && sisteErLik(inkluderingsmuligheter)
-        ) {
-
+        if (inkluderingsmuligheter.harInkludering() && !sisteErLik(inkluderingsmuligheter) ) {
             inkluderingsmuligheterRepository.lagreInkluderingsmuligheter(inkluderingsmuligheter)
         }
     }
@@ -25,11 +20,15 @@ class InkluderingsmuligheterService(private val inkluderingsmuligheterRepository
             inkluderingsmuligheterRepository.hentInkludering(inkluderingsmuligheter.stillingsid)
                     .run { !isEmpty() && inkluderingsmuligheter.erLik(first()) }
 
-    private fun Ad.toInkluderingsmuligheter(): Inkluderingsmulighet? {
+    private fun Ad.toInkluderingsmuligheter(): Inkluderingsmulighet {
 
-        val tagsString = this.properties.first { it.key == "tags" } ?: return null
+        val tagStrings = this.properties.filter { it.key == "tags" }
+        if(tagStrings.isEmpty()) return Inkluderingsmulighet(
+                stillingsid = this.uuid.toString(),
+                radOpprettet = LocalDateTime.now()
+        )
 
-        val tags: List<String> = ObjectMapper().readValue(tagsString.value.toString())
+        val tags: List<String> = ObjectMapper().readValue(tagStrings.first().value.toString())
 
         return Inkluderingsmulighet(
                 stillingsid = this.uuid.toString(),

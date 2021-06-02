@@ -11,10 +11,10 @@ import java.time.LocalDateTime
 
 data class Inkluderingsmulighet(
         val stillingsid: String,
-        val tilretteleggingmuligheter: List<String>,
-        val virkemidler: List<String>,
-        val prioriterteMålgrupper: List<String>,
-        val statligInkluderingsdugnad: Boolean,
+        val tilretteleggingmuligheter: List<String> = emptyList(),
+        val virkemidler: List<String> = emptyList(),
+        val prioriterteMålgrupper: List<String> = emptyList(),
+        val statligInkluderingsdugnad: Boolean = false,
         val radOpprettet: LocalDateTime
 ) {
     fun harInkludering(): Boolean =
