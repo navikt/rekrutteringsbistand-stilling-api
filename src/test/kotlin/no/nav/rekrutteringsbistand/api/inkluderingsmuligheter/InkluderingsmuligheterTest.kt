@@ -1,4 +1,4 @@
-package no.nav.rekrutteringsbistand.api.inkludering
+package no.nav.rekrutteringsbistand.api.inkluderingsmuligheter
 
 import no.nav.pam.stilling.ext.avro.Ad
 import no.nav.rekrutteringsbistand.api.Testdata.enAd
@@ -16,13 +16,13 @@ import java.time.LocalDateTime
 
 @RunWith(SpringRunner::class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-internal class InkluderingTest {
+class InkluderingsmuligheterTest {
 
     @Autowired
     lateinit var mockConsumer: MockConsumer<String, Ad>
 
     @Autowired
-    lateinit var inkluderingRepository: InkluderingRepository
+    lateinit var inkluderingsmuligheterRepository: InkluderingsmuligheterRepository
 
     @Test
     fun `Melding på Kafka-topic fører til at vi lagrer inkluderingsmuligheter i databasen`() {
@@ -31,7 +31,7 @@ internal class InkluderingTest {
 
         Thread.sleep(100)
 
-        val lagretInkluderingmulighet: Inkluderingsmulighet = inkluderingRepository.hentInkludering(stilling.uuid.toString()).first()
+        val lagretInkluderingmulighet: Inkluderingsmulighet = inkluderingsmuligheterRepository.hentInkludering(stilling.uuid.toString()).first()
 
         assertThat(lagretInkluderingmulighet.stillingsid).isEqualTo(stilling.uuid)
         assertThat(lagretInkluderingmulighet.tilretteleggingmuligheter).containsExactlyInAnyOrder(

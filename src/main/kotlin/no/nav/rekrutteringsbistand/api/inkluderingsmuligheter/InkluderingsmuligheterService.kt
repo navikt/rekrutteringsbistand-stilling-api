@@ -1,4 +1,4 @@
-package no.nav.rekrutteringsbistand.api.inkludering
+package no.nav.rekrutteringsbistand.api.inkluderingsmuligheter
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
@@ -7,12 +7,11 @@ import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 
 @Service
-class InkluderingService(private val inkluderingRepository: InkluderingRepository) {
-
+class InkluderingsmuligheterService(private val inkluderingsmuligheterRepository: InkluderingsmuligheterRepository) {
 
     fun lagreInkluderingsmuligheter(ad: Ad) {
         val inkluderingsmuligheter = ad.toInkluderingsmuligheter()
-        inkluderingRepository.lagreInkluderingsmuligheter(inkluderingsmuligheter)
+        inkluderingsmuligheterRepository.lagreInkluderingsmuligheter(inkluderingsmuligheter)
     }
 
     private fun Ad.toInkluderingsmuligheter(): Inkluderingsmulighet {

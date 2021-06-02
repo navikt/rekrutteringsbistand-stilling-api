@@ -1,4 +1,4 @@
-package no.nav.rekrutteringsbistand.api.inkludering
+package no.nav.rekrutteringsbistand.api.inkluderingsmuligheter
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
@@ -19,7 +19,7 @@ data class Inkluderingsmulighet(
 )
 
 @Repository
-class InkluderingRepository(val namedJdbcTemplate: NamedParameterJdbcTemplate) {
+class InkluderingsmuligheterRepository(val namedJdbcTemplate: NamedParameterJdbcTemplate) {
 
     val objectMapper = ObjectMapper()
     val simpleJdbcInsert = SimpleJdbcInsert(namedJdbcTemplate.jdbcTemplate)

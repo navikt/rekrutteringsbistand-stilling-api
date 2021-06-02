@@ -1,7 +1,7 @@
 package no.nav.rekrutteringsbistand.api.config
 
 import no.nav.pam.stilling.ext.avro.Ad
-import no.nav.rekrutteringsbistand.api.inkludering.stillingstopic
+import no.nav.rekrutteringsbistand.api.inkluderingsmuligheter.stillingstopic
 import org.apache.kafka.clients.consumer.MockConsumer
 import org.apache.kafka.clients.consumer.OffsetResetStrategy
 import org.apache.kafka.common.TopicPartition

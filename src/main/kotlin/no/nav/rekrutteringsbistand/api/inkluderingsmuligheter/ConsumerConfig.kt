@@ -1,4 +1,4 @@
-package no.nav.rekrutteringsbistand.api.inkludering
+package no.nav.rekrutteringsbistand.api.inkluderingsmuligheter
 
 import io.confluent.kafka.serializers.KafkaAvroDeserializer
 import io.confluent.kafka.serializers.KafkaAvroDeserializerConfig

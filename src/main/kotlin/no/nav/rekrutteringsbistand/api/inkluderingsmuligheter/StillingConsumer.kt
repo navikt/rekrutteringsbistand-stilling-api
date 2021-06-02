@@ -1,4 +1,4 @@
-package no.nav.rekrutteringsbistand.api.inkludering
+package no.nav.rekrutteringsbistand.api.inkluderingsmuligheter
 
 import no.nav.pam.stilling.ext.avro.Ad
 import no.nav.rekrutteringsbistand.api.support.LOG
@@ -14,30 +14,27 @@ import javax.annotation.PreDestroy
 
 @Component
 class StillingConsumer(
-        private val consumer: Consumer<String, Ad>,
-        private val inkluderingService: InkluderingService
+    private val consumer: Consumer<String, Ad>,
+    private val inkluderingsmuligheterService: InkluderingsmuligheterService
 ) : Closeable {
 
     @Scheduled(fixedRate = Long.MAX_VALUE) // Kjøres kun en gang, i egen tråd/task, ved startup
     fun start() {
         try {
             consumer.subscribe(listOf(stillingstopic))
-            LOG.info(
-                    "Starter å konsumere topic $stillingstopic med groupId ${consumer.groupMetadata().groupId()} "
-            )
+
+            LOG.info("Starter å konsumere topic $stillingstopic med groupId ${consumer.groupMetadata().groupId()}")
 
             while (true) {
                 val records: ConsumerRecords<String, Ad> = consumer.poll(Duration.ofSeconds(5))
                 if (records.count() == 0) continue
-                else if(records.count() != 1) {
-                    throw RuntimeException("Forventet batchsize 1")
-                }
+                else if (records.count() != 1) throw RuntimeException("Forventet batchsize 1")
 
                 val stilling = records.map { it.value() }.first()
 
                 LOG.info("Stillinger mottatt: id:${stilling.uuid}")
 
-                inkluderingService.lagreInkluderingsmuligheter(stilling)
+                inkluderingsmuligheterService.lagreInkluderingsmuligheter(stilling)
                 consumer.commitSync()
 
                 LOG.info("Committet offset ${records.last().offset()} til Kafka")
@@ -49,7 +46,6 @@ class StillingConsumer(
         } finally {
             consumer.close()
         }
-
     }
 
     @PreDestroy
