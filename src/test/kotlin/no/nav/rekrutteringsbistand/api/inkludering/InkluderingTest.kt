@@ -3,16 +3,11 @@ package no.nav.rekrutteringsbistand.api.inkludering
 import no.nav.pam.stilling.ext.avro.Ad
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.MockConsumer
-import org.apache.kafka.clients.consumer.OffsetResetStrategy
-import org.apache.kafka.common.TopicPartition
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.context.TestConfiguration
-import org.springframework.context.annotation.Bean
-import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit4.SpringRunner
 
 
@@ -26,7 +21,7 @@ internal class InkluderingTest {
     @Autowired
     lateinit var inkluderingRepository: InkluderingRepository
 
-    @Test
+    @Test()
     fun `Melding på Kafka-topic fører til at vi lagrer inkluderingsmuligheter i databasen`() {
 
         val stilling = enAd
@@ -35,12 +30,16 @@ internal class InkluderingTest {
         sendMelding(stilling)
 
         // Hent ut inkluderingsmuligheter i databasen
-        Thread.sleep(3000)
-        val lagretInkluderingmuligheter = inkluderingRepository.hentInkluderingForStillingId(stilling.uuid.toString())
-        println(lagretInkluderingmuligheter)
-        // Assert at feltene ser riktig ut
-//        assertThat(lagretInkluderingmuligheter.tilretteleggingmuligheter).contains("INKLUDERING")
-        // TODO: assert resten av verdiene
+        Thread.sleep(100)
+        val lagretInkluderingmulighet: Inkluderingsmulighet = inkluderingRepository.hentInkluderingForStillingId(stilling.uuid.toString()).first()
+        assertThat(lagretInkluderingmulighet.stillingsid).isEqualTo(stilling.uuid)
+
+        assertThat(lagretInkluderingmulighet.tilretteleggingmuligheter).containsExactlyInAnyOrder("INKLUDERING", "INKLUDERING__ARBEIDSTID", "INKLUDERING__FYSISK", "INKLUDERING__ARBEIDSMILJØ", "INKLUDERING__GRUNNLEGGENDE")
+        assertThat(lagretInkluderingmulighet.virkemidler).containsExactlyInAnyOrder("TILTAK_ELLER_VIRKEMIDDEL", "TILTAK_ELLER_VIRKEMIDDEL__LØNNSTILSKUDD", "TILTAK_ELLER_VIRKEMIDDEL__MENTORTILSKUDD", "TILTAK_ELLER_VIRKEMIDDEL__LÆRLINGPLASS")
+        assertThat(lagretInkluderingmulighet.prioriterte_maalgrupper).containsExactlyInAnyOrder("PRIORITERT_MÅLGRUPPE", "PRIORITERT_MÅLGRUPPE__UNGE_UNDER_30", "PRIORITERT_MÅLGRUPPE__SENIORER_OVER_45", "PRIORITERT_MÅLGRUPPE__KOMMER_FRA_LAND_UTENFOR_EØS", "PRIORITERT_MÅLGRUPPE__HULL_I_CV_EN", "PRIORITERT_MÅLGRUPPE__LITE_ELLER_INGEN_UTDANNING", "PRIORITERT_MÅLGRUPPE__LITE_ELLER_INGEN_ARBEIDSERFARING")
+        assertThat(lagretInkluderingmulighet.statlig_inkluderingsdugnad).isTrue
+
+        println(lagretInkluderingmulighet)
     }
 
     @Test

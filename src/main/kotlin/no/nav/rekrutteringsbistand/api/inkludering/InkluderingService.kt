@@ -1,10 +1,13 @@
 package no.nav.rekrutteringsbistand.api.inkludering
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.pam.stilling.ext.avro.Ad
 import org.springframework.stereotype.Service
 
 @Service
 class InkluderingService(private val inkluderingRepository: InkluderingRepository) {
+
 
     fun lagreInkludering(ad: Ad) {
         val inkluderingsmuligheter = toInkluderingsmuligheter(ad)
@@ -12,18 +15,15 @@ class InkluderingService(private val inkluderingRepository: InkluderingRepositor
     }
 
     private fun toInkluderingsmuligheter(ad: Ad): Inkluderingsmulighet {
-        // TODO: Fiks
-        val tags: List<String> = ad.properties.any { it.key == "tags" }.toString()
-                .removePrefix("[")
-                .removeSuffix("]")
-                .split(", ")
 
+        val tagstring = ad.properties.first { it.key == "tags" }.value.toString()
+        val tags: List<String> = ObjectMapper().readValue(tagstring)
 
         return Inkluderingsmulighet(
                 stillingsid = ad.uuid.toString(),
-                tilretteleggingmuligheter = tags.filter { it.startsWith("INKLUDERING__") },
-                virkemidler = tags.filter { it.startsWith("TILTAK_ELLER_VIRKEMIDDEL__") },
-                prioriterte_maalgrupper = tags.filter { it.startsWith("PRIORITERT_MÅLGRUPPE__") },
+                tilretteleggingmuligheter = tags.filter { it.startsWith("INKLUDERING") },
+                virkemidler = tags.filter { it.startsWith("TILTAK_ELLER_VIRKEMIDDEL") },
+                prioriterte_maalgrupper = tags.filter { it.startsWith("PRIORITERT_MÅLGRUPPE") },
                 statlig_inkluderingsdugnad = tags.contains("STATLIG_INKLUDERINGSDUGNAD"),
         )
 
