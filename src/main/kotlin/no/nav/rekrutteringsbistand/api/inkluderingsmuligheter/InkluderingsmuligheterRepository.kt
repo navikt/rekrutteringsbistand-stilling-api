@@ -10,32 +10,48 @@ import java.sql.ResultSet
 import java.time.LocalDateTime
 
 data class Inkluderingsmulighet(
-    val stillingsid: String,
-    val tilretteleggingmuligheter: List<String>,
-    val virkemidler: List<String>,
-    val prioriterteMålgrupper: List<String>,
-    val statligInkluderingsdugnad: Boolean,
-    val radOpprettet: LocalDateTime,
-)
+        val stillingsid: String,
+        val tilretteleggingmuligheter: List<String>,
+        val virkemidler: List<String>,
+        val prioriterteMålgrupper: List<String>,
+        val statligInkluderingsdugnad: Boolean,
+        val radOpprettet: LocalDateTime
+) {
+    fun harInkludering(): Boolean =
+            tilretteleggingmuligheter.isNotEmpty()
+                    || virkemidler.isNotEmpty()
+                    || prioriterteMålgrupper.isNotEmpty()
+                    || statligInkluderingsdugnad
+
+    fun erLik(other: Inkluderingsmulighet): Boolean =
+            containsExactly(tilretteleggingmuligheter, other.tilretteleggingmuligheter) &&
+                    containsExactly(virkemidler, other.virkemidler) &&
+                    containsExactly(prioriterteMålgrupper, other.prioriterteMålgrupper) &&
+                    statligInkluderingsdugnad == other.statligInkluderingsdugnad
+
+    fun <T> containsExactly(l1: List<T>, l2: List<T>): Boolean = l1.containsAll(l2) && l2.containsAll(l1)
+
+
+}
 
 @Repository
 class InkluderingsmuligheterRepository(val namedJdbcTemplate: NamedParameterJdbcTemplate) {
 
     val objectMapper = ObjectMapper()
     val simpleJdbcInsert = SimpleJdbcInsert(namedJdbcTemplate.jdbcTemplate)
-        .withTableName(inkluderingsmuligheterTabell)
-        .usingGeneratedKeyColumns("id")
+            .withTableName(inkluderingsmuligheterTabell)
+            .usingGeneratedKeyColumns("id")
 
     fun lagreInkluderingsmuligheter(inkluderingsmulighet: Inkluderingsmulighet): Number {
         val retur = simpleJdbcInsert.executeAndReturnKey(
-            mapOf(
-                stillingsidFelt to inkluderingsmulighet.stillingsid,
-                tilretteleggingmuligheterFelt to objectMapper.writeValueAsString(inkluderingsmulighet.tilretteleggingmuligheter),
-                virkemidlerFelt to objectMapper.writeValueAsString(inkluderingsmulighet.virkemidler),
-                prioriterteMålgrupperFelt to objectMapper.writeValueAsString(inkluderingsmulighet.prioriterteMålgrupper),
-                statligInkluderingsdugnadFelt to inkluderingsmulighet.statligInkluderingsdugnad,
-                radOpprettetFelt to inkluderingsmulighet.radOpprettet
-            )
+                mapOf(
+                        stillingsidFelt to inkluderingsmulighet.stillingsid,
+                        tilretteleggingmuligheterFelt to objectMapper.writeValueAsString(inkluderingsmulighet.tilretteleggingmuligheter),
+                        virkemidlerFelt to objectMapper.writeValueAsString(inkluderingsmulighet.virkemidler),
+                        prioriterteMålgrupperFelt to objectMapper.writeValueAsString(inkluderingsmulighet.prioriterteMålgrupper),
+                        statligInkluderingsdugnadFelt to inkluderingsmulighet.statligInkluderingsdugnad,
+                        radOpprettetFelt to inkluderingsmulighet.radOpprettet
+                )
         )
         LOG.info("Lagret stilling med dbid: $retur og stillingsid: ${inkluderingsmulighet.stillingsid}")
         return retur
@@ -45,12 +61,12 @@ class InkluderingsmuligheterRepository(val namedJdbcTemplate: NamedParameterJdbc
         return namedJdbcTemplate.query("SELECT * FROM $inkluderingsmuligheterTabell WHERE $stillingsidFelt = '$stillingId'")
         { rs: ResultSet, _: Int ->
             Inkluderingsmulighet(
-                stillingsid = rs.getString(stillingsidFelt),
-                tilretteleggingmuligheter = tilStringListe(rs.getString(tilretteleggingmuligheterFelt)),
-                virkemidler = tilStringListe(rs.getString(virkemidlerFelt)),
-                prioriterteMålgrupper = tilStringListe(rs.getString(prioriterteMålgrupperFelt)),
-                statligInkluderingsdugnad = rs.getBoolean(statligInkluderingsdugnadFelt),
-                radOpprettet = rs.getTimestamp(radOpprettetFelt).toLocalDateTime()
+                    stillingsid = rs.getString(stillingsidFelt),
+                    tilretteleggingmuligheter = tilStringListe(rs.getString(tilretteleggingmuligheterFelt)),
+                    virkemidler = tilStringListe(rs.getString(virkemidlerFelt)),
+                    prioriterteMålgrupper = tilStringListe(rs.getString(prioriterteMålgrupperFelt)),
+                    statligInkluderingsdugnad = rs.getBoolean(statligInkluderingsdugnadFelt),
+                    radOpprettet = rs.getTimestamp(radOpprettetFelt).toLocalDateTime()
             )
         }
     }
@@ -58,7 +74,6 @@ class InkluderingsmuligheterRepository(val namedJdbcTemplate: NamedParameterJdbc
     private fun tilStringListe(string: String): List<String> {
         return ObjectMapper().readValue(string)
     }
-
 
     companion object {
         const val inkluderingsmuligheterTabell = "inkluderingsmuligheter"

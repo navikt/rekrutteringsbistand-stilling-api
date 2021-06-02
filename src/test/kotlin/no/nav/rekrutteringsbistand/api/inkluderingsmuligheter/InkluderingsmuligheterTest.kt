@@ -2,6 +2,7 @@ package no.nav.rekrutteringsbistand.api.inkluderingsmuligheter
 
 import no.nav.pam.stilling.ext.avro.Ad
 import no.nav.rekrutteringsbistand.api.Testdata.enAd
+import no.nav.rekrutteringsbistand.api.Testdata.enAdUtenTag
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.MockConsumer
 import org.apache.kafka.common.PartitionInfo
@@ -33,7 +34,7 @@ class InkluderingsmuligheterTest {
         val stilling = enAd(tags = """["INKLUDERING", "INKLUDERING__ARBEIDSTID", "INKLUDERING__FYSISK", "INKLUDERING__ARBEIDSMILJØ", "INKLUDERING__GRUNNLEGGENDE", "TILTAK_ELLER_VIRKEMIDDEL", "TILTAK_ELLER_VIRKEMIDDEL__LØNNSTILSKUDD", "TILTAK_ELLER_VIRKEMIDDEL__MENTORTILSKUDD", "TILTAK_ELLER_VIRKEMIDDEL__LÆRLINGPLASS", "PRIORITERT_MÅLGRUPPE", "PRIORITERT_MÅLGRUPPE__UNGE_UNDER_30", "PRIORITERT_MÅLGRUPPE__SENIORER_OVER_45", "PRIORITERT_MÅLGRUPPE__KOMMER_FRA_LAND_UTENFOR_EØS", "PRIORITERT_MÅLGRUPPE__HULL_I_CV_EN", "PRIORITERT_MÅLGRUPPE__LITE_ELLER_INGEN_UTDANNING", "PRIORITERT_MÅLGRUPPE__LITE_ELLER_INGEN_ARBEIDSERFARING", "STATLIG_INKLUDERINGSDUGNAD"]""")
         sendMelding(stilling)
 
-        Thread.sleep(100)
+        Thread.sleep(300)
 
         val lagretInkluderingmulighet: Inkluderingsmulighet = inkluderingsmuligheterRepository.hentInkludering(stilling.uuid.toString()).first()
 
@@ -68,10 +69,11 @@ class InkluderingsmuligheterTest {
     fun `To meldinger på Kafka-topic fører til at vi lagrer to rader`() {
         // Send to Kafka-meldinger
         val stillingsId = UUID.randomUUID()
-        val stillingV1 = enAd(stillingsId, tags = """["INKLUDERING"]""")
-        val stillingV2 = enAd(stillingsId, tags = """["INKLUDERING", "INKLUDERING__ARBEIDSTID"]""")
+        val stillingV1 = enAd(stillingsId, tags = "[]")
+        val stillingV2 = enAdUtenTag(stillingsId)
 
         sendMelding(stillingV1)
+        Thread.sleep(100)
         sendMelding(stillingV2)
 
         Thread.sleep(100)
@@ -81,7 +83,8 @@ class InkluderingsmuligheterTest {
 
         // assert at det er to rader
         assertThat(lagretInkluderingsmuligheter.size).isEqualTo(2)
-
+        assertThat(lagretInkluderingsmuligheter.first().tilretteleggingmuligheter).isEmpty()
+        assertThat(lagretInkluderingsmuligheter[1].tilretteleggingmuligheter).isEmpty()
         // assert at hentNyeste henter nyeste
     }
 
