@@ -11,14 +11,15 @@ class InkluderingsmuligheterService(private val inkluderingsmuligheterRepository
 
     fun lagreInkluderingsmuligheter(ad: Ad) {
         val inkluderingsmuligheter = ad.toInkluderingsmuligheter()
-        if (inkluderingsmuligheter.harInkludering() && !sisteErLik(inkluderingsmuligheter) ) {
+        if (!sisteErLik(inkluderingsmuligheter) ) {
             inkluderingsmuligheterRepository.lagreInkluderingsmuligheter(inkluderingsmuligheter)
         }
     }
 
-    fun sisteErLik(inkluderingsmuligheter: Inkluderingsmulighet): Boolean =
-            inkluderingsmuligheterRepository.hentInkludering(inkluderingsmuligheter.stillingsid)
-                    .run { !isEmpty() && inkluderingsmuligheter.erLik(first()) }
+    fun sisteErLik(inkluderingsmuligheter: Inkluderingsmulighet): Boolean {
+        val liste = inkluderingsmuligheterRepository.hentInkludering(inkluderingsmuligheter.stillingsid)
+        return (liste.isEmpty() && !inkluderingsmuligheter.harInkludering()) || (liste.isNotEmpty() && inkluderingsmuligheter.erLik(liste.first()));
+    }
 
     private fun Ad.toInkluderingsmuligheter(): Inkluderingsmulighet {
 
