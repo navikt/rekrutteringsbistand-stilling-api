@@ -8,7 +8,6 @@ import org.apache.kafka.common.errors.WakeupException
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import java.io.Closeable
-import java.lang.RuntimeException
 import java.time.Duration
 import javax.annotation.PreDestroy
 
@@ -30,7 +29,16 @@ class StillingConsumer(
                 if (records.count() == 0) continue
 
                 val stilling = records.map { it.value() }
-                LOG.info("Stillinger mottatt, stillingsId: ${stilling.map { it.uuid }}")
+                LOG.info(
+                    "Stillinger mottatt, stillingsId: ${
+                        stilling.map {
+                            "${it.uuid} ${
+                                it.properties.filter { it.key == "tags" }.map { " tags ${it.value}" }
+                            }    "
+                        }
+                    }"
+                )
+
                 stilling.forEach {
                     inkluderingsmuligheterService.lagreInkluderingsmuligheter(it)
                 }
