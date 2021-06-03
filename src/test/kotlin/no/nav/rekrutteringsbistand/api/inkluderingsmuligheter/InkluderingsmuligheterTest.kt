@@ -74,9 +74,7 @@ class InkluderingsmuligheterTest {
             radOpprettet = LocalDateTime.now()
         )
 
-        val lagretId = inkluderingsmuligheterRepository.lagreInkluderingsmuligheter(tomInkluderingsmulighet)
-        println("Lagret rad med ID $lagretId")
-        println("Stilling før Kafka-melding ${inkluderingsmuligheterRepository.hentInkluderingsmulighet(tomInkluderingsmulighet.stillingsid)}")
+        inkluderingsmuligheterRepository.lagreInkluderingsmuligheter(tomInkluderingsmulighet)
 
         val adMedEndretInkluderingsmulighet = enAd(
             stillingsId = tomInkluderingsmulighet.stillingsid,
@@ -89,7 +87,6 @@ class InkluderingsmuligheterTest {
 
         // hent ut inkludering
         val lagretInkluderingsmuligheter = inkluderingsmuligheterRepository.hentInkluderingsmulighet(adMedEndretInkluderingsmulighet.uuid.toString())
-        println(lagretInkluderingsmuligheter)
 
         // assert på inkludering
         assertThat(lagretInkluderingsmuligheter.size).isEqualTo(2)
@@ -98,9 +95,42 @@ class InkluderingsmuligheterTest {
     }
 
     @Test
-    @Ignore
     fun `Vi lagrer inkluderingsmuligheter hvis det finnes data men det er en rad og den er tom, og en eldre rad som ikke er tom`() {
 
+        val tomInkluderingsmulighet = Inkluderingsmulighet(
+            stillingsid = UUID.randomUUID().toString(),
+            radOpprettet = LocalDateTime.now()
+        )
+
+        inkluderingsmuligheterRepository.lagreInkluderingsmuligheter(Inkluderingsmulighet(
+            stillingsid = tomInkluderingsmulighet.stillingsid,
+            statligInkluderingsdugnad = true,
+            prioriterteMålgrupper = listOf("KOMMER_FRA_LAND_UTENFOR_EØS"),
+            radOpprettet = LocalDateTime.now()
+        ))
+        inkluderingsmuligheterRepository.lagreInkluderingsmuligheter(tomInkluderingsmulighet)
+
+
+
+        val adMedEndretInkluderingsmulighet = enAd(
+            stillingsId = tomInkluderingsmulighet.stillingsid,
+            tags = """["INKLUDERING__ARBEIDSTID"]"""
+        )
+
+        sendMelding(adMedEndretInkluderingsmulighet)
+
+        Thread.sleep(1000)
+
+        // hent ut inkludering
+        val lagretInkluderingsmuligheter = inkluderingsmuligheterRepository.hentInkluderingsmulighet(adMedEndretInkluderingsmulighet.uuid.toString())
+
+        // assert på inkludering
+        assertThat(lagretInkluderingsmuligheter.size).isEqualTo(3)
+
+        assertThat(lagretInkluderingsmuligheter[2].prioriterteMålgrupper).contains("KOMMER_FRA_LAND_UTENFOR_EØS")
+        assertThat(lagretInkluderingsmuligheter[2].tilretteleggingmuligheter).isEmpty()
+        assertThat(lagretInkluderingsmuligheter[1].harInkludering()).isFalse
+        assertThat(lagretInkluderingsmuligheter[0].tilretteleggingmuligheter).contains("ARBEIDSTID")
     }
 
     @Test
@@ -143,7 +173,6 @@ class InkluderingsmuligheterTest {
     }
 
     private fun sendMelding(ad: Ad) {
-        println("Sender melding med offset $offset")
         mockConsumer.addRecord(ConsumerRecord(stillingstopic, 0, offset++, ad.uuid.toString(), ad))
     }
 

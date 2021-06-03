@@ -12,7 +12,6 @@ class InkluderingsmuligheterService(private val inkluderingsmuligheterRepository
     fun lagreInkluderingsmuligheter(ad: Ad) {
         val inkluderingsmuligheter = ad.toInkluderingsmuligheter()
         if (!sisteErLik(inkluderingsmuligheter) ) {
-            println("Lagrer rad $inkluderingsmuligheter")
             inkluderingsmuligheterRepository.lagreInkluderingsmuligheter(inkluderingsmuligheter)
         }
     }
