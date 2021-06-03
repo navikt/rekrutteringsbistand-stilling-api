@@ -191,8 +191,32 @@ class InkluderingsmuligheterTest {
     }
 
     @Test
-    fun `Vi lagrer IKKE inkluderingsmuligheter hvis begge er tomme`() {
+    fun `Vi lagrer IKKE inkluderingsmuligheter hvis siste rad og ny melding er tom`() {
+        val stillingdId = UUID.randomUUID().toString()
+        val inkluderingsmulighet = Inkluderingsmulighet(
+            stillingsid = stillingdId,
+            statligInkluderingsdugnad = true,
+            prioriterteMålgrupper = listOf("KOMMER_FRA_LAND_UTENFOR_EØS"),
+            radOpprettet = LocalDateTime.now()
+        )
+        inkluderingsmuligheterRepository.lagreInkluderingsmuligheter(inkluderingsmulighet)
 
+        val tomInkluderingsmulighet = Inkluderingsmulighet(
+            stillingsid = stillingdId,
+            radOpprettet = LocalDateTime.now()
+        )
+        inkluderingsmuligheterRepository.lagreInkluderingsmuligheter(tomInkluderingsmulighet)
+
+        val adMedEndretInkluderingsmulighet = enAdUtenTag(stillingdId)
+        sendMelding(adMedEndretInkluderingsmulighet)
+
+        ventLitt()
+
+        val lagretInkluderingsmuligheter = inkluderingsmuligheterRepository.hentInkluderingsmulighet(stillingdId)
+
+        assertThat(lagretInkluderingsmuligheter.size).isEqualTo(2)
+        assertThat(lagretInkluderingsmuligheter[1].prioriterteMålgrupper).contains("KOMMER_FRA_LAND_UTENFOR_EØS")
+        assertThat(lagretInkluderingsmuligheter[0].harInkludering()).isFalse
     }
 
     @Test
