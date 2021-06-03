@@ -5,7 +5,6 @@ import no.nav.rekrutteringsbistand.api.Testdata.enAd
 import no.nav.rekrutteringsbistand.api.Testdata.enAdUtenTag
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.MockConsumer
-import org.apache.kafka.common.PartitionInfo
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Ignore
 import org.junit.Test
@@ -27,7 +26,9 @@ class InkluderingsmuligheterTest {
     @Autowired
     lateinit var inkluderingsmuligheterRepository: InkluderingsmuligheterRepository
 
-    var offset: Long = 1
+    companion object {
+        var offset: Long = 1
+    }
 
     @Test
     fun `Vi lagrer inkluderingsmuligheter hvis det ikke finnes data`() {
@@ -36,7 +37,7 @@ class InkluderingsmuligheterTest {
 
         Thread.sleep(300)
 
-        val lagretInkluderingmulighet: Inkluderingsmulighet = inkluderingsmuligheterRepository.hentInkludering(stilling.uuid.toString()).first()
+        val lagretInkluderingmulighet = inkluderingsmuligheterRepository.hentSisteInkluderingsmulighet(stilling.uuid.toString())!!
 
         assertThat(lagretInkluderingmulighet.stillingsid).isEqualTo(stilling.uuid)
         assertThat(lagretInkluderingmulighet.tilretteleggingmuligheter).containsExactlyInAnyOrder(
@@ -66,35 +67,62 @@ class InkluderingsmuligheterTest {
     }
 
     @Test
-    fun `Vi lagrer inkluderingsmuligheter hvis det finnes data men de er en rad og den er tom`() {
+    fun `Vi lagrer inkluderingsmuligheter hvis det finnes data men det er en rad og den er tom`() {
+
+        val tomInkluderingsmulighet = Inkluderingsmulighet(
+            stillingsid = UUID.randomUUID().toString(),
+            radOpprettet = LocalDateTime.now()
+        )
+
+        val lagretId = inkluderingsmuligheterRepository.lagreInkluderingsmuligheter(tomInkluderingsmulighet)
+        println("Lagret rad med ID $lagretId")
+        println("Stilling før Kafka-melding ${inkluderingsmuligheterRepository.hentInkluderingsmulighet(tomInkluderingsmulighet.stillingsid)}")
+
+        val adMedEndretInkluderingsmulighet = enAd(
+            stillingsId = tomInkluderingsmulighet.stillingsid,
+            tags = """["INKLUDERING__ARBEIDSTID"]"""
+        )
+
+        sendMelding(adMedEndretInkluderingsmulighet)
+
+        Thread.sleep(1000)
+
+        // hent ut inkludering
+        val lagretInkluderingsmuligheter = inkluderingsmuligheterRepository.hentInkluderingsmulighet(adMedEndretInkluderingsmulighet.uuid.toString())
+        println(lagretInkluderingsmuligheter)
+
+        // assert på inkludering
+        assertThat(lagretInkluderingsmuligheter.size).isEqualTo(2)
+        assertThat(lagretInkluderingsmuligheter.first().tilretteleggingmuligheter).contains("ARBEIDSTID")
+        assertThat(lagretInkluderingsmuligheter.last().tilretteleggingmuligheter).isEmpty()
+    }
+
+    @Test
+    @Ignore
+    fun `Vi lagrer inkluderingsmuligheter hvis det finnes data men det er en rad og den er tom, og en eldre rad som ikke er tom`() {
 
     }
 
     @Test
-    fun `Vi lagrer inkluderingsmuligheter hvis det finnes data men de er en rad og den er tom, og en eldre rad som ikke er tom`() {
-
-    }
-
-    @Test
+    @Ignore
     fun `Vi lagrer inkluderingsmuligheter hvis det finnes data som er annerledes`() {
     }
 
     @Test
+    @Ignore
     fun `Vi lagrer IKKE inkluderingsmuligheter hvis begge er tomme`() {
     }
 
     @Test
+    @Ignore
     fun `Vi lagrer IKKE inkluderingsmuligheter hvis begge er like`() {
     }
 
-
-
-        @Test
-   @Ignore
+    @Test
     fun `To meldinger på Kafka-topic fører til at vi lagrer to rader`() {
         // Send to Kafka-meldinger
         val stillingsId = UUID.randomUUID()
-        val stillingV1 = enAd(stillingsId, tags = "[]")
+        val stillingV1 = enAd(stillingsId.toString(), tags = "[]")
         val stillingV2 = enAdUtenTag(stillingsId)
 
         sendMelding(stillingV1)
@@ -104,7 +132,7 @@ class InkluderingsmuligheterTest {
         Thread.sleep(100)
 
         // Hent ut lagrede rader
-        val lagretInkluderingsmuligheter = inkluderingsmuligheterRepository.hentInkludering(stillingV1.uuid.toString())
+        val lagretInkluderingsmuligheter = inkluderingsmuligheterRepository.hentInkluderingsmulighet(stillingV1.uuid.toString())
 
         // assert at det er to rader
         assertThat(lagretInkluderingsmuligheter.size).isEqualTo(2)
@@ -114,6 +142,7 @@ class InkluderingsmuligheterTest {
     }
 
     private fun sendMelding(ad: Ad) {
+        println("Sender melding med offset $offset")
         mockConsumer.addRecord(ConsumerRecord(stillingstopic, 0, offset++, ad.uuid.toString(), ad))
     }
 

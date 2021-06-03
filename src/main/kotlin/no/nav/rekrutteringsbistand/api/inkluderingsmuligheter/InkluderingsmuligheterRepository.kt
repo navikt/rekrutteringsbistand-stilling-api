@@ -30,8 +30,6 @@ data class Inkluderingsmulighet(
                     statligInkluderingsdugnad == other.statligInkluderingsdugnad
 
     fun <T> containsExactly(l1: List<T>, l2: List<T>): Boolean = l1.containsAll(l2) && l2.containsAll(l1)
-
-
 }
 
 @Repository
@@ -57,23 +55,31 @@ class InkluderingsmuligheterRepository(val namedJdbcTemplate: NamedParameterJdbc
         return retur
     }
 
-    fun hentInkludering(stillingId: String): List<Inkluderingsmulighet> {
-        return namedJdbcTemplate.query("SELECT * FROM $inkluderingsmuligheterTabell WHERE $stillingsidFelt = '$stillingId'")
-        { rs: ResultSet, _: Int ->
-            Inkluderingsmulighet(
-                    stillingsid = rs.getString(stillingsidFelt),
-                    tilretteleggingmuligheter = tilStringListe(rs.getString(tilretteleggingmuligheterFelt)),
-                    virkemidler = tilStringListe(rs.getString(virkemidlerFelt)),
-                    prioriterteMålgrupper = tilStringListe(rs.getString(prioriterteMålgrupperFelt)),
-                    statligInkluderingsdugnad = rs.getBoolean(statligInkluderingsdugnadFelt),
-                    radOpprettet = rs.getTimestamp(radOpprettetFelt).toLocalDateTime()
-            )
-        }
+    fun hentInkluderingsmulighet(stillingId: String): List<Inkluderingsmulighet> {
+        return namedJdbcTemplate.query("SELECT * FROM $inkluderingsmuligheterTabell WHERE $stillingsidFelt = '$stillingId' ORDER BY $idFelt DESC")
+        { rs: ResultSet, _: Int -> tilInkludering(rs) }
+    }
+
+    fun hentSisteInkluderingsmulighet(stillingId: String): Inkluderingsmulighet? {
+        return namedJdbcTemplate.query("SELECT * FROM $inkluderingsmuligheterTabell WHERE $stillingsidFelt = '$stillingId' ORDER BY $idFelt DESC LIMIT 1")
+        { rs: ResultSet, _: Int -> tilInkludering(rs) }.firstOrNull()
+    }
+
+    private fun tilInkludering(rs: ResultSet): Inkluderingsmulighet {
+        return Inkluderingsmulighet(
+            stillingsid = rs.getString(stillingsidFelt),
+            tilretteleggingmuligheter = tilStringListe(rs.getString(tilretteleggingmuligheterFelt)),
+            virkemidler = tilStringListe(rs.getString(virkemidlerFelt)),
+            prioriterteMålgrupper = tilStringListe(rs.getString(prioriterteMålgrupperFelt)),
+            statligInkluderingsdugnad = rs.getBoolean(statligInkluderingsdugnadFelt),
+            radOpprettet = rs.getTimestamp(radOpprettetFelt).toLocalDateTime()
+        )
     }
 
     private fun tilStringListe(string: String): List<String> {
         return ObjectMapper().readValue(string)
     }
+
 
     companion object {
         const val inkluderingsmuligheterTabell = "inkluderingsmuligheter"

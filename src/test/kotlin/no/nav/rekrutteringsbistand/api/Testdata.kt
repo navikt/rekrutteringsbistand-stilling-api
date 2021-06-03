@@ -150,8 +150,8 @@ object Testdata {
             stilling = enFjerdeStilling.tilStilling()
     )
 
-    fun enAd(stillingsId: UUID = UUID.randomUUID(), tags: String) = Ad(
-            stillingsId.toString(),
+    fun enAd(stillingsId: String = UUID.randomUUID().toString(), tags: String) = Ad(
+            stillingsId,
             "annonsenr",
             "tittel",
             AdStatus.ACTIVE,
