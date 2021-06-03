@@ -177,37 +177,27 @@ class InkluderingsmuligheterTest {
     }
 
     @Test
-    @Ignore
+    fun `Vi lagrer IKKE inkluderingsmuligheter hvis melding er tom og db er tom`() {
+
+        val adMedEndretInkluderingsmulighet = enAdUtenTag()
+
+        sendMelding(adMedEndretInkluderingsmulighet)
+
+        ventLitt()
+
+        val lagretInkluderingsmuligheter = inkluderingsmuligheterRepository.hentInkluderingsmulighet(adMedEndretInkluderingsmulighet.uuid.toString())
+
+        assertThat(lagretInkluderingsmuligheter).isEmpty()
+    }
+
+    @Test
     fun `Vi lagrer IKKE inkluderingsmuligheter hvis begge er tomme`() {
+
     }
 
     @Test
     @Ignore
     fun `Vi lagrer IKKE inkluderingsmuligheter hvis begge er like`() {
-    }
-
-    @Test
-    @Ignore
-    fun `To meldinger på Kafka-topic fører til at vi lagrer to rader`() {
-        // Send to Kafka-meldinger
-        val stillingsId = UUID.randomUUID()
-        val stillingV1 = enAd(stillingsId.toString(), tags = "[]")
-        val stillingV2 = enAdUtenTag(stillingsId)
-
-        sendMelding(stillingV1)
-        ventLitt()
-        sendMelding(stillingV2)
-
-        ventLitt()
-
-        // Hent ut lagrede rader
-        val lagretInkluderingsmuligheter = inkluderingsmuligheterRepository.hentInkluderingsmulighet(stillingV1.uuid.toString())
-
-        // assert at det er to rader
-        assertThat(lagretInkluderingsmuligheter.size).isEqualTo(2)
-        assertThat(lagretInkluderingsmuligheter.first().tilretteleggingmuligheter).isEmpty()
-        assertThat(lagretInkluderingsmuligheter[1].tilretteleggingmuligheter).isEmpty()
-        // assert at hentNyeste henter nyeste
     }
 
     private fun sendMelding(ad: Ad) {

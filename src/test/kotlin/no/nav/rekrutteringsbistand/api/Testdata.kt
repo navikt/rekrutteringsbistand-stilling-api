@@ -201,8 +201,8 @@ object Testdata {
             )
     )
 
-    fun enAdUtenTag(stillingsId: UUID = UUID.randomUUID()) = Ad(
-            stillingsId.toString(),
+    fun enAdUtenTag(stillingsId: String = UUID.randomUUID().toString()) = Ad(
+            stillingsId,
             "annonsenr",
             "tittel",
             AdStatus.ACTIVE,
