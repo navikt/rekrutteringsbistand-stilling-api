@@ -119,6 +119,7 @@ class InkluderingsmuligheterTest {
     }
 
     @Test
+    @Ignore
     fun `To meldinger på Kafka-topic fører til at vi lagrer to rader`() {
         // Send to Kafka-meldinger
         val stillingsId = UUID.randomUUID()
