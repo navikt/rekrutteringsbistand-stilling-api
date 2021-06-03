@@ -220,8 +220,30 @@ class InkluderingsmuligheterTest {
     }
 
     @Test
-    @Ignore
     fun `Vi lagrer IKKE inkluderingsmuligheter hvis begge er like`() {
+        val stillingsid = UUID.randomUUID().toString()
+        val inkluderingsmulighet = Inkluderingsmulighet(
+            stillingsid = stillingsid,
+            tilretteleggingmuligheter = listOf("ARBEIDSTID"),
+            radOpprettet = LocalDateTime.now()
+        )
+
+        inkluderingsmuligheterRepository.lagreInkluderingsmuligheter(inkluderingsmulighet)
+
+        val adMedEndretInkluderingsmulighet = enAd(
+            stillingsId = stillingsid,
+            tags = """["INKLUDERING__ARBEIDSTID"]"""
+        )
+
+        sendMelding(adMedEndretInkluderingsmulighet)
+
+        ventLitt()
+
+        val lagretInkluderingsmuligheter = inkluderingsmuligheterRepository.hentInkluderingsmulighet(stillingsid)
+
+        assertThat(lagretInkluderingsmuligheter.size).isEqualTo(1)
+
+        assertThat(lagretInkluderingsmuligheter[0].tilretteleggingmuligheter).contains("ARBEIDSTID")
     }
 
     private fun sendMelding(ad: Ad) {
