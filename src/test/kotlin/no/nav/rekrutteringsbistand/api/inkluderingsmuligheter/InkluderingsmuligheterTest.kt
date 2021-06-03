@@ -30,7 +30,7 @@ class InkluderingsmuligheterTest {
     var offset: Long = 1
 
     @Test
-    fun `Melding på Kafka-topic fører til at vi lagrer inkluderingsmuligheter i databasen`() {
+    fun `Vi lagrer inkluderingsmuligheter hvis det ikke finnes data`() {
         val stilling = enAd(tags = """["INKLUDERING", "INKLUDERING__ARBEIDSTID", "INKLUDERING__FYSISK", "INKLUDERING__ARBEIDSMILJØ", "INKLUDERING__GRUNNLEGGENDE", "TILTAK_ELLER_VIRKEMIDDEL", "TILTAK_ELLER_VIRKEMIDDEL__LØNNSTILSKUDD", "TILTAK_ELLER_VIRKEMIDDEL__MENTORTILSKUDD", "TILTAK_ELLER_VIRKEMIDDEL__LÆRLINGPLASS", "PRIORITERT_MÅLGRUPPE", "PRIORITERT_MÅLGRUPPE__UNGE_UNDER_30", "PRIORITERT_MÅLGRUPPE__SENIORER_OVER_45", "PRIORITERT_MÅLGRUPPE__KOMMER_FRA_LAND_UTENFOR_EØS", "PRIORITERT_MÅLGRUPPE__HULL_I_CV_EN", "PRIORITERT_MÅLGRUPPE__LITE_ELLER_INGEN_UTDANNING", "PRIORITERT_MÅLGRUPPE__LITE_ELLER_INGEN_ARBEIDSERFARING", "STATLIG_INKLUDERINGSDUGNAD"]""")
         sendMelding(stilling)
 
@@ -65,7 +65,32 @@ class InkluderingsmuligheterTest {
         assertThat(lagretInkluderingmulighet.radOpprettet).isBetween(LocalDateTime.now().minusSeconds(1), LocalDateTime.now())
     }
 
-   /* @Test
+    @Test
+    fun `Vi lagrer inkluderingsmuligheter hvis det finnes data men de er en rad og den er tom`() {
+
+    }
+
+    @Test
+    fun `Vi lagrer inkluderingsmuligheter hvis det finnes data men de er en rad og den er tom, og en eldre rad som ikke er tom`() {
+
+    }
+
+    @Test
+    fun `Vi lagrer inkluderingsmuligheter hvis det finnes data som er annerledes`() {
+    }
+
+    @Test
+    fun `Vi lagrer IKKE inkluderingsmuligheter hvis begge er tomme`() {
+    }
+
+    @Test
+    fun `Vi lagrer IKKE inkluderingsmuligheter hvis begge er like`() {
+    }
+
+
+
+        @Test
+   @Ignore
     fun `To meldinger på Kafka-topic fører til at vi lagrer to rader`() {
         // Send to Kafka-meldinger
         val stillingsId = UUID.randomUUID()
@@ -86,7 +111,7 @@ class InkluderingsmuligheterTest {
         assertThat(lagretInkluderingsmuligheter.first().tilretteleggingmuligheter).isEmpty()
         assertThat(lagretInkluderingsmuligheter[1].tilretteleggingmuligheter).isEmpty()
         // assert at hentNyeste henter nyeste
-    }*/
+    }
 
     private fun sendMelding(ad: Ad) {
         mockConsumer.addRecord(ConsumerRecord(stillingstopic, 0, offset++, ad.uuid.toString(), ad))
