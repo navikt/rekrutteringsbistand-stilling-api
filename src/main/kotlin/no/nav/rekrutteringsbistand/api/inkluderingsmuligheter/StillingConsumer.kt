@@ -28,13 +28,12 @@ class StillingConsumer(
             while (true) {
                 val records: ConsumerRecords<String, Ad> = consumer.poll(Duration.ofSeconds(5))
                 if (records.count() == 0) continue
-                else if (records.count() != 1) throw RuntimeException("Forventet batchsize 1")
 
-                val stilling = records.map { it.value() }.first()
-
-                LOG.info("Stilling mottatt, stillingsId: ${stilling.uuid}")
-
-                inkluderingsmuligheterService.lagreInkluderingsmuligheter(stilling)
+                val stilling = records.map { it.value() }
+                LOG.info("Stillinger mottatt, stillingsId: ${stilling.map { it.uuid }}")
+                stilling.forEach {
+                    inkluderingsmuligheterService.lagreInkluderingsmuligheter(it)
+                }
                 consumer.commitSync()
 
                 LOG.info("Committet offset ${records.last().offset()} til Kafka")

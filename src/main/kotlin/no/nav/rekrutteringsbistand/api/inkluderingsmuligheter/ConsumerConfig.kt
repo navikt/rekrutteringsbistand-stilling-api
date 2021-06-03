@@ -26,7 +26,7 @@ class ConsumerConfig {
     fun kafkaConsumer(): Consumer<String, Ad> = KafkaConsumer(consumerConfig(versjon = 2))
 
     private fun consumerConfig(versjon: Int) = Properties().apply {
-        put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 1)
+        put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 100)
         put(ConsumerConfig.GROUP_ID_CONFIG, "rekrutteringsbistand-stilling-til-inkludering-$versjon")
         put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false)
         put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")

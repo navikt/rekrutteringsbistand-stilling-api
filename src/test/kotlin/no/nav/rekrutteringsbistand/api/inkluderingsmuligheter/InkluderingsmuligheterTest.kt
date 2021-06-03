@@ -112,6 +112,33 @@ class InkluderingsmuligheterTest {
     }
 
     @Test
+    fun `Vi lagrer inkluderingsmuligheter i batch hvis det finnes data men det er en rad og den er tom`() {
+
+        val stillingsid = UUID.randomUUID().toString()
+
+        val adMedEndretInkluderingsmulighet1 = enAd(
+            stillingsId = stillingsid,
+            tags = """["INKLUDERING__ARBEIDSTID"]"""
+        )
+
+        val adMedEndretInkluderingsmulighet2 = enAd(
+            stillingsId = stillingsid,
+            tags = """["INKLUDERING__FYSISK"]"""
+        )
+
+        sendMelding(adMedEndretInkluderingsmulighet1)
+        sendMelding(adMedEndretInkluderingsmulighet2)
+
+        ventLitt()
+
+        val lagretInkluderingsmuligheter = inkluderingsmuligheterRepository.hentInkluderingsmulighet(stillingsid)
+
+        assertThat(lagretInkluderingsmuligheter.size).isEqualTo(2)
+        assertThat(lagretInkluderingsmuligheter[0].tilretteleggingmuligheter).contains("FYSISK")
+        assertThat(lagretInkluderingsmuligheter[1].tilretteleggingmuligheter).contains("ARBEIDSTID")
+    }
+
+    @Test
     fun `Vi lagrer inkluderingsmuligheter hvis det finnes data men det er en rad og den er tom, og en eldre rad som ikke er tom`() {
         val tomInkluderingsmulighet = Inkluderingsmulighet(
             stillingsid = UUID.randomUUID().toString(),

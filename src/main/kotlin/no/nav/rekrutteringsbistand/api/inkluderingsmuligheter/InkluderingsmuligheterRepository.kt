@@ -51,7 +51,7 @@ class InkluderingsmuligheterRepository(val namedJdbcTemplate: NamedParameterJdbc
                         radOpprettetFelt to inkluderingsmulighet.radOpprettet
                 )
         )
-        LOG.info("Lagret stilling med dbid: $retur og stillingsid: ${inkluderingsmulighet.stillingsid}")
+        LOG.info("Lagret inkludering med dbid: $retur og stillingsid: ${inkluderingsmulighet.stillingsid}")
         return retur
     }
 
