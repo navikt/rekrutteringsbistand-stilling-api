@@ -32,10 +32,29 @@ class InkluderingsmuligheterTest {
 
     @Test
     fun `Vi lagrer inkluderingsmuligheter hvis det ikke finnes data`() {
-        val stilling = enAd(tags = """["INKLUDERING", "INKLUDERING__ARBEIDSTID", "INKLUDERING__FYSISK", "INKLUDERING__ARBEIDSMILJØ", "INKLUDERING__GRUNNLEGGENDE", "TILTAK_ELLER_VIRKEMIDDEL", "TILTAK_ELLER_VIRKEMIDDEL__LØNNSTILSKUDD", "TILTAK_ELLER_VIRKEMIDDEL__MENTORTILSKUDD", "TILTAK_ELLER_VIRKEMIDDEL__LÆRLINGPLASS", "PRIORITERT_MÅLGRUPPE", "PRIORITERT_MÅLGRUPPE__UNGE_UNDER_30", "PRIORITERT_MÅLGRUPPE__SENIORER_OVER_45", "PRIORITERT_MÅLGRUPPE__KOMMER_FRA_LAND_UTENFOR_EØS", "PRIORITERT_MÅLGRUPPE__HULL_I_CV_EN", "PRIORITERT_MÅLGRUPPE__LITE_ELLER_INGEN_UTDANNING", "PRIORITERT_MÅLGRUPPE__LITE_ELLER_INGEN_ARBEIDSERFARING", "STATLIG_INKLUDERINGSDUGNAD"]""")
+        val stilling = enAd(tags =
+            """["INKLUDERING",
+                "INKLUDERING__ARBEIDSTID",
+                "INKLUDERING__FYSISK",
+                "INKLUDERING__ARBEIDSMILJØ",
+                "INKLUDERING__GRUNNLEGGENDE",
+                "TILTAK_ELLER_VIRKEMIDDEL",
+                "TILTAK_ELLER_VIRKEMIDDEL__LØNNSTILSKUDD",
+                "TILTAK_ELLER_VIRKEMIDDEL__MENTORTILSKUDD",
+                "TILTAK_ELLER_VIRKEMIDDEL__LÆRLINGPLASS",
+                "PRIORITERT_MÅLGRUPPE",
+                "PRIORITERT_MÅLGRUPPE__UNGE_UNDER_30",
+                "PRIORITERT_MÅLGRUPPE__SENIORER_OVER_45",
+                "PRIORITERT_MÅLGRUPPE__KOMMER_FRA_LAND_UTENFOR_EØS",
+                "PRIORITERT_MÅLGRUPPE__HULL_I_CV_EN",
+                "PRIORITERT_MÅLGRUPPE__LITE_ELLER_INGEN_UTDANNING",
+                "PRIORITERT_MÅLGRUPPE__LITE_ELLER_INGEN_ARBEIDSERFARING",
+                "STATLIG_INKLUDERINGSDUGNAD"]"""
+        )
+
         sendMelding(stilling)
 
-        Thread.sleep(300)
+        ventLitt()
 
         val lagretInkluderingmulighet = inkluderingsmuligheterRepository.hentSisteInkluderingsmulighet(stilling.uuid.toString())!!
 
@@ -83,12 +102,10 @@ class InkluderingsmuligheterTest {
 
         sendMelding(adMedEndretInkluderingsmulighet)
 
-        Thread.sleep(1000)
+        ventLitt()
 
-        // hent ut inkludering
         val lagretInkluderingsmuligheter = inkluderingsmuligheterRepository.hentInkluderingsmulighet(adMedEndretInkluderingsmulighet.uuid.toString())
 
-        // assert på inkludering
         assertThat(lagretInkluderingsmuligheter.size).isEqualTo(2)
         assertThat(lagretInkluderingsmuligheter.first().tilretteleggingmuligheter).contains("ARBEIDSTID")
         assertThat(lagretInkluderingsmuligheter.last().tilretteleggingmuligheter).isEmpty()
@@ -96,7 +113,6 @@ class InkluderingsmuligheterTest {
 
     @Test
     fun `Vi lagrer inkluderingsmuligheter hvis det finnes data men det er en rad og den er tom, og en eldre rad som ikke er tom`() {
-
         val tomInkluderingsmulighet = Inkluderingsmulighet(
             stillingsid = UUID.randomUUID().toString(),
             radOpprettet = LocalDateTime.now()
@@ -111,7 +127,6 @@ class InkluderingsmuligheterTest {
         inkluderingsmuligheterRepository.lagreInkluderingsmuligheter(tomInkluderingsmulighet)
 
 
-
         val adMedEndretInkluderingsmulighet = enAd(
             stillingsId = tomInkluderingsmulighet.stillingsid,
             tags = """["INKLUDERING__ARBEIDSTID"]"""
@@ -119,12 +134,10 @@ class InkluderingsmuligheterTest {
 
         sendMelding(adMedEndretInkluderingsmulighet)
 
-        Thread.sleep(1000)
+        ventLitt()
 
-        // hent ut inkludering
         val lagretInkluderingsmuligheter = inkluderingsmuligheterRepository.hentInkluderingsmulighet(adMedEndretInkluderingsmulighet.uuid.toString())
 
-        // assert på inkludering
         assertThat(lagretInkluderingsmuligheter.size).isEqualTo(3)
 
         assertThat(lagretInkluderingsmuligheter[2].prioriterteMålgrupper).contains("KOMMER_FRA_LAND_UTENFOR_EØS")
@@ -134,8 +147,33 @@ class InkluderingsmuligheterTest {
     }
 
     @Test
-    @Ignore
     fun `Vi lagrer inkluderingsmuligheter hvis det finnes data som er annerledes`() {
+        val inkluderingsmulighet = Inkluderingsmulighet(
+            stillingsid = UUID.randomUUID().toString(),
+            statligInkluderingsdugnad = true,
+            prioriterteMålgrupper = listOf("KOMMER_FRA_LAND_UTENFOR_EØS"),
+            radOpprettet = LocalDateTime.now()
+        )
+
+        inkluderingsmuligheterRepository.lagreInkluderingsmuligheter(inkluderingsmulighet)
+
+
+        val adMedEndretInkluderingsmulighet = enAd(
+            stillingsId = inkluderingsmulighet.stillingsid,
+            tags = """["INKLUDERING__ARBEIDSTID"]"""
+        )
+
+        sendMelding(adMedEndretInkluderingsmulighet)
+
+        ventLitt()
+
+        val lagretInkluderingsmuligheter = inkluderingsmuligheterRepository.hentInkluderingsmulighet(adMedEndretInkluderingsmulighet.uuid.toString())
+
+        assertThat(lagretInkluderingsmuligheter.size).isEqualTo(2)
+
+        assertThat(lagretInkluderingsmuligheter[1].prioriterteMålgrupper).contains("KOMMER_FRA_LAND_UTENFOR_EØS")
+        assertThat(lagretInkluderingsmuligheter[1].tilretteleggingmuligheter).isEmpty()
+        assertThat(lagretInkluderingsmuligheter[0].tilretteleggingmuligheter).contains("ARBEIDSTID")
     }
 
     @Test
@@ -157,10 +195,10 @@ class InkluderingsmuligheterTest {
         val stillingV2 = enAdUtenTag(stillingsId)
 
         sendMelding(stillingV1)
-        Thread.sleep(100)
+        ventLitt()
         sendMelding(stillingV2)
 
-        Thread.sleep(100)
+        ventLitt()
 
         // Hent ut lagrede rader
         val lagretInkluderingsmuligheter = inkluderingsmuligheterRepository.hentInkluderingsmulighet(stillingV1.uuid.toString())
@@ -176,6 +214,7 @@ class InkluderingsmuligheterTest {
         mockConsumer.addRecord(ConsumerRecord(stillingstopic, 0, offset++, ad.uuid.toString(), ad))
     }
 
+    private fun ventLitt() = Thread.sleep(300)
 
 
 }
