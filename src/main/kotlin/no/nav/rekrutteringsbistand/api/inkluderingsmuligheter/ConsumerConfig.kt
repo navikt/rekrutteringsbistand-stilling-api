@@ -23,7 +23,7 @@ class ConsumerConfig {
 
     @Bean
     @Profile("dev", "prod")
-    fun kafkaConsumer(): Consumer<String, Ad> = KafkaConsumer(consumerConfig(versjon = 1))
+    fun kafkaConsumer(): Consumer<String, Ad> = KafkaConsumer(consumerConfig(versjon = 2))
 
     private fun consumerConfig(versjon: Int) = Properties().apply {
         put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 1)
