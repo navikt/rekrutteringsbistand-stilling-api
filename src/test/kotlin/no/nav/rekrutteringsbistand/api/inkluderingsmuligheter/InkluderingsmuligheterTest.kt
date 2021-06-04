@@ -6,7 +6,6 @@ import no.nav.rekrutteringsbistand.api.Testdata.enAdUtenTag
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.MockConsumer
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -60,20 +59,17 @@ class InkluderingsmuligheterTest {
 
         assertThat(lagretInkluderingmulighet.stillingsid).isEqualTo(stilling.uuid)
         assertThat(lagretInkluderingmulighet.tilretteleggingmuligheter).containsExactlyInAnyOrder(
-            "INKLUDERING_KATEGORI",
             "ARBEIDSTID",
             "FYSISK",
             "ARBEIDSMILJØ",
             "GRUNNLEGGENDE"
         )
         assertThat(lagretInkluderingmulighet.virkemidler).containsExactlyInAnyOrder(
-            "TILTAK_ELLER_VIRKEMIDDEL_KATEGORI",
             "LØNNSTILSKUDD",
             "MENTORTILSKUDD",
             "LÆRLINGPLASS"
         )
         assertThat(lagretInkluderingmulighet.prioriterteMålgrupper).containsExactlyInAnyOrder(
-            "PRIORITERT_MÅLGRUPPE_KATEGORI",
             "UNGE_UNDER_30",
             "SENIORER_OVER_45",
             "KOMMER_FRA_LAND_UTENFOR_EØS",
@@ -97,7 +93,7 @@ class InkluderingsmuligheterTest {
 
         val adMedEndretInkluderingsmulighet = enAd(
             stillingsId = tomInkluderingsmulighet.stillingsid,
-            tags = """["INKLUDERING__ARBEIDSTID"]"""
+            tags = """["INKLUDERING", "INKLUDERING__ARBEIDSTID"]"""
         )
 
         sendMelding(adMedEndretInkluderingsmulighet)
@@ -107,7 +103,7 @@ class InkluderingsmuligheterTest {
         val lagretInkluderingsmuligheter = inkluderingsmuligheterRepository.hentInkluderingsmulighet(adMedEndretInkluderingsmulighet.uuid.toString())
 
         assertThat(lagretInkluderingsmuligheter.size).isEqualTo(2)
-        assertThat(lagretInkluderingsmuligheter.first().tilretteleggingmuligheter).contains("ARBEIDSTID")
+        assertThat(lagretInkluderingsmuligheter.first().tilretteleggingmuligheter).containsExactly("ARBEIDSTID")
         assertThat(lagretInkluderingsmuligheter.last().tilretteleggingmuligheter).isEmpty()
     }
 
@@ -118,12 +114,12 @@ class InkluderingsmuligheterTest {
 
         val adMedEndretInkluderingsmulighet1 = enAd(
             stillingsId = stillingsid,
-            tags = """["INKLUDERING__ARBEIDSTID"]"""
+            tags = """["INKLUDERING", "INKLUDERING__ARBEIDSTID"]"""
         )
 
         val adMedEndretInkluderingsmulighet2 = enAd(
             stillingsId = stillingsid,
-            tags = """["INKLUDERING__FYSISK"]"""
+            tags = """["INKLUDERING", "INKLUDERING__FYSISK"]"""
         )
 
         sendMelding(adMedEndretInkluderingsmulighet1)
@@ -134,8 +130,8 @@ class InkluderingsmuligheterTest {
         val lagretInkluderingsmuligheter = inkluderingsmuligheterRepository.hentInkluderingsmulighet(stillingsid)
 
         assertThat(lagretInkluderingsmuligheter.size).isEqualTo(2)
-        assertThat(lagretInkluderingsmuligheter[0].tilretteleggingmuligheter).contains("FYSISK")
-        assertThat(lagretInkluderingsmuligheter[1].tilretteleggingmuligheter).contains("ARBEIDSTID")
+        assertThat(lagretInkluderingsmuligheter[0].tilretteleggingmuligheter).containsExactly("FYSISK")
+        assertThat(lagretInkluderingsmuligheter[1].tilretteleggingmuligheter).containsExactly("ARBEIDSTID")
     }
 
     @Test
@@ -156,7 +152,7 @@ class InkluderingsmuligheterTest {
 
         val adMedEndretInkluderingsmulighet = enAd(
             stillingsId = tomInkluderingsmulighet.stillingsid,
-            tags = """["INKLUDERING__ARBEIDSTID"]"""
+            tags = """["INKLUDERING", "INKLUDERING__ARBEIDSTID"]"""
         )
 
         sendMelding(adMedEndretInkluderingsmulighet)
@@ -167,10 +163,10 @@ class InkluderingsmuligheterTest {
 
         assertThat(lagretInkluderingsmuligheter.size).isEqualTo(3)
 
-        assertThat(lagretInkluderingsmuligheter[2].prioriterteMålgrupper).contains("KOMMER_FRA_LAND_UTENFOR_EØS")
+        assertThat(lagretInkluderingsmuligheter[2].prioriterteMålgrupper).containsExactly("KOMMER_FRA_LAND_UTENFOR_EØS")
         assertThat(lagretInkluderingsmuligheter[2].tilretteleggingmuligheter).isEmpty()
         assertThat(lagretInkluderingsmuligheter[1].harInkludering()).isFalse
-        assertThat(lagretInkluderingsmuligheter[0].tilretteleggingmuligheter).contains("ARBEIDSTID")
+        assertThat(lagretInkluderingsmuligheter[0].tilretteleggingmuligheter).containsExactly("ARBEIDSTID")
     }
 
     @Test
@@ -187,7 +183,7 @@ class InkluderingsmuligheterTest {
 
         val adMedEndretInkluderingsmulighet = enAd(
             stillingsId = inkluderingsmulighet.stillingsid,
-            tags = """["INKLUDERING__ARBEIDSTID"]"""
+            tags = """["INKLUDERING", "INKLUDERING__ARBEIDSTID"]"""
         )
 
         sendMelding(adMedEndretInkluderingsmulighet)
@@ -198,9 +194,9 @@ class InkluderingsmuligheterTest {
 
         assertThat(lagretInkluderingsmuligheter.size).isEqualTo(2)
 
-        assertThat(lagretInkluderingsmuligheter[1].prioriterteMålgrupper).contains("KOMMER_FRA_LAND_UTENFOR_EØS")
+        assertThat(lagretInkluderingsmuligheter[1].prioriterteMålgrupper).containsExactly("KOMMER_FRA_LAND_UTENFOR_EØS")
         assertThat(lagretInkluderingsmuligheter[1].tilretteleggingmuligheter).isEmpty()
-        assertThat(lagretInkluderingsmuligheter[0].tilretteleggingmuligheter).contains("ARBEIDSTID")
+        assertThat(lagretInkluderingsmuligheter[0].tilretteleggingmuligheter).containsExactly("ARBEIDSTID")
     }
 
     @Test
@@ -242,7 +238,7 @@ class InkluderingsmuligheterTest {
         val lagretInkluderingsmuligheter = inkluderingsmuligheterRepository.hentInkluderingsmulighet(stillingdId)
 
         assertThat(lagretInkluderingsmuligheter.size).isEqualTo(2)
-        assertThat(lagretInkluderingsmuligheter[1].prioriterteMålgrupper).contains("KOMMER_FRA_LAND_UTENFOR_EØS")
+        assertThat(lagretInkluderingsmuligheter[1].prioriterteMålgrupper).containsExactly("KOMMER_FRA_LAND_UTENFOR_EØS")
         assertThat(lagretInkluderingsmuligheter[0].harInkludering()).isFalse
     }
 
@@ -259,7 +255,7 @@ class InkluderingsmuligheterTest {
 
         val adMedEndretInkluderingsmulighet = enAd(
             stillingsId = stillingsid,
-            tags = """["INKLUDERING__ARBEIDSTID"]"""
+            tags = """["INKLUDERING", "INKLUDERING__ARBEIDSTID"]"""
         )
 
         sendMelding(adMedEndretInkluderingsmulighet)
@@ -269,8 +265,7 @@ class InkluderingsmuligheterTest {
         val lagretInkluderingsmuligheter = inkluderingsmuligheterRepository.hentInkluderingsmulighet(stillingsid)
 
         assertThat(lagretInkluderingsmuligheter.size).isEqualTo(1)
-
-        assertThat(lagretInkluderingsmuligheter[0].tilretteleggingmuligheter).contains("ARBEIDSTID")
+        assertThat(lagretInkluderingsmuligheter[0].tilretteleggingmuligheter).containsExactly("ARBEIDSTID")
     }
 
     private fun sendMelding(ad: Ad) {

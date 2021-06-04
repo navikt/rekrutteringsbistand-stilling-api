@@ -7,7 +7,6 @@ import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
 import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteKlient
 import no.nav.rekrutteringsbistand.api.option.Option
 import no.nav.rekrutteringsbistand.api.stillingsinfo.*
-import no.nav.rekrutteringsbistand.api.support.LOG
 import no.nav.rekrutteringsbistand.api.support.config.ExternalConfiguration
 import no.nav.rekrutteringsbistand.api.support.rest.RestProxy
 import no.nav.rekrutteringsbistand.api.support.rest.RestResponseEntityExceptionHandler
@@ -205,25 +204,16 @@ class StillingService(
     }
 
     fun hentStillinger(url: String, queryString: String?): Page<StillingMedStillingsinfo> {
-        val startAlt = System.currentTimeMillis()
-
-        val startHentFraArbplassen = System.currentTimeMillis()
         val opprinneligeStillingerPage: Page<StillingMedStillingsinfo> = hent(url, queryString, headers())
             ?: throw RestResponseEntityExceptionHandler.NoContentException("Fant ikke stillinger")
-        val stoppHentFraArbplassen = System.currentTimeMillis()
 
         val opprinneligeStillinger = opprinneligeStillingerPage.content
 
-        val startBerikFraEgenDb = System.currentTimeMillis()
         val stillingsinfoer = opprinneligeStillinger.map(::hentStillingsinfo)
-        val stoppBerikFraEgenDb = System.currentTimeMillis()
 
         val newContent = stillingsinfoer.zip(opprinneligeStillinger, ::leggPåStillingsinfo)
-        val result = opprinneligeStillingerPage.copy(content = newContent)
 
-        val stoppAlt = System.currentTimeMillis()
-        LOG.info("Tidsmåling ms hentStillinger: ${stoppAlt - startAlt}, hentFraArbplassen: ${stoppHentFraArbplassen - startHentFraArbplassen}, berikFraEgenDb: ${stoppBerikFraEgenDb - startBerikFraEgenDb}")
-        return result
+        return opprinneligeStillingerPage.copy(content = newContent)
     }
 
     private fun leggPåStillingsinfo(

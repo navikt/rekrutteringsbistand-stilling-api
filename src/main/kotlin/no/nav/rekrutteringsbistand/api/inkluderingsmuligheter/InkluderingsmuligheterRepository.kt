@@ -41,7 +41,7 @@ class InkluderingsmuligheterRepository(val namedJdbcTemplate: NamedParameterJdbc
             .usingGeneratedKeyColumns("id")
 
     fun lagreInkluderingsmuligheter(inkluderingsmulighet: Inkluderingsmulighet): Number {
-        val retur = simpleJdbcInsert.executeAndReturnKey(
+        val dbId = simpleJdbcInsert.executeAndReturnKey(
                 mapOf(
                         stillingsidFelt to inkluderingsmulighet.stillingsid,
                         tilretteleggingmuligheterFelt to objectMapper.writeValueAsString(inkluderingsmulighet.tilretteleggingmuligheter),
@@ -51,8 +51,8 @@ class InkluderingsmuligheterRepository(val namedJdbcTemplate: NamedParameterJdbc
                         radOpprettetFelt to inkluderingsmulighet.radOpprettet
                 )
         )
-        LOG.info("Lagret inkludering med dbid: $retur og stillingsid: ${inkluderingsmulighet.stillingsid}")
-        return retur
+        LOG.info("Lagret inkludering med dbid: $dbId og stillingsid: ${inkluderingsmulighet.stillingsid}")
+        return dbId
     }
 
     fun hentInkluderingsmulighet(stillingId: String): List<Inkluderingsmulighet> {
