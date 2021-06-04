@@ -3,6 +3,7 @@ package no.nav.rekrutteringsbistand.api.inkluderingsmuligheter
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.pam.stilling.ext.avro.Ad
+import no.nav.rekrutteringsbistand.api.support.LOG
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 
@@ -10,8 +11,16 @@ import java.time.LocalDateTime
 class InkluderingsmuligheterService(private val inkluderingsmuligheterRepository: InkluderingsmuligheterRepository) {
 
     fun lagreInkluderingsmuligheter(ad: Ad) {
+
+
         val inkluderingsmuligheter = ad.toInkluderingsmuligheter()
-        if (!sisteErLik(inkluderingsmuligheter) ) {
+        val sisteErLik = sisteErLik(inkluderingsmuligheter)
+
+        LOG.info("Skal behandle ad ${ad.uuid} properties: ${ad.properties}")
+        LOG.info("inkluderingsmuligheter for ${ad.uuid}: $inkluderingsmuligheter")
+        LOG.info("sisteErLik for ${ad.uuid}: $sisteErLik")
+
+        if (!sisteErLik) {
             inkluderingsmuligheterRepository.lagreInkluderingsmuligheter(inkluderingsmuligheter)
         }
     }

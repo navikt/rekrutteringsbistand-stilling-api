@@ -29,15 +29,8 @@ class StillingConsumer(
                 if (records.count() == 0) continue
 
                 val stilling = records.map { it.value() }
-                LOG.info(
-                    "Stillinger mottatt, stillingsId: ${
-                        stilling.map {
-                            "${it.uuid} ${
-                                it.properties.filter { it.key == "tags" }.map { " tags ${it.value}" }
-                            }    "
-                        }
-                    }"
-                )
+                val stillingsIder = stilling.map { it.uuid }
+                LOG.info("Stillinger mottatt: $stillingsIder")
 
                 stilling.forEach {
                     inkluderingsmuligheterService.lagreInkluderingsmuligheter(it)
