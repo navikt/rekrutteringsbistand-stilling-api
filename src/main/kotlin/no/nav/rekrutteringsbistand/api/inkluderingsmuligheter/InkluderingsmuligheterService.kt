@@ -36,7 +36,9 @@ class InkluderingsmuligheterService(private val inkluderingsmuligheterRepository
 
     private fun Ad.toInkluderingsmuligheter(): Inkluderingsmulighet {
         LOG.info("toInkluderingsmuligheter $uuid start for ${this.properties}")
-        val tagStrings = this.properties.filter { it.key.equals("tags") }
+        LOG.info("toInkluderingsmuligheter keys ${this.properties.map{it.key}}")
+        LOG.info("toInkluderingsmuligheter keys toString ${this.properties.map{it.key.toString()}}")
+        val tagStrings = this.properties.filter { it.key.toString() == "tags" }
         LOG.info("toInkluderingsmuligheter $uuid tagstring $tagStrings")
         if (tagStrings.isEmpty()) {
             LOG.info("toInkluderingsmuligheter ${uuid} tagstrings er empty, lager tom")
