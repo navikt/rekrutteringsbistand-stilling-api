@@ -19,7 +19,7 @@ import java.util.*
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class InkluderingsmuligheterTest {
     @Test
-    fun ikkeIBrukForNå(){}
+    fun `ikke i bruk for nå`(){}
 /*
     @Autowired
     lateinit var mockConsumer: MockConsumer<String, Ad>

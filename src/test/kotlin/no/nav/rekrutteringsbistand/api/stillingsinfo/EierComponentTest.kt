@@ -4,6 +4,7 @@ import arrow.core.getOrElse
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.github.tomakehurst.wiremock.junit.WireMockRule
+import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.rekrutteringsbistand.api.Testdata.enStillingsinfo
 import no.nav.rekrutteringsbistand.api.support.toMultiValueMap
 import org.assertj.core.api.Assertions.assertThat
@@ -13,6 +14,8 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mockito
+import org.mockito.MockitoAnnotations
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.client.TestRestTemplate
@@ -26,6 +29,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatus.NO_CONTENT
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.test.context.junit4.SpringRunner
+
 
 @RunWith(SpringRunner::class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -42,10 +46,15 @@ class EierComponentTest {
     val restTemplate = TestRestTemplate(ENABLE_COOKIES)
 
     @Autowired
+    lateinit var rapidsConnection: RapidsConnection
+
+    @Autowired
     lateinit var repository: StillingsinfoRepository
 
     @Before
     fun authenticateClient() {
+        MockitoAnnotations.openMocks(this)
+        Mockito.reset(rapidsConnection)
         restTemplate.getForObject("$localBaseUrl/veileder-token-cookie", Unit::class.java)
     }
 
@@ -145,5 +154,44 @@ class EierComponentTest {
                                 .withHeader(CONNECTION, "close") // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
                                 .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE))
         )
+    }
+
+    @Test
+    fun `Opprettelse av stillingsinfo skal publisere endretVeilederHendelse`() {
+        val tilLagring = enStillingsinfo.asEierDto().copy(stillingsinfoid = null)
+        mockKandidatlisteOppdatering()
+
+        val url = "$localBaseUrl/rekruttering"
+        restTemplate.postForEntity(url, httpEntity(tilLagring), EierDto::class.java)
+        val lagretStillingsinfo = repository.hentForStilling(enStillingsinfo.stillingsid).getOrElse { fail("fant ikke stillingen") }
+
+        org.mockito.Mockito.verify(rapidsConnection).publish(enStillingsinfo.stillingsid.asString(),"""{"@event_name":"endret_veileder","@veileder":{"eierNavident":"C12345","eierNavn":"Clark Kent"},"@stillingsid":"${enStillingsinfo.stillingsid.asString()}"}""")
+
+        repository.slett(lagretStillingsinfo.stillingsinfoid)
+    }
+
+    @Test
+    fun `Endring av stillingsinfo skal publisere endretVeilederHendelse`() {
+        repository.lagre(enStillingsinfo)
+        val oppdatering = enStillingsinfo.copy(eier = Eier(navident = "endretIdent", navn = "endretNavn"))
+        mockKandidatlisteOppdatering()
+
+        val url = "$localBaseUrl/rekruttering"
+        restTemplate.exchange("$localBaseUrl/rekruttering", HttpMethod.PUT, httpEntity(oppdatering.asEierDto()), EierDto::class.java)
+        val lagretStillingsinfo = repository.hentForStilling(enStillingsinfo.stillingsid).getOrElse { fail("fant ikke stillingen") }
+
+        org.mockito.Mockito.verify(rapidsConnection).publish(enStillingsinfo.stillingsid.asString(),"""{"@event_name":"endret_veileder","@veileder":{"eierNavident":"endretIdent","eierNavn":"endretNavn"},"@stillingsid":"${enStillingsinfo.stillingsid.asString()}"}""")
+
+        repository.slett(lagretStillingsinfo.stillingsinfoid)
+    }
+
+    @Test
+    fun `Hvis lagring feiler ved oppdatering av stilingsinfo skal endretVeilederHendelse ikke publiseres`() {
+        TODO()
+    }
+
+    @Test
+    fun `Hvis lagring feiler ved endring av stilingsinfo skal endretVeilederHendelse ikke publiseres`() {
+        TODO()
     }
 }

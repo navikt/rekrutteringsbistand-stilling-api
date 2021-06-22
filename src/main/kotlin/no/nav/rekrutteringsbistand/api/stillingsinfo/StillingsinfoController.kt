@@ -5,6 +5,7 @@ import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteKlient
 import no.nav.rekrutteringsbistand.api.support.LOG
 import no.nav.security.token.support.core.api.Protected
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -16,7 +17,8 @@ import java.util.*
 @ProtectedWithClaims(issuer = "isso")
 class EierController(
         val repo: StillingsinfoRepository,
-        val kandidatlisteKlient: KandidatlisteKlient
+        val kandidatlisteKlient: KandidatlisteKlient,
+        private val veilederHendelse: VeilederHendelseService
 ) {
 
     @PostMapping
@@ -30,6 +32,13 @@ class EierController(
                     val dtoMedId = dto.copy(stillingsinfoid = UUID.randomUUID().toString())
                     LOG.debug("lager ny eierinformasjon for stillinginfoid ${dtoMedId.stillingsid} stillingid ${dtoMedId.stillingsinfoid}")
                     repo.lagre(dtoMedId.asStillinginfo())
+                    if(dtoMedId.eierNavident != null && dtoMedId.eierNavn != null) {
+                        veilederHendelse.oppdaterVeileder(
+                            dtoMedId.stillingsid,
+                            dtoMedId.eierNavident,
+                            dtoMedId.eierNavn
+                        )
+                    }
                     kandidatlisteKlient.oppdaterKandidatliste(Stillingsid(dto.stillingsid))
                     ResponseEntity.created(URI("/rekruttering/${dtoMedId.stillingsinfoid}")).body(dtoMedId)
                 }
@@ -41,6 +50,9 @@ class EierController(
 
         LOG.debug("Oppdaterer eierinformasjon for stillingInfoid ${dto.asStillinginfo().stillingsinfoid.asString()} stillingid  ${dto.asStillinginfo().stillingsid.asString()}")
         repo.oppdaterEierIdentOgEierNavn(dto.asOppdaterEierinfo())
+        if(dto.eierNavident != null && dto.eierNavn != null) {
+            veilederHendelse.oppdaterVeileder(dto.stillingsid, dto.eierNavident, dto.eierNavn)
+        }
         kandidatlisteKlient.oppdaterKandidatliste(dto.asStillinginfo().stillingsid)
         return ResponseEntity.ok().body(dto)
     }
