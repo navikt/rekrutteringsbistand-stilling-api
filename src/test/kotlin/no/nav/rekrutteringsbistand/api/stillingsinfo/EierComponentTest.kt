@@ -15,6 +15,8 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito
+import org.mockito.Mockito.anyString
+import org.mockito.Mockito.times
 import org.mockito.MockitoAnnotations
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -29,6 +31,8 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatus.NO_CONTENT
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.test.context.junit4.SpringRunner
+import java.util.*
+import kotlin.text.Typography.times
 
 
 @RunWith(SpringRunner::class)
@@ -187,11 +191,17 @@ class EierComponentTest {
 
     @Test
     fun `Hvis lagring feiler ved oppdatering av stilingsinfo skal endretVeilederHendelse ikke publiseres`() {
-        TODO()
-    }
+        repository.lagre(enStillingsinfo)
+        val oppdatering = enStillingsinfo.copy(eier = Eier(navident = "endretIdent", navn = "endretNavn"), stillingsinfoid = Stillingsinfoid(
+            UUID.randomUUID().toString()
+        ))
+        mockKandidatlisteOppdatering()
 
-    @Test
-    fun `Hvis lagring feiler ved endring av stilingsinfo skal endretVeilederHendelse ikke publiseres`() {
-        TODO()
+        restTemplate.exchange("$localBaseUrl/rekruttering", HttpMethod.PUT, httpEntity(oppdatering.asEierDto()), EierDto::class.java)
+        val lagretStillingsinfo = repository.hentForStilling(enStillingsinfo.stillingsid).getOrElse { fail("fant ikke stillingen") }
+
+        Mockito.verify(rapidsConnection, times(0)).publish(anyString(), anyString())
+
+        repository.slett(lagretStillingsinfo.stillingsinfoid)
     }
 }

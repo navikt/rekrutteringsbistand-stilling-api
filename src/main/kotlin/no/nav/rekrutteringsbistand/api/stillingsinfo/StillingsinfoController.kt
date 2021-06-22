@@ -49,8 +49,8 @@ class EierController(
         if (dto.stillingsinfoid == null) throw BadRequestException("Stillingsinfoid må ha verdi for put")
 
         LOG.debug("Oppdaterer eierinformasjon for stillingInfoid ${dto.asStillinginfo().stillingsinfoid.asString()} stillingid  ${dto.asStillinginfo().stillingsid.asString()}")
-        repo.oppdaterEierIdentOgEierNavn(dto.asOppdaterEierinfo())
-        if(dto.eierNavident != null && dto.eierNavn != null) {
+        val harOppdatert = repo.oppdaterEierIdentOgEierNavn(dto.asOppdaterEierinfo())
+        if(dto.eierNavident != null && dto.eierNavn != null && harOppdatert) {
             veilederHendelse.oppdaterVeileder(dto.stillingsid, dto.eierNavident, dto.eierNavn)
         }
         kandidatlisteKlient.oppdaterKandidatliste(dto.asStillinginfo().stillingsid)
