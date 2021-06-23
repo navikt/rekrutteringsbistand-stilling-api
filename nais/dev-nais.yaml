@@ -41,5 +41,7 @@ spec:
       value: 4d3876c0-dfae-4bad-aecf-4415d549954a
     - name: REKRUTTERINGSBISTAND_STILLING_INDEKSER_CLIENT_ID
       value: 685a0f3d-2a60-42a3-944d-252bb2b1093f
+    - name: KAFKA_RAPID_TOPIC
+      value: arbeidsgiver-inkludering.rekrutteringsbistand-rapid
   kafka:
     pool: nav-dev
