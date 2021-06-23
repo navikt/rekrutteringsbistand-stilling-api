@@ -42,6 +42,8 @@ spec:
     - name: REKRUTTERINGSBISTAND_STILLING_INDEKSER_CLIENT_ID
       value: 685a0f3d-2a60-42a3-944d-252bb2b1093f
     - name: KAFKA_RAPID_TOPIC
-      value: arbeidsgiver-inkludering.rekrutteringsbistand-rapid
+      value: arbeidsgiver-inkludering.rapid
+    - name: KAFKA_CONSUMER_GROUP_ID
+      value: arbeidsgiver-inkludering.rapid.stillingsinfo-v1
   kafka:
     pool: nav-dev

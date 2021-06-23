@@ -8,12 +8,12 @@ import org.springframework.stereotype.Service
 @Service
 class VeilederHendelseService(private val rapids: RapidsConnection) {
     private val mapper = ObjectMapper()
-    fun oppdaterVeileder(stillingsid: String, eierNavident: String, eierNavn: String) =
-        rapids.publish(stillingsid, endretVeilederHendelse(stillingsid, Veileder(eierNavident, eierNavn)))
+    fun publiserOppdaterVeilederHendelse(stillingsid: String, eierNavident: String, eierNavn: String) =
+        rapids.publish(stillingsid, oppdatertVeilederHendelse(stillingsid, Veileder(eierNavident, eierNavn)))
 
-    private fun endretVeilederHendelse(stillingsid: String, veileder: Veileder) =
+    private fun oppdatertVeilederHendelse(stillingsid: String, veileder: Veileder) =
         mapper.createObjectNode().apply {
-            put("@event_name", "endret_veileder")
+            put("@event_name", "Stilling.Veileder.Oppdatert")
             set<ObjectNode>("@veileder", mapper.readTree(mapper.writeValueAsString(veileder)))
             put("@stillingsid", stillingsid)
         }.toJson()

@@ -3,9 +3,7 @@ package no.nav.rekrutteringsbistand.api.stillingsinfo
 import arrow.core.getOrElse
 import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteKlient
 import no.nav.rekrutteringsbistand.api.support.LOG
-import no.nav.security.token.support.core.api.Protected
 import no.nav.security.token.support.core.api.ProtectedWithClaims
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -33,7 +31,7 @@ class EierController(
                     LOG.debug("lager ny eierinformasjon for stillinginfoid ${dtoMedId.stillingsid} stillingid ${dtoMedId.stillingsinfoid}")
                     repo.lagre(dtoMedId.asStillinginfo())
                     if(dtoMedId.eierNavident != null && dtoMedId.eierNavn != null) {
-                        veilederHendelse.oppdaterVeileder(
+                        veilederHendelse.publiserOppdaterVeilederHendelse(
                             dtoMedId.stillingsid,
                             dtoMedId.eierNavident,
                             dtoMedId.eierNavn
@@ -54,7 +52,7 @@ class EierController(
             return ResponseEntity.notFound().build()
         }
         if(dto.eierNavident != null && dto.eierNavn != null) {
-            veilederHendelse.oppdaterVeileder(dto.stillingsid, dto.eierNavident, dto.eierNavn)
+            veilederHendelse.publiserOppdaterVeilederHendelse(dto.stillingsid, dto.eierNavident, dto.eierNavn)
         }
         kandidatlisteKlient.oppdaterKandidatliste(dto.asStillinginfo().stillingsid)
         return ResponseEntity.ok().body(dto)
