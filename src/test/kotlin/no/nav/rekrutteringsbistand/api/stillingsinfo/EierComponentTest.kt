@@ -166,11 +166,11 @@ class EierComponentTest {
         mockKandidatlisteOppdatering()
 
         val url = "$localBaseUrl/rekruttering"
-        restTemplate.postForEntity(url, httpEntity(tilLagring), EierDto::class.java)
+        val lagretResponse = restTemplate.postForEntity(url, httpEntity(tilLagring), EierDto::class.java)
         val lagretStillingsinfo = repository.hentForStilling(enStillingsinfo.stillingsid).getOrElse { fail("fant ikke stillingen") }
 
-        org.mockito.Mockito.verify(rapidsConnection).publish(enStillingsinfo.stillingsid.asString(),"""{"@event_name":"endret_veileder","@veileder":{"eierNavident":"C12345","eierNavn":"Clark Kent"},"@stillingsid":"${enStillingsinfo.stillingsid.asString()}"}""")
-
+        Mockito.verify(rapidsConnection).publish(enStillingsinfo.stillingsid.asString(),"""{"@event_name":"endret_veileder","@veileder":{"eierNavident":"C12345","eierNavn":"Clark Kent"},"@stillingsid":"${enStillingsinfo.stillingsid.asString()}"}""")
+        assertThat(lagretResponse.statusCodeValue).isEqualTo(201)
         repository.slett(lagretStillingsinfo.stillingsinfoid)
     }
 
@@ -181,27 +181,24 @@ class EierComponentTest {
         mockKandidatlisteOppdatering()
 
         val url = "$localBaseUrl/rekruttering"
-        restTemplate.exchange("$localBaseUrl/rekruttering", HttpMethod.PUT, httpEntity(oppdatering.asEierDto()), EierDto::class.java)
+        val oppdaterResponse = restTemplate.exchange("$localBaseUrl/rekruttering", HttpMethod.PUT, httpEntity(oppdatering.asEierDto()), EierDto::class.java)
         val lagretStillingsinfo = repository.hentForStilling(enStillingsinfo.stillingsid).getOrElse { fail("fant ikke stillingen") }
 
-        org.mockito.Mockito.verify(rapidsConnection).publish(enStillingsinfo.stillingsid.asString(),"""{"@event_name":"endret_veileder","@veileder":{"eierNavident":"endretIdent","eierNavn":"endretNavn"},"@stillingsid":"${enStillingsinfo.stillingsid.asString()}"}""")
-
+        Mockito.verify(rapidsConnection).publish(enStillingsinfo.stillingsid.asString(),"""{"@event_name":"endret_veileder","@veileder":{"eierNavident":"endretIdent","eierNavn":"endretNavn"},"@stillingsid":"${enStillingsinfo.stillingsid.asString()}"}""")
+        assertThat(oppdaterResponse.statusCodeValue).isEqualTo(200)
         repository.slett(lagretStillingsinfo.stillingsinfoid)
     }
 
     @Test
     fun `Hvis lagring feiler ved oppdatering av stilingsinfo skal endretVeilederHendelse ikke publiseres`() {
-        repository.lagre(enStillingsinfo)
         val oppdatering = enStillingsinfo.copy(eier = Eier(navident = "endretIdent", navn = "endretNavn"), stillingsinfoid = Stillingsinfoid(
             UUID.randomUUID().toString()
         ))
         mockKandidatlisteOppdatering()
 
-        restTemplate.exchange("$localBaseUrl/rekruttering", HttpMethod.PUT, httpEntity(oppdatering.asEierDto()), EierDto::class.java)
-        val lagretStillingsinfo = repository.hentForStilling(enStillingsinfo.stillingsid).getOrElse { fail("fant ikke stillingen") }
+        val oppdaterResponse = restTemplate.exchange("$localBaseUrl/rekruttering", HttpMethod.PUT, httpEntity(oppdatering.asEierDto()), EierDto::class.java)
 
         Mockito.verify(rapidsConnection, times(0)).publish(anyString(), anyString())
-
-        repository.slett(lagretStillingsinfo.stillingsinfoid)
+        assertThat(oppdaterResponse.statusCodeValue).isEqualTo(404)
     }
 }

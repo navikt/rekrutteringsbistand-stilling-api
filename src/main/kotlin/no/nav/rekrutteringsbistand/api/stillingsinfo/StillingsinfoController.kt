@@ -50,7 +50,10 @@ class EierController(
 
         LOG.debug("Oppdaterer eierinformasjon for stillingInfoid ${dto.asStillinginfo().stillingsinfoid.asString()} stillingid  ${dto.asStillinginfo().stillingsid.asString()}")
         val harOppdatert = repo.oppdaterEierIdentOgEierNavn(dto.asOppdaterEierinfo())
-        if(dto.eierNavident != null && dto.eierNavn != null && harOppdatert) {
+        if(!harOppdatert) {
+            return ResponseEntity.notFound().build()
+        }
+        if(dto.eierNavident != null && dto.eierNavn != null) {
             veilederHendelse.oppdaterVeileder(dto.stillingsid, dto.eierNavident, dto.eierNavn)
         }
         kandidatlisteKlient.oppdaterKandidatliste(dto.asStillinginfo().stillingsid)
