@@ -24,7 +24,7 @@ class StillingsinfoRepository(
             )
         )
 
-    fun oppdaterEierIdentOgEierNavn(oppdatering: OppdaterEier) =
+    fun oppdaterEierIdentOgEierNavn(oppdatering: OppdaterEier) : Boolean =
         namedJdbcTemplate.update(
             "update $STILLINGSINFO set $EIER_NAVIDENT=:eier_navident, $EIER_NAVN=:eier_navn where $STILLINGSINFOID=:stillingsinfoid",
             mapOf(
@@ -33,7 +33,9 @@ class StillingsinfoRepository(
                 "eier_navn" to oppdatering.eier.navn
             )
 
-        )
+        ).let {
+            return it != null && it == 1
+        }
 
     fun oppdaterNotat(oppdatering: OppdaterNotat) {
         namedJdbcTemplate.update(

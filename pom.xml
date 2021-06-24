@@ -220,6 +220,11 @@
             <artifactId>kafka-clients</artifactId>
             <version>${kafka-clients.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.github.navikt</groupId>
+            <artifactId>rapids-and-rivers</artifactId>
+            <version>1.389b5c3</version>
+        </dependency>
         <!-- Slutt, dependencies relatert til login -->
 
     </dependencies>
@@ -336,6 +341,11 @@
             <id>confluent repo</id>
             <name>confluent repo</name>
             <url>https://packages.confluent.io/maven/</url>
+        </repository>
+        <repository>
+            <name>github</name>
+            <id>github</id>
+            <url>https://github-package-registry-mirror.gc.nav.no/cached/maven-release</url>
         </repository>
     </repositories>
 
