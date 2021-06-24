@@ -16,7 +16,7 @@ import java.util.*
 class EierController(
         val repo: StillingsinfoRepository,
         val kandidatlisteKlient: KandidatlisteKlient,
-        private val veilederHendelse: VeilederHendelseService
+        private val eierHendelseService: EierHendelseService
 ) {
 
     @PostMapping
@@ -31,7 +31,7 @@ class EierController(
                     LOG.debug("lager ny eierinformasjon for stillinginfoid ${dtoMedId.stillingsid} stillingid ${dtoMedId.stillingsinfoid}")
                     repo.lagre(dtoMedId.asStillinginfo())
                     if(dtoMedId.eierNavident != null && dtoMedId.eierNavn != null) {
-                        veilederHendelse.publiserOppdaterVeilederHendelse(
+                        eierHendelseService.publiser(
                             dtoMedId.stillingsid,
                             dtoMedId.eierNavident,
                             dtoMedId.eierNavn
@@ -52,7 +52,7 @@ class EierController(
             return ResponseEntity.notFound().build()
         }
         if(dto.eierNavident != null && dto.eierNavn != null) {
-            veilederHendelse.publiserOppdaterVeilederHendelse(dto.stillingsid, dto.eierNavident, dto.eierNavn)
+            eierHendelseService.publiser(dto.stillingsid, dto.eierNavident, dto.eierNavn)
         }
         kandidatlisteKlient.oppdaterKandidatliste(dto.asStillinginfo().stillingsid)
         return ResponseEntity.ok().body(dto)

@@ -32,7 +32,6 @@ import org.springframework.http.HttpStatus.NO_CONTENT
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.test.context.junit4.SpringRunner
 import java.util.*
-import kotlin.text.Typography.times
 
 
 @RunWith(SpringRunner::class)
@@ -78,7 +77,11 @@ class EierComponentTest {
         repository.lagre(enStillingsinfo)
 
         val url = "$localBaseUrl/rekruttering/ident/${enStillingsinfo.eier?.navident}"
-        val stillingsinfoRespons = restTemplate.exchange(url, HttpMethod.GET, httpEntity(null), object : ParameterizedTypeReference<List<EierDto>>() {})
+        val stillingsinfoRespons = restTemplate.exchange(
+            url,
+            HttpMethod.GET,
+            httpEntity(null),
+            object : ParameterizedTypeReference<List<EierDto>>() {})
 
         assertThat(stillingsinfoRespons.statusCode).isEqualTo(HttpStatus.OK)
         stillingsinfoRespons.body.apply {
@@ -94,7 +97,8 @@ class EierComponentTest {
 
         val url = "$localBaseUrl/rekruttering"
         val stillingsinfoRespons = restTemplate.postForEntity(url, httpEntity(tilLagring), EierDto::class.java)
-        val lagretStillingsinfo = repository.hentForStilling(enStillingsinfo.stillingsid).getOrElse { fail("fant ikke stillingen") }
+        val lagretStillingsinfo =
+            repository.hentForStilling(enStillingsinfo.stillingsid).getOrElse { fail("fant ikke stillingen") }
 
         assertThat(stillingsinfoRespons.statusCode).isEqualTo(HttpStatus.CREATED)
         stillingsinfoRespons.body!!.apply {
@@ -111,8 +115,14 @@ class EierComponentTest {
         val oppdatering = enStillingsinfo.copy(eier = Eier(navident = "endretIdent", navn = "endretNavn"))
         mockKandidatlisteOppdatering()
 
-        val oppdateringRespons = restTemplate.exchange("$localBaseUrl/rekruttering", HttpMethod.PUT, httpEntity(oppdatering.asEierDto()), EierDto::class.java)
-        val lagretStillingsinfo = repository.hentForStilling(enStillingsinfo.stillingsid).getOrElse { fail("fant ikke stillingen") }
+        val oppdateringRespons = restTemplate.exchange(
+            "$localBaseUrl/rekruttering",
+            HttpMethod.PUT,
+            httpEntity(oppdatering.asEierDto()),
+            EierDto::class.java
+        )
+        val lagretStillingsinfo =
+            repository.hentForStilling(enStillingsinfo.stillingsid).getOrElse { fail("fant ikke stillingen") }
 
         assertThat(oppdateringRespons.statusCode).isEqualTo(HttpStatus.OK)
         assertThat(oppdateringRespons.body).isEqualTo(lagretStillingsinfo.asEierDto())
@@ -128,7 +138,8 @@ class EierComponentTest {
 
         val url = "$localBaseUrl/rekruttering"
         val stillingsinfoRespons = restTemplate.postForEntity(url, httpEntity(tilLagring), EierDto::class.java)
-        val lagretStillingsinfo = repository.hentForStilling(enStillingsinfo.stillingsid).getOrElse { fail("fant ikke stillingen") }
+        val lagretStillingsinfo =
+            repository.hentForStilling(enStillingsinfo.stillingsid).getOrElse { fail("fant ikke stillingen") }
 
         assertThat(stillingsinfoRespons.statusCode).isEqualTo(HttpStatus.OK)
         assertThat(stillingsinfoRespons.body).isEqualTo(lagretStillingsinfo.asEierDto())
@@ -143,20 +154,25 @@ class EierComponentTest {
 
     private fun httpEntity(body: Any?): HttpEntity<Any> {
         val headers = mapOf(
-                CONTENT_TYPE to APPLICATION_JSON_VALUE,
-                ACCEPT to APPLICATION_JSON_VALUE
+            CONTENT_TYPE to APPLICATION_JSON_VALUE,
+            ACCEPT to APPLICATION_JSON_VALUE
         ).toMultiValueMap()
         return HttpEntity(body, headers)
     }
 
     private fun mockKandidatlisteOppdatering() {
         wiremock.stubFor(
-                put(urlPathMatching("/rekrutteringsbistand-kandidat-api/rest/veileder/stilling/.*/kandidatliste"))
-                        .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
-                        .withHeader(ACCEPT, equalTo(APPLICATION_JSON_VALUE))
-                        .willReturn(aResponse().withStatus(NO_CONTENT.value())
-                                .withHeader(CONNECTION, "close") // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
-                                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE))
+            put(urlPathMatching("/rekrutteringsbistand-kandidat-api/rest/veileder/stilling/.*/kandidatliste"))
+                .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
+                .withHeader(ACCEPT, equalTo(APPLICATION_JSON_VALUE))
+                .willReturn(
+                    aResponse().withStatus(NO_CONTENT.value())
+                        .withHeader(
+                            CONNECTION,
+                            "close"
+                        ) // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
+                        .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+                )
         )
     }
 
@@ -167,9 +183,12 @@ class EierComponentTest {
 
         val url = "$localBaseUrl/rekruttering"
         val lagretResponse = restTemplate.postForEntity(url, httpEntity(tilLagring), EierDto::class.java)
-        val lagretStillingsinfo = repository.hentForStilling(enStillingsinfo.stillingsid).getOrElse { fail("fant ikke stillingen") }
+        val lagretStillingsinfo =
+            repository.hentForStilling(enStillingsinfo.stillingsid).getOrElse { fail("fant ikke stillingen") }
 
-        Mockito.verify(rapidsConnection).publish(enStillingsinfo.stillingsid.asString(),"""{"@event_name":"Stilling.Veileder.Oppdatert","@veileder":{"eierNavident":"C12345","eierNavn":"Clark Kent"},"@stillingsid":"${enStillingsinfo.stillingsid.asString()}"}""")
+        val expected =
+            """{"@event_name":"stilling_eier_oppdatert","stillingsid":"${enStillingsinfo.stillingsid.asString()}","eier":{"eierNavident":"C12345","eierNavn":"Clark Kent"},"system_read_count":0}"""
+        Mockito.verify(rapidsConnection).publish(enStillingsinfo.stillingsid.asString(), expected)
         assertThat(lagretResponse.statusCodeValue).isEqualTo(201)
         repository.slett(lagretStillingsinfo.stillingsinfoid)
     }
@@ -180,23 +199,37 @@ class EierComponentTest {
         val oppdatering = enStillingsinfo.copy(eier = Eier(navident = "endretIdent", navn = "endretNavn"))
         mockKandidatlisteOppdatering()
 
-        val url = "$localBaseUrl/rekruttering"
-        val oppdaterResponse = restTemplate.exchange("$localBaseUrl/rekruttering", HttpMethod.PUT, httpEntity(oppdatering.asEierDto()), EierDto::class.java)
-        val lagretStillingsinfo = repository.hentForStilling(enStillingsinfo.stillingsid).getOrElse { fail("fant ikke stillingen") }
+        val oppdaterResponse = restTemplate.exchange(
+            "$localBaseUrl/rekruttering",
+            HttpMethod.PUT,
+            httpEntity(oppdatering.asEierDto()),
+            EierDto::class.java
+        )
+        val lagretStillingsinfo =
+            repository.hentForStilling(enStillingsinfo.stillingsid).getOrElse { fail("fant ikke stillingen") }
 
-        Mockito.verify(rapidsConnection).publish(enStillingsinfo.stillingsid.asString(),"""{"@event_name":"Stilling.Veileder.Oppdatert","@veileder":{"eierNavident":"endretIdent","eierNavn":"endretNavn"},"@stillingsid":"${enStillingsinfo.stillingsid.asString()}"}""")
+        val expected =
+            """{"@event_name":"stilling_eier_oppdatert","stillingsid":"${enStillingsinfo.stillingsid.asString()}","eier":{"eierNavident":"endretIdent","eierNavn":"endretNavn"},"system_read_count":0}"""
+        Mockito.verify(rapidsConnection).publish(enStillingsinfo.stillingsid.asString(), expected)
         assertThat(oppdaterResponse.statusCodeValue).isEqualTo(200)
         repository.slett(lagretStillingsinfo.stillingsinfoid)
     }
 
     @Test
     fun `Hvis lagring feiler ved oppdatering av stilingsinfo skal endretVeilederHendelse ikke publiseres`() {
-        val oppdatering = enStillingsinfo.copy(eier = Eier(navident = "endretIdent", navn = "endretNavn"), stillingsinfoid = Stillingsinfoid(
-            UUID.randomUUID().toString()
-        ))
+        val oppdatering = enStillingsinfo.copy(
+            eier = Eier(navident = "endretIdent", navn = "endretNavn"), stillingsinfoid = Stillingsinfoid(
+                UUID.randomUUID().toString()
+            )
+        )
         mockKandidatlisteOppdatering()
 
-        val oppdaterResponse = restTemplate.exchange("$localBaseUrl/rekruttering", HttpMethod.PUT, httpEntity(oppdatering.asEierDto()), EierDto::class.java)
+        val oppdaterResponse = restTemplate.exchange(
+            "$localBaseUrl/rekruttering",
+            HttpMethod.PUT,
+            httpEntity(oppdatering.asEierDto()),
+            EierDto::class.java
+        )
 
         Mockito.verify(rapidsConnection, times(0)).publish(anyString(), anyString())
         assertThat(oppdaterResponse.statusCodeValue).isEqualTo(404)
