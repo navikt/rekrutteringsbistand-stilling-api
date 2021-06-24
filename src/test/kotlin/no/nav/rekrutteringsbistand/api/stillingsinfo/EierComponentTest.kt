@@ -102,7 +102,7 @@ class EierComponentTest {
 
         assertThat(stillingsinfoRespons.statusCode).isEqualTo(HttpStatus.CREATED)
         stillingsinfoRespons.body!!.apply {
-            assertThat(this).isEqualToIgnoringGivenFields(tilLagring, "stillingsinfoid")
+            assertThat(this).usingRecursiveComparison().ignoringFields("stillingsinfoid").isEqualTo(tilLagring)
             assertThat(stillingsinfoid).isEqualTo(lagretStillingsinfo.stillingsinfoid.asString())
         }
 
