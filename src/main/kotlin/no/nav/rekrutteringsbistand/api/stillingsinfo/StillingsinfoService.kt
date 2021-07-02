@@ -16,7 +16,7 @@ class StillingsinfoService(private val repository: StillingsinfoRepository) {
     }
 
     fun lagre(stillingsinfo: Stillingsinfo) {
-        repository.lagre(stillingsinfo)
+        repository.opprett(stillingsinfo)
     }
 
 }

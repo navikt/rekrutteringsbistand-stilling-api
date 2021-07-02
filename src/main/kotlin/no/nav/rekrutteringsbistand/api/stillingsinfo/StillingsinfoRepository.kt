@@ -1,6 +1,7 @@
 package no.nav.rekrutteringsbistand.api.stillingsinfo
 
 import no.nav.rekrutteringsbistand.api.option.Option
+import no.nav.rekrutteringsbistand.api.option.optionOf
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert
@@ -13,7 +14,7 @@ class StillingsinfoRepository(
 ) {
     val simpleJdbcInsert = SimpleJdbcInsert(namedJdbcTemplate.jdbcTemplate).withTableName("Stillingsinfo").usingGeneratedKeyColumns("id")
 
-    fun lagre(stillingsinfo: Stillingsinfo) =
+    fun opprett(stillingsinfo: Stillingsinfo) =
         simpleJdbcInsert.executeAndReturnKey(
             mapOf(
                 STILLINGSINFOID to stillingsinfo.stillingsinfoid.asString(),
@@ -49,7 +50,7 @@ class StillingsinfoRepository(
     fun hentForStilling(stillingId: Stillingsid): Option<Stillingsinfo> {
         val list = hentForStillinger(listOf(stillingId))
         check(list.size <= 1) { "Antall stillingsinfo for stillingsid ${stillingId.asString()}: ${list.size}" }
-        return Option(list.firstOrNull())
+        return optionOf(list.firstOrNull())
     }
 
 

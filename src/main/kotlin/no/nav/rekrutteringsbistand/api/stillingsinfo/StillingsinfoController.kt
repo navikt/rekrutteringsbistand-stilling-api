@@ -3,7 +3,6 @@ package no.nav.rekrutteringsbistand.api.stillingsinfo
 import arrow.core.getOrElse
 import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteKlient
 import no.nav.rekrutteringsbistand.api.support.LOG
-import no.nav.security.token.support.core.api.Protected
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -29,7 +28,7 @@ class EierController(
                 }.getOrElse {
                     val dtoMedId = dto.copy(stillingsinfoid = UUID.randomUUID().toString())
                     LOG.debug("lager ny eierinformasjon for stillinginfoid ${dtoMedId.stillingsid} stillingid ${dtoMedId.stillingsinfoid}")
-                    repo.lagre(dtoMedId.asStillinginfo())
+                    repo.opprett(dtoMedId.asStillinginfo())
                     kandidatlisteKlient.oppdaterKandidatliste(Stillingsid(dto.stillingsid))
                     ResponseEntity.created(URI("/rekruttering/${dtoMedId.stillingsinfoid}")).body(dtoMedId)
                 }

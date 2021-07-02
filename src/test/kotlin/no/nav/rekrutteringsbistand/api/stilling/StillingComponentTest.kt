@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.github.tomakehurst.wiremock.client.WireMock.*
-import com.github.tomakehurst.wiremock.http.Fault
 import com.github.tomakehurst.wiremock.junit.WireMockRule
 import no.nav.rekrutteringsbistand.api.HentRekrutteringsbistandStillingDto
 import no.nav.rekrutteringsbistand.api.OppdaterRekrutteringsbistandStillingDto
@@ -91,7 +90,7 @@ internal class StillingComponentTest {
     @Test
     fun `GET mot en rekrutteringsbistandstilling skal returnere en stilling med stillingsinfo hvis det er lagret`() {
         mockUtenAuthorization("/b2b/api/v1/ads/${enStilling.uuid}", enStilling)
-        repository.lagre(enStillingsinfo)
+        repository.opprett(enStillingsinfo)
         restTemplate.getForObject("$localBaseUrl/rekrutteringsbistandstilling/${enStillingsinfo.stillingsid}", HentRekrutteringsbistandStillingDto::class.java).also {
             assertThat(it).isEqualTo(HentRekrutteringsbistandStillingDto(
                     stillingsinfo = StillingsinfoDto(
@@ -109,7 +108,7 @@ internal class StillingComponentTest {
 
     @Test
     fun `GET mot en stilling skal returnere en stilling beriket med stillingsinfo`() {
-        repository.lagre(enStillingsinfo)
+        repository.opprett(enStillingsinfo)
 
         mockUtenAuthorization("/b2b/api/v1/ads/${enStilling.uuid}", enStilling)
 
@@ -121,7 +120,7 @@ internal class StillingComponentTest {
 
     @Test
     fun `GET mot en stilling med stillingsnummer skal returnere en stilling beriket med stillingsinfo`() {
-        repository.lagre(enStillingsinfo)
+        repository.opprett(enStillingsinfo)
 
         mockUtenAuthorization("/b2b/api/v1/ads?id=1000", Page(listOf(enStilling), 1, 1))
 
@@ -167,7 +166,7 @@ internal class StillingComponentTest {
     fun `PUT mot stilling med notat skal returnere endret stilling når stillingsinfo finnes`() {
         mock(HttpMethod.PUT, "/api/v1/ads/${enRekrutteringsbistandStilling.stilling.uuid}", enTredjeStilling)
         mockKandidatlisteOppdatering()
-        repository.lagre(enTredjeStillingsinfo.copy(notat = "gammelt notat"))
+        repository.opprett(enTredjeStillingsinfo.copy(notat = "gammelt notat"))
 
         restTemplate.exchange(
                 "$localBaseUrl/rekrutteringsbistandstilling",
@@ -191,7 +190,7 @@ internal class StillingComponentTest {
         val rekrutteringsbistandStilling = enRekrutteringsbistandStillingUtenEier
         mock(HttpMethod.PUT, "/api/v1/ads/${rekrutteringsbistandStilling.stilling.uuid}", enFjerdeStilling)
         mockKandidatlisteOppdatering()
-        repository.lagre(enStillinggsinfoUtenEier.copy(notat = null))
+        repository.opprett(enStillinggsinfoUtenEier.copy(notat = null))
 
         restTemplate.exchange(
                 "$localBaseUrl/rekrutteringsbistandstilling",
@@ -282,8 +281,8 @@ internal class StillingComponentTest {
 
     @Test
     fun `GET mot mine stillinger skal returnere HTTP 200 med mine stillinger med stillingsinfo`() {
-        repository.lagre(enStillingsinfo)
-        repository.lagre(enAnnenStillingsinfo)
+        repository.opprett(enStillingsinfo)
+        repository.opprett(enAnnenStillingsinfo)
 
         mock(HttpMethod.GET, "/api/v1/ads/rekrutteringsbistand/minestillinger", enPage)
 

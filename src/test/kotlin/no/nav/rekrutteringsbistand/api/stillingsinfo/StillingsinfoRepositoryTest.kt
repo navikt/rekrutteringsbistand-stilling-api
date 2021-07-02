@@ -4,6 +4,7 @@ import arrow.core.getOrElse
 import no.nav.rekrutteringsbistand.api.Testdata.enStillingsinfo
 import no.nav.rekrutteringsbistand.api.Testdata.enStillingsinfoOppdatering
 import no.nav.rekrutteringsbistand.api.option.Option
+import no.nav.rekrutteringsbistand.api.option.optionOf
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.fail
 import org.junit.After
@@ -24,15 +25,15 @@ class StillingsinfoRepositoryTest {
 
     @Test
     fun `Skal kunne lagre og hente ut stillingsinfo`() {
-        repository.lagre(tilLagring)
+        repository.opprett(tilLagring)
         val lagretRekrutteringsbistand: Option<Stillingsinfo> = repository.hentForStilling(tilLagring.stillingsid)
 
-        assertThat(lagretRekrutteringsbistand).isEqualTo(Option(tilLagring))
+        assertThat(lagretRekrutteringsbistand).isEqualTo(optionOf(tilLagring))
     }
 
     @Test
     fun `Skal kunne oppdatere eierident og eiernavn på stillingsinfo`() {
-        repository.lagre(tilLagring)
+        repository.opprett(tilLagring)
         repository.oppdaterEierIdentOgEierNavn(enStillingsinfoOppdatering)
 
         val endretRekrutteringsbistand =

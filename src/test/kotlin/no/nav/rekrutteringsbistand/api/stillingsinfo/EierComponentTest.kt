@@ -51,7 +51,7 @@ class EierComponentTest {
 
     @Test
     fun `Henting av eier basert på stilling skal returnere HTTP OK med lagret stillingsinfo`() {
-        repository.lagre(enStillingsinfo)
+        repository.opprett(enStillingsinfo)
 
         val url = "$localBaseUrl/rekruttering/stilling/${enStillingsinfo.stillingsid}"
         val stillingsinfoRespons = restTemplate.exchange(url, HttpMethod.GET, httpEntity(null), EierDto::class.java)
@@ -62,7 +62,7 @@ class EierComponentTest {
 
     @Test
     fun `Henting av stillingsinfo basert på bruker skal returnere HTTP 200 med lagret stillingsinfo`() {
-        repository.lagre(enStillingsinfo)
+        repository.opprett(enStillingsinfo)
 
         val url = "$localBaseUrl/rekruttering/ident/${enStillingsinfo.eier?.navident}"
         val stillingsinfoRespons = restTemplate.exchange(url, HttpMethod.GET, httpEntity(null), object : ParameterizedTypeReference<List<EierDto>>() {})
@@ -94,7 +94,7 @@ class EierComponentTest {
 
     @Test
     fun `Oppdatering av stillingsinfo skal returnere HTTP 200 med oppdatert stillingsinfo`() {
-        repository.lagre(enStillingsinfo)
+        repository.opprett(enStillingsinfo)
         val oppdatering = enStillingsinfo.copy(eier = Eier(navident = "endretIdent", navn = "endretNavn"))
         mockKandidatlisteOppdatering()
 
@@ -109,7 +109,7 @@ class EierComponentTest {
 
     @Test
     fun `Lagring av stillingsinfo med eksisterende stillingsinfo skal returnere HTTP 200 med oppdatert stillingsinfo`() {
-        repository.lagre(enStillingsinfo)
+        repository.opprett(enStillingsinfo)
         val tilLagring = enStillingsinfo.asEierDto().copy(stillingsinfoid = null)
         mockKandidatlisteOppdatering()
 
