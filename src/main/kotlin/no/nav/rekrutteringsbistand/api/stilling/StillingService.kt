@@ -8,6 +8,7 @@ import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteKlient
 import no.nav.rekrutteringsbistand.api.option.Option
 import no.nav.rekrutteringsbistand.api.option.Some
 import no.nav.rekrutteringsbistand.api.option.get
+import no.nav.rekrutteringsbistand.api.stilling.ekstern.ArbeidsplassenKlient
 import no.nav.rekrutteringsbistand.api.stillingsinfo.*
 import no.nav.rekrutteringsbistand.api.support.config.ExternalConfiguration
 import no.nav.rekrutteringsbistand.api.support.rest.RestProxy
@@ -29,7 +30,8 @@ class StillingService(
     val stillingsinfoService: StillingsinfoService,
     val tokenUtils: TokenUtils,
     val kandidatlisteKlient: KandidatlisteKlient,
-    val restProxy: RestProxy
+    val restProxy: RestProxy,
+    val arbeidsplassenKlient: ArbeidsplassenKlient
 ) {
 
     @Deprecated("Bruk hentRekrutteringsbistandStilling")
@@ -154,13 +156,8 @@ class StillingService(
         dto: OppdaterRekrutteringsbistandStillingDto,
         queryString: String?
     ): OppdaterRekrutteringsbistandStillingDto {
-        val url = "${externalConfiguration.stillingApi.url}/api/v1/ads/${dto.stilling.uuid}"
-        val returnertStilling: Stilling = restTemplate.exchange(
-            url + "?${queryString ?: ""}",
-            HttpMethod.GET,
-            HttpEntity<Object>(headers()),
-            Stilling::class.java
-        )
+        require(dto.stilling.uuid!=null) { "Vi antar at uuid til stilling er satt ved kall til oppdaterRekrutteringsbistandStilling." }
+        val returnertStilling: Stilling = arbeidsplassenKlient.hentStilling(dto.stilling.uuid, queryString)
             .body
             ?: throw RestResponseEntityExceptionHandler.NoContentException("Tom body fra oppdater stilling")
 
@@ -175,7 +172,7 @@ class StillingService(
             lagreNyttNotat(dto.notat, id)
         }
 
-        triggeNyStillingsMeldingFraArbeidsplassen(url, queryString, dto)
+        arbeidsplassenKlient.triggeNyStillingsMeldingFraArbeidsplassen(dto.stilling, queryString)
 
         val eksisterendeStillingsinfo: Stillingsinfo? =
             stillingsinfoService.hentForStilling(id).orNull()
@@ -186,19 +183,6 @@ class StillingService(
             notat = eksisterendeStillingsinfo?.notat
         )
 
-    }
-
-    private fun triggeNyStillingsMeldingFraArbeidsplassen(
-        url: String,
-        queryString: String?,
-        dto: OppdaterRekrutteringsbistandStillingDto
-    ) {
-        restTemplate.exchange(
-            url + "?${queryString ?: ""}",
-            HttpMethod.PUT,
-            HttpEntity(dto.stilling, headers()),
-            Stilling::class.java
-        )
     }
 
     fun slettStilling(uuid: String, request: HttpServletRequest): ResponseEntity<String> {
