@@ -156,9 +156,9 @@ class StillingService(
     ): OppdaterRekrutteringsbistandStillingDto {
         val url = "${externalConfiguration.stillingApi.url}/api/v1/ads/${dto.stilling.uuid}"
         val returnertStilling: Stilling = restTemplate.exchange(
-            url + if (queryString != null) "?$queryString" else "",
-            HttpMethod.PUT,
-            HttpEntity(dto.stilling, headers()),
+            url + "?${queryString ?: ""}",
+            HttpMethod.GET,
+            HttpEntity<Object>(headers()),
             Stilling::class.java
         )
             .body
@@ -175,6 +175,8 @@ class StillingService(
             lagreNyttNotat(dto.notat, id)
         }
 
+        triggeNyStillingsMeldingFraArbeidsplassen(url, queryString, dto)
+
         val eksisterendeStillingsinfo: Stillingsinfo? =
             stillingsinfoService.hentForStilling(id).orNull()
 
@@ -184,6 +186,19 @@ class StillingService(
             notat = eksisterendeStillingsinfo?.notat
         )
 
+    }
+
+    private fun triggeNyStillingsMeldingFraArbeidsplassen(
+        url: String,
+        queryString: String?,
+        dto: OppdaterRekrutteringsbistandStillingDto
+    ) {
+        restTemplate.exchange(
+            url + "?${queryString ?: ""}",
+            HttpMethod.PUT,
+            HttpEntity(dto.stilling, headers()),
+            Stilling::class.java
+        )
     }
 
     fun slettStilling(uuid: String, request: HttpServletRequest): ResponseEntity<String> {
