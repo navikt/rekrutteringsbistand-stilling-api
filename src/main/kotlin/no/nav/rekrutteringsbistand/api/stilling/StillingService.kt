@@ -156,13 +156,13 @@ class StillingService(
         dto: OppdaterRekrutteringsbistandStillingDto,
         queryString: String?
     ): OppdaterRekrutteringsbistandStillingDto {
-        require(dto.stilling.uuid!=null) { "Vi antar at uuid til stilling er satt ved kall til oppdaterRekrutteringsbistandStilling." }
+        require(dto.stilling.uuid != null) { "Vi antar at uuid til stilling er satt ved kall til oppdaterRekrutteringsbistandStilling." }
         val returnertStilling: Stilling = arbeidsplassenKlient.hentStilling(dto.stilling.uuid, queryString)
             .body
             ?: throw RestResponseEntityExceptionHandler.NoContentException("Tom body fra oppdater stilling")
 
-        val id = returnertStilling.uuid?.let { Stillingsid(it) }
-            ?: throw IllegalArgumentException("Mangler stilling uuid")
+        val id =
+            returnertStilling.uuid?.let { Stillingsid(it) } ?: throw IllegalArgumentException("Mangler stilling uuid")
 
         if ("DIR".equals(returnertStilling.source, false)) {
             kandidatlisteKlient.oppdaterKandidatliste(id)
@@ -174,9 +174,7 @@ class StillingService(
 
         arbeidsplassenKlient.triggeNyStillingsMeldingFraArbeidsplassen(dto.stilling, queryString)
 
-        val eksisterendeStillingsinfo: Stillingsinfo? =
-            stillingsinfoService.hentForStilling(id).orNull()
-
+        val eksisterendeStillingsinfo: Stillingsinfo? = stillingsinfoService.hentForStilling(id).orNull()
         return OppdaterRekrutteringsbistandStillingDto(
             stilling = returnertStilling,
             stillingsinfoid = eksisterendeStillingsinfo?.stillingsinfoid?.asString(),
