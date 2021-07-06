@@ -134,7 +134,7 @@ internal class StillingComponentTest {
     fun `POST mot stillinger skal returnere stilling`() {
 
         mock(HttpMethod.POST, "/api/v1/ads", enStilling)
-        mockKandidatlisteOppdatering()
+        mockKandidatlisteOppdateringSkalLykkes()
 
         restTemplate.postForObject(
                 "$localBaseUrl/rekrutteringsbistand/api/v1/ads",
@@ -149,7 +149,7 @@ internal class StillingComponentTest {
     @Test
     fun `PUT mot stilling skal returnere endret stilling`() {
         mock(HttpMethod.PUT, "/api/v1/ads/${enStilling.uuid}", enStilling)
-        mockKandidatlisteOppdatering()
+        mockKandidatlisteOppdateringSkalLykkes()
 
         restTemplate.exchange(
                 "$localBaseUrl/rekrutteringsbistand/api/v1/ads/${enStilling.uuid}",
@@ -164,8 +164,9 @@ internal class StillingComponentTest {
 
     @Test
     fun `PUT mot stilling med notat skal returnere endret stilling når stillingsinfo finnes`() {
+        mock(HttpMethod.GET, "/api/v1/ads/${enRekrutteringsbistandStilling.stilling.uuid}", enTredjeStilling)
         mock(HttpMethod.PUT, "/api/v1/ads/${enRekrutteringsbistandStilling.stilling.uuid}", enTredjeStilling)
-        mockKandidatlisteOppdatering()
+        mockKandidatlisteOppdateringSkalLykkes()
         repository.opprett(enTredjeStillingsinfo.copy(notat = "gammelt notat"))
 
         restTemplate.exchange(
@@ -188,8 +189,9 @@ internal class StillingComponentTest {
     @Test
     fun `PUT mot stilling med notat skal returnere endret stilling når stillingsinfo ikke har eier`() {
         val rekrutteringsbistandStilling = enRekrutteringsbistandStillingUtenEier
+        mock(HttpMethod.GET, "/api/v1/ads/${rekrutteringsbistandStilling.stilling.uuid}", enFjerdeStilling)
         mock(HttpMethod.PUT, "/api/v1/ads/${rekrutteringsbistandStilling.stilling.uuid}", enFjerdeStilling)
-        mockKandidatlisteOppdatering()
+        mockKandidatlisteOppdateringSkalLykkes()
         repository.opprett(enStillinggsinfoUtenEier.copy(notat = null))
 
         restTemplate.exchange(
@@ -212,8 +214,9 @@ internal class StillingComponentTest {
     @Test
     fun `PUT mot stilling med notat skal returnere endret stilling når stillingsinfo ikke finnes`() {
         val rekrutteringsbistandStilling = enRekrutteringsbistandStillingUtenEier
+        mock(HttpMethod.GET, "/api/v1/ads/${rekrutteringsbistandStilling.stilling.uuid}", rekrutteringsbistandStilling.stilling)
         mock(HttpMethod.PUT, "/api/v1/ads/${rekrutteringsbistandStilling.stilling.uuid}", rekrutteringsbistandStilling.stilling)
-        mockKandidatlisteOppdatering()
+        mockKandidatlisteOppdateringSkalLykkes()
 
         restTemplate.exchange(
                 "$localBaseUrl/rekrutteringsbistandstilling",
@@ -235,7 +238,7 @@ internal class StillingComponentTest {
     @Test
     fun `PUT mot stilling med kandidatlistefeil skal returnere status 500`() {
         mock(HttpMethod.PUT, "/api/v1/ads/${enStilling.uuid}", enStilling)
-        mockKandidatlisteOppdateringFeiler()
+        mockKandidatlisteOppdateringSkalFeile()
 
         restTemplate.exchange(
                 "$localBaseUrl/rekrutteringsbistand/api/v1/ads/${enStilling.uuid}",
@@ -251,7 +254,7 @@ internal class StillingComponentTest {
     fun `DELETE mot stilling med kandidatlistefeil skal returnere status 500`() {
         val slettetStilling = enStillingUtenStillingsinfo.copy(status = "DELETED")
         mock(HttpMethod.DELETE, "/api/v1/ads/${slettetStilling.uuid}", slettetStilling)
-        mockKandidatlisteOppdateringFeiler()
+        mockKandidatlisteOppdateringSkalFeile()
 
         restTemplate.exchange(
                 "$localBaseUrl/rekrutteringsbistand/api/v1/ads/${enStillingUtenStillingsinfo.uuid}",
@@ -302,7 +305,7 @@ internal class StillingComponentTest {
     fun `DELETE mot stilling skal returnere HTTP 200 med stilling og status DELETED`() {
         val slettetStilling = enStillingUtenStillingsinfo.copy(status = "DELETED")
         mock(HttpMethod.DELETE, "/api/v1/ads/${slettetStilling.uuid}", slettetStilling)
-        mockKandidatlisteOppdatering()
+        mockKandidatlisteOppdateringSkalLykkes()
 
         val respons: ResponseEntity<Stilling> = restTemplate.exchange(
                 "$localBaseUrl/rekrutteringsbistand/api/v1/ads/${slettetStilling.uuid}",
@@ -340,7 +343,7 @@ internal class StillingComponentTest {
         )
     }
 
-    private fun mockKandidatlisteOppdatering() {
+    private fun mockKandidatlisteOppdateringSkalLykkes() {
         wiremockKandidatliste.stubFor(
                 put(urlPathMatching("/rekrutteringsbistand-kandidat-api/rest/veileder/stilling/.*/kandidatliste"))
                         .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
@@ -351,7 +354,7 @@ internal class StillingComponentTest {
         )
     }
 
-    private fun mockKandidatlisteOppdateringFeiler() {
+    private fun mockKandidatlisteOppdateringSkalFeile() {
         wiremockKandidatliste.stubFor(
                 put(urlPathMatching("/rekrutteringsbistand-kandidat-api/rest/veileder/stilling/.+/kandidatliste"))
                         .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
