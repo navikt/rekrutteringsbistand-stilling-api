@@ -147,22 +147,6 @@ internal class StillingComponentTest {
     }
 
     @Test
-    fun `PUT mot stilling skal returnere endret stilling`() {
-        mock(HttpMethod.PUT, "/api/v1/ads/${enStilling.uuid}", enStilling)
-        mockKandidatlisteOppdatering()
-
-        restTemplate.exchange(
-                "$localBaseUrl/rekrutteringsbistand/api/v1/ads/${enStilling.uuid}",
-                HttpMethod.PUT,
-                HttpEntity(enStilling.copy(uuid = null)),
-                StillingMedStillingsinfo::class.java
-        ).body.also {
-            assertThat(it!!.uuid).isNotEmpty()
-            assertThat(it.copy(uuid = null)).isEqualTo(enStilling.copy(uuid = null))
-        }
-    }
-
-    @Test
     fun `PUT mot stilling med notat skal returnere endret stilling når stillingsinfo finnes`() {
         mock(HttpMethod.PUT, "/api/v1/ads/${enRekrutteringsbistandStilling.stilling.uuid}", enTredjeStilling)
         mockKandidatlisteOppdatering()
@@ -229,21 +213,6 @@ internal class StillingComponentTest {
             assertThat(it.stilling.copy(uuid = null)).isEqualTo(rekrutteringsbistandStilling.stilling.copy(uuid = null))
             assertThat(it.notat).isEqualTo(rekrutteringsbistandStilling.stillingsinfo?.notat)
             assertThat(it.stillingsinfoid).isNotEmpty()
-        }
-    }
-
-    @Test
-    fun `PUT mot stilling med kandidatlistefeil skal returnere status 500`() {
-        mock(HttpMethod.PUT, "/api/v1/ads/${enStilling.uuid}", enStilling)
-        mockKandidatlisteOppdateringFeiler()
-
-        restTemplate.exchange(
-                "$localBaseUrl/rekrutteringsbistand/api/v1/ads/${enStilling.uuid}",
-                HttpMethod.PUT,
-                HttpEntity(enStilling.copy(uuid = null)),
-                StillingMedStillingsinfo::class.java
-        ).also {
-            assertThat(it.statusCode).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
         }
     }
 

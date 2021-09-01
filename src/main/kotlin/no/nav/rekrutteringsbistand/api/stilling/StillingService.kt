@@ -107,28 +107,6 @@ class StillingService(
             .getOrElse { opprinneligStilling }
     }
 
-    fun oppdaterStilling(uuid: String, stilling: Stilling, queryString: String?): StillingMedStillingsinfo? {
-        val url = "${externalConfiguration.stillingApi.url}/api/v1/ads/${uuid}"
-        val opprinneligStilling: StillingMedStillingsinfo = restTemplate.exchange(
-            url + if (queryString != null) "?$queryString" else "",
-            HttpMethod.PUT,
-            HttpEntity(stilling, headers()),
-            StillingMedStillingsinfo::class.java
-        )
-            .body
-            ?: throw RestResponseEntityExceptionHandler.NoContentException("Tom body fra oppdater stilling")
-
-        val id = opprinneligStilling.uuid?.let { Stillingsid(it) }
-            ?: throw IllegalArgumentException("Mangler stilling uuid")
-        if (opprinneligStilling.rekruttering?.eierNavident != null || "DIR".equals(opprinneligStilling.source, false)) {
-            kandidatlisteKlient.oppdaterKandidatliste(id)
-        }
-        val stillingsinfo: Option<Stillingsinfo> = hentStillingsinfo(opprinneligStilling)
-        return stillingsinfo.map { opprinneligStilling.copy(rekruttering = it.asEierDto()) }
-            .getOrElse { opprinneligStilling }
-    }
-
-
     private fun lagreNyttNotat(
         nyttNotat: String,
         stillingsId: Stillingsid,

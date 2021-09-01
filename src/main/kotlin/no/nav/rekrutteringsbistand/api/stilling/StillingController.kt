@@ -31,13 +31,6 @@ class StillingController(
         return ok().body(opprettetStilling)
     }
 
-    @PutMapping("/rekrutteringsbistand/api/v1/ads/{uuid}")
-    @Deprecated("Bruk putRekrutteringsbistandStilling")
-    fun proxyPutTilStillingsApi(@PathVariable uuid: String, request: HttpServletRequest, @RequestBody stilling: Stilling): ResponseEntity<StillingMedStillingsinfo> {
-        val oppdatertStilling = stillingService.oppdaterStilling(uuid, stilling, request.queryString)
-        return ok().body(oppdatertStilling)
-    }
-
     @PutMapping("/rekrutteringsbistandstilling")
     fun putRekrutteringsbistandStilling(request: HttpServletRequest, @RequestBody rekrutteringsbistandStillingDto: OppdaterRekrutteringsbistandStillingDto): ResponseEntity<OppdaterRekrutteringsbistandStillingDto> {
         val oppdatertStilling = stillingService.oppdaterRekrutteringsbistandStilling(rekrutteringsbistandStillingDto, request.queryString)
