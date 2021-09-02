@@ -5,7 +5,6 @@ import no.nav.rekrutteringsbistand.api.OppdaterRekrutteringsbistandStillingDto
 import no.nav.rekrutteringsbistand.api.support.LOG
 import no.nav.rekrutteringsbistand.api.support.config.ExternalConfiguration
 import no.nav.rekrutteringsbistand.api.support.rest.RestProxy
-import no.nav.security.token.support.core.api.Protected
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.HttpMethod.GET
 import org.springframework.http.HttpMethod.POST
@@ -95,18 +94,28 @@ class StillingController(
 
     @GetMapping("/rekrutteringsbistand/api/v1/stilling/{uuid}")
     @Deprecated("Bruk hentRekrutteringsbistandStilling")
-    fun hentStilling(@PathVariable uuid: String): ResponseEntity<StillingMedStillingsinfo> =
-            ok(stillingService.hentStilling(uuid))
+    fun hentStilling(@PathVariable uuid: String): ResponseEntity<StillingMedStillingsinfo> {
+        return ok(stillingService.hentStilling(uuid))
+    }
 
     @GetMapping("/rekrutteringsbistandstilling/{uuid}")
-    fun hentRekrutteringsbistandStilling(@PathVariable uuid: String): ResponseEntity<HentRekrutteringsbistandStillingDto> =
-            ok(stillingService.hentRekrutteringsbistandStilling(uuid))
+    fun hentRekrutteringsbistandStilling(@PathVariable uuid: String): ResponseEntity<HentRekrutteringsbistandStillingDto> {
+        return ok(stillingService.hentRekrutteringsbistandStilling(uuid))
+    }
 
     @GetMapping("/rekrutteringsbistand/api/v1/stilling/stillingsnummer/{stillingsnummer}")
-    fun hentStillingAnnonsenummer(@PathVariable stillingsnummer: String): ResponseEntity<StillingMedStillingsinfo> =
-            ok(stillingService.hentStillingMedStillingsnummer(stillingsnummer))
+    @Deprecated("hentRekrutteringsbistandStillingBasertPåAnnonsenr")
+    fun hentStillingAnnonsenummer(@PathVariable stillingsnummer: String): ResponseEntity<StillingMedStillingsinfo> {
+        return ok(stillingService.hentStillingBasertPåAnnonsenrGammel(stillingsnummer))
+    }
+
+    @GetMapping("/rekrutteringsbistandstilling/annonsenr/{annonsenr}")
+    fun hentRekrutteringsbistandStillingBasertPåAnnonsenr(@PathVariable annonsenr: String): ResponseEntity<HentRekrutteringsbistandStillingDto> {
+        return ok(stillingService.hentStillingBasertPåAnnonsenr(annonsenr))
+    }
 
     @GetMapping("/rekrutteringsbistand/api/v1/ads/rekrutteringsbistand/minestillinger")
+    @Deprecated("Lag endepunkt som returnerer noe annet enn Page<RekrutteringsbistandStilling>")
     fun hentMineStillinger(request: HttpServletRequest): ResponseEntity<Page<StillingMedStillingsinfo>> {
         return ok().body(stillingService.hentStillinger(
                  "${externalConfiguration.stillingApi.url}/api/v1/ads/rekrutteringsbistand/minestillinger",

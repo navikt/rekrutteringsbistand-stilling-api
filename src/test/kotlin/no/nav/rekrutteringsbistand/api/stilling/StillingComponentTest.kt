@@ -124,9 +124,9 @@ internal class StillingComponentTest {
 
         mockUtenAuthorization("/b2b/api/v1/ads?id=1000", Page(listOf(enStilling), 1, 1))
 
-        restTemplate.getForObject("$localBaseUrl/rekrutteringsbistand/api/v1/stilling/stillingsnummer/${enStilling.id}", StillingMedStillingsinfo::class.java).also {
-            assertThat(it.rekruttering).isEqualTo(enStillingsinfo.asEierDto())
-            assertThat(it.uuid).isEqualTo(enStillingsinfo.stillingsid.asString())
+        restTemplate.getForObject("$localBaseUrl/rekrutteringsbistandstilling/annonsenr/${enStilling.id}", HentRekrutteringsbistandStillingDto::class.java).also {
+            assertThat(it.stillingsinfo).isEqualTo(enStillingsinfo.asStillingsinfoDto())
+            assertThat(it.stilling.uuid).isEqualTo(enStillingsinfo.stillingsid.asString())
         }
     }
 
