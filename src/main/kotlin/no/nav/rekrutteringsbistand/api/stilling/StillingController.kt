@@ -103,24 +103,32 @@ class StillingController(
         return ok(stillingService.hentRekrutteringsbistandStilling(uuid))
     }
 
-    @GetMapping("/rekrutteringsbistand/api/v1/stilling/stillingsnummer/{stillingsnummer}")
-    @Deprecated("hentRekrutteringsbistandStillingBasertPåAnnonsenr")
-    fun hentStillingAnnonsenummer(@PathVariable stillingsnummer: String): ResponseEntity<StillingMedStillingsinfo> {
-        return ok(stillingService.hentStillingBasertPåAnnonsenrGammel(stillingsnummer))
-    }
-
     @GetMapping("/rekrutteringsbistandstilling/annonsenr/{annonsenr}")
     fun hentRekrutteringsbistandStillingBasertPåAnnonsenr(@PathVariable annonsenr: String): ResponseEntity<HentRekrutteringsbistandStillingDto> {
-        return ok(stillingService.hentStillingBasertPåAnnonsenr(annonsenr))
+        return ok(stillingService.hentRekrutteringsbistandStillingBasertPåAnnonsenr(annonsenr))
     }
 
     @GetMapping("/rekrutteringsbistand/api/v1/ads/rekrutteringsbistand/minestillinger")
     @Deprecated("Lag endepunkt som returnerer noe annet enn Page<RekrutteringsbistandStilling>")
-    fun hentMineStillinger(request: HttpServletRequest): ResponseEntity<Page<StillingMedStillingsinfo>> {
+    fun hentMineStillingerGammel(request: HttpServletRequest): ResponseEntity<Page<StillingMedStillingsinfo>> {
         return ok().body(stillingService.hentStillinger(
                  "${externalConfiguration.stillingApi.url}/api/v1/ads/rekrutteringsbistand/minestillinger",
                 if (request.queryString != null) URLDecoder.decode(request.queryString, StandardCharsets.UTF_8) else null
         ))
+    }
+
+    @GetMapping("/mine-stillinger")
+    fun hentMineStillinger(request: HttpServletRequest): ResponseEntity<Page<HentRekrutteringsbistandStillingDto>> {
+
+        val queryString = if (request.queryString != null) {
+            URLDecoder.decode(request.queryString, StandardCharsets.UTF_8)
+        } else {
+            null
+        }
+
+        val stillinger: Page<HentRekrutteringsbistandStillingDto> = stillingService.hentMineStillinger(queryString)
+
+        return ok().body(stillinger)
     }
 
 }

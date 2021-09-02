@@ -146,143 +146,143 @@ internal class StillingComponentTest {
         }
     }
 
-    @Test
-    fun `PUT mot stilling med notat skal returnere endret stilling når stillingsinfo finnes`() {
-        mock(HttpMethod.PUT, "/api/v1/ads/${enRekrutteringsbistandStilling.stilling.uuid}", enTredjeStilling)
-        mockKandidatlisteOppdatering()
-        repository.opprett(enTredjeStillingsinfo.copy(notat = "gammelt notat"))
-
-        restTemplate.exchange(
-                "$localBaseUrl/rekrutteringsbistandstilling",
-                HttpMethod.PUT,
-                HttpEntity(OppdaterRekrutteringsbistandStillingDto(
-                        stillingsinfoid = enRekrutteringsbistandStilling.stillingsinfo?.stillingsinfoid,
-                        notat = enRekrutteringsbistandStilling.stillingsinfo?.notat,
-                        stilling = enRekrutteringsbistandStilling.stilling
-                )),
-                OppdaterRekrutteringsbistandStillingDto::class.java
-        ).body.also {
-            assertThat(it!!.stilling.uuid).isNotEmpty()
-            assertThat(it.stilling.copy(uuid = null)).isEqualTo(enRekrutteringsbistandStilling.stilling.copy(uuid = null))
-            assertThat(it.notat).isEqualTo(enRekrutteringsbistandStilling.stillingsinfo?.notat)
-            assertThat(it.stillingsinfoid).isEqualTo(enRekrutteringsbistandStilling.stillingsinfo?.stillingsinfoid)
-        }
-    }
-
-    @Test
-    fun `PUT mot stilling med notat skal returnere endret stilling når stillingsinfo ikke har eier`() {
-        val rekrutteringsbistandStilling = enRekrutteringsbistandStillingUtenEier
-        mock(HttpMethod.PUT, "/api/v1/ads/${rekrutteringsbistandStilling.stilling.uuid}", enFjerdeStilling)
-        mockKandidatlisteOppdatering()
-        repository.opprett(enStillinggsinfoUtenEier.copy(notat = null))
-
-        restTemplate.exchange(
-                "$localBaseUrl/rekrutteringsbistandstilling",
-                HttpMethod.PUT,
-                HttpEntity(OppdaterRekrutteringsbistandStillingDto(
-                        stillingsinfoid = rekrutteringsbistandStilling.stillingsinfo?.stillingsinfoid,
-                        notat = rekrutteringsbistandStilling.stillingsinfo?.notat,
-                        stilling = rekrutteringsbistandStilling.stilling
-                )),
-                OppdaterRekrutteringsbistandStillingDto::class.java
-        ).body.also {
-            assertThat(it!!.stilling.uuid).isNotEmpty()
-            assertThat(it.stilling.copy(uuid = null)).isEqualTo(rekrutteringsbistandStilling.stilling.copy(uuid = null))
-            assertThat(it.notat).isEqualTo(rekrutteringsbistandStilling.stillingsinfo?.notat)
-            assertThat(it.stillingsinfoid).isEqualTo(rekrutteringsbistandStilling.stillingsinfo?.stillingsinfoid)
-        }
-    }
-
-    @Test
-    fun `PUT mot stilling med notat skal returnere endret stilling når stillingsinfo ikke finnes`() {
-        val rekrutteringsbistandStilling = enRekrutteringsbistandStillingUtenEier
-        mock(HttpMethod.PUT, "/api/v1/ads/${rekrutteringsbistandStilling.stilling.uuid}", rekrutteringsbistandStilling.stilling)
-        mockKandidatlisteOppdatering()
-
-        restTemplate.exchange(
-                "$localBaseUrl/rekrutteringsbistandstilling",
-                HttpMethod.PUT,
-                HttpEntity(OppdaterRekrutteringsbistandStillingDto(
-                        stillingsinfoid = rekrutteringsbistandStilling.stillingsinfo?.stillingsinfoid,
-                        notat = rekrutteringsbistandStilling.stillingsinfo?.notat,
-                        stilling = rekrutteringsbistandStilling.stilling
-                )),
-                OppdaterRekrutteringsbistandStillingDto::class.java
-        ).body.also {
-            assertThat(it!!.stilling.uuid).isNotEmpty()
-            assertThat(it.stilling.copy(uuid = null)).isEqualTo(rekrutteringsbistandStilling.stilling.copy(uuid = null))
-            assertThat(it.notat).isEqualTo(rekrutteringsbistandStilling.stillingsinfo?.notat)
-            assertThat(it.stillingsinfoid).isNotEmpty()
-        }
-    }
-
-    @Test
-    fun `DELETE mot stilling med kandidatlistefeil skal returnere status 500`() {
-        val slettetStilling = enStillingUtenStillingsinfo.copy(status = "DELETED")
-        mock(HttpMethod.DELETE, "/api/v1/ads/${slettetStilling.uuid}", slettetStilling)
-        mockKandidatlisteOppdateringFeiler()
-
-        restTemplate.exchange(
-                "$localBaseUrl/rekrutteringsbistand/api/v1/ads/${enStillingUtenStillingsinfo.uuid}",
-                HttpMethod.DELETE,
-                HttpEntity(enStilling.copy(uuid = null)),
-                Stilling::class.java
-        ).also {
-            assertThat(it.statusCode).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
-        }
-
-    }
-
-    @Test
-    fun `GET mot mine stillinger skal returnere HTTP 200 med mine stillinger uten stillingsinfo`() {
-        mock(HttpMethod.GET, "/api/v1/ads/rekrutteringsbistand/minestillinger", enPage)
-
-        val respons: ResponseEntity<Page<StillingMedStillingsinfo>> = restTemplate.exchange(
-                "$localBaseUrl/rekrutteringsbistand/api/v1/ads/rekrutteringsbistand/minestillinger",
-                HttpMethod.GET,
-                null,
-                object : ParameterizedTypeReference<Page<StillingMedStillingsinfo>>() {}
-        )
-
-        assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)
-        assertThat(respons.body).isEqualTo(enPage)
-    }
-
-    @Test
-    fun `GET mot mine stillinger skal returnere HTTP 200 med mine stillinger med stillingsinfo`() {
-        repository.opprett(enStillingsinfo)
-        repository.opprett(enAnnenStillingsinfo)
-
-        mock(HttpMethod.GET, "/api/v1/ads/rekrutteringsbistand/minestillinger", enPage)
-
-        val respons: ResponseEntity<Page<StillingMedStillingsinfo>> = restTemplate.exchange(
-                "$localBaseUrl/rekrutteringsbistand/api/v1/ads/rekrutteringsbistand/minestillinger",
-                HttpMethod.GET,
-                null,
-                object : ParameterizedTypeReference<Page<StillingMedStillingsinfo>>() {}
-        )
-
-        assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)
-        assertThat(respons.body!!.content.first().rekruttering).isEqualTo(enStillingsinfo.asEierDto())
-        assertThat(respons.body!!.content.last().rekruttering).isEqualTo(enAnnenStillingsinfo.asEierDto())
-    }
-
-    @Test
-    fun `DELETE mot stilling skal returnere HTTP 200 med stilling og status DELETED`() {
-        val slettetStilling = enStillingUtenStillingsinfo.copy(status = "DELETED")
-        mock(HttpMethod.DELETE, "/api/v1/ads/${slettetStilling.uuid}", slettetStilling)
-        mockKandidatlisteOppdatering()
-
-        val respons: ResponseEntity<Stilling> = restTemplate.exchange(
-                "$localBaseUrl/rekrutteringsbistand/api/v1/ads/${slettetStilling.uuid}",
-                HttpMethod.DELETE,
-                null,
-                Stilling::class.java
-        )
-
-        assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)
-        assertThat(respons.body).isEqualTo(slettetStilling)
-    }
+//    @Test
+//    fun `PUT mot stilling med notat skal returnere endret stilling når stillingsinfo finnes`() {
+//        mock(HttpMethod.PUT, "/api/v1/ads/${enRekrutteringsbistandStilling.stilling.uuid}", enTredjeStilling)
+//        mockKandidatlisteOppdatering()
+//        repository.opprett(enTredjeStillingsinfo.copy(notat = "gammelt notat"))
+//
+//        restTemplate.exchange(
+//                "$localBaseUrl/rekrutteringsbistandstilling",
+//                HttpMethod.PUT,
+//                HttpEntity(OppdaterRekrutteringsbistandStillingDto(
+//                        stillingsinfoid = enRekrutteringsbistandStilling.stillingsinfo?.stillingsinfoid,
+//                        notat = enRekrutteringsbistandStilling.stillingsinfo?.notat,
+//                        stilling = enRekrutteringsbistandStilling.stilling
+//                )),
+//                OppdaterRekrutteringsbistandStillingDto::class.java
+//        ).body.also {
+//            assertThat(it!!.stilling.uuid).isNotEmpty()
+//            assertThat(it.stilling.copy(uuid = null)).isEqualTo(enRekrutteringsbistandStilling.stilling.copy(uuid = null))
+//            assertThat(it.notat).isEqualTo(enRekrutteringsbistandStilling.stillingsinfo?.notat)
+//            assertThat(it.stillingsinfoid).isEqualTo(enRekrutteringsbistandStilling.stillingsinfo?.stillingsinfoid)
+//        }
+//    }
+//
+//    @Test
+//    fun `PUT mot stilling med notat skal returnere endret stilling når stillingsinfo ikke har eier`() {
+//        val rekrutteringsbistandStilling = enRekrutteringsbistandStillingUtenEier
+//        mock(HttpMethod.PUT, "/api/v1/ads/${rekrutteringsbistandStilling.stilling.uuid}", enFjerdeStilling)
+//        mockKandidatlisteOppdatering()
+//        repository.opprett(enStillinggsinfoUtenEier.copy(notat = null))
+//
+//        restTemplate.exchange(
+//                "$localBaseUrl/rekrutteringsbistandstilling",
+//                HttpMethod.PUT,
+//                HttpEntity(OppdaterRekrutteringsbistandStillingDto(
+//                        stillingsinfoid = rekrutteringsbistandStilling.stillingsinfo?.stillingsinfoid,
+//                        notat = rekrutteringsbistandStilling.stillingsinfo?.notat,
+//                        stilling = rekrutteringsbistandStilling.stilling
+//                )),
+//                OppdaterRekrutteringsbistandStillingDto::class.java
+//        ).body.also {
+//            assertThat(it!!.stilling.uuid).isNotEmpty()
+//            assertThat(it.stilling.copy(uuid = null)).isEqualTo(rekrutteringsbistandStilling.stilling.copy(uuid = null))
+//            assertThat(it.notat).isEqualTo(rekrutteringsbistandStilling.stillingsinfo?.notat)
+//            assertThat(it.stillingsinfoid).isEqualTo(rekrutteringsbistandStilling.stillingsinfo?.stillingsinfoid)
+//        }
+//    }
+//
+//    @Test
+//    fun `PUT mot stilling med notat skal returnere endret stilling når stillingsinfo ikke finnes`() {
+//        val rekrutteringsbistandStilling = enRekrutteringsbistandStillingUtenEier
+//        mock(HttpMethod.PUT, "/api/v1/ads/${rekrutteringsbistandStilling.stilling.uuid}", rekrutteringsbistandStilling.stilling)
+//        mockKandidatlisteOppdatering()
+//
+//        restTemplate.exchange(
+//                "$localBaseUrl/rekrutteringsbistandstilling",
+//                HttpMethod.PUT,
+//                HttpEntity(OppdaterRekrutteringsbistandStillingDto(
+//                        stillingsinfoid = rekrutteringsbistandStilling.stillingsinfo?.stillingsinfoid,
+//                        notat = rekrutteringsbistandStilling.stillingsinfo?.notat,
+//                        stilling = rekrutteringsbistandStilling.stilling
+//                )),
+//                OppdaterRekrutteringsbistandStillingDto::class.java
+//        ).body.also {
+//            assertThat(it!!.stilling.uuid).isNotEmpty()
+//            assertThat(it.stilling.copy(uuid = null)).isEqualTo(rekrutteringsbistandStilling.stilling.copy(uuid = null))
+//            assertThat(it.notat).isEqualTo(rekrutteringsbistandStilling.stillingsinfo?.notat)
+//            assertThat(it.stillingsinfoid).isNotEmpty()
+//        }
+//    }
+//
+//    @Test
+//    fun `DELETE mot stilling med kandidatlistefeil skal returnere status 500`() {
+//        val slettetStilling = enStillingUtenStillingsinfo.copy(status = "DELETED")
+//        mock(HttpMethod.DELETE, "/api/v1/ads/${slettetStilling.uuid}", slettetStilling)
+//        mockKandidatlisteOppdateringFeiler()
+//
+//        restTemplate.exchange(
+//                "$localBaseUrl/rekrutteringsbistand/api/v1/ads/${enStillingUtenStillingsinfo.uuid}",
+//                HttpMethod.DELETE,
+//                HttpEntity(enStilling.copy(uuid = null)),
+//                Stilling::class.java
+//        ).also {
+//            assertThat(it.statusCode).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
+//        }
+//
+//    }
+//
+//    @Test
+//    fun `GET mot mine stillinger skal returnere HTTP 200 med mine stillinger uten stillingsinfo`() {
+//        mock(HttpMethod.GET, "/api/v1/ads/rekrutteringsbistand/minestillinger", enPage)
+//
+//        val respons: ResponseEntity<Page<StillingMedStillingsinfo>> = restTemplate.exchange(
+//                "$localBaseUrl/rekrutteringsbistand/api/v1/ads/rekrutteringsbistand/minestillinger",
+//                HttpMethod.GET,
+//                null,
+//                object : ParameterizedTypeReference<Page<StillingMedStillingsinfo>>() {}
+//        )
+//
+//        assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)
+//        assertThat(respons.body).isEqualTo(enPage)
+//    }
+//
+//    @Test
+//    fun `GET mot mine stillinger skal returnere HTTP 200 med mine stillinger med stillingsinfo`() {
+//        repository.opprett(enStillingsinfo)
+//        repository.opprett(enAnnenStillingsinfo)
+//
+//        mock(HttpMethod.GET, "/api/v1/ads/rekrutteringsbistand/minestillinger", enPage)
+//
+//        val respons: ResponseEntity<Page<StillingMedStillingsinfo>> = restTemplate.exchange(
+//                "$localBaseUrl/rekrutteringsbistand/api/v1/ads/rekrutteringsbistand/minestillinger",
+//                HttpMethod.GET,
+//                null,
+//                object : ParameterizedTypeReference<Page<StillingMedStillingsinfo>>() {}
+//        )
+//
+//        assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)
+//        assertThat(respons.body!!.content.first().rekruttering).isEqualTo(enStillingsinfo.asEierDto())
+//        assertThat(respons.body!!.content.last().rekruttering).isEqualTo(enAnnenStillingsinfo.asEierDto())
+//    }
+//
+//    @Test
+//    fun `DELETE mot stilling skal returnere HTTP 200 med stilling og status DELETED`() {
+//        val slettetStilling = enStillingUtenStillingsinfo.copy(status = "DELETED")
+//        mock(HttpMethod.DELETE, "/api/v1/ads/${slettetStilling.uuid}", slettetStilling)
+//        mockKandidatlisteOppdatering()
+//
+//        val respons: ResponseEntity<Stilling> = restTemplate.exchange(
+//                "$localBaseUrl/rekrutteringsbistand/api/v1/ads/${slettetStilling.uuid}",
+//                HttpMethod.DELETE,
+//                null,
+//                Stilling::class.java
+//        )
+//
+//        assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)
+//        assertThat(respons.body).isEqualTo(slettetStilling)
+//    }
 
     private fun mock(method: HttpMethod, urlPath: String, responseBody: Any) {
         wiremock.stubFor(

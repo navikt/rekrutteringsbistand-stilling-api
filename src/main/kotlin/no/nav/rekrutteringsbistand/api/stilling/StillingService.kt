@@ -64,35 +64,17 @@ class StillingService(
         )
     }
 
-    fun hentStillingBasertPåAnnonsenr(annonsenr: String): HentRekrutteringsbistandStillingDto {
+    fun hentRekrutteringsbistandStillingBasertPåAnnonsenr(annonsenr: String): HentRekrutteringsbistandStillingDto {
         val url = "${externalConfiguration.stillingApi.url}/b2b/api/v1/ads"
         val queryParams = "id=${annonsenr}"
-        val stillingPage = hent(url, queryParams, headersUtenToken())
+        val stilling = hent(url, queryParams).content.first()
 
-        if (stillingPage == null || stillingPage.content.isEmpty()) {
-            throw RestResponseEntityExceptionHandler.NoContentException("Fant ikke stilling")
-        } else {
-            val stilling = stillingPage.content.first()
-            val stillingsinfo: Option<Stillingsinfo> = hentStillingsinfo(stilling)
+        val stillingsinfo: Option<Stillingsinfo> = hentStillingsinfo(stilling)
 
-            return HentRekrutteringsbistandStillingDto(
-                stilling = stilling,
-                stillingsinfo = stillingsinfo.map { it.asStillingsinfoDto() }.getOrElse { null }
-            )
-        }
-    }
-
-    fun hentStillingBasertPåAnnonsenrGammel(stillingsnummer: String): StillingMedStillingsinfo {
-        val stillingPage =
-            hentGammel("${externalConfiguration.stillingApi.url}/b2b/api/v1/ads", "id=${stillingsnummer}", headersUtenToken())
-
-        if (stillingPage == null || stillingPage.content.isEmpty()) {
-            throw RestResponseEntityExceptionHandler.NoContentException("Fant ikke stilling")
-        } else {
-            val stilling = stillingPage.content.first()
-            val stillingsinfo: Option<Stillingsinfo> = hentStillingsinfo(stilling)
-            return stillingsinfo.map { stilling.copy(rekruttering = it.asEierDto()) }.getOrElse { stilling }
-        }
+        return HentRekrutteringsbistandStillingDto(
+            stilling = stilling,
+            stillingsinfo = stillingsinfo.map { it.asStillingsinfoDto() }.getOrElse { null }
+        )
     }
 
     fun opprettStilling(stilling: Stilling, queryString: String?): StillingMedStillingsinfo {
@@ -183,6 +165,30 @@ class StillingService(
         return respons
     }
 
+    fun hentMineStillinger(queryString: String?): Page<HentRekrutteringsbistandStillingDto> {
+        val url = "${externalConfiguration.stillingApi.url}/mine-stillinger"
+        val stillingerPage: Page<Stilling> = hent(url, queryString)
+
+        val stillingsIder = stillingerPage.content.map { Stillingsid(it.uuid) }
+
+        val stillingsinfoer: Map<String, Stillingsinfo> = stillingsinfoService
+            .hentForStillinger(stillingsIder)
+            .associateBy { it.stillingsid.asString() }
+
+        val rekrutteringsbistandStillinger = stillingerPage.content.map {
+            HentRekrutteringsbistandStillingDto(
+                stillingsinfo = stillingsinfoer[it.uuid]?.asStillingsinfoDto(),
+                stilling = it
+            )
+        }
+
+        return Page(
+            totalPages = stillingerPage.totalPages,
+            totalElements = stillingerPage.totalElements,
+            content = rekrutteringsbistandStillinger
+        )
+    }
+
     fun hentStillinger(url: String, queryString: String?): Page<StillingMedStillingsinfo> {
         val opprinneligeStillingerPage: Page<StillingMedStillingsinfo> = hentGammel(url, queryString, headers())
             ?: throw RestResponseEntityExceptionHandler.NoContentException("Fant ikke stillinger")
@@ -203,18 +209,21 @@ class StillingService(
         return info.map { opprinnelig.copy(rekruttering = it.asEierDto()) }.getOrElse { opprinnelig }
     }
 
-    private fun hent(
-        url: String,
-        queryString: String?,
-        headers: MultiValueMap<String, String>
-    ): Page<Stilling>? {
+    private fun hent(url: String, queryString: String?): Page<Stilling> {
+
         val withQueryParams: String = UriComponentsBuilder.fromHttpUrl(url).query(queryString).build().toString()
-        return restTemplate.exchange(
+        val stillingPage = restTemplate.exchange(
             withQueryParams,
             HttpMethod.GET,
-            HttpEntity(null, headers),
+            HttpEntity(null, headersUtenToken()),
             object : ParameterizedTypeReference<Page<Stilling>>() {}
         ).body
+
+        if (stillingPage == null || stillingPage.content.isEmpty()) {
+            throw RestResponseEntityExceptionHandler.NoContentException("Ingen body på henting av stilling, url: $url")
+        }
+
+        return stillingPage
     }
 
     // TODO: Slett denne siden den returnerer Page<StillingMedStillingsinfo>, noe som ikke stemmer.
