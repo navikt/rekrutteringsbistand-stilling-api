@@ -166,10 +166,10 @@ class StillingService(
     }
 
     fun hentMineStillinger(queryString: String?): Page<HentRekrutteringsbistandStillingDto> {
-        val url = "${externalConfiguration.stillingApi.url}/mine-stillinger"
+        val url = "${externalConfiguration.stillingApi.url}/api/v1/ads/rekrutteringsbistand/minestillinger"
         val stillingerPage: Page<Stilling> = hent(url, queryString)
 
-        val stillingsIder = stillingerPage.content.map { Stillingsid(it.uuid) }
+        val stillingsIder = stillingerPage.content.map { Stillingsid(it.uuid!!) }
 
         val stillingsinfoer: Map<String, Stillingsinfo> = stillingsinfoService
             .hentForStillinger(stillingsIder)

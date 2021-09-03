@@ -8,8 +8,8 @@ import kotlin.collections.ArrayList
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class StillingMedStillingsinfo(
-        val id: Long,
-        val uuid: String,
+        val id: Long?,
+        val uuid: String?,
         val created: LocalDateTime?,
         val createdBy: String?,
         val updated: LocalDateTime?,
@@ -71,8 +71,8 @@ data class StillingMedStillingsinfo(
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Stilling(
-        val id: Long,
-        val uuid: String,
+        val id: Long?,
+        val uuid: String?,
         val created: LocalDateTime?,
         val createdBy: String?,
         val updated: LocalDateTime?,
