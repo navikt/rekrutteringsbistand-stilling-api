@@ -215,7 +215,7 @@ class StillingService(
         val stillingPage = restTemplate.exchange(
             withQueryParams,
             HttpMethod.GET,
-            HttpEntity(null, headersUtenToken()),
+            HttpEntity(null, headers()),
             object : ParameterizedTypeReference<Page<Stilling>>() {}
         ).body
 
