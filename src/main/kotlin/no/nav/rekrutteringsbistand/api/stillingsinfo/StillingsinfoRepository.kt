@@ -2,6 +2,7 @@ package no.nav.rekrutteringsbistand.api.stillingsinfo
 
 import no.nav.rekrutteringsbistand.api.option.Option
 import no.nav.rekrutteringsbistand.api.option.optionOf
+import no.nav.rekrutteringsbistand.api.support.LOG
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert
@@ -14,7 +15,8 @@ class StillingsinfoRepository(
 ) {
     val simpleJdbcInsert = SimpleJdbcInsert(namedJdbcTemplate.jdbcTemplate).withTableName("Stillingsinfo").usingGeneratedKeyColumns("id")
 
-    fun opprett(stillingsinfo: Stillingsinfo) =
+    fun opprett(stillingsinfo: Stillingsinfo) {
+        LOG.info("Lagrer stilling med stillingsId ${stillingsinfo.stillingsid}")
         simpleJdbcInsert.executeAndReturnKey(
             mapOf(
                 STILLINGSINFOID to stillingsinfo.stillingsinfoid.asString(),
@@ -24,6 +26,7 @@ class StillingsinfoRepository(
                 NOTAT to stillingsinfo.notat
             )
         )
+    }
 
     fun oppdaterEierIdentOgEierNavn(oppdatering: OppdaterEier) =
         namedJdbcTemplate.update(
@@ -53,15 +56,15 @@ class StillingsinfoRepository(
         return optionOf(list.firstOrNull())
     }
 
+    fun hentForStillinger(stillingsider: List<Stillingsid>): List<Stillingsinfo> {
+        val sql = "SELECT * FROM $STILLINGSINFO WHERE $STILLINGSID IN(:stillingsider)"
+        val params = MapSqlParameterSource("stillingsider", stillingsider.map { it.asString() })
 
-    fun hentForStillinger(stillingsider: List<Stillingsid>): List<Stillingsinfo> =
-        namedJdbcTemplate.query(
-            "SELECT * FROM $STILLINGSINFO WHERE $STILLINGSID IN(:stillingsider)",
-            MapSqlParameterSource("stillingsider", stillingsider.map { it.asString() }.joinToString(","))
-        )
+        return namedJdbcTemplate.query(sql, params)
         { rs: ResultSet, _: Int ->
             Stillingsinfo.fromDB(rs)
         }
+    }
 
     fun hentForIdent(ident: String): Collection<Stillingsinfo> =
         namedJdbcTemplate.query(
