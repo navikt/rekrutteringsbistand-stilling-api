@@ -218,10 +218,7 @@ class StillingService(
             HttpEntity(null, headers()),
             object : ParameterizedTypeReference<Page<Stilling>>() {}
         ).body
-
-        if (stillingPage == null || stillingPage.content.isEmpty()) {
-            throw RestResponseEntityExceptionHandler.NoContentException("Ingen body på henting av stilling, url: $url")
-        }
+            ?: throw RestResponseEntityExceptionHandler.NoContentException("Ingen body på henting av stilling, url: $url")
 
         return stillingPage
     }
