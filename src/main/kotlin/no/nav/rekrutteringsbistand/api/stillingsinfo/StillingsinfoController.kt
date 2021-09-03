@@ -13,7 +13,7 @@ import java.util.*
 @RestController
 @RequestMapping("/rekruttering")
 @ProtectedWithClaims(issuer = "isso")
-class EierController(
+class StillingsinfoController(
         val repo: StillingsinfoRepository,
         val kandidatlisteKlient: KandidatlisteKlient
 ) {
