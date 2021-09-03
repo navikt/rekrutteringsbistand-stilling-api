@@ -237,15 +237,18 @@ internal class StillingComponentTest {
     fun `GET mot mine stillinger skal returnere HTTP 200 med mine stillinger uten stillingsinfo`() {
         mock(HttpMethod.GET, "/api/v1/ads/rekrutteringsbistand/minestillinger", enPage)
 
-        val respons: ResponseEntity<Page<StillingMedStillingsinfo>> = restTemplate.exchange(
-                "$localBaseUrl/rekrutteringsbistand/api/v1/ads/rekrutteringsbistand/minestillinger",
+        val respons = restTemplate.exchange(
+                "$localBaseUrl/mine-stillinger",
                 HttpMethod.GET,
                 null,
-                object : ParameterizedTypeReference<Page<StillingMedStillingsinfo>>() {}
+                object : ParameterizedTypeReference<Page<HentRekrutteringsbistandStillingDto>>() {}
         )
 
         assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)
-        assertThat(respons.body).isEqualTo(enPage)
+        assertThat(respons.body!!.content.size).isEqualTo(enPage.content.size)
+        respons.body!!.content.forEach {
+            assertThat(it.stillingsinfo).isNull()
+        }
     }
 
     @Test
@@ -256,7 +259,7 @@ internal class StillingComponentTest {
         mock(HttpMethod.GET, "/api/v1/ads/rekrutteringsbistand/minestillinger", enPage)
 
         val respons: ResponseEntity<Page<StillingMedStillingsinfo>> = restTemplate.exchange(
-                "$localBaseUrl/rekrutteringsbistand/api/v1/ads/rekrutteringsbistand/minestillinger",
+                "$localBaseUrl/mine-stillinger",
                 HttpMethod.GET,
                 null,
                 object : ParameterizedTypeReference<Page<StillingMedStillingsinfo>>() {}

@@ -1,6 +1,5 @@
 package no.nav.rekrutteringsbistand.api.stilling
 
-import arrow.core.Either
 import arrow.core.getOrElse
 import no.nav.rekrutteringsbistand.api.HentRekrutteringsbistandStillingDto
 import no.nav.rekrutteringsbistand.api.OppdaterRekrutteringsbistandStillingDto
@@ -17,7 +16,6 @@ import no.nav.rekrutteringsbistand.api.support.toMultiValueMap
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.*
 import org.springframework.stereotype.Service
-import org.springframework.util.MultiValueMap
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.util.UriComponentsBuilder
 import java.util.*
@@ -42,7 +40,7 @@ class StillingService(
             HttpEntity(null, headersUtenToken()),
             StillingMedStillingsinfo::class.java
         ).body!!
-        val stillingsinfo: Option<Stillingsinfo> = hentStillingsinfo(opprinneligStilling)
+        val stillingsinfo: Option<Stillingsinfo> = stillingsinfoService.hentStillingsinfo(opprinneligStilling)
         return stillingsinfo.map { opprinneligStilling.copy(rekruttering = it.asEierDto()) }
             .getOrElse { opprinneligStilling }
     }
@@ -56,7 +54,7 @@ class StillingService(
             Stilling::class.java
         ).body!!
 
-        val stillingsinfo: Option<Stillingsinfo> = hentStillingsinfo(opprinneligStilling)
+        val stillingsinfo: Option<Stillingsinfo> = stillingsinfoService.hentStillingsinfo(opprinneligStilling)
 
         return HentRekrutteringsbistandStillingDto(
             stillingsinfo = stillingsinfo.map { it.asStillingsinfoDto() }.getOrElse { null },
@@ -69,7 +67,7 @@ class StillingService(
         val queryParams = "id=${annonsenr}"
         val stilling = hent(url, queryParams).content.first()
 
-        val stillingsinfo: Option<Stillingsinfo> = hentStillingsinfo(stilling)
+        val stillingsinfo: Option<Stillingsinfo> = stillingsinfoService.hentStillingsinfo(stilling)
 
         return HentRekrutteringsbistandStillingDto(
             stilling = stilling,
@@ -91,7 +89,7 @@ class StillingService(
         val id = opprinneligStilling.uuid?.let { Stillingsid(it) }
             ?: throw IllegalArgumentException("Mangler stilling uuid")
         kandidatlisteKlient.oppdaterKandidatliste(id)
-        val stillingsinfo: Option<Stillingsinfo> = hentStillingsinfo(opprinneligStilling)
+        val stillingsinfo: Option<Stillingsinfo> = stillingsinfoService.hentStillingsinfo(opprinneligStilling)
         return stillingsinfo.map { opprinneligStilling.copy(rekruttering = it.asEierDto()) }
             .getOrElse { opprinneligStilling }
     }
@@ -189,26 +187,6 @@ class StillingService(
         )
     }
 
-    fun hentStillinger(url: String, queryString: String?): Page<StillingMedStillingsinfo> {
-        val opprinneligeStillingerPage: Page<StillingMedStillingsinfo> = hentGammel(url, queryString, headers())
-            ?: throw RestResponseEntityExceptionHandler.NoContentException("Fant ikke stillinger")
-
-        val opprinneligeStillinger: List<StillingMedStillingsinfo> = opprinneligeStillingerPage.content
-
-        val stillingsinfoer: List<Either<Unit, Stillingsinfo>> = opprinneligeStillinger.map(::hentStillingsinfo)
-
-        val newContent = stillingsinfoer.zip(opprinneligeStillinger, ::leggPåStillingsinfo)
-
-        return opprinneligeStillingerPage.copy(content = newContent)
-    }
-
-    private fun leggPåStillingsinfo(
-        info: Option<Stillingsinfo>,
-        opprinnelig: StillingMedStillingsinfo
-    ): StillingMedStillingsinfo {
-        return info.map { opprinnelig.copy(rekruttering = it.asEierDto()) }.getOrElse { opprinnelig }
-    }
-
     private fun hent(url: String, queryString: String?): Page<Stilling> {
 
         val withQueryParams: String = UriComponentsBuilder.fromHttpUrl(url).query(queryString).build().toString()
@@ -222,30 +200,6 @@ class StillingService(
 
         return stillingPage
     }
-
-    // TODO: Slett denne siden den returnerer Page<StillingMedStillingsinfo>, noe som ikke stemmer.
-    //  Vi får faktisk en Page<Stilling> fra API-kallet.
-    //  Kan ikke lett oppdatere typen, siden resten av koden avhenger av at det er feil typesetting.
-    //  Når @Deprecated endepunkt er fjerna kan vi bare slette denne koden.
-    private fun hentGammel(
-        url: String,
-        queryString: String?,
-        headers: MultiValueMap<String, String>
-    ): Page<StillingMedStillingsinfo>? {
-        val withQueryParams: String = UriComponentsBuilder.fromHttpUrl(url).query(queryString).build().toString()
-        return restTemplate.exchange(
-            withQueryParams,
-            HttpMethod.GET,
-            HttpEntity(null, headers),
-            object : ParameterizedTypeReference<Page<StillingMedStillingsinfo>>() {}
-        ).body
-    }
-
-    private fun hentStillingsinfo(stillingMedStillingsinfo: StillingMedStillingsinfo): Option<Stillingsinfo> =
-        stillingsinfoService.hentForStilling(Stillingsid(stillingMedStillingsinfo.uuid!!))
-
-    private fun hentStillingsinfo(stilling: Stilling): Option<Stillingsinfo> =
-        stillingsinfoService.hentForStilling(Stillingsid(stilling.uuid!!))
 
     private fun headers() =
         mapOf(
