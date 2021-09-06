@@ -108,15 +108,6 @@ class StillingController(
         return ok(stillingService.hentRekrutteringsbistandStillingBasertPåAnnonsenr(annonsenr))
     }
 
-    @GetMapping("/rekrutteringsbistand/api/v1/ads/rekrutteringsbistand/minestillinger")
-    @Deprecated("Lag endepunkt som returnerer noe annet enn Page<RekrutteringsbistandStilling>")
-    fun hentMineStillingerGammel(request: HttpServletRequest): ResponseEntity<Page<StillingMedStillingsinfo>> {
-        return ok().body(stillingService.hentStillinger(
-                 "${externalConfiguration.stillingApi.url}/api/v1/ads/rekrutteringsbistand/minestillinger",
-                if (request.queryString != null) URLDecoder.decode(request.queryString, StandardCharsets.UTF_8) else null
-        ))
-    }
-
     @GetMapping("/mine-stillinger")
     fun hentMineStillinger(request: HttpServletRequest): ResponseEntity<Page<HentRekrutteringsbistandStillingDto>> {
 
