@@ -31,20 +31,6 @@ class StillingService(
     val restProxy: RestProxy
 ) {
 
-    @Deprecated("Bruk hentRekrutteringsbistandStilling")
-    fun hentStilling(uuid: String): StillingMedStillingsinfo {
-        val url = "${externalConfiguration.stillingApi.url}/b2b/api/v1/ads/$uuid"
-        val opprinneligStilling: StillingMedStillingsinfo = restTemplate.exchange(
-            url,
-            HttpMethod.GET,
-            HttpEntity(null, headersUtenToken()),
-            StillingMedStillingsinfo::class.java
-        ).body!!
-        val stillingsinfo: Option<Stillingsinfo> = stillingsinfoService.hentStillingsinfo(opprinneligStilling)
-        return stillingsinfo.map { opprinneligStilling.copy(rekruttering = it.asEierDto()) }
-            .getOrElse { opprinneligStilling }
-    }
-
     fun hentRekrutteringsbistandStilling(uuid: String): HentRekrutteringsbistandStillingDto {
         val url = "${externalConfiguration.stillingApi.url}/b2b/api/v1/ads/$uuid"
         val opprinneligStilling: Stilling = restTemplate.exchange(

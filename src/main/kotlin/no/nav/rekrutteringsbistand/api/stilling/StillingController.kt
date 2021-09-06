@@ -92,12 +92,6 @@ class StillingController(
         return ResponseEntity(respons.body, respons.statusCode)
     }
 
-    @GetMapping("/rekrutteringsbistand/api/v1/stilling/{uuid}")
-    @Deprecated("Bruk hentRekrutteringsbistandStilling")
-    fun hentStilling(@PathVariable uuid: String): ResponseEntity<StillingMedStillingsinfo> {
-        return ok(stillingService.hentStilling(uuid))
-    }
-
     @GetMapping("/rekrutteringsbistandstilling/{uuid}")
     fun hentRekrutteringsbistandStilling(@PathVariable uuid: String): ResponseEntity<HentRekrutteringsbistandStillingDto> {
         return ok(stillingService.hentRekrutteringsbistandStilling(uuid))

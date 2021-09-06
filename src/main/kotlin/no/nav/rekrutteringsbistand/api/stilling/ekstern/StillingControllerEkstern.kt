@@ -13,22 +13,22 @@ import javax.servlet.http.HttpServletRequest
 @RestController
 @ProtectedWithClaims(issuer = "azuread")
 class StillingControllerEkstern(
-        val stillingService: StillingService,
-        val authorizedPartyUtils: AuthorizedPartyUtils
+    val stillingService: StillingService,
+    val authorizedPartyUtils: AuthorizedPartyUtils
 ) {
 
     @GetMapping("/rekrutteringsbistand/ekstern/api/v1/stilling/{uuid}")
-    fun hentStilling(@PathVariable uuid: String, request: HttpServletRequest): ResponseEntity<Stilling> {
+    fun hentStillingTilPersonbruker(@PathVariable uuid: String): ResponseEntity<Stilling> {
 
         if (!authorizedPartyUtils.kallKommerFraVisStilling()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
         }
 
-        val stilling = stillingService.hentStilling(uuid)
+        val stilling = stillingService.hentRekrutteringsbistandStilling(uuid).stilling
 
         fun copyProps(vararg keys: String): Map<String, String> =
-                hashMapOf(*(keys.filter { stilling.properties.get(it) != null }.map {
-                    it to (stilling.properties.get(it) ?: "")
+                hashMapOf(*(keys.filter { stilling.properties[it] != null }.map {
+                    it to (stilling.properties[it] ?: "")
                 }.toTypedArray()))
 
         return ResponseEntity.ok().body(

@@ -18,6 +18,7 @@ import no.nav.rekrutteringsbistand.api.Testdata.enStillinggsinfoUtenEier
 import no.nav.rekrutteringsbistand.api.Testdata.enStillingsinfo
 import no.nav.rekrutteringsbistand.api.Testdata.enTredjeStillingMedStillingsinfo
 import no.nav.rekrutteringsbistand.api.Testdata.enTredjeStillingsinfo
+import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsid
 import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoDto
 import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoRepository
 import org.assertj.core.api.Assertions.assertThat
@@ -70,53 +71,29 @@ internal class StillingComponentTest {
 
     @Test
     fun `GET mot en stilling skal returnere en stilling uten stillingsinfo hvis det ikke er lagret`() {
-        mockUtenAuthorization("/b2b/api/v1/ads/${enStillingMedStillingsinfo.uuid}", enStillingMedStillingsinfo)
-        restTemplate.getForObject("$localBaseUrl/rekrutteringsbistand/api/v1/stilling/${enStillingMedStillingsinfo.uuid}", StillingMedStillingsinfo::class.java).also {
-            assertThat(it).isEqualTo(enStillingMedStillingsinfo)
-        }
-    }
-
-    @Test
-    fun `GET mot en rekrutteringsbistandstilling skal returnere en stilling uten stillingsinfo hvis det ikke er lagret`() {
-        mockUtenAuthorization("/b2b/api/v1/ads/${enStillingMedStillingsinfo.uuid}", enStillingMedStillingsinfo)
-        restTemplate.getForObject("$localBaseUrl/rekrutteringsbistandstilling/${enStillingMedStillingsinfo.uuid}", HentRekrutteringsbistandStillingDto::class.java).also {
-            assertThat(it).isEqualTo(HentRekrutteringsbistandStillingDto(
-                    stilling = enStillingMedStillingsinfo.tilStilling(),
-                    stillingsinfo = null
-            ))
+        val stilling = enStilling
+        mockUtenAuthorization("/b2b/api/v1/ads/${stilling.uuid}", stilling)
+        restTemplate.getForObject("$localBaseUrl/rekrutteringsbistandstilling/${stilling.uuid}", HentRekrutteringsbistandStillingDto::class.java).also {
+            assertThat(it.stillingsinfo).isNull()
+            assertThat(it.stilling).isEqualTo(stilling)
         }
     }
 
     @Test
     fun `GET mot en rekrutteringsbistandstilling skal returnere en stilling med stillingsinfo hvis det er lagret`() {
-        mockUtenAuthorization("/b2b/api/v1/ads/${enStillingMedStillingsinfo.uuid}", enStillingMedStillingsinfo)
-        repository.opprett(enStillingsinfo)
-        restTemplate.getForObject("$localBaseUrl/rekrutteringsbistandstilling/${enStillingsinfo.stillingsid}", HentRekrutteringsbistandStillingDto::class.java).also {
-            assertThat(it).isEqualTo(HentRekrutteringsbistandStillingDto(
-                    stillingsinfo = StillingsinfoDto(
-                            stillingsinfoid = enStillingsinfo.stillingsinfoid.asString(),
-                            eierNavident = enStillingsinfo.eier?.navident,
-                            eierNavn = enStillingsinfo.eier?.navn,
-                            notat = enStillingsinfo.notat,
-                            stillingsid = enStillingsinfo.stillingsid.asString()
-                    ),
-                    stilling = enStillingMedStillingsinfo.tilStilling()
-            ))
+
+        val stilling = enStilling
+        val stillingsinfo = enStillingsinfo.copy(stillingsid = Stillingsid(stilling.uuid!!))
+
+        mockUtenAuthorization("/b2b/api/v1/ads/${stilling.uuid}", stilling)
+        repository.opprett(stillingsinfo)
+
+        restTemplate.getForObject("$localBaseUrl/rekrutteringsbistandstilling/${stilling.uuid}", HentRekrutteringsbistandStillingDto::class.java).also {
+            assertThat(it.stilling).isEqualTo(stilling)
+            assertThat(it.stillingsinfo).isEqualTo(stillingsinfo.asStillingsinfoDto())
         }
     }
 
-
-    @Test
-    fun `GET mot en stilling skal returnere en stilling beriket med stillingsinfo`() {
-        repository.opprett(enStillingsinfo)
-
-        mockUtenAuthorization("/b2b/api/v1/ads/${enStillingMedStillingsinfo.uuid}", enStillingMedStillingsinfo)
-
-        restTemplate.getForObject("$localBaseUrl/rekrutteringsbistand/api/v1/stilling/${enStillingMedStillingsinfo.uuid}", StillingMedStillingsinfo::class.java).also {
-            assertThat(it.rekruttering).isEqualTo(enStillingsinfo.asEierDto())
-            assertThat(it.uuid).isEqualTo(enStillingsinfo.stillingsid.asString())
-        }
-    }
 
     @Test
     fun `GET mot en stilling med stillingsnummer skal returnere en stilling beriket med stillingsinfo`() {
