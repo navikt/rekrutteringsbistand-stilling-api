@@ -56,7 +56,7 @@ class StillingsinfoRepository(
     }
 
     fun hentForStillinger(stillingsider: List<Stillingsid>): List<Stillingsinfo> {
-        val sql = "SELECT * FROM $STILLINGSINFO WHERE $STILLINGSID IN(:stillingsider) ORDER BY id"
+        val sql = "SELECT * FROM $STILLINGSINFO WHERE $STILLINGSID IN(:stillingsider) ORDER BY ID"
         val params = MapSqlParameterSource("stillingsider", stillingsider.map { it.asString() })
 
         return namedJdbcTemplate.query(sql, params)
