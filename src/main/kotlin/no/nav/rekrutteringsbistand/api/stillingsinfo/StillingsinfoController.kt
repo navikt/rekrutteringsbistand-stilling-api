@@ -27,7 +27,8 @@ class StillingsinfoController(
                     oppdater(dto.copy(stillingsinfoid = it.asEierDto().stillingsinfoid))
                 }.getOrElse {
                     val dtoMedId = dto.copy(stillingsinfoid = UUID.randomUUID().toString())
-                    LOG.debug("lager ny eierinformasjon for stillinginfoid ${dtoMedId.stillingsid} stillingid ${dtoMedId.stillingsinfoid}")
+                    LOG.debug("Lager ny eierinformasjon for stilling ${dtoMedId.stillingsid} med stillingsInfoId ${dtoMedId.stillingsinfoid}")
+
                     repo.opprett(dtoMedId.asStillinginfo())
                     kandidatlisteKlient.oppdaterKandidatliste(Stillingsid(dto.stillingsid))
                     ResponseEntity.created(URI("/rekruttering/${dtoMedId.stillingsinfoid}")).body(dtoMedId)
