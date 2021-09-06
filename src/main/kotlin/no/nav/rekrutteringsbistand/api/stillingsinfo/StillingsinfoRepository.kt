@@ -16,7 +16,6 @@ class StillingsinfoRepository(
     val simpleJdbcInsert = SimpleJdbcInsert(namedJdbcTemplate.jdbcTemplate).withTableName("Stillingsinfo").usingGeneratedKeyColumns("id")
 
     fun opprett(stillingsinfo: Stillingsinfo) {
-        LOG.info("Lagrer stilling med stillingsId ${stillingsinfo.stillingsid}")
         simpleJdbcInsert.executeAndReturnKey(
             mapOf(
                 STILLINGSINFOID to stillingsinfo.stillingsinfoid.asString(),
@@ -57,7 +56,7 @@ class StillingsinfoRepository(
     }
 
     fun hentForStillinger(stillingsider: List<Stillingsid>): List<Stillingsinfo> {
-        val sql = "SELECT * FROM $STILLINGSINFO WHERE $STILLINGSID IN(:stillingsider)"
+        val sql = "SELECT * FROM $STILLINGSINFO WHERE $STILLINGSID IN(:stillingsider) ORDER BY id"
         val params = MapSqlParameterSource("stillingsider", stillingsider.map { it.asString() })
 
         return namedJdbcTemplate.query(sql, params)
