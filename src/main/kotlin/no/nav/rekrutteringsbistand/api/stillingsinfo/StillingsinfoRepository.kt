@@ -56,6 +56,10 @@ class StillingsinfoRepository(
     }
 
     fun hentForStillinger(stillingsider: List<Stillingsid>): List<Stillingsinfo> {
+        if (stillingsider.isEmpty()) {
+            return emptyList()
+        }
+        
         val sql = "SELECT * FROM $STILLINGSINFO WHERE $STILLINGSID IN(:stillingsider) ORDER BY ID"
         val params = MapSqlParameterSource("stillingsider", stillingsider.map { it.asString() })
 
