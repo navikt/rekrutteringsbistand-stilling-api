@@ -1,6 +1,7 @@
 package no.nav.rekrutteringsbistand.api.stillingsinfo
 
 import arrow.core.getOrElse
+import no.nav.rekrutteringsbistand.api.Testdata.enAnnenStillingsinfo
 import no.nav.rekrutteringsbistand.api.Testdata.enStillingsinfo
 import no.nav.rekrutteringsbistand.api.Testdata.enStillingsinfoOppdatering
 import no.nav.rekrutteringsbistand.api.option.Option
@@ -26,9 +27,25 @@ class StillingsinfoRepositoryTest {
     @Test
     fun `Skal kunne lagre og hente ut stillingsinfo`() {
         repository.opprett(tilLagring)
-        val lagretRekrutteringsbistand: Option<Stillingsinfo> = repository.hentForStilling(tilLagring.stillingsid)
+        val lagretStillingsinfo: Option<Stillingsinfo> = repository.hentForStilling(tilLagring.stillingsid)
 
-        assertThat(lagretRekrutteringsbistand).isEqualTo(optionOf(tilLagring))
+        assertThat(lagretStillingsinfo).isEqualTo(optionOf(tilLagring))
+    }
+
+    @Test
+    fun `Skal kunne lagre og hente ut flere stillingsinfoer om gangen`() {
+        val stillingsinfo1 = enStillingsinfo
+        val stillingsinfo2 = enAnnenStillingsinfo
+
+        repository.opprett(stillingsinfo1)
+        repository.opprett(stillingsinfo2)
+
+        val lagretStillingsinfoer = repository.hentForStillinger(
+            listOf(stillingsinfo1.stillingsid, stillingsinfo2.stillingsid)
+        )
+
+        assertThat(lagretStillingsinfoer.first()).isEqualTo(stillingsinfo1)
+        assertThat(lagretStillingsinfoer.last()).isEqualTo(stillingsinfo2)
     }
 
     @Test
@@ -46,5 +63,6 @@ class StillingsinfoRepositoryTest {
     @After
     fun cleanUp() {
         repository.slett(tilLagring.stillingsinfoid)
+        repository.slett(enAnnenStillingsinfo.stillingsinfoid)
     }
 }
