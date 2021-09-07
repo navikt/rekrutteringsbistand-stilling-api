@@ -1,7 +1,7 @@
 package no.nav.rekrutteringsbistand.api.stilling
 
 import arrow.core.getOrElse
-import no.nav.rekrutteringsbistand.api.HentRekrutteringsbistandStillingDto
+import no.nav.rekrutteringsbistand.api.RekrutteringsbistandStilling
 import no.nav.rekrutteringsbistand.api.OppdaterRekrutteringsbistandStillingDto
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
 import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteKlient
@@ -31,7 +31,7 @@ class StillingService(
     val restProxy: RestProxy
 ) {
 
-    fun hentRekrutteringsbistandStilling(uuid: String): HentRekrutteringsbistandStillingDto {
+    fun hentRekrutteringsbistandStilling(uuid: String): RekrutteringsbistandStilling {
         val url = "${externalConfiguration.stillingApi.url}/b2b/api/v1/ads/$uuid"
         val opprinneligStilling: Stilling = restTemplate.exchange(
             url,
@@ -42,28 +42,51 @@ class StillingService(
 
         val stillingsinfo: Option<Stillingsinfo> = stillingsinfoService.hentStillingsinfo(opprinneligStilling)
 
-        return HentRekrutteringsbistandStillingDto(
+        return RekrutteringsbistandStilling(
             stillingsinfo = stillingsinfo.map { it.asStillingsinfoDto() }.getOrElse { null },
             stilling = opprinneligStilling
         )
     }
 
-    fun hentRekrutteringsbistandStillingBasertPåAnnonsenr(annonsenr: String): HentRekrutteringsbistandStillingDto {
+    fun hentRekrutteringsbistandStillingBasertPåAnnonsenr(annonsenr: String): RekrutteringsbistandStilling {
         val url = "${externalConfiguration.stillingApi.url}/b2b/api/v1/ads"
         val queryParams = "id=${annonsenr}"
         val stilling = hent(url, queryParams).content.first()
 
         val stillingsinfo: Option<Stillingsinfo> = stillingsinfoService.hentStillingsinfo(stilling)
 
-        return HentRekrutteringsbistandStillingDto(
+        return RekrutteringsbistandStilling(
             stilling = stilling,
             stillingsinfo = stillingsinfo.map { it.asStillingsinfoDto() }.getOrElse { null }
         )
     }
 
-    fun opprettStilling(stilling: Stilling, queryString: String?): StillingMedStillingsinfo {
+    fun opprettStilling(stilling: Stilling, queryString: String?): RekrutteringsbistandStilling {
         val url = "${externalConfiguration.stillingApi.url}/api/v1/ads"
-        val opprinneligStilling: StillingMedStillingsinfo = restTemplate.exchange(
+        val opprinneligStilling = restTemplate.exchange(
+            url + if (queryString != null) "?$queryString" else "",
+            HttpMethod.POST,
+            HttpEntity(stilling, headers()),
+            Stilling::class.java
+        )
+            .body
+            ?: throw RestResponseEntityExceptionHandler.NoContentException("Tom body fra opprett stilling")
+
+        val id = opprinneligStilling.uuid?.let { Stillingsid(it) }
+            ?: throw IllegalArgumentException("Mangler stilling uuid")
+
+        kandidatlisteKlient.oppdaterKandidatliste(id)
+        val stillingsinfo: Option<Stillingsinfo> = stillingsinfoService.hentStillingsinfo(opprinneligStilling)
+
+        return RekrutteringsbistandStilling(
+            stilling = opprinneligStilling,
+            stillingsinfo = stillingsinfo.map { it.asStillingsinfoDto() }.orNull()
+        )
+    }
+
+    fun opprettStillingGammel(stilling: Stilling, queryString: String?): StillingMedStillingsinfo {
+        val url = "${externalConfiguration.stillingApi.url}/api/v1/ads"
+        val opprinneligStilling = restTemplate.exchange(
             url + if (queryString != null) "?$queryString" else "",
             HttpMethod.POST,
             HttpEntity(stilling, headers()),
@@ -74,8 +97,10 @@ class StillingService(
 
         val id = opprinneligStilling.uuid?.let { Stillingsid(it) }
             ?: throw IllegalArgumentException("Mangler stilling uuid")
+
         kandidatlisteKlient.oppdaterKandidatliste(id)
         val stillingsinfo: Option<Stillingsinfo> = stillingsinfoService.hentStillingsinfo(opprinneligStilling)
+
         return stillingsinfo.map { opprinneligStilling.copy(rekruttering = it.asEierDto()) }
             .getOrElse { opprinneligStilling }
     }
@@ -149,7 +174,7 @@ class StillingService(
         return respons
     }
 
-    fun hentMineStillinger(queryString: String?): Page<HentRekrutteringsbistandStillingDto> {
+    fun hentMineStillinger(queryString: String?): Page<RekrutteringsbistandStilling> {
         val url = "${externalConfiguration.stillingApi.url}/api/v1/ads/rekrutteringsbistand/minestillinger"
         val stillingerPage: Page<Stilling> = hent(url, queryString)
 
@@ -160,7 +185,7 @@ class StillingService(
             .associateBy { it.stillingsid.asString() }
 
         val rekrutteringsbistandStillinger = stillingerPage.content.map {
-            HentRekrutteringsbistandStillingDto(
+            RekrutteringsbistandStilling(
                 stillingsinfo = stillingsinfoer[it.uuid]?.asStillingsinfoDto(),
                 stilling = it
             )

@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.junit.WireMockRule
-import no.nav.rekrutteringsbistand.api.HentRekrutteringsbistandStillingDto
+import no.nav.rekrutteringsbistand.api.RekrutteringsbistandStilling
 import no.nav.rekrutteringsbistand.api.OppdaterRekrutteringsbistandStillingDto
 import no.nav.rekrutteringsbistand.api.Testdata.enAnnenStillingsinfo
 import no.nav.rekrutteringsbistand.api.Testdata.enFjerdeStillingMedStillingsinfo
@@ -19,7 +19,6 @@ import no.nav.rekrutteringsbistand.api.Testdata.enStillingsinfo
 import no.nav.rekrutteringsbistand.api.Testdata.enTredjeStillingMedStillingsinfo
 import no.nav.rekrutteringsbistand.api.Testdata.enTredjeStillingsinfo
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsid
-import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoDto
 import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.After
@@ -74,7 +73,7 @@ internal class StillingComponentTest {
         val stilling = enStilling
         mockUtenAuthorization("/b2b/api/v1/ads/${stilling.uuid}", stilling)
 
-        restTemplate.getForObject("$localBaseUrl/rekrutteringsbistandstilling/${stilling.uuid}", HentRekrutteringsbistandStillingDto::class.java).also {
+        restTemplate.getForObject("$localBaseUrl/rekrutteringsbistandstilling/${stilling.uuid}", RekrutteringsbistandStilling::class.java).also {
             assertThat(it.stillingsinfo).isNull()
             assertThat(it.stilling).isEqualTo(stilling)
         }
@@ -89,7 +88,7 @@ internal class StillingComponentTest {
         mockUtenAuthorization("/b2b/api/v1/ads/${stilling.uuid}", stilling)
         repository.opprett(stillingsinfo)
 
-        restTemplate.getForObject("$localBaseUrl/rekrutteringsbistandstilling/${stilling.uuid}", HentRekrutteringsbistandStillingDto::class.java).also {
+        restTemplate.getForObject("$localBaseUrl/rekrutteringsbistandstilling/${stilling.uuid}", RekrutteringsbistandStilling::class.java).also {
             assertThat(it.stilling).isEqualTo(stilling)
             assertThat(it.stillingsinfo).isEqualTo(stillingsinfo.asStillingsinfoDto())
         }
@@ -111,7 +110,7 @@ internal class StillingComponentTest {
 
         mockUtenAuthorization("/b2b/api/v1/ads?id=1000", page)
 
-        restTemplate.getForObject("$localBaseUrl/rekrutteringsbistandstilling/annonsenr/${stilling.id}", HentRekrutteringsbistandStillingDto::class.java).also {
+        restTemplate.getForObject("$localBaseUrl/rekrutteringsbistandstilling/annonsenr/${stilling.id}", RekrutteringsbistandStilling::class.java).also {
             assertThat(it.stillingsinfo).isEqualTo(stillingsinfo.asStillingsinfoDto())
             assertThat(it.stilling).isEqualTo(stilling)
         }
@@ -119,17 +118,18 @@ internal class StillingComponentTest {
 
     @Test
     fun `POST mot stillinger skal returnere stilling`() {
+        val stilling = enStilling
 
-        mock(HttpMethod.POST, "/api/v1/ads", enStillingMedStillingsinfo)
+        mock(HttpMethod.POST, "/api/v1/ads", stilling)
         mockKandidatlisteOppdatering()
 
         restTemplate.postForObject(
-            "$localBaseUrl/rekrutteringsbistand/api/v1/ads",
-            enStillingMedStillingsinfo.copy(uuid = null),
-            StillingMedStillingsinfo::class.java
+            "$localBaseUrl/rekrutteringsbistandstilling",
+            stilling,
+            RekrutteringsbistandStilling::class.java
         ).also {
-            assertThat(it.uuid).isNotEmpty()
-            assertThat(it.copy(uuid = null)).isEqualTo(enStillingMedStillingsinfo.copy(uuid = null))
+            assertThat(it.stilling).isEqualTo(stilling)
+            assertThat(it.stillingsinfo).isNull()
         }
     }
 
@@ -228,7 +228,7 @@ internal class StillingComponentTest {
                 "$localBaseUrl/mine-stillinger",
                 HttpMethod.GET,
                 null,
-                object : ParameterizedTypeReference<Page<HentRekrutteringsbistandStillingDto>>() {}
+                object : ParameterizedTypeReference<Page<RekrutteringsbistandStilling>>() {}
         )
 
         assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)
@@ -261,7 +261,7 @@ internal class StillingComponentTest {
                 "$localBaseUrl/mine-stillinger",
                 HttpMethod.GET,
                 null,
-                object : ParameterizedTypeReference<Page<HentRekrutteringsbistandStillingDto>>() {}
+                object : ParameterizedTypeReference<Page<RekrutteringsbistandStilling>>() {}
         )
 
         assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)

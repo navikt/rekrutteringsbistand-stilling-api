@@ -1,6 +1,6 @@
 package no.nav.rekrutteringsbistand.api.stilling
 
-import no.nav.rekrutteringsbistand.api.HentRekrutteringsbistandStillingDto
+import no.nav.rekrutteringsbistand.api.RekrutteringsbistandStilling
 import no.nav.rekrutteringsbistand.api.OppdaterRekrutteringsbistandStillingDto
 import no.nav.rekrutteringsbistand.api.support.LOG
 import no.nav.rekrutteringsbistand.api.support.config.ExternalConfiguration
@@ -24,8 +24,15 @@ class StillingController(
         val stillingService: StillingService
 ) {
 
+    @Deprecated("bruk proxyPostTilStillingsApi")
     @PostMapping("/rekrutteringsbistand/api/v1/ads")
-    fun proxyPostTilStillingsApi(request: HttpServletRequest, @RequestBody stilling: Stilling): ResponseEntity<StillingMedStillingsinfo> {
+    fun proxyPostTilStillingsApiGammel(request: HttpServletRequest, @RequestBody stilling: Stilling): ResponseEntity<StillingMedStillingsinfo> {
+        val opprettetStilling = stillingService.opprettStillingGammel(stilling, request.queryString)
+        return ok().body(opprettetStilling)
+    }
+
+    @PostMapping("/rekrutteringsbistandstilling")
+    fun proxyPostTilStillingsApi(request: HttpServletRequest, @RequestBody stilling: Stilling): ResponseEntity<RekrutteringsbistandStilling> {
         val opprettetStilling = stillingService.opprettStilling(stilling, request.queryString)
         return ok().body(opprettetStilling)
     }
@@ -93,17 +100,17 @@ class StillingController(
     }
 
     @GetMapping("/rekrutteringsbistandstilling/{uuid}")
-    fun hentRekrutteringsbistandStilling(@PathVariable uuid: String): ResponseEntity<HentRekrutteringsbistandStillingDto> {
+    fun hentRekrutteringsbistandStilling(@PathVariable uuid: String): ResponseEntity<RekrutteringsbistandStilling> {
         return ok(stillingService.hentRekrutteringsbistandStilling(uuid))
     }
 
     @GetMapping("/rekrutteringsbistandstilling/annonsenr/{annonsenr}")
-    fun hentRekrutteringsbistandStillingBasertPåAnnonsenr(@PathVariable annonsenr: String): ResponseEntity<HentRekrutteringsbistandStillingDto> {
+    fun hentRekrutteringsbistandStillingBasertPåAnnonsenr(@PathVariable annonsenr: String): ResponseEntity<RekrutteringsbistandStilling> {
         return ok(stillingService.hentRekrutteringsbistandStillingBasertPåAnnonsenr(annonsenr))
     }
 
     @GetMapping("/mine-stillinger")
-    fun hentMineStillinger(request: HttpServletRequest): ResponseEntity<Page<HentRekrutteringsbistandStillingDto>> {
+    fun hentMineStillinger(request: HttpServletRequest): ResponseEntity<Page<RekrutteringsbistandStilling>> {
 
         val queryString = if (request.queryString != null) {
             URLDecoder.decode(request.queryString, StandardCharsets.UTF_8)
@@ -111,7 +118,7 @@ class StillingController(
             null
         }
 
-        val stillinger: Page<HentRekrutteringsbistandStillingDto> = stillingService.hentMineStillinger(queryString)
+        val stillinger: Page<RekrutteringsbistandStilling> = stillingService.hentMineStillinger(queryString)
 
         return ok().body(stillinger)
     }

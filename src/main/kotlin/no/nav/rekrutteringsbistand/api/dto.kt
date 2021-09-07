@@ -5,14 +5,14 @@ import no.nav.rekrutteringsbistand.api.stilling.Stilling
 import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoDto
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class HentRekrutteringsbistandStillingDto(
-        val stillingsinfo: StillingsinfoDto?,
-        val stilling: Stilling
+data class RekrutteringsbistandStilling(
+    val stillingsinfo: StillingsinfoDto?,
+    val stilling: Stilling
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class OppdaterRekrutteringsbistandStillingDto(
-        val stillingsinfoid: String?,
-        val stilling: Stilling,
-        val notat: String?
+    val stillingsinfoid: String?,
+    val stilling: Stilling,
+    val notat: String?
 )
