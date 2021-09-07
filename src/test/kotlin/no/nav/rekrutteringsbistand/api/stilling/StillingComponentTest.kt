@@ -73,6 +73,7 @@ internal class StillingComponentTest {
     fun `GET mot en stilling skal returnere en stilling uten stillingsinfo hvis det ikke er lagret`() {
         val stilling = enStilling
         mockUtenAuthorization("/b2b/api/v1/ads/${stilling.uuid}", stilling)
+
         restTemplate.getForObject("$localBaseUrl/rekrutteringsbistandstilling/${stilling.uuid}", HentRekrutteringsbistandStillingDto::class.java).also {
             assertThat(it.stillingsinfo).isNull()
             assertThat(it.stilling).isEqualTo(stilling)
@@ -96,14 +97,23 @@ internal class StillingComponentTest {
 
 
     @Test
-    fun `GET mot en stilling med stillingsnummer skal returnere en stilling beriket med stillingsinfo`() {
-        repository.opprett(enStillingsinfo)
+    fun `GET mot en stilling med annonsenummer skal returnere en stilling beriket med stillingsinfo`() {
 
-        mockUtenAuthorization("/b2b/api/v1/ads?id=1000", Page(listOf(enStillingMedStillingsinfo), 1, 1))
+        val stilling = enStilling
+        val page = Page(
+            content = listOf(stilling),
+            totalPages = 1,
+            totalElements = 1
+        )
+        val stillingsinfo = enStillingsinfo.copy(stillingsid = Stillingsid(stilling.uuid!!))
 
-        restTemplate.getForObject("$localBaseUrl/rekrutteringsbistandstilling/annonsenr/${enStillingMedStillingsinfo.id}", HentRekrutteringsbistandStillingDto::class.java).also {
-            assertThat(it.stillingsinfo).isEqualTo(enStillingsinfo.asStillingsinfoDto())
-            assertThat(it.stilling.uuid).isEqualTo(enStillingsinfo.stillingsid.asString())
+        repository.opprett(stillingsinfo)
+
+        mockUtenAuthorization("/b2b/api/v1/ads?id=1000", page)
+
+        restTemplate.getForObject("$localBaseUrl/rekrutteringsbistandstilling/annonsenr/${stilling.id}", HentRekrutteringsbistandStillingDto::class.java).also {
+            assertThat(it.stillingsinfo).isEqualTo(stillingsinfo.asStillingsinfoDto())
+            assertThat(it.stilling).isEqualTo(stilling)
         }
     }
 
@@ -114,9 +124,9 @@ internal class StillingComponentTest {
         mockKandidatlisteOppdatering()
 
         restTemplate.postForObject(
-                "$localBaseUrl/rekrutteringsbistand/api/v1/ads",
-                enStillingMedStillingsinfo.copy(uuid = null),
-                StillingMedStillingsinfo::class.java
+            "$localBaseUrl/rekrutteringsbistand/api/v1/ads",
+            enStillingMedStillingsinfo.copy(uuid = null),
+            StillingMedStillingsinfo::class.java
         ).also {
             assertThat(it.uuid).isNotEmpty()
             assertThat(it.copy(uuid = null)).isEqualTo(enStillingMedStillingsinfo.copy(uuid = null))
