@@ -2,14 +2,12 @@ package no.nav.rekrutteringsbistand.api.stilling.ekstern
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import no.nav.rekrutteringsbistand.api.stilling.Geografi
-import no.nav.rekrutteringsbistand.api.stilling.Media
 import java.time.LocalDateTime
 import java.util.*
 import kotlin.collections.ArrayList
 
-
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class Stilling(
+data class StillingForPersonbruker(
         val id: Long?,
         val uuid: String?,
         val updated: LocalDateTime?,

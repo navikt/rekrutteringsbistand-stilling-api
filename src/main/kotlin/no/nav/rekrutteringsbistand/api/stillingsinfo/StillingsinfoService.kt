@@ -2,14 +2,10 @@ package no.nav.rekrutteringsbistand.api.stillingsinfo
 
 import no.nav.rekrutteringsbistand.api.option.Option
 import no.nav.rekrutteringsbistand.api.stilling.Stilling
-import no.nav.rekrutteringsbistand.api.stilling.StillingMedStillingsinfo
 import org.springframework.stereotype.Service
 
 @Service
 class StillingsinfoService(private val repository: StillingsinfoRepository) {
-
-    fun hentStillingsinfo(stillingMedStillingsinfo: StillingMedStillingsinfo): Option<Stillingsinfo> =
-        hentForStilling(Stillingsid(stillingMedStillingsinfo.uuid!!))
 
     fun hentStillingsinfo(stilling: Stilling): Option<Stillingsinfo> =
         hentForStilling(Stillingsid(stilling.uuid!!))

@@ -1,6 +1,7 @@
 package no.nav.rekrutteringsbistand.api.stillingsinfo
 
 import arrow.core.getOrElse
+import no.nav.rekrutteringsbistand.api.TestRepository
 import no.nav.rekrutteringsbistand.api.Testdata.enAnnenStillingsinfo
 import no.nav.rekrutteringsbistand.api.Testdata.enStillingsinfo
 import no.nav.rekrutteringsbistand.api.Testdata.enStillingsinfoOppdatering
@@ -23,6 +24,9 @@ class StillingsinfoRepositoryTest {
 
     @Autowired
     lateinit var repository: StillingsinfoRepository
+
+    @Autowired
+    lateinit var testRepository: TestRepository
 
     @Test
     fun `Skal kunne lagre og hente ut stillingsinfo`() {
@@ -62,7 +66,6 @@ class StillingsinfoRepositoryTest {
 
     @After
     fun cleanUp() {
-        repository.slett(tilLagring.stillingsinfoid)
-        repository.slett(enAnnenStillingsinfo.stillingsinfoid)
+        testRepository.slettAlt()
     }
 }

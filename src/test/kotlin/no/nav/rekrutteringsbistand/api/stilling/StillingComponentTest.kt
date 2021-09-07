@@ -7,17 +7,14 @@ import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.junit.WireMockRule
 import no.nav.rekrutteringsbistand.api.RekrutteringsbistandStilling
 import no.nav.rekrutteringsbistand.api.OppdaterRekrutteringsbistandStillingDto
+import no.nav.rekrutteringsbistand.api.TestRepository
 import no.nav.rekrutteringsbistand.api.Testdata.enAnnenStillingsinfo
-import no.nav.rekrutteringsbistand.api.Testdata.enFjerdeStillingMedStillingsinfo
 import no.nav.rekrutteringsbistand.api.Testdata.enPageMedStilling
 import no.nav.rekrutteringsbistand.api.Testdata.enRekrutteringsbistandStilling
 import no.nav.rekrutteringsbistand.api.Testdata.enRekrutteringsbistandStillingUtenEier
-import no.nav.rekrutteringsbistand.api.Testdata.enStillingMedStillingsinfo
 import no.nav.rekrutteringsbistand.api.Testdata.enStilling
-import no.nav.rekrutteringsbistand.api.Testdata.enStillinggsinfoUtenEier
 import no.nav.rekrutteringsbistand.api.Testdata.enStillingsinfo
-import no.nav.rekrutteringsbistand.api.Testdata.enTredjeStillingMedStillingsinfo
-import no.nav.rekrutteringsbistand.api.Testdata.enTredjeStillingsinfo
+import no.nav.rekrutteringsbistand.api.Testdata.enStillingsinfoUtenEier
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsid
 import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoRepository
 import org.assertj.core.api.Assertions.assertThat
@@ -56,6 +53,9 @@ internal class StillingComponentTest {
 
     @Autowired
     lateinit var repository: StillingsinfoRepository
+
+    @Autowired
+    lateinit var testRepository: TestRepository
 
     private val restTemplate = TestRestTemplate(TestRestTemplate.HttpClientOption.ENABLE_COOKIES)
 
@@ -135,33 +135,41 @@ internal class StillingComponentTest {
 
     @Test
     fun `PUT mot stilling med notat skal returnere endret stilling når stillingsinfo finnes`() {
-        mock(HttpMethod.PUT, "/api/v1/ads/${enRekrutteringsbistandStilling.stilling.uuid}", enTredjeStillingMedStillingsinfo)
+
+        val stilling = enStilling
+        val stillingsinfo = enStillingsinfo.copy(notat = "gammelt notat")
+
+        mock(HttpMethod.PUT, "/api/v1/ads/${enRekrutteringsbistandStilling.stilling.uuid}", stilling)
         mockKandidatlisteOppdatering()
-        repository.opprett(enTredjeStillingsinfo.copy(notat = "gammelt notat"))
+
+        repository.opprett(stillingsinfo)
+
+        val dto = OppdaterRekrutteringsbistandStillingDto(
+            stillingsinfoid = stillingsinfo.stillingsinfoid.asString(),
+            notat = stillingsinfo.notat,
+            stilling = stilling
+        )
 
         restTemplate.exchange(
                 "$localBaseUrl/rekrutteringsbistandstilling",
                 HttpMethod.PUT,
-                HttpEntity(OppdaterRekrutteringsbistandStillingDto(
-                        stillingsinfoid = enRekrutteringsbistandStilling.stillingsinfo?.stillingsinfoid,
-                        notat = enRekrutteringsbistandStilling.stillingsinfo?.notat,
-                        stilling = enRekrutteringsbistandStilling.stilling
-                )),
+                HttpEntity(dto),
                 OppdaterRekrutteringsbistandStillingDto::class.java
-        ).body.also {
-            assertThat(it!!.stilling.uuid).isNotEmpty()
-            assertThat(it.stilling.copy(uuid = null)).isEqualTo(enRekrutteringsbistandStilling.stilling.copy(uuid = null))
-            assertThat(it.notat).isEqualTo(enRekrutteringsbistandStilling.stillingsinfo?.notat)
-            assertThat(it.stillingsinfoid).isEqualTo(enRekrutteringsbistandStilling.stillingsinfo?.stillingsinfoid)
+        ).body!!.also {
+            assertThat(it.stilling).isEqualTo(stilling)
+            assertThat(it.notat).isEqualTo(stillingsinfo.notat)
+            assertThat(it.stillingsinfoid).isEqualTo(stillingsinfo.stillingsinfoid.asString())
         }
     }
 
     @Test
     fun `PUT mot stilling med notat skal returnere endret stilling når stillingsinfo ikke har eier`() {
         val rekrutteringsbistandStilling = enRekrutteringsbistandStillingUtenEier
-        mock(HttpMethod.PUT, "/api/v1/ads/${rekrutteringsbistandStilling.stilling.uuid}", enFjerdeStillingMedStillingsinfo)
+
+        mock(HttpMethod.PUT, "/api/v1/ads/${rekrutteringsbistandStilling.stilling.uuid}", rekrutteringsbistandStilling.stilling)
+
         mockKandidatlisteOppdatering()
-        repository.opprett(enStillinggsinfoUtenEier.copy(notat = null))
+        repository.opprett(enStillingsinfoUtenEier.copy(notat = null))
 
         restTemplate.exchange(
                 "$localBaseUrl/rekrutteringsbistandstilling",
@@ -206,13 +214,14 @@ internal class StillingComponentTest {
     @Test
     fun `DELETE mot stilling med kandidatlistefeil skal returnere status 500`() {
         val slettetStilling = enStilling.copy(status = "DELETED")
+
         mock(HttpMethod.DELETE, "/api/v1/ads/${slettetStilling.uuid}", slettetStilling)
         mockKandidatlisteOppdateringFeiler()
 
         restTemplate.exchange(
                 "$localBaseUrl/rekrutteringsbistand/api/v1/ads/${enStilling.uuid}",
                 HttpMethod.DELETE,
-                HttpEntity(enStillingMedStillingsinfo.copy(uuid = null)),
+                null,
                 Stilling::class.java
         ).also {
             assertThat(it.statusCode).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -335,7 +344,6 @@ internal class StillingComponentTest {
 
     @After
     fun tearDown() {
-        repository.slett(enStillingsinfo.stillingsinfoid)
-        repository.slett(enAnnenStillingsinfo.stillingsinfoid)
+        testRepository.slettAlt()
     }
 }

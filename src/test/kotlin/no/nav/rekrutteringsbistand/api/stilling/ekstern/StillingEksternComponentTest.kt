@@ -5,7 +5,8 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.junit.WireMockRule
-import no.nav.rekrutteringsbistand.api.Testdata.enStillingMedStillingsinfo
+import no.nav.rekrutteringsbistand.api.Testdata.enStilling
+import no.nav.rekrutteringsbistand.api.Testdata.enStillingForPersonbruker
 import no.nav.rekrutteringsbistand.api.config.MockLogin
 import no.nav.rekrutteringsbistand.api.support.toMultiValueMap
 import org.assertj.core.api.Assertions.assertThat
@@ -52,19 +53,22 @@ internal class StillingEksternComponentTest {
 
     @Test
     fun `GET mot en stilling skal returnere en stilling uten stillingsinfo hvis det ikke er lagret`() {
-        mockUtenAuthorization("/b2b/api/v1/ads/${enStillingMedStillingsinfo.uuid}", enStillingMedStillingsinfo)
+
+        val stilling = enStilling
+
+        mockUtenAuthorization("/b2b/api/v1/ads/${stilling.uuid}", stilling)
 
         val token = mockLogin.hentAzureAdMaskinTilMaskinToken(clientIdTilVisStilling)
 
         restTemplate.exchange(
-                "$localBaseUrl/rekrutteringsbistand/ekstern/api/v1/stilling/${enStillingMedStillingsinfo.uuid}",
+                "$localBaseUrl/rekrutteringsbistand/ekstern/api/v1/stilling/${stilling.uuid}",
                 HttpMethod.GET,
                 HttpEntity(null, mapOf(
                         AUTHORIZATION to "Bearer $token"
                 ).toMultiValueMap()),
-                Stilling::class.java
+                StillingForPersonbruker::class.java
         ).also {
-            assertThat(it.body).isEqualTo(enEksternStilling)
+            assertThat(it.body).isEqualTo(enStillingForPersonbruker)
         }
     }
 
@@ -79,18 +83,4 @@ internal class StillingEksternComponentTest {
                                 .withBody(objectMapper.writeValueAsString(responseBody)))
         )
     }
-
-    val enEksternStilling = Stilling(
-            id = enStillingMedStillingsinfo.id,
-            updated = enStillingMedStillingsinfo.updated,
-            title = enStillingMedStillingsinfo.title,
-            medium = enStillingMedStillingsinfo.medium,
-            employer = null,
-            location = enStillingMedStillingsinfo.location,
-            properties = enStillingMedStillingsinfo.properties,
-            businessName = enStillingMedStillingsinfo.businessName,
-            status = enStillingMedStillingsinfo.status,
-            uuid = enStillingMedStillingsinfo.uuid,
-            source = enStillingMedStillingsinfo.source
-    )
 }

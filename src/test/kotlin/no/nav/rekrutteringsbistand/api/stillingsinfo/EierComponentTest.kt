@@ -4,6 +4,7 @@ import arrow.core.getOrElse
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.github.tomakehurst.wiremock.junit.WireMockRule
+import no.nav.rekrutteringsbistand.api.TestRepository
 import no.nav.rekrutteringsbistand.api.Testdata.enStillingsinfo
 import no.nav.rekrutteringsbistand.api.support.toMultiValueMap
 import org.assertj.core.api.Assertions.assertThat
@@ -43,6 +44,9 @@ class EierComponentTest {
 
     @Autowired
     lateinit var repository: StillingsinfoRepository
+
+    @Autowired
+    lateinit var testRepository: TestRepository
 
     @Before
     fun authenticateClient() {
@@ -88,8 +92,6 @@ class EierComponentTest {
             assertThat(this).isEqualToIgnoringGivenFields(tilLagring, "stillingsinfoid")
             assertThat(stillingsinfoid).isEqualTo(lagretStillingsinfo.stillingsinfoid.asString())
         }
-
-        repository.slett(lagretStillingsinfo.stillingsinfoid)
     }
 
     @Test
@@ -103,8 +105,6 @@ class EierComponentTest {
 
         assertThat(oppdateringRespons.statusCode).isEqualTo(HttpStatus.OK)
         assertThat(oppdateringRespons.body).isEqualTo(lagretStillingsinfo.asEierDto())
-
-        repository.slett(lagretStillingsinfo.stillingsinfoid)
     }
 
     @Test
@@ -119,13 +119,11 @@ class EierComponentTest {
 
         assertThat(stillingsinfoRespons.statusCode).isEqualTo(HttpStatus.OK)
         assertThat(stillingsinfoRespons.body).isEqualTo(lagretStillingsinfo.asEierDto())
-
-        repository.slett(lagretStillingsinfo.stillingsinfoid)
     }
 
     @After
     fun tearDown() {
-        repository.slett(enStillingsinfo.stillingsinfoid)
+        testRepository.slettAlt()
     }
 
     private fun httpEntity(body: Any?): HttpEntity<Any> {

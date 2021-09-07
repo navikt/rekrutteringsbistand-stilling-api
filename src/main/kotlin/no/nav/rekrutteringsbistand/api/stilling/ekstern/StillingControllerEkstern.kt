@@ -8,7 +8,6 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RestController
-import javax.servlet.http.HttpServletRequest
 
 @RestController
 @ProtectedWithClaims(issuer = "azuread")
@@ -18,7 +17,7 @@ class StillingControllerEkstern(
 ) {
 
     @GetMapping("/rekrutteringsbistand/ekstern/api/v1/stilling/{uuid}")
-    fun hentStillingTilPersonbruker(@PathVariable uuid: String): ResponseEntity<Stilling> {
+    fun hentStillingTilPersonbruker(@PathVariable uuid: String): ResponseEntity<StillingForPersonbruker> {
 
         if (!authorizedPartyUtils.kallKommerFraVisStilling()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
@@ -32,7 +31,7 @@ class StillingControllerEkstern(
                 }.toTypedArray()))
 
         return ResponseEntity.ok().body(
-                Stilling(
+                StillingForPersonbruker(
                         title = stilling.title,
                         properties = copyProps(
                                 "adtext", "applicationdue", "applicationemail", "engagementtype", "jobarrangement", "extent", "workday",

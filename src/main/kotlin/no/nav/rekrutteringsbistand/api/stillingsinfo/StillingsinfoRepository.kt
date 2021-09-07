@@ -59,7 +59,7 @@ class StillingsinfoRepository(
         if (stillingsider.isEmpty()) {
             return emptyList()
         }
-        
+
         val sql = "SELECT * FROM $STILLINGSINFO WHERE $STILLINGSID IN(:stillingsider) ORDER BY ID"
         val params = MapSqlParameterSource("stillingsider", stillingsider.map { it.asString() })
 
@@ -77,12 +77,6 @@ class StillingsinfoRepository(
         { rs: ResultSet, _: Int ->
             Stillingsinfo.fromDB(rs)
         }
-
-    fun slett(stillingsinfoid: Stillingsinfoid) =
-        namedJdbcTemplate.update(
-            "DELETE FROM $STILLINGSINFO WHERE $STILLINGSINFOID = :stillingsinfoid",
-            MapSqlParameterSource("stillingsinfoid", stillingsinfoid.asString())
-        )
 
     companion object {
         const val STILLINGSINFO = "Stillingsinfo"

@@ -19,17 +19,10 @@ import javax.servlet.http.HttpServletRequest
 @RestController
 @ProtectedWithClaims(issuer = "isso")
 class StillingController(
-        val restProxy: RestProxy,
-        val externalConfiguration: ExternalConfiguration,
-        val stillingService: StillingService
+    val restProxy: RestProxy,
+    val externalConfiguration: ExternalConfiguration,
+    val stillingService: StillingService
 ) {
-
-    @Deprecated("bruk proxyPostTilStillingsApi")
-    @PostMapping("/rekrutteringsbistand/api/v1/ads")
-    fun proxyPostTilStillingsApiGammel(request: HttpServletRequest, @RequestBody stilling: Stilling): ResponseEntity<StillingMedStillingsinfo> {
-        val opprettetStilling = stillingService.opprettStillingGammel(stilling, request.queryString)
-        return ok().body(opprettetStilling)
-    }
 
     @PostMapping("/rekrutteringsbistandstilling")
     fun proxyPostTilStillingsApi(request: HttpServletRequest, @RequestBody stilling: Stilling): ResponseEntity<RekrutteringsbistandStilling> {
