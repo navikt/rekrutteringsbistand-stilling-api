@@ -22,6 +22,12 @@ class StillingController(val stillingService: StillingService) {
         return ok().body(opprettetStilling)
     }
 
+    @PostMapping("/rekrutteringsbistandstilling/kopier/{stillingsId}")
+    fun kopierStilling(@PathVariable stillingsId: String): ResponseEntity<RekrutteringsbistandStilling> {
+        val kopiertStilling = stillingService.kopierStilling(stillingsId)
+        return ok().body(kopiertStilling)
+    }
+
     @PutMapping("/rekrutteringsbistandstilling")
     fun oppdaterStilling(request: HttpServletRequest, @RequestBody rekrutteringsbistandStillingDto: OppdaterRekrutteringsbistandStillingDto): ResponseEntity<OppdaterRekrutteringsbistandStillingDto> {
         val oppdatertStilling = stillingService.oppdaterRekrutteringsbistandStilling(rekrutteringsbistandStillingDto, request.queryString)

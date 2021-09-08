@@ -18,10 +18,7 @@ import no.nav.rekrutteringsbistand.api.Testdata.enStillingsinfoUtenEier
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsid
 import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoRepository
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.After
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
+import org.junit.*
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -285,14 +282,51 @@ internal class StillingComponentTest {
         mockKandidatlisteOppdatering()
 
         val respons: ResponseEntity<Stilling> = restTemplate.exchange(
-                "$localBaseUrl/rekrutteringsbistand/api/v1/ads/${slettetStilling.uuid}",
-                HttpMethod.DELETE,
-                null,
-                Stilling::class.java
+            "$localBaseUrl/rekrutteringsbistand/api/v1/ads/${slettetStilling.uuid}",
+            HttpMethod.DELETE,
+            null,
+            Stilling::class.java
         )
 
         assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)
         assertThat(respons.body).isEqualTo(slettetStilling)
+    }
+
+    @Ignore
+    @Test
+    fun `POST mot kopier-stilling skal returnere kopi av rekrutteringsbistandstilling med gitt stillingsId`() {
+        // lag stilling
+
+        val rekrutteringsbistandStilling = enRekrutteringsbistandStilling
+        val stilling = rekrutteringsbistandStilling.stilling
+
+        val respons = restTemplate.exchange(
+            "$localBaseUrl/rekrutteringsbistandstilling/kopier/${stilling.uuid}",
+            HttpMethod.POST,
+            null,
+            RekrutteringsbistandStilling::class.java
+        )
+
+        val kopiertStilling = respons.body!!.stilling
+
+        assertThat(kopiertStilling.title).isEqualTo("Kopi - ${stilling.title}")
+        assertThat(kopiertStilling.createdBy).isEqualTo("pam-rekrutteringsbistand")
+        assertThat(kopiertStilling.updatedBy).isEqualTo("pam-rekrutteringsbistand")
+        assertThat(kopiertStilling.source).isEqualTo("DIR")
+        assertThat(kopiertStilling.privacy).isEqualTo("INTERNAL_NOT_SHOWN")
+        assertThat(kopiertStilling.administration?.status).isEqualTo("PENDING")
+        assertThat(kopiertStilling.administration?.reportee).isEqualTo("Clark Kent")
+        assertThat(kopiertStilling.administration?.navIdent).isEqualTo("C12345")
+
+        assertThat(kopiertStilling.medium).isEqualTo(stilling.medium)
+        assertThat(kopiertStilling.employer).isEqualTo(stilling.employer)
+        assertThat(kopiertStilling.location).isEqualTo(stilling.location)
+        assertThat(kopiertStilling.locationList).isEqualTo(stilling.locationList)
+        assertThat(kopiertStilling.properties).isEqualTo(stilling.properties)
+        assertThat(kopiertStilling.businessName).isEqualTo(stilling.businessName)
+        assertThat(kopiertStilling.deactivatedByExpiry).isEqualTo(stilling.deactivatedByExpiry)
+        assertThat(kopiertStilling.categoryList).isEqualTo(stilling.categoryList)
+        assertThat(kopiertStilling.activationOnPublishingDate).isEqualTo(stilling.activationOnPublishingDate)
     }
 
     private fun mock(method: HttpMethod, urlPath: String, responseBody: Any) {

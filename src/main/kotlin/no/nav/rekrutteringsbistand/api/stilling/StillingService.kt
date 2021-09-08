@@ -104,6 +104,10 @@ class StillingService(
         }
     }
 
+    fun kopierStilling(stillingsId: String): RekrutteringsbistandStilling {
+        TODO()
+    }
+
 
     fun oppdaterRekrutteringsbistandStilling(
         dto: OppdaterRekrutteringsbistandStillingDto,
