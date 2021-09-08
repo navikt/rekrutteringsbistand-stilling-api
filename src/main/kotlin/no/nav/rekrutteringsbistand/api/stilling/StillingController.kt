@@ -3,11 +3,7 @@ package no.nav.rekrutteringsbistand.api.stilling
 import no.nav.rekrutteringsbistand.api.RekrutteringsbistandStilling
 import no.nav.rekrutteringsbistand.api.OppdaterRekrutteringsbistandStillingDto
 import no.nav.rekrutteringsbistand.api.support.LOG
-import no.nav.rekrutteringsbistand.api.support.config.ExternalConfiguration
-import no.nav.rekrutteringsbistand.api.support.rest.RestProxy
 import no.nav.security.token.support.core.api.ProtectedWithClaims
-import org.springframework.http.HttpMethod.GET
-import org.springframework.http.HttpMethod.POST
 import org.springframework.http.ResponseEntity
 import org.springframework.http.ResponseEntity.ok
 import org.springframework.web.bind.annotation.*
@@ -18,77 +14,24 @@ import javax.servlet.http.HttpServletRequest
 
 @RestController
 @ProtectedWithClaims(issuer = "isso")
-class StillingController(
-    val restProxy: RestProxy,
-    val externalConfiguration: ExternalConfiguration,
-    val stillingService: StillingService
-) {
+class StillingController(val stillingService: StillingService) {
 
     @PostMapping("/rekrutteringsbistandstilling")
-    fun proxyPostTilStillingsApi(request: HttpServletRequest, @RequestBody stilling: Stilling): ResponseEntity<RekrutteringsbistandStilling> {
+    fun opprettStilling(request: HttpServletRequest, @RequestBody stilling: Stilling): ResponseEntity<RekrutteringsbistandStilling> {
         val opprettetStilling = stillingService.opprettStilling(stilling, request.queryString)
         return ok().body(opprettetStilling)
     }
 
     @PutMapping("/rekrutteringsbistandstilling")
-    fun putRekrutteringsbistandStilling(request: HttpServletRequest, @RequestBody rekrutteringsbistandStillingDto: OppdaterRekrutteringsbistandStillingDto): ResponseEntity<OppdaterRekrutteringsbistandStillingDto> {
+    fun oppdaterStilling(request: HttpServletRequest, @RequestBody rekrutteringsbistandStillingDto: OppdaterRekrutteringsbistandStillingDto): ResponseEntity<OppdaterRekrutteringsbistandStillingDto> {
         val oppdatertStilling = stillingService.oppdaterRekrutteringsbistandStilling(rekrutteringsbistandStillingDto, request.queryString)
         return ok().body(oppdatertStilling)
     }
 
     @DeleteMapping("/rekrutteringsbistand/api/v1/ads/{uuid}")
-    fun proxyDeleteTilStillingsApi(request: HttpServletRequest, @PathVariable(value = "uuid") uuid: String): ResponseEntity<String> {
+    fun slettStilling(request: HttpServletRequest, @PathVariable(value = "uuid") uuid: String): ResponseEntity<String> {
         LOG.debug("Mottok ${request.method} til ${request.requestURI}")
         val respons: ResponseEntity<String> = stillingService.slettStilling(uuid, request)
-        return ResponseEntity(respons.body, respons.statusCode)
-    }
-
-    @GetMapping("/rekrutteringsbistand/api/v1/geography/municipals")
-    fun proxyGetMunicipals(request: HttpServletRequest): ResponseEntity<String> {
-        LOG.debug("Mottok ${request.method} til ${request.requestURI}")
-        val respons = restProxy.proxyJsonRequest(GET, request, replaceRekrutteringsbistandInUrl, null, externalConfiguration.stillingApi.url)
-        return ResponseEntity(respons.body, respons.statusCode)
-    }
-
-    @GetMapping("/rekrutteringsbistand/api/v1/geography/counties")
-    fun proxyGetCounties(request: HttpServletRequest): ResponseEntity<String> {
-        LOG.debug("Mottok ${request.method} til ${request.requestURI}")
-        val respons = restProxy.proxyJsonRequest(GET, request, replaceRekrutteringsbistandInUrl, null, externalConfiguration.stillingApi.url)
-        return ResponseEntity(respons.body, respons.statusCode)
-    }
-
-    @GetMapping("/rekrutteringsbistand/api/v1/geography/countries")
-    fun proxyGetCountries(request: HttpServletRequest): ResponseEntity<String> {
-        LOG.debug("Mottok ${request.method} til ${request.requestURI}")
-        val respons = restProxy.proxyJsonRequest(GET, request, replaceRekrutteringsbistandInUrl, null, externalConfiguration.stillingApi.url)
-        return ResponseEntity(respons.body, respons.statusCode)
-    }
-
-    @GetMapping("/rekrutteringsbistand/api/v1/categories-with-altnames")
-    fun proxyGetCategoriesWithAltnames(request: HttpServletRequest): ResponseEntity<String> {
-        LOG.debug("Mottok ${request.method} til ${request.requestURI}")
-        val respons = restProxy.proxyJsonRequest(GET, request, replaceRekrutteringsbistandInUrl, null, externalConfiguration.stillingApi.url)
-        return ResponseEntity(respons.body, respons.statusCode)
-    }
-
-    @GetMapping("/rekrutteringsbistand/api/v1/postdata")
-    fun proxyGetPostdata(request: HttpServletRequest): ResponseEntity<String> {
-        LOG.debug("Mottok ${request.method} til ${request.requestURI}")
-        val respons = restProxy.proxyJsonRequest(GET, request, replaceRekrutteringsbistandInUrl, null, externalConfiguration.stillingApi.url)
-        return ResponseEntity(respons.body, respons.statusCode)
-    }
-
-    @GetMapping("/search-api/underenhet/_search")
-    private fun getSokTilPamAdApi(request: HttpServletRequest): ResponseEntity<String> {
-        LOG.debug("Mottok ${request.method} til ${request.requestURI}")
-        val respons = restProxy.proxyJsonRequest(GET, request, "", null, externalConfiguration.sokApi.url)
-        return ResponseEntity(respons.body, respons.statusCode)
-    }
-
-    @PostMapping("/search-api/underenhet/_search")
-    private fun postSokTilPamAdApi(request: HttpServletRequest, @RequestBody requestBody: String): ResponseEntity<String> {
-        LOG.debug("Mottok ${request.method} til ${request.requestURI}")
-        val respons = restProxy.proxyJsonRequest(POST, request, "", requestBody, externalConfiguration.sokApi.url)
         return ResponseEntity(respons.body, respons.statusCode)
     }
 
@@ -115,7 +58,4 @@ class StillingController(
 
         return ok().body(stillinger)
     }
-
 }
-
-private const val replaceRekrutteringsbistandInUrl = "/rekrutteringsbistand"

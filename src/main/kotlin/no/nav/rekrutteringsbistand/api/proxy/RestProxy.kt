@@ -1,4 +1,4 @@
-package no.nav.rekrutteringsbistand.api.support.rest
+package no.nav.rekrutteringsbistand.api.proxy
 
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
 import no.nav.rekrutteringsbistand.api.support.LOG
