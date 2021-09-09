@@ -45,7 +45,6 @@ class ArbeidsplassenKlient(
     }
 
     fun hentStillingBasertPåAnnonsenr(annonsenr: String): Stilling {
-
         val url = UriComponentsBuilder
             .fromHttpUrl("${externalConfiguration.stillingApi.url}/b2b/api/v1/ads")
             .query("id=${annonsenr}")
@@ -68,6 +67,29 @@ class ArbeidsplassenKlient(
             throw ResponseStatusException(
                 HttpStatus.valueOf(exception.rawStatusCode),
                 "Klarte ikke hente stillingen med annonsenr $annonsenr fra Arbeidsplassen"
+            )
+        }
+    }
+
+    fun hentMineStillinger(): Page<Stilling> {
+        val url = "${externalConfiguration.stillingApi.url}/api/v1/ads/rekrutteringsbistand/minestillinger"
+
+        try {
+            val response = restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                HttpEntity(null, httpHeaders()),
+                object : ParameterizedTypeReference<Page<Stilling>>() {}
+            )
+
+            return response.body
+                ?: throw ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Klarte ikke å tolke respons fra Arbeidsplassen")
+
+        } catch (exception: RestClientResponseException) {
+            LOG.error("Klarte ikke hente mine stillinger fra arbeidsplassen. URL: $url, Status: ${exception.rawStatusCode}, Body: ${exception.responseBodyAsString}")
+            throw ResponseStatusException(
+                HttpStatus.valueOf(exception.rawStatusCode),
+                "Klarte ikke hente mine stillinger fra Arbeidsplassen"
             )
         }
     }

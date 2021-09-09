@@ -178,8 +178,7 @@ class StillingService(
     }
 
     fun hentMineStillinger(queryString: String?): Page<RekrutteringsbistandStilling> {
-        val url = "${externalConfiguration.stillingApi.url}/api/v1/ads/rekrutteringsbistand/minestillinger"
-        val stillingerPage: Page<Stilling> = hent(url, queryString)
+        val stillingerPage = arbeidsplassenKlient.hentMineStillinger()
 
         val stillingsIder = stillingerPage.content.map { Stillingsid(it.uuid!!) }
 
@@ -201,32 +200,10 @@ class StillingService(
         )
     }
 
-    private fun hent(url: String, queryString: String?): Page<Stilling> {
-
-        val withQueryParams: String = UriComponentsBuilder.fromHttpUrl(url).query(queryString).build().toString()
-        val stillingPage = restTemplate.exchange(
-            withQueryParams,
-            HttpMethod.GET,
-            HttpEntity(null, headers()),
-            object : ParameterizedTypeReference<Page<Stilling>>() {}
-        ).body
-            ?: throw RestResponseEntityExceptionHandler.NoContentException("Ingen body på henting av stilling, url: $url")
-
-        return stillingPage
-    }
-
     private fun headers() =
         mapOf(
             HttpHeaders.CONTENT_TYPE to MediaType.APPLICATION_JSON_VALUE,
             HttpHeaders.ACCEPT to MediaType.APPLICATION_JSON_VALUE,
             HttpHeaders.AUTHORIZATION to "Bearer ${tokenUtils.hentOidcToken()}}"
         ).toMultiValueMap()
-
-    private fun headersUtenToken() =
-        mapOf(
-            HttpHeaders.CONTENT_TYPE to MediaType.APPLICATION_JSON_VALUE,
-            HttpHeaders.ACCEPT to MediaType.APPLICATION_JSON_VALUE
-        ).toMultiValueMap()
-
-
 }
