@@ -2,8 +2,8 @@ package no.nav.rekrutteringsbistand.api
 
 import no.nav.pam.stilling.ext.avro.*
 import no.nav.rekrutteringsbistand.api.autorisasjon.InnloggetVeileder
-import no.nav.rekrutteringsbistand.api.stilling.Page
-import no.nav.rekrutteringsbistand.api.stilling.Stilling
+import no.nav.rekrutteringsbistand.api.stilling.*
+import no.nav.rekrutteringsbistand.api.stilling.Administration
 import no.nav.rekrutteringsbistand.api.stilling.ekstern.StillingForPersonbruker
 import no.nav.rekrutteringsbistand.api.stillingsinfo.*
 import java.time.LocalDateTime
@@ -38,6 +38,56 @@ object Testdata {
         firstPublished = null,
         deactivatedByExpiry = null,
         activationOnPublishingDate = null
+    )
+
+    val enOpprettStillingDto = OpprettStillingDto(
+        title = "Ny stilling",
+        createdBy= "pam-rekrutteringsbistand",
+        updatedBy= "pam-rekrutteringsbistand",
+        source= "DIR",
+        privacy= "INTERNAL_NOT_SHOWN",
+        administration= OpprettStillingAdministrationDto(
+            status= "PENDING",
+            reportee = enVeileder.displayName,
+            navIdent = enVeileder.navIdent,
+        ),
+    )
+
+    val enOpprettetStilling = Stilling(
+        title = "Ny stilling",
+        createdBy= "pam-rekrutteringsbistand",
+        updatedBy= "pam-rekrutteringsbistand",
+        source= "DIR",
+        privacy= "INTERNAL_NOT_SHOWN",
+        administration= Administration(
+            status= "PENDING",
+            reportee = enVeileder.displayName,
+            navIdent = enVeileder.navIdent,
+            id = 0,
+            comments = "",
+            remarks = emptyList()
+        ),
+        id = 1000,
+        uuid = UUID.randomUUID().toString(),
+        created = LocalDateTime.now(),
+        updated = LocalDateTime.now(),
+        reference = UUID.randomUUID().toString(),
+        published = LocalDateTime.now(),
+        expires = LocalDateTime.now(),
+        activationOnPublishingDate = null,
+        categoryList = emptyList(),
+        mediaList = emptyList(),
+        locationList = emptyList(),
+        contactList = emptyList(),
+        businessName = null,
+        deactivatedByExpiry = null,
+        firstPublished = null,
+        publishedByAdmin = null,
+        properties = emptyMap(),
+        location = null,
+        status = null,
+        employer = null,
+        medium = null,
     )
 
     val enAnnenStilling = enStilling.copy(
@@ -108,7 +158,7 @@ object Testdata {
         "tittel",
         AdStatus.ACTIVE,
         PrivacyChannel.INTERNAL_NOT_SHOWN,
-        Administration(
+        no.nav.pam.stilling.ext.avro.Administration(
             AdministrationStatus.DONE,
             listOf(RemarkType.FOREIGN_JOB),
             "kommentar",
@@ -162,7 +212,7 @@ object Testdata {
         "tittel",
         AdStatus.ACTIVE,
         PrivacyChannel.INTERNAL_NOT_SHOWN,
-        Administration(
+        no.nav.pam.stilling.ext.avro.Administration(
             AdministrationStatus.DONE,
             listOf(RemarkType.FOREIGN_JOB),
             "kommentar",

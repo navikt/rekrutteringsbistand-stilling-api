@@ -49,25 +49,16 @@ class StillingService(
         )
     }
 
-    fun opprettStilling(stilling: Stilling, queryString: String?): RekrutteringsbistandStilling {
-        val url = "${externalConfiguration.stillingApi.url}/api/v1/ads"
-        val opprinneligStilling = restTemplate.exchange(
-            url + if (queryString != null) "?$queryString" else "",
-            HttpMethod.POST,
-            HttpEntity(stilling, headers()),
-            Stilling::class.java
-        )
-            .body
-            ?: throw RestResponseEntityExceptionHandler.NoContentException("Tom body fra opprett stilling")
-
-        val id = opprinneligStilling.uuid?.let { Stillingsid(it) }
+    fun opprettStilling(stilling: OpprettStillingDto): RekrutteringsbistandStilling {
+        val opprettetStilling = arbeidsplassenKlient.opprettStilling(stilling)
+        val id = opprettetStilling.uuid?.let { Stillingsid(it) }
             ?: throw IllegalArgumentException("Mangler stilling uuid")
 
         kandidatlisteKlient.oppdaterKandidatliste(id)
-        val stillingsinfo: Option<Stillingsinfo> = stillingsinfoService.hentStillingsinfo(opprinneligStilling)
+        val stillingsinfo = stillingsinfoService.hentStillingsinfo(opprettetStilling)
 
         return RekrutteringsbistandStilling(
-            stilling = opprinneligStilling,
+            stilling = opprettetStilling,
             stillingsinfo = stillingsinfo.map { it.asStillingsinfoDto() }.orNull()
         )
     }
@@ -101,7 +92,7 @@ class StillingService(
             updatedBy = "pam-rekrutteringsbistand",
             source = "DIR",
             privacy = "INTERNAL_NOT_SHOWN",
-            administration = KopierAdministrationDto(
+            administration = OpprettStillingAdministrationDto(
                 status = "PENDING",
                 reportee = tokenUtils.hentInnloggetVeileder().displayName,
                 navIdent = tokenUtils.hentInnloggetVeileder().navIdent,

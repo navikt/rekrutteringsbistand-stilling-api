@@ -36,26 +36,27 @@ data class Stilling(
     val activationOnPublishingDate: Boolean?
 )
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class OpprettStillingDto(
     val title: String,
     val createdBy: String,
     val updatedBy: String,
     val privacy: String?,
     val source: String?,
-    val administration: KopierAdministrationDto,
+    val administration: OpprettStillingAdministrationDto,
 
-    val mediaList: List<Media> = ArrayList(),
-    val contactList: List<Contact> = ArrayList(),
-    val medium: String?,
-    val employer: Arbeidsgiver?,
-    val location: Geografi?,
-    val locationList: List<Geografi> = ArrayList(),
-    val categoryList: List<Kategori> = ArrayList(),
-    val properties: Map<String, String> = HashMap(),
-    val businessName: String?,
-    val firstPublished: Boolean?,
-    val deactivatedByExpiry: Boolean?,
-    val activationOnPublishingDate: Boolean?
+    val mediaList: List<Media>? = ArrayList(),
+    val contactList: List<Contact>? = ArrayList(),
+    val medium: String? = null,
+    val employer: Arbeidsgiver? = null,
+    val location: Geografi? = null,
+    val locationList: List<Geografi>? = ArrayList(),
+    val categoryList: List<Kategori>? = ArrayList(),
+    val properties: Map<String, String>? = HashMap(),
+    val businessName: String? = null,
+    val firstPublished: Boolean? = null,
+    val deactivatedByExpiry: Boolean? = null,
+    val activationOnPublishingDate: Boolean? = null
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -68,7 +69,7 @@ data class Administration(
     val navIdent: String?
 )
 
-data class KopierAdministrationDto(
+data class OpprettStillingAdministrationDto(
     val status: String,
     val reportee: String,
     val navIdent: String,

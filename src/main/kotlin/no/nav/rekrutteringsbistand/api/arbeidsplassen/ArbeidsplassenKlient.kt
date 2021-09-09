@@ -1,6 +1,7 @@
 package no.nav.rekrutteringsbistand.api.arbeidsplassen
 
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
+import no.nav.rekrutteringsbistand.api.stilling.OpprettStillingDto
 import no.nav.rekrutteringsbistand.api.stilling.Page
 import no.nav.rekrutteringsbistand.api.stilling.Stilling
 import no.nav.rekrutteringsbistand.api.support.LOG
@@ -90,6 +91,27 @@ class ArbeidsplassenKlient(
             throw ResponseStatusException(
                 HttpStatus.valueOf(exception.rawStatusCode),
                 "Klarte ikke hente mine stillinger fra Arbeidsplassen"
+            )
+        }
+    }
+
+    fun opprettStilling(stilling: OpprettStillingDto): Stilling {
+        val url = "${externalConfiguration.stillingApi.url}/api/v1/ads?classify=true"
+
+        try {
+            val response = restTemplate.exchange(
+                url,
+                HttpMethod.POST,
+                HttpEntity(stilling, httpHeaders()),
+                Stilling::class.java
+            )
+
+            return response.body ?: throw kunneIkkeTolkeBodyException()
+        } catch (exception: RestClientResponseException) {
+            LOG.error("Klarte ikke å opprette stilling hos arbeidsplassen. URL: $url, Status: ${exception.rawStatusCode}, Body: ${exception.responseBodyAsString}")
+            throw ResponseStatusException(
+                HttpStatus.valueOf(exception.rawStatusCode),
+                "Klarte ikke å opprette stilling Arbeidsplassen"
             )
         }
     }
