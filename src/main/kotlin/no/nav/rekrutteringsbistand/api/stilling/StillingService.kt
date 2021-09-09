@@ -11,14 +11,13 @@ import no.nav.rekrutteringsbistand.api.option.Some
 import no.nav.rekrutteringsbistand.api.option.get
 import no.nav.rekrutteringsbistand.api.stillingsinfo.*
 import no.nav.rekrutteringsbistand.api.support.config.ExternalConfiguration
-import no.nav.rekrutteringsbistand.api.arbeidsplassen.proxy.RestProxy
 import no.nav.rekrutteringsbistand.api.support.rest.RestResponseEntityExceptionHandler
 import no.nav.rekrutteringsbistand.api.support.toMultiValueMap
 import org.springframework.http.*
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestTemplate
 import java.util.*
-import javax.servlet.http.HttpServletRequest
+
 
 @Service
 class StillingService(
