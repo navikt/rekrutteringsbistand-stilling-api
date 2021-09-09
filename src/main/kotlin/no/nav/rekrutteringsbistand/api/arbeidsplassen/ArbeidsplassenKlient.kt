@@ -5,7 +5,6 @@ import no.nav.rekrutteringsbistand.api.stilling.Page
 import no.nav.rekrutteringsbistand.api.stilling.Stilling
 import no.nav.rekrutteringsbistand.api.support.LOG
 import no.nav.rekrutteringsbistand.api.support.config.ExternalConfiguration
-import no.nav.rekrutteringsbistand.api.support.rest.RestResponseEntityExceptionHandler
 import no.nav.rekrutteringsbistand.api.support.toMultiValueMap
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.*
@@ -32,8 +31,7 @@ class ArbeidsplassenKlient(
                 Stilling::class.java
             )
 
-            return respons.body
-                ?: throw ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Klarte ikke å tolke respons fra Arbeidsplassen, stillingsId $stillingsId")
+            return respons.body ?: throw kunneIkkeTolkeBodyException()
 
         } catch (exception: RestClientResponseException) {
             LOG.error("Klarte ikke hente stilling fra arbeidsplassen. URL: $url, Status: ${exception.rawStatusCode}, Body: ${exception.responseBodyAsString}")
@@ -59,8 +57,7 @@ class ArbeidsplassenKlient(
                 object : ParameterizedTypeReference<Page<Stilling>>() {}
             )
 
-            return response.body?.content?.firstOrNull()
-                ?: throw ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Klarte ikke å tolke respons fra Arbeidsplassen, annonsenr $annonsenr")
+            return response.body?.content?.firstOrNull() ?: throw kunneIkkeTolkeBodyException()
 
         } catch (exception: RestClientResponseException) {
             LOG.error("Klarte ikke hente stilling fra arbeidsplassen. URL: $url, Status: ${exception.rawStatusCode}, Body: ${exception.responseBodyAsString}")
@@ -86,8 +83,7 @@ class ArbeidsplassenKlient(
                 object : ParameterizedTypeReference<Page<Stilling>>() {}
             )
 
-            return response.body
-                ?: throw ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Klarte ikke å tolke respons fra Arbeidsplassen")
+            return response.body ?: throw kunneIkkeTolkeBodyException()
 
         } catch (exception: RestClientResponseException) {
             LOG.error("Klarte ikke hente mine stillinger fra arbeidsplassen. URL: $url, Status: ${exception.rawStatusCode}, Body: ${exception.responseBodyAsString}")
@@ -96,6 +92,32 @@ class ArbeidsplassenKlient(
                 "Klarte ikke hente mine stillinger fra Arbeidsplassen"
             )
         }
+    }
+
+    fun slettStilling(stillingsId: String): Stilling {
+        val url = "${externalConfiguration.stillingApi.url}/api/v1/ads/$stillingsId"
+
+        try {
+            val response = restTemplate.exchange(
+                url,
+                HttpMethod.DELETE,
+                HttpEntity(null, httpHeaders()),
+                Stilling::class.java
+            )
+
+            return response.body ?: throw kunneIkkeTolkeBodyException()
+
+        } catch (exception: RestClientResponseException) {
+            LOG.error("Klarte ikke å slette stilling hos arbeidsplassen. URL: $url, Status: ${exception.rawStatusCode}, Body: ${exception.responseBodyAsString}")
+            throw ResponseStatusException(
+                HttpStatus.valueOf(exception.rawStatusCode),
+                "Klarte ikke å slette stilling hos Arbeidsplassen, stillingsId $stillingsId"
+            )
+        }
+    }
+
+    private fun kunneIkkeTolkeBodyException(): ResponseStatusException {
+        return ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Klarte ikke å tolke respons fra Arbeidsplassen")
     }
 
     private fun httpHeaders() =

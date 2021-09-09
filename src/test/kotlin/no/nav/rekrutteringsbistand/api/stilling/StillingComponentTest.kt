@@ -295,8 +295,6 @@ internal class StillingComponentTest {
     @Ignore
     @Test
     fun `POST mot kopier-stilling skal returnere kopi av rekrutteringsbistandstilling med gitt stillingsId`() {
-        // lag stilling
-
         val rekrutteringsbistandStilling = enRekrutteringsbistandStilling
         val stilling = rekrutteringsbistandStilling.stilling
 

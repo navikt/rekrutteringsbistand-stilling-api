@@ -27,8 +27,7 @@ class StillingService(
     val stillingsinfoService: StillingsinfoService,
     val tokenUtils: TokenUtils,
     val kandidatlisteKlient: KandidatlisteKlient,
-    val arbeidsplassenKlient: ArbeidsplassenKlient,
-    val restProxy: RestProxy,
+    val arbeidsplassenKlient: ArbeidsplassenKlient
 ) {
 
     fun hentRekrutteringsbistandStilling(stillingsId: String): RekrutteringsbistandStilling {
@@ -163,16 +162,10 @@ class StillingService(
 
     }
 
-    fun slettStilling(uuid: String, request: HttpServletRequest): ResponseEntity<String> {
-        val respons = restProxy.proxyJsonRequest(
-            HttpMethod.DELETE,
-            request,
-            "/rekrutteringsbistand",
-            null,
-            externalConfiguration.stillingApi.url
-        )
-        kandidatlisteKlient.oppdaterKandidatliste(Stillingsid(uuid))
-        return respons
+    fun slettStilling(stillingsId: String): Stilling {
+        val slettetStilling = arbeidsplassenKlient.slettStilling(stillingsId)
+        kandidatlisteKlient.oppdaterKandidatliste(Stillingsid(stillingsId))
+        return slettetStilling
     }
 
     fun hentMineStillinger(queryString: String?): Page<RekrutteringsbistandStilling> {

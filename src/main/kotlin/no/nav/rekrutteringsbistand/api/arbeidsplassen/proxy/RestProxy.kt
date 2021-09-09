@@ -21,34 +21,36 @@ import javax.servlet.http.HttpServletRequest
 @Component
 class RestProxy(val restTemplate: RestTemplate, val tokenUtils: TokenUtils) {
 
-    fun proxyJsonRequest(method: HttpMethod,
-                         request: HttpServletRequest,
-                         stripPathPrefix: String,
-                         body: String?,
-                         targetUrl: String): ResponseEntity<String> {
+    fun proxyJsonRequest(
+        method: HttpMethod,
+        request: HttpServletRequest,
+        stripPathPrefix: String,
+        body: String?,
+        targetUrl: String
+    ): ResponseEntity<String> {
         val url = buildProxyTargetUrl(request, stripPathPrefix, targetUrl)
         LOG.debug("Proxy til URL=$url, HTTP-metode=$method")
         return restTemplate.exchange(
-                url,
-                method,
-                HttpEntity(body, proxyHeaders()),
-                String::class.java
+            url,
+            method,
+            HttpEntity(body, proxyHeaders()),
+            String::class.java
         )
     }
 
 
     private fun proxyHeaders(): MultiValueMap<String, String> =
-            mapOf(
-                    CONTENT_TYPE to APPLICATION_JSON_VALUE,
-                    ACCEPT to APPLICATION_JSON_VALUE,
-                    AUTHORIZATION to "Bearer ${tokenUtils.hentOidcToken()}}"
-            ).toMultiValueMap()
+        mapOf(
+            CONTENT_TYPE to APPLICATION_JSON_VALUE,
+            ACCEPT to APPLICATION_JSON_VALUE,
+            AUTHORIZATION to "Bearer ${tokenUtils.hentOidcToken()}}"
+        ).toMultiValueMap()
 
     private fun buildProxyTargetUrl(request: HttpServletRequest, stripPrefix: String, targetUrl: String): URI {
         return UriComponentsBuilder.fromUriString(targetUrl)
-                .path(request.requestURI.substring(stripPrefix.length))
-                .replaceQuery(request.queryString)
-                .build(true).toUri()
+            .path(request.requestURI.substring(stripPrefix.length))
+            .replaceQuery(request.queryString)
+            .build(true).toUri()
     }
 
 }
