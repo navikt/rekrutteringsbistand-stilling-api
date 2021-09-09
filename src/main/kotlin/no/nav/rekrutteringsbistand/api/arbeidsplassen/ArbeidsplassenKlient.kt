@@ -71,8 +71,12 @@ class ArbeidsplassenKlient(
         }
     }
 
-    fun hentMineStillinger(): Page<Stilling> {
-        val url = "${externalConfiguration.stillingApi.url}/api/v1/ads/rekrutteringsbistand/minestillinger"
+    fun hentMineStillinger(queryString: String?): Page<Stilling> {
+        val url = UriComponentsBuilder
+            .fromHttpUrl("${externalConfiguration.stillingApi.url}/api/v1/ads/rekrutteringsbistand/minestillinger")
+            .query(queryString)
+            .build()
+            .toString()
 
         try {
             val response = restTemplate.exchange(

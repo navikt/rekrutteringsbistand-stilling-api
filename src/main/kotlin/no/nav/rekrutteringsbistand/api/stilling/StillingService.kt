@@ -14,11 +14,9 @@ import no.nav.rekrutteringsbistand.api.support.config.ExternalConfiguration
 import no.nav.rekrutteringsbistand.api.arbeidsplassen.proxy.RestProxy
 import no.nav.rekrutteringsbistand.api.support.rest.RestResponseEntityExceptionHandler
 import no.nav.rekrutteringsbistand.api.support.toMultiValueMap
-import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.*
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestTemplate
-import org.springframework.web.util.UriComponentsBuilder
 import java.util.*
 import javax.servlet.http.HttpServletRequest
 
@@ -178,7 +176,7 @@ class StillingService(
     }
 
     fun hentMineStillinger(queryString: String?): Page<RekrutteringsbistandStilling> {
-        val stillingerPage = arbeidsplassenKlient.hentMineStillinger()
+        val stillingerPage = arbeidsplassenKlient.hentMineStillinger(queryString)
 
         val stillingsIder = stillingerPage.content.map { Stillingsid(it.uuid!!) }
 
