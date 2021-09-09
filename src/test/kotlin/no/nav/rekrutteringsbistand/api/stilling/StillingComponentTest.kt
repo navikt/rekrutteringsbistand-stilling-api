@@ -9,6 +9,8 @@ import no.nav.rekrutteringsbistand.api.RekrutteringsbistandStilling
 import no.nav.rekrutteringsbistand.api.OppdaterRekrutteringsbistandStillingDto
 import no.nav.rekrutteringsbistand.api.TestRepository
 import no.nav.rekrutteringsbistand.api.Testdata.enAnnenStillingsinfo
+import no.nav.rekrutteringsbistand.api.Testdata.enOpprettStillingDto
+import no.nav.rekrutteringsbistand.api.Testdata.enOpprettetStilling
 import no.nav.rekrutteringsbistand.api.Testdata.enPageMedStilling
 import no.nav.rekrutteringsbistand.api.Testdata.enRekrutteringsbistandStilling
 import no.nav.rekrutteringsbistand.api.Testdata.enRekrutteringsbistandStillingUtenEier
@@ -114,10 +116,10 @@ internal class StillingComponentTest {
     }
 
     @Test
-    fun `POST mot stillinger skal returnere stilling`() {
-        val stilling = enStilling
+    fun `POST mot stillinger skal returnere opprettet stilling`() {
+        val stilling = enOpprettStillingDto
 
-        mock(HttpMethod.POST, "/api/v1/ads", stilling)
+        mock(HttpMethod.POST, "/api/v1/ads", enOpprettetStilling)
         mockKandidatlisteOppdatering()
 
         restTemplate.postForObject(
@@ -125,7 +127,16 @@ internal class StillingComponentTest {
             stilling,
             RekrutteringsbistandStilling::class.java
         ).also {
-            assertThat(it.stilling).isEqualTo(stilling)
+            assertThat(it.stilling.uuid).isNotNull
+            assertThat(it.stilling.id).isNotNull
+
+            assertThat(it.stilling.title).isEqualTo(stilling.title)
+            assertThat(it.stilling.administration?.navIdent).isEqualTo(stilling.administration.navIdent)
+            assertThat(it.stilling.administration?.reportee).isEqualTo(stilling.administration.reportee)
+            assertThat(it.stilling.createdBy).isEqualTo(stilling.createdBy)
+            assertThat(it.stilling.updatedBy).isEqualTo(stilling.updatedBy)
+            assertThat(it.stilling.source).isEqualTo(stilling.source)
+            assertThat(it.stilling.privacy).isEqualTo(stilling.privacy)
             assertThat(it.stillingsinfo).isNull()
         }
     }

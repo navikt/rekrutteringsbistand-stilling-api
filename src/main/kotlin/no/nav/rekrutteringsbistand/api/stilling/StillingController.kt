@@ -16,8 +16,8 @@ import javax.servlet.http.HttpServletRequest
 class StillingController(val stillingService: StillingService) {
 
     @PostMapping("/rekrutteringsbistandstilling")
-    fun opprettStilling(request: HttpServletRequest, @RequestBody stilling: Stilling): ResponseEntity<RekrutteringsbistandStilling> {
-        val opprettetStilling = stillingService.opprettStilling(stilling, request.queryString)
+    fun opprettStilling(@RequestBody stilling: OpprettStillingDto): ResponseEntity<RekrutteringsbistandStilling> {
+        val opprettetStilling = stillingService.opprettStilling(stilling)
         return ok(opprettetStilling)
     }
 
