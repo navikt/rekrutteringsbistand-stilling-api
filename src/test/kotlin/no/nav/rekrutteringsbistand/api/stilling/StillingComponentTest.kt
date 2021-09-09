@@ -331,48 +331,48 @@ internal class StillingComponentTest {
 
     private fun mock(method: HttpMethod, urlPath: String, responseBody: Any) {
         wiremock.stubFor(
-                request(method.name, urlPathMatching(urlPath))
-                        .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
-                        .withHeader(ACCEPT, equalTo(APPLICATION_JSON_VALUE))
-                        .withHeader(AUTHORIZATION, matching("Bearer .*}"))
-                        .willReturn(aResponse().withStatus(200)
-                                .withHeader(CONNECTION, "close") // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
-                                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-                                .withBody(objectMapper.writeValueAsString(responseBody)))
+            request(method.name, urlPathMatching(urlPath))
+                .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
+                .withHeader(ACCEPT, equalTo(APPLICATION_JSON_VALUE))
+                .withHeader(AUTHORIZATION, matching("Bearer .*}"))
+                .willReturn(aResponse().withStatus(200)
+                    .withHeader(CONNECTION, "close") // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
+                    .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+                    .withBody(objectMapper.writeValueAsString(responseBody)))
         )
     }
 
     private fun mockUtenAuthorization(urlPath: String, responseBody: Any) {
         wiremock.stubFor(
-                get(urlEqualTo(urlPath))
-                        .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
-                        .withHeader(ACCEPT, equalTo(APPLICATION_JSON_VALUE))
-                        .willReturn(aResponse().withStatus(200)
-                                .withHeader(CONNECTION, "close") // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
-                                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-                                .withBody(objectMapper.writeValueAsString(responseBody)))
+            get(urlEqualTo(urlPath))
+                .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
+                .withHeader(ACCEPT, equalTo(APPLICATION_JSON_VALUE))
+                .willReturn(aResponse().withStatus(200)
+                    .withHeader(CONNECTION, "close") // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
+                    .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+                    .withBody(objectMapper.writeValueAsString(responseBody)))
         )
     }
 
     private fun mockKandidatlisteOppdatering() {
         wiremockKandidatliste.stubFor(
-                put(urlPathMatching("/rekrutteringsbistand-kandidat-api/rest/veileder/stilling/.*/kandidatliste"))
-                        .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
-                        .withHeader(ACCEPT, equalTo(APPLICATION_JSON_VALUE))
-                        .willReturn(aResponse().withStatus(HttpStatus.NO_CONTENT.value())
-                                .withHeader(CONNECTION, "close") // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
-                                .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE))
+            put(urlPathMatching("/rekrutteringsbistand-kandidat-api/rest/veileder/stilling/.*/kandidatliste"))
+                .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
+                .withHeader(ACCEPT, equalTo(APPLICATION_JSON_VALUE))
+                .willReturn(aResponse().withStatus(HttpStatus.NO_CONTENT.value())
+                    .withHeader(CONNECTION, "close") // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
+                    .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE))
         )
     }
 
     private fun mockKandidatlisteOppdateringFeiler() {
         wiremockKandidatliste.stubFor(
-                put(urlPathMatching("/rekrutteringsbistand-kandidat-api/rest/veileder/stilling/.+/kandidatliste"))
-                        .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
-                        .withHeader(ACCEPT, equalTo(APPLICATION_JSON_VALUE))
-                        .willReturn(aResponse().withStatus(500)
-                                .withHeader(CONNECTION, "close") // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
-                            )
+            put(urlPathMatching("/rekrutteringsbistand-kandidat-api/rest/veileder/stilling/.+/kandidatliste"))
+                .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
+                .withHeader(ACCEPT, equalTo(APPLICATION_JSON_VALUE))
+                .willReturn(aResponse().withStatus(500)
+                    .withHeader(CONNECTION, "close") // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
+                )
         )
     }
 

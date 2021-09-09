@@ -18,7 +18,6 @@ import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.*
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestTemplate
-import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.util.UriComponentsBuilder
 import java.util.*
 import javax.servlet.http.HttpServletRequest
@@ -45,10 +44,7 @@ class StillingService(
     }
 
     fun hentRekrutteringsbistandStillingBasertPåAnnonsenr(annonsenr: String): RekrutteringsbistandStilling {
-        val url = "${externalConfiguration.stillingApi.url}/b2b/api/v1/ads"
-        val queryParams = "id=${annonsenr}"
-        val stilling = hent(url, queryParams).content.first()
-
+        val stilling = arbeidsplassenKlient.hentStillingBasertPåAnnonsenr(annonsenr)
         val stillingsinfo: Option<Stillingsinfo> = stillingsinfoService.hentStillingsinfo(stilling)
 
         return RekrutteringsbistandStilling(
