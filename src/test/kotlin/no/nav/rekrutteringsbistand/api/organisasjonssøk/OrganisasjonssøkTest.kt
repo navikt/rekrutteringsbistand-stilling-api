@@ -64,7 +64,7 @@ internal class OrganisasjonssøkTest {
                 WireMock.request(method.name, WireMock.urlMatching(urlPath))
                         .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
                         .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
-                        .withHeader(HttpHeaders.AUTHORIZATION, WireMock.matching("Bearer .*}"))
+                        .withHeader(HttpHeaders.AUTHORIZATION, WireMock.matching("Bearer .*"))
                         .willReturn(WireMock.aResponse().withStatus(200)
                                 .withHeader(HttpHeaders.CONNECTION, "close") // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
                                 .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
@@ -77,7 +77,7 @@ internal class OrganisasjonssøkTest {
                 WireMock.post(WireMock.urlPathMatching(urlPath))
                         .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
                         .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
-                        .withHeader(HttpHeaders.AUTHORIZATION, WireMock.matching("Bearer .*}"))
+                        .withHeader(HttpHeaders.AUTHORIZATION, WireMock.matching("Bearer .*"))
                         .willReturn(WireMock.serverError()
                                 .withHeader(HttpHeaders.CONNECTION, "close") // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
                                 .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
