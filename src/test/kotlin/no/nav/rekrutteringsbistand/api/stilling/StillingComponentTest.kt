@@ -82,7 +82,7 @@ internal class StillingComponentTest {
     fun `GET mot en rekrutteringsbistandstilling skal returnere en stilling med stillingsinfo hvis det er lagret`() {
 
         val stilling = enStilling
-        val stillingsinfo = enStillingsinfo.copy(stillingsid = Stillingsid(stilling.uuid!!))
+        val stillingsinfo = enStillingsinfo.copy(stillingsid = Stillingsid(stilling.uuid))
 
         mockUtenAuthorization("/b2b/api/v1/ads/${stilling.uuid}", stilling)
         repository.opprett(stillingsinfo)
@@ -103,7 +103,7 @@ internal class StillingComponentTest {
             totalPages = 1,
             totalElements = 1
         )
-        val stillingsinfo = enStillingsinfo.copy(stillingsid = Stillingsid(stilling.uuid!!))
+        val stillingsinfo = enStillingsinfo.copy(stillingsid = Stillingsid(stilling.uuid))
 
         repository.opprett(stillingsinfo)
 
@@ -188,8 +188,8 @@ internal class StillingComponentTest {
                 )),
                 OppdaterRekrutteringsbistandStillingDto::class.java
         ).body.also {
-            assertThat(it!!.stilling.uuid).isNotEmpty()
-            assertThat(it.stilling.copy(uuid = null)).isEqualTo(rekrutteringsbistandStilling.stilling.copy(uuid = null))
+            assertThat(it!!.stilling.uuid).isNotEmpty
+            assertThat(it.stilling).isEqualTo(rekrutteringsbistandStilling.stilling)
             assertThat(it.notat).isEqualTo(rekrutteringsbistandStilling.stillingsinfo?.notat)
             assertThat(it.stillingsinfoid).isEqualTo(rekrutteringsbistandStilling.stillingsinfo?.stillingsinfoid)
         }
@@ -212,7 +212,7 @@ internal class StillingComponentTest {
                 OppdaterRekrutteringsbistandStillingDto::class.java
         ).body.also {
             assertThat(it!!.stilling.uuid).isNotEmpty()
-            assertThat(it.stilling.copy(uuid = null)).isEqualTo(rekrutteringsbistandStilling.stilling.copy(uuid = null))
+            assertThat(it.stilling).isEqualTo(rekrutteringsbistandStilling.stilling)
             assertThat(it.notat).isEqualTo(rekrutteringsbistandStilling.stillingsinfo?.notat)
             assertThat(it.stillingsinfoid).isNotEmpty()
         }

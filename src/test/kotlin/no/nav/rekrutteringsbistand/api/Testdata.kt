@@ -87,7 +87,7 @@ object Testdata {
         publishedByAdmin = null,
         properties = emptyMap(),
         location = null,
-        status = null,
+        status = "ACTIVE",
         employer = null,
         medium = null,
     )
@@ -107,21 +107,21 @@ object Testdata {
     val enStillingsinfo = Stillingsinfo(
         stillingsinfoid = Stillingsinfoid(UUID.randomUUID()),
         eier = Eier(navident = enVeileder.navIdent, navn = enVeileder.displayName),
-        stillingsid = Stillingsid(enStilling.uuid!!),
+        stillingsid = Stillingsid(enStilling.uuid),
         notat = etNotat
     )
 
     val enStillingsinfoUtenEier = Stillingsinfo(
         stillingsinfoid = Stillingsinfoid(UUID.randomUUID()),
         eier = null,
-        stillingsid = Stillingsid(enStilling.uuid!!),
+        stillingsid = Stillingsid(enStilling.uuid),
         notat = etNotat
     )
 
     val enAnnenStillingsinfo = Stillingsinfo(
         stillingsinfoid = Stillingsinfoid(UUID.randomUUID()),
         eier = Eier(navident = enVeileder.navIdent, navn = enVeileder.displayName),
-        stillingsid = Stillingsid(enAnnenStilling.uuid!!),
+        stillingsid = Stillingsid(enAnnenStilling.uuid),
         notat = etNotat
     )
 

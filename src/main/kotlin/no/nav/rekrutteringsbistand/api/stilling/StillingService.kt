@@ -12,25 +12,17 @@ import no.nav.rekrutteringsbistand.api.option.Option
 import no.nav.rekrutteringsbistand.api.option.Some
 import no.nav.rekrutteringsbistand.api.option.get
 import no.nav.rekrutteringsbistand.api.stillingsinfo.*
-import no.nav.rekrutteringsbistand.api.support.config.ExternalConfiguration
-import no.nav.rekrutteringsbistand.api.support.rest.RestResponseEntityExceptionHandler
-import no.nav.rekrutteringsbistand.api.support.toMultiValueMap
-import org.springframework.http.*
 import org.springframework.stereotype.Service
-import org.springframework.web.client.RestTemplate
 import java.util.*
 
 
 @Service
 class StillingService(
-    val restTemplate: RestTemplate,
-    val externalConfiguration: ExternalConfiguration,
     val stillingsinfoService: StillingsinfoService,
     val tokenUtils: TokenUtils,
     val kandidatlisteKlient: KandidatlisteKlient,
     val arbeidsplassenKlient: ArbeidsplassenKlient
 ) {
-
     fun hentRekrutteringsbistandStilling(stillingsId: String): RekrutteringsbistandStilling {
         val stilling = arbeidsplassenKlient.hentStilling(stillingsId)
         val stillingsinfo: Option<Stillingsinfo> = stillingsinfoService.hentStillingsinfo(stilling)
@@ -53,8 +45,7 @@ class StillingService(
 
     fun opprettStilling(stilling: OpprettStillingDto): RekrutteringsbistandStilling {
         val opprettetStilling = arbeidsplassenKlient.opprettStilling(stilling)
-        val id = opprettetStilling.uuid?.let { Stillingsid(it) }
-            ?: throw IllegalArgumentException("Mangler stilling uuid")
+        val id = Stillingsid(opprettetStilling.uuid)
 
         kandidatlisteKlient.oppdaterKandidatliste(id)
         val stillingsinfo = stillingsinfoService.hentStillingsinfo(opprettetStilling)
@@ -123,10 +114,9 @@ class StillingService(
     ): OppdaterRekrutteringsbistandStillingDto {
         val oppdatertStilling = arbeidsplassenKlient.oppdaterStilling(dto.stilling, queryString)
 
-        val id = oppdatertStilling.uuid?.let { Stillingsid(it) }
-            ?: throw IllegalArgumentException("Mangler stilling uuid")
+        val id = Stillingsid(oppdatertStilling.uuid)
 
-        if ("DIR".equals(oppdatertStilling.source, false)) {
+        if (oppdatertStilling.source.equals("DIR", false)) {
             kandidatlisteKlient.oppdaterKandidatliste(id)
         }
 
@@ -153,7 +143,7 @@ class StillingService(
     fun hentMineStillinger(queryString: String?): Page<RekrutteringsbistandStilling> {
         val stillingerPage = arbeidsplassenKlient.hentMineStillinger(queryString)
 
-        val stillingsIder = stillingerPage.content.map { Stillingsid(it.uuid!!) }
+        val stillingsIder = stillingerPage.content.map { Stillingsid(it.uuid) }
 
         val stillingsinfoer: Map<String, Stillingsinfo> = stillingsinfoService
             .hentForStillinger(stillingsIder)

@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service
 class StillingsinfoService(private val repository: StillingsinfoRepository) {
 
     fun hentStillingsinfo(stilling: Stilling): Option<Stillingsinfo> =
-        hentForStilling(Stillingsid(stilling.uuid!!))
+        hentForStilling(Stillingsid(stilling.uuid))
 
     fun hentForStilling(stillingId: Stillingsid): Option<Stillingsinfo> =
         repository.hentForStilling(stillingId)
