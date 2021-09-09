@@ -3,6 +3,7 @@ package no.nav.rekrutteringsbistand.api.stilling
 import arrow.core.getOrElse
 import no.nav.rekrutteringsbistand.api.RekrutteringsbistandStilling
 import no.nav.rekrutteringsbistand.api.OppdaterRekrutteringsbistandStillingDto
+import no.nav.rekrutteringsbistand.api.arbeidsplassen.ArbeidsplassenKlient
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
 import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteKlient
 import no.nav.rekrutteringsbistand.api.option.Option
@@ -10,13 +11,14 @@ import no.nav.rekrutteringsbistand.api.option.Some
 import no.nav.rekrutteringsbistand.api.option.get
 import no.nav.rekrutteringsbistand.api.stillingsinfo.*
 import no.nav.rekrutteringsbistand.api.support.config.ExternalConfiguration
-import no.nav.rekrutteringsbistand.api.proxy.RestProxy
+import no.nav.rekrutteringsbistand.api.arbeidsplassen.proxy.RestProxy
 import no.nav.rekrutteringsbistand.api.support.rest.RestResponseEntityExceptionHandler
 import no.nav.rekrutteringsbistand.api.support.toMultiValueMap
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.*
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestTemplate
+import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.util.UriComponentsBuilder
 import java.util.*
 import javax.servlet.http.HttpServletRequest
@@ -28,23 +30,17 @@ class StillingService(
     val stillingsinfoService: StillingsinfoService,
     val tokenUtils: TokenUtils,
     val kandidatlisteKlient: KandidatlisteKlient,
-    val restProxy: RestProxy
+    val arbeidsplassenKlient: ArbeidsplassenKlient,
+    val restProxy: RestProxy,
 ) {
 
-    fun hentRekrutteringsbistandStilling(uuid: String): RekrutteringsbistandStilling {
-        val url = "${externalConfiguration.stillingApi.url}/b2b/api/v1/ads/$uuid"
-        val opprinneligStilling: Stilling = restTemplate.exchange(
-            url,
-            HttpMethod.GET,
-            HttpEntity(null, headersUtenToken()),
-            Stilling::class.java
-        ).body!!
-
-        val stillingsinfo: Option<Stillingsinfo> = stillingsinfoService.hentStillingsinfo(opprinneligStilling)
+    fun hentRekrutteringsbistandStilling(stillingsId: String): RekrutteringsbistandStilling {
+        val stilling = arbeidsplassenKlient.hentStilling(stillingsId)
+        val stillingsinfo: Option<Stillingsinfo> = stillingsinfoService.hentStillingsinfo(stilling)
 
         return RekrutteringsbistandStilling(
             stillingsinfo = stillingsinfo.map { it.asStillingsinfoDto() }.getOrElse { null },
-            stilling = opprinneligStilling
+            stilling = stilling
         )
     }
 
@@ -105,6 +101,34 @@ class StillingService(
     }
 
     fun kopierStilling(stillingsId: String): RekrutteringsbistandStilling {
+        val eksisterendeStilling = hentRekrutteringsbistandStilling(stillingsId).stilling
+
+        val kopi = OpprettStillingDto(
+            title = "Kopi - ${eksisterendeStilling.title}",
+            createdBy = "pam-rekrutteringsbistand",
+            updatedBy = "pam-rekrutteringsbistand",
+            source = "DIR",
+            privacy = "INTERNAL_NOT_SHOWN",
+            administration = KopierAdministrationDto(
+                status = "PENDING",
+                reportee = tokenUtils.hentInnloggetVeileder().displayName,
+                navIdent = tokenUtils.hentInnloggetVeileder().navIdent,
+            ),
+
+            mediaList = eksisterendeStilling.mediaList,
+            contactList = eksisterendeStilling.contactList,
+            medium = eksisterendeStilling.medium,
+            employer = eksisterendeStilling.employer,
+            location = eksisterendeStilling.location,
+            locationList = eksisterendeStilling.locationList,
+            categoryList = eksisterendeStilling.categoryList,
+            properties = eksisterendeStilling.properties,
+            businessName = eksisterendeStilling.businessName,
+            firstPublished = eksisterendeStilling.firstPublished,
+            deactivatedByExpiry = eksisterendeStilling.deactivatedByExpiry,
+            activationOnPublishingDate = eksisterendeStilling.activationOnPublishingDate,
+        )
+
         TODO()
     }
 
