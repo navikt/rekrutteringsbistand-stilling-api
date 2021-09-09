@@ -30,15 +30,10 @@ class ArbeidsplassenKlient(
                 HttpEntity(null, httpHeadersUtenToken()),
                 Stilling::class.java
             )
-
             return respons.body ?: throw kunneIkkeTolkeBodyException()
 
         } catch (exception: RestClientResponseException) {
-            LOG.error("Klarte ikke hente stilling fra arbeidsplassen. URL: $url, Status: ${exception.rawStatusCode}, Body: ${exception.responseBodyAsString}")
-            throw ResponseStatusException(
-                HttpStatus.valueOf(exception.rawStatusCode),
-                "Klarte ikke hente stillingen med stillingsId $stillingsId fra Arbeidsplassen"
-            )
+            throw svarMedFeilmelding("Klarte ikke hente stillingen med stillingsId $stillingsId fra Arbeidsplassen", url, exception)
         }
     }
 
@@ -56,15 +51,10 @@ class ArbeidsplassenKlient(
                 HttpEntity(null, httpHeaders()),
                 object : ParameterizedTypeReference<Page<Stilling>>() {}
             )
-
             return response.body?.content?.firstOrNull() ?: throw kunneIkkeTolkeBodyException()
 
         } catch (exception: RestClientResponseException) {
-            LOG.error("Klarte ikke hente stilling fra arbeidsplassen. URL: $url, Status: ${exception.rawStatusCode}, Body: ${exception.responseBodyAsString}")
-            throw ResponseStatusException(
-                HttpStatus.valueOf(exception.rawStatusCode),
-                "Klarte ikke hente stillingen med annonsenr $annonsenr fra Arbeidsplassen"
-            )
+            throw svarMedFeilmelding("Klarte ikke hente stillingen med annonsenr $annonsenr fra Arbeidsplassen", url, exception)
         }
     }
 
@@ -82,15 +72,10 @@ class ArbeidsplassenKlient(
                 HttpEntity(null, httpHeaders()),
                 object : ParameterizedTypeReference<Page<Stilling>>() {}
             )
-
             return response.body ?: throw kunneIkkeTolkeBodyException()
 
         } catch (exception: RestClientResponseException) {
-            LOG.error("Klarte ikke hente mine stillinger fra arbeidsplassen. URL: $url, Status: ${exception.rawStatusCode}, Body: ${exception.responseBodyAsString}")
-            throw ResponseStatusException(
-                HttpStatus.valueOf(exception.rawStatusCode),
-                "Klarte ikke hente mine stillinger fra Arbeidsplassen"
-            )
+            throw svarMedFeilmelding("Klarte ikke hente mine stillinger fra Arbeidsplassen", url, exception)
         }
     }
 
@@ -104,14 +89,10 @@ class ArbeidsplassenKlient(
                 HttpEntity(stilling, httpHeaders()),
                 Stilling::class.java
             )
-
             return response.body ?: throw kunneIkkeTolkeBodyException()
+
         } catch (exception: RestClientResponseException) {
-            LOG.error("Klarte ikke å opprette stilling hos arbeidsplassen. URL: $url, Status: ${exception.rawStatusCode}, Body: ${exception.responseBodyAsString}")
-            throw ResponseStatusException(
-                HttpStatus.valueOf(exception.rawStatusCode),
-                "Klarte ikke å opprette stilling Arbeidsplassen"
-            )
+            throw svarMedFeilmelding("Klarte ikke å opprette stilling hos Arbeidsplassen", url, exception)
         }
     }
 
@@ -125,14 +106,10 @@ class ArbeidsplassenKlient(
                 HttpEntity(stilling, httpHeaders()),
                 Stilling::class.java
             )
-
             return response.body ?: throw kunneIkkeTolkeBodyException()
+
         } catch (exception: RestClientResponseException) {
-            LOG.error("Klarte ikke å oppdatere stilling hos arbeidsplassen. URL: $url, Status: ${exception.rawStatusCode}, Body: ${exception.responseBodyAsString}")
-            throw ResponseStatusException(
-                HttpStatus.valueOf(exception.rawStatusCode),
-                "Klarte ikke å oppdatere stilling Arbeidsplassen"
-            )
+            throw svarMedFeilmelding("Klarte ikke å oppdatere stilling hos Arbeidsplassen", url, exception)
         }
     }
 
@@ -146,16 +123,16 @@ class ArbeidsplassenKlient(
                 HttpEntity(null, httpHeaders()),
                 Stilling::class.java
             )
-
             return response.body ?: throw kunneIkkeTolkeBodyException()
 
         } catch (exception: RestClientResponseException) {
-            LOG.error("Klarte ikke å slette stilling hos arbeidsplassen. URL: $url, Status: ${exception.rawStatusCode}, Body: ${exception.responseBodyAsString}")
-            throw ResponseStatusException(
-                HttpStatus.valueOf(exception.rawStatusCode),
-                "Klarte ikke å slette stilling hos Arbeidsplassen, stillingsId $stillingsId"
-            )
+            throw svarMedFeilmelding("Klarte ikke å slette stilling hos arbeidsplassen", url, exception)
         }
+    }
+
+    private fun svarMedFeilmelding(melding: String, url: String, exception: RestClientResponseException): ResponseStatusException {
+        LOG.error("$melding. URL: $url, Status: ${exception.rawStatusCode}, Body: ${exception.responseBodyAsString}")
+        return ResponseStatusException(HttpStatus.valueOf(exception.rawStatusCode), melding)
     }
 
     private fun kunneIkkeTolkeBodyException(): ResponseStatusException {
@@ -166,7 +143,7 @@ class ArbeidsplassenKlient(
         mapOf(
             HttpHeaders.CONTENT_TYPE to MediaType.APPLICATION_JSON_VALUE,
             HttpHeaders.ACCEPT to MediaType.APPLICATION_JSON_VALUE,
-            HttpHeaders.AUTHORIZATION to "Bearer ${tokenUtils.hentOidcToken()}}"
+            HttpHeaders.AUTHORIZATION to "Bearer ${tokenUtils.hentOidcToken()}"
         ).toMultiValueMap()
 
     private fun httpHeadersUtenToken() =
