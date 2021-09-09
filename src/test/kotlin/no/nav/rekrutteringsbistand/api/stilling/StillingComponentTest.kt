@@ -308,6 +308,10 @@ internal class StillingComponentTest {
         val rekrutteringsbistandStilling = enRekrutteringsbistandStilling
         val stilling = rekrutteringsbistandStilling.stilling
 
+        mockUtenAuthorization("/b2b/api/v1/ads/${stilling.uuid}", stilling)
+        mockKandidatlisteOppdatering()
+        mock(HttpMethod.POST, "/api/v1/ads", stilling)
+
         val respons = restTemplate.exchange(
             "$localBaseUrl/rekrutteringsbistandstilling/kopier/${stilling.uuid}",
             HttpMethod.POST,

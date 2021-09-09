@@ -105,7 +105,7 @@ class StillingService(
             activationOnPublishingDate = eksisterendeStilling.activationOnPublishingDate,
         )
 
-        TODO()
+        return opprettStilling(kopi)
     }
 
     fun oppdaterRekrutteringsbistandStilling(

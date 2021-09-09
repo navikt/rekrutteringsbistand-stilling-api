@@ -22,30 +22,30 @@ class KandidatlisteKlient(
         val url = buildUpdateNotificationUrl(stillingsid)
         LOG.info("Oppdaterer kandidatliste, stillingsid: $stillingsid")
         return restTemplate.exchange(
-                url,
-                HttpMethod.PUT,
-                HttpEntity(null, headers()),
-                Void::class.java
+            url,
+            HttpMethod.PUT,
+            HttpEntity(null, headers()),
+            Void::class.java
         )
-                .also {
-                    if (it.statusCode != HttpStatus.NO_CONTENT) {
-                        LOG.warn("Uventet response fra kandidatliste-api for ad {}: {}", stillingsid.asString(), it.statusCodeValue)
-                    }
+            .also {
+                if (it.statusCode != HttpStatus.NO_CONTENT) {
+                    LOG.warn("Uventet response fra kandidatliste-api for ad {}: {}", stillingsid.asString(), it.statusCodeValue)
                 }
+            }
     }
 
     private fun buildUpdateNotificationUrl(stillingsid: Stillingsid): URI {
         return UriComponentsBuilder.fromUriString(externalConfiguration.kandidatlisteApi.url)
-                .pathSegment(stillingsid.asString())
-                .pathSegment("kandidatliste")
-                .build(true)
-                .toUri()
+            .pathSegment(stillingsid.asString())
+            .pathSegment("kandidatliste")
+            .build(true)
+            .toUri()
     }
 
     fun headers() =
-            mapOf(
-                    HttpHeaders.CONTENT_TYPE to MediaType.APPLICATION_JSON_VALUE,
-                    HttpHeaders.ACCEPT to MediaType.APPLICATION_JSON_VALUE,
-                    HttpHeaders.AUTHORIZATION to "Bearer ${tokenUtils.hentOidcToken()}"
-            ).toMultiValueMap()
+        mapOf(
+            HttpHeaders.CONTENT_TYPE to MediaType.APPLICATION_JSON_VALUE,
+            HttpHeaders.ACCEPT to MediaType.APPLICATION_JSON_VALUE,
+            HttpHeaders.AUTHORIZATION to "Bearer ${tokenUtils.hentOidcToken()}"
+        ).toMultiValueMap()
 }
