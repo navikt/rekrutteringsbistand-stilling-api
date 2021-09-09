@@ -127,16 +127,15 @@ internal class StillingComponentTest {
             stilling,
             RekrutteringsbistandStilling::class.java
         ).also {
-            assertThat(it.stilling.uuid).isNotNull
-            assertThat(it.stilling.id).isNotNull
-
             assertThat(it.stilling.title).isEqualTo(stilling.title)
             assertThat(it.stilling.administration?.navIdent).isEqualTo(stilling.administration.navIdent)
             assertThat(it.stilling.administration?.reportee).isEqualTo(stilling.administration.reportee)
+            assertThat(it.stilling.administration?.status).isEqualTo(stilling.administration.status)
             assertThat(it.stilling.createdBy).isEqualTo(stilling.createdBy)
             assertThat(it.stilling.updatedBy).isEqualTo(stilling.updatedBy)
             assertThat(it.stilling.source).isEqualTo(stilling.source)
             assertThat(it.stilling.privacy).isEqualTo(stilling.privacy)
+
             assertThat(it.stillingsinfo).isNull()
         }
     }

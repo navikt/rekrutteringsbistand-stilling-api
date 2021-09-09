@@ -1,6 +1,8 @@
 package no.nav.rekrutteringsbistand.api
 
 import no.nav.pam.stilling.ext.avro.*
+import no.nav.rekrutteringsbistand.api.arbeidsplassen.OpprettStillingAdministrationDto
+import no.nav.rekrutteringsbistand.api.arbeidsplassen.OpprettStillingDto
 import no.nav.rekrutteringsbistand.api.autorisasjon.InnloggetVeileder
 import no.nav.rekrutteringsbistand.api.stilling.*
 import no.nav.rekrutteringsbistand.api.stilling.Administration
