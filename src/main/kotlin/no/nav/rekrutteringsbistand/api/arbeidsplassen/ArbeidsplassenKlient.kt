@@ -116,6 +116,27 @@ class ArbeidsplassenKlient(
         }
     }
 
+    fun oppdaterStilling(stilling: Stilling, queryString: String?): Stilling {
+        val url = "${externalConfiguration.stillingApi.url}/api/v1/ads/${stilling.uuid}"
+
+        try {
+            val response = restTemplate.exchange(
+                url + if (queryString != null) "?$queryString" else "",
+                HttpMethod.PUT,
+                HttpEntity(stilling, httpHeaders()),
+                Stilling::class.java
+            )
+
+            return response.body ?: throw kunneIkkeTolkeBodyException()
+        } catch (exception: RestClientResponseException) {
+            LOG.error("Klarte ikke å oppdatere stilling hos arbeidsplassen. URL: $url, Status: ${exception.rawStatusCode}, Body: ${exception.responseBodyAsString}")
+            throw ResponseStatusException(
+                HttpStatus.valueOf(exception.rawStatusCode),
+                "Klarte ikke å oppdatere stilling Arbeidsplassen"
+            )
+        }
+    }
+
     fun slettStilling(stillingsId: String): Stilling {
         val url = "${externalConfiguration.stillingApi.url}/api/v1/ads/$stillingsId"
 
