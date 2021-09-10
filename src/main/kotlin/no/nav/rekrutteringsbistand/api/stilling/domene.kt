@@ -1,6 +1,9 @@
 package no.nav.rekrutteringsbistand.api.stilling
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import no.nav.rekrutteringsbistand.api.arbeidsplassen.OpprettStillingAdministrationDto
+import no.nav.rekrutteringsbistand.api.arbeidsplassen.OpprettStillingDto
+import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
 import java.time.LocalDateTime
 import java.util.*
 import kotlin.collections.ArrayList
@@ -35,7 +38,37 @@ data class Stilling(
     val firstPublished: Boolean?,
     val deactivatedByExpiry: Boolean?,
     val activationOnPublishingDate: Boolean?
-)
+) {
+
+    // TODO
+    fun toOpprettStillingDto(tokenUtils: TokenUtils): OpprettStillingDto {
+        return OpprettStillingDto(
+            title = "Kopi - $title",
+            createdBy = "pam-rekrutteringsbistand",
+            updatedBy = "pam-rekrutteringsbistand",
+            source = "DIR",
+            privacy = "INTERNAL_NOT_SHOWN",
+            administration = OpprettStillingAdministrationDto(
+                status = "PENDING",
+                reportee = tokenUtils.hentInnloggetVeileder().displayName,
+                navIdent = tokenUtils.hentInnloggetVeileder().navIdent,
+            ),
+
+            mediaList = mediaList,
+            contactList = contactList,
+            medium = medium,
+            employer = employer,
+            location = location,
+            locationList = locationList,
+            categoryList = categoryList,
+            properties = properties,
+            businessName = businessName,
+            firstPublished = firstPublished,
+            deactivatedByExpiry = deactivatedByExpiry,
+            activationOnPublishingDate = activationOnPublishingDate,
+        )
+    }
+}
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Administration(

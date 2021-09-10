@@ -78,32 +78,7 @@ class StillingService(
 
     fun kopierStilling(stillingsId: String): RekrutteringsbistandStilling {
         val eksisterendeStilling = hentRekrutteringsbistandStilling(stillingsId).stilling
-
-        val kopi = OpprettStillingDto(
-            title = "Kopi - ${eksisterendeStilling.title}",
-            createdBy = "pam-rekrutteringsbistand",
-            updatedBy = "pam-rekrutteringsbistand",
-            source = "DIR",
-            privacy = "INTERNAL_NOT_SHOWN",
-            administration = OpprettStillingAdministrationDto(
-                status = "PENDING",
-                reportee = tokenUtils.hentInnloggetVeileder().displayName,
-                navIdent = tokenUtils.hentInnloggetVeileder().navIdent,
-            ),
-
-            mediaList = eksisterendeStilling.mediaList,
-            contactList = eksisterendeStilling.contactList,
-            medium = eksisterendeStilling.medium,
-            employer = eksisterendeStilling.employer,
-            location = eksisterendeStilling.location,
-            locationList = eksisterendeStilling.locationList,
-            categoryList = eksisterendeStilling.categoryList,
-            properties = eksisterendeStilling.properties,
-            businessName = eksisterendeStilling.businessName,
-            firstPublished = eksisterendeStilling.firstPublished,
-            deactivatedByExpiry = eksisterendeStilling.deactivatedByExpiry,
-            activationOnPublishingDate = eksisterendeStilling.activationOnPublishingDate,
-        )
+        val kopi = eksisterendeStilling.toOpprettStillingDto(tokenUtils)
 
         return opprettStilling(kopi)
     }
