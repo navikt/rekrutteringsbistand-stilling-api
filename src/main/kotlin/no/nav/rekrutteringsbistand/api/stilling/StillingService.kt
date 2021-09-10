@@ -78,7 +78,7 @@ class StillingService(
 
     fun kopierStilling(stillingsId: String): RekrutteringsbistandStilling {
         val eksisterendeStilling = hentRekrutteringsbistandStilling(stillingsId).stilling
-        val kopi = eksisterendeStilling.toOpprettStillingDto(tokenUtils)
+        val kopi = eksisterendeStilling.toKopiertStilling(tokenUtils)
 
         return opprettStilling(kopi)
     }

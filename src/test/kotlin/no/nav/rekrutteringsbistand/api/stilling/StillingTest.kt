@@ -21,7 +21,7 @@ class StillingTest {
         `when`(tokenUtils.hentInnloggetVeileder()).thenReturn(enVeileder)
 
         val stilling = enStilling
-        val kopiertStilling = stilling.toOpprettStillingDto(tokenUtils)
+        val kopiertStilling = stilling.toKopiertStilling(tokenUtils)
 
         assertThat(kopiertStilling.title).isEqualTo("Kopi - ${stilling.title}")
         assertThat(kopiertStilling.createdBy).isEqualTo("pam-rekrutteringsbistand")

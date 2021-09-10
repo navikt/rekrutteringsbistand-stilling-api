@@ -39,21 +39,11 @@ data class Stilling(
     val deactivatedByExpiry: Boolean?,
     val activationOnPublishingDate: Boolean?
 ) {
-
-    // TODO
-    fun toOpprettStillingDto(tokenUtils: TokenUtils): OpprettStillingDto {
-        return OpprettStillingDto(
-            title = "Kopi - $title",
-            createdBy = "pam-rekrutteringsbistand",
-            updatedBy = "pam-rekrutteringsbistand",
-            source = "DIR",
-            privacy = "INTERNAL_NOT_SHOWN",
-            administration = OpprettStillingAdministrationDto(
-                status = "PENDING",
-                reportee = tokenUtils.hentInnloggetVeileder().displayName,
-                navIdent = tokenUtils.hentInnloggetVeileder().navIdent,
-            ),
-
+    fun toKopiertStilling(tokenUtils: TokenUtils): OpprettStillingDto {
+        return lagNyStilling(
+            tittel = "Kopi - $title",
+            tokenUtils
+        ).copy(
             mediaList = mediaList,
             contactList = contactList,
             medium = medium,
@@ -68,6 +58,21 @@ data class Stilling(
             activationOnPublishingDate = activationOnPublishingDate,
         )
     }
+}
+
+fun lagNyStilling(tittel: String = "Ny stilling", tokenUtils: TokenUtils): OpprettStillingDto {
+    return OpprettStillingDto(
+        title = tittel,
+        createdBy = "pam-rekrutteringsbistand",
+        updatedBy = "pam-rekrutteringsbistand",
+        source = "DIR",
+        privacy = "INTERNAL_NOT_SHOWN",
+        administration = OpprettStillingAdministrationDto(
+            status = "PENDING",
+            reportee = tokenUtils.hentInnloggetVeileder().displayName,
+            navIdent = tokenUtils.hentInnloggetVeileder().navIdent,
+        ),
+    )
 }
 
 @JsonIgnoreProperties(ignoreUnknown = true)
