@@ -1,6 +1,7 @@
 package no.nav.rekrutteringsbistand.api.stillingsinfo
 
 import arrow.core.getOrElse
+import no.nav.rekrutteringsbistand.api.arbeidsplassen.ArbeidsplassenKlient
 import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteKlient
 import no.nav.rekrutteringsbistand.api.support.LOG
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -14,20 +15,22 @@ import java.util.*
 @RequestMapping("/rekruttering")
 @ProtectedWithClaims(issuer = "isso")
 class StillingsinfoController(
-        val repo: StillingsinfoRepository,
-        val kandidatlisteKlient: KandidatlisteKlient
+    val repo: StillingsinfoRepository,
+    val kandidatlisteKlient: KandidatlisteKlient,
+    val arbeidsplassenKlient: ArbeidsplassenKlient
 ) {
-    @PostMapping
-    fun opprettKandidatlisteForEksternStilling(@RequestBody dto: OpprettKandidatlisteForEksternStillingDto): ResponseEntity<Stillingsinfo> {
-        // Brukes kun ett sted i frontend, når man trykker på "Opprett kandidatliste" på ekstern stilling.
+    @PostMapping("/kandidatliste")
+    fun opprettKandidatlisteForEksternStilling(@RequestBody dto: OpprettKandidatlisteForEksternStillingDto): ResponseEntity<Any> {
+        repo.hentForStilling(Stillingsid(dto.stillingsid)).exists {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Stillingen har allerede kandidatliste")
+        }
 
-        // Gi 409 Conflict hvis stillingsinfo finnes fra før
-        val stillingsinfo = repo.hentForStilling(Stillingsid(dto.stillingsid))
+        val stillingsinfo = dto.tilNyStillingsinfo()
+        repo.opprett(stillingsinfo)
+        kandidatlisteKlient.oppdaterKandidatliste(Stillingsid(dto.stillingsid))
+        arbeidsplassenKlient.triggResendingAvStillingsmeldingFraArbeidsplassen(dto.stillingsid)
 
-        // Opprett stillingsinfo
-        // Oppdater kandidatliste
-        // Trigg oppdatering hos Arbeidsplassen
-        // Returner hele stillingsinfoen
+        return ResponseEntity.status(HttpStatus.CREATED).body(stillingsinfo)
     }
 
     @PostMapping
@@ -35,16 +38,16 @@ class StillingsinfoController(
         if (dto.stillingsinfoid != null) throw BadRequestException("stillingsinfoid må være tom for post")
 
         return repo.hentForStilling(Stillingsid(dto.stillingsid))
-                .map {
-                    oppdater(dto.copy(stillingsinfoid = it.asEierDto().stillingsinfoid))
-                }.getOrElse {
-                    val dtoMedId = dto.copy(stillingsinfoid = UUID.randomUUID().toString())
-                    LOG.debug("Lager ny eierinformasjon for stilling ${dtoMedId.stillingsid} med stillingsInfoId ${dtoMedId.stillingsinfoid}")
+            .map {
+                oppdater(dto.copy(stillingsinfoid = it.asEierDto().stillingsinfoid))
+            }.getOrElse {
+                val dtoMedId = dto.copy(stillingsinfoid = UUID.randomUUID().toString())
+                LOG.debug("Lager ny eierinformasjon for stilling ${dtoMedId.stillingsid} med stillingsInfoId ${dtoMedId.stillingsinfoid}")
 
-                    repo.opprett(dtoMedId.asStillinginfo())
-                    kandidatlisteKlient.oppdaterKandidatliste(Stillingsid(dto.stillingsid))
-                    ResponseEntity.created(URI("/rekruttering/${dtoMedId.stillingsinfoid}")).body(dtoMedId)
-                }
+                repo.opprett(dtoMedId.asStillinginfo())
+                kandidatlisteKlient.oppdaterKandidatliste(Stillingsid(dto.stillingsid))
+                ResponseEntity.created(URI("/rekruttering/${dtoMedId.stillingsinfoid}")).body(dtoMedId)
+            }
     }
 
     @PutMapping
@@ -59,11 +62,12 @@ class StillingsinfoController(
 
     @GetMapping("/stilling/{id}")
     fun hentForStilling(@PathVariable id: String): EierDto =
-            repo.hentForStilling(Stillingsid(id)).map { it.asEierDto() }.getOrElse { throw NotFoundException("Stilling id $id") }
+        repo.hentForStilling(Stillingsid(id)).map { it.asEierDto() }
+            .getOrElse { throw NotFoundException("Stilling id $id") }
 
     @GetMapping("/ident/{id}")
     fun hentForIdent(@PathVariable id: String): Collection<EierDto> =
-            repo.hentForIdent(id).map { it.asEierDto() }
+        repo.hentForIdent(id).map { it.asEierDto() }
 
 }
 
@@ -71,7 +75,15 @@ data class OpprettKandidatlisteForEksternStillingDto(
     val stillingsid: String,
     val eierNavident: String?,
     val eierNavn: String?
-)
+) {
+    fun tilNyStillingsinfo() = Stillingsinfo(
+        stillingsinfoid = Stillingsinfoid(UUID.randomUUID()),
+        stillingsid = Stillingsid(verdi = stillingsid),
+        eier = Eier(navident = eierNavident, navn = eierNavn),
+        notat = null
+    )
+}
+
 
 @ResponseStatus(HttpStatus.BAD_REQUEST)
 class BadRequestException(message: String) : RuntimeException(message)
