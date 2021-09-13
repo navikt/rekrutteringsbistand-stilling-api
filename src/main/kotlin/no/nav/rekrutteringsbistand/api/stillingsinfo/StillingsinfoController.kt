@@ -30,7 +30,7 @@ class StillingsinfoController(
         kandidatlisteKlient.oppdaterKandidatliste(Stillingsid(dto.stillingsid))
         arbeidsplassenKlient.triggResendingAvStillingsmeldingFraArbeidsplassen(dto.stillingsid)
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(stillingsinfo)
+        return ResponseEntity.status(HttpStatus.CREATED).body(stillingsinfo.asStillingsinfoDto())
     }
 
     @PostMapping

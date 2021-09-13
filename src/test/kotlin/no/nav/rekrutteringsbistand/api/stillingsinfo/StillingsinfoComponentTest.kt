@@ -111,15 +111,15 @@ class StillingsinfoComponentTest {
         mockKandidatlisteOppdatering()
 
         val url = "$localBaseUrl/rekruttering/kandidatliste"
-        val stillingsinfoRespons = restTemplate.postForEntity(url, httpEntity(dto), Stillingsinfo::class.java)
+        val stillingsinfoRespons = restTemplate.postForEntity(url, httpEntity(dto), StillingsinfoDto::class.java)
 
         verify(arbeidsplassenKlient, times(1)).triggResendingAvStillingsmeldingFraArbeidsplassen(dto.stillingsid)
         assertThat(stillingsinfoRespons.statusCode).isEqualTo(HttpStatus.CREATED)
 
         stillingsinfoRespons.body!!.apply {
             assertThat(this.stillingsid).isNotNull
-            assertThat(this.eier?.navn).isEqualTo(dto.eierNavn)
-            assertThat(this.eier?.navident).isEqualTo(dto.eierNavident)
+            assertThat(this.eierNavn).isEqualTo(dto.eierNavn)
+            assertThat(this.eierNavident).isEqualTo(dto.eierNavident)
             assertThat(this.notat).isNull()
         }
     }
