@@ -37,6 +37,11 @@ class ArbeidsplassenKlient(
         }
     }
 
+    fun triggResendingAvStillingsmeldingFraArbeidsplassen(stillingsid: String ) {
+        val stilling = hentStilling(stillingsid)
+        oppdaterStilling(stilling, null)
+    }
+
     fun hentStillingBasertPåAnnonsenr(annonsenr: String): Stilling {
         val url = UriComponentsBuilder
             .fromHttpUrl("${externalConfiguration.stillingApi.url}/b2b/api/v1/ads")

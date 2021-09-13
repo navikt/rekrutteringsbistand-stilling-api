@@ -5,7 +5,10 @@ import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.github.tomakehurst.wiremock.junit.WireMockRule
 import no.nav.rekrutteringsbistand.api.TestRepository
+import no.nav.rekrutteringsbistand.api.Testdata
+import no.nav.rekrutteringsbistand.api.Testdata.enOpprettKandidatlisteForEksternStillingDto
 import no.nav.rekrutteringsbistand.api.Testdata.enStillingsinfo
+import no.nav.rekrutteringsbistand.api.arbeidsplassen.ArbeidsplassenKlient
 import no.nav.rekrutteringsbistand.api.support.toMultiValueMap
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.fail
@@ -14,8 +17,12 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mockito
+import org.mockito.Mockito.times
+import org.mockito.Mockito.verify
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.boot.test.web.client.TestRestTemplate.HttpClientOption.ENABLE_COOKIES
 import org.springframework.boot.web.server.LocalServerPort
@@ -30,7 +37,7 @@ import org.springframework.test.context.junit4.SpringRunner
 
 @RunWith(SpringRunner::class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class EierComponentTest {
+class StillingsinfoComponentTest {
 
     @get:Rule
     val wiremock = WireMockRule(WireMockConfiguration.options().port(8766))
@@ -41,6 +48,9 @@ class EierComponentTest {
     val localBaseUrl by lazy { "http://localhost:$port" }
 
     val restTemplate = TestRestTemplate(ENABLE_COOKIES)
+
+    @MockBean
+    lateinit var arbeidsplassenKlient: ArbeidsplassenKlient
 
     @Autowired
     lateinit var repository: StillingsinfoRepository
@@ -92,6 +102,39 @@ class EierComponentTest {
             assertThat(this).isEqualToIgnoringGivenFields(tilLagring, "stillingsinfoid")
             assertThat(stillingsinfoid).isEqualTo(lagretStillingsinfo.stillingsinfoid.asString())
         }
+    }
+
+    @Test
+    fun `Opprettelse av kandidatliste på ekstern stilling skal returnere HTTP 201 med opprettet stillingsinfo, og trigge resending hos Arbeidsplassen`() {
+        val dto = enOpprettKandidatlisteForEksternStillingDto
+
+        mockKandidatlisteOppdatering()
+
+        val url = "$localBaseUrl/rekruttering/kandidatliste"
+        val stillingsinfoRespons = restTemplate.postForEntity(url, httpEntity(dto), Stillingsinfo::class.java)
+
+        verify(arbeidsplassenKlient, times(1)).triggResendingAvStillingsmeldingFraArbeidsplassen(dto.stillingsid)
+        assertThat(stillingsinfoRespons.statusCode).isEqualTo(HttpStatus.CREATED)
+
+        stillingsinfoRespons.body!!.apply {
+            assertThat(this.stillingsid).isNotNull
+            assertThat(this.eier?.navn).isEqualTo(dto.eierNavn)
+            assertThat(this.eier?.navident).isEqualTo(dto.eierNavident)
+            assertThat(this.notat).isNull()
+        }
+    }
+
+    @Test
+    fun `Opprettelse av kandidatliste på ekstern stilling som har kandidatliste fra før skal returnere HTTP 409 Conflict`() {
+        val lagretStillingsinfo = enStillingsinfo
+        val dto = enOpprettKandidatlisteForEksternStillingDto
+
+        repository.opprett(lagretStillingsinfo)
+
+        val url = "$localBaseUrl/rekruttering/kandidatliste"
+        val respons = restTemplate.postForEntity(url, httpEntity(dto), String::class.java)
+
+        assertThat(respons.statusCode).isEqualTo(HttpStatus.CONFLICT)
     }
 
     @Test
