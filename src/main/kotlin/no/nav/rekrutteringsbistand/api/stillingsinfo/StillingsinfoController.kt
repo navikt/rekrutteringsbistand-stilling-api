@@ -17,6 +17,18 @@ class StillingsinfoController(
         val repo: StillingsinfoRepository,
         val kandidatlisteKlient: KandidatlisteKlient
 ) {
+    @PostMapping
+    fun opprettKandidatlisteForEksternStilling(@RequestBody dto: OpprettKandidatlisteForEksternStillingDto): ResponseEntity<Stillingsinfo> {
+        // Brukes kun ett sted i frontend, når man trykker på "Opprett kandidatliste" på ekstern stilling.
+
+        // Gi 409 Conflict hvis stillingsinfo finnes fra før
+        val stillingsinfo = repo.hentForStilling(Stillingsid(dto.stillingsid))
+
+        // Opprett stillingsinfo
+        // Oppdater kandidatliste
+        // Trigg oppdatering hos Arbeidsplassen
+        // Returner hele stillingsinfoen
+    }
 
     @PostMapping
     fun lagre(@RequestBody dto: EierDto): ResponseEntity<EierDto> {
@@ -54,6 +66,12 @@ class StillingsinfoController(
             repo.hentForIdent(id).map { it.asEierDto() }
 
 }
+
+data class OpprettKandidatlisteForEksternStillingDto(
+    val stillingsid: String,
+    val eierNavident: String?,
+    val eierNavn: String?
+)
 
 @ResponseStatus(HttpStatus.BAD_REQUEST)
 class BadRequestException(message: String) : RuntimeException(message)
