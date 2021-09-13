@@ -40,6 +40,8 @@ class ArbeidsplassenKlient(
     fun triggResendingAvStillingsmeldingFraArbeidsplassen(stillingsid: String ) {
         val stilling = hentStilling(stillingsid)
         oppdaterStilling(stilling, null)
+
+        LOG.info("Trigget resending av stillingsmelding fra Arbeidsplassen for stilling $stillingsid")
     }
 
     fun hentStillingBasertPåAnnonsenr(annonsenr: String): Stilling {
