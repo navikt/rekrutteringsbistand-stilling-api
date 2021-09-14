@@ -62,14 +62,14 @@ class StillingsinfoComponentTest {
     }
 
     @Test
-    fun `Henting av eier basert på stilling skal returnere HTTP OK med lagret stillingsinfo`() {
+    fun `Henting av stillingsinfo basert på stilling skal returnere HTTP OK med lagret stillingsinfo`() {
         repository.opprett(enStillingsinfo)
 
         val url = "$localBaseUrl/rekruttering/stilling/${enStillingsinfo.stillingsid}"
-        val stillingsinfoRespons = restTemplate.exchange(url, HttpMethod.GET, httpEntity(null), EierDto::class.java)
+        val stillingsinfoRespons = restTemplate.exchange(url, HttpMethod.GET, httpEntity(null), StillingsinfoDto::class.java)
 
         assertThat(stillingsinfoRespons.statusCode).isEqualTo(HttpStatus.OK)
-        assertThat(stillingsinfoRespons.body).isEqualTo(enStillingsinfo.asEierDto())
+        assertThat(stillingsinfoRespons.body).isEqualTo(enStillingsinfo.asStillingsinfoDto())
     }
 
     @Test
@@ -77,11 +77,11 @@ class StillingsinfoComponentTest {
         repository.opprett(enStillingsinfo)
 
         val url = "$localBaseUrl/rekruttering/ident/${enStillingsinfo.eier?.navident}"
-        val stillingsinfoRespons = restTemplate.exchange(url, HttpMethod.GET, httpEntity(null), object : ParameterizedTypeReference<List<EierDto>>() {})
+        val stillingsinfoRespons = restTemplate.exchange(url, HttpMethod.GET, httpEntity(null), object : ParameterizedTypeReference<List<StillingsinfoDto>>() {})
 
         assertThat(stillingsinfoRespons.statusCode).isEqualTo(HttpStatus.OK)
         stillingsinfoRespons.body.apply {
-            assertThat(this!!).contains(enStillingsinfo.asEierDto())
+            assertThat(this!!).contains(enStillingsinfo.asStillingsinfoDto())
         }
     }
 
@@ -106,9 +106,9 @@ class StillingsinfoComponentTest {
     }
 
     @Test
-    fun `Oppretting av kandidatliste på ekstern stilling med eksisterende stillingsinfo skal returnere HTTP 201 med oppdatert stillingsinfo`() {
+    fun `Oppretting av kandidatliste på ekstern stilling med eksisterende stillingsinfo skal returnere HTTP 200 med oppdatert stillingsinfo`() {
         repository.opprett(enStillingsinfo)
-        val tilLagring = enStillingsinfo.asEierDto().copy(stillingsinfoid = null)
+        val tilLagring = enStillingsinfoInboundDto
         mockKandidatlisteOppdatering()
 
         val url = "$localBaseUrl/rekruttering"

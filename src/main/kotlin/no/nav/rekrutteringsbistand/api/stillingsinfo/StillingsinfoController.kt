@@ -37,13 +37,13 @@ class StillingsinfoController(
     }
 
     @GetMapping("/stilling/{id}")
-    fun hentForStilling(@PathVariable id: String): EierDto =
-        repo.hentForStilling(Stillingsid(id)).map { it.asEierDto() }
+    fun hentForStilling(@PathVariable id: String): StillingsinfoDto =
+        repo.hentForStilling(Stillingsid(id)).map { it.asStillingsinfoDto() }
             .getOrElse { throw NotFoundException("Stilling id $id") }
 
     @GetMapping("/ident/{id}")
-    fun hentForIdent(@PathVariable id: String): Collection<EierDto> =
-        repo.hentForIdent(id).map { it.asEierDto() }
+    fun hentForIdent(@PathVariable id: String): Collection<StillingsinfoDto> =
+        repo.hentForIdent(id).map { it.asStillingsinfoDto() }
 }
 
 data class StillingsinfoInboundDto(
@@ -65,9 +65,6 @@ data class StillingsinfoInboundDto(
         notat = notat
     )
 }
-
-@ResponseStatus(HttpStatus.BAD_REQUEST)
-class BadRequestException(message: String) : RuntimeException(message)
 
 @ResponseStatus(HttpStatus.NOT_FOUND)
 class NotFoundException(message: String) : RuntimeException(message)
