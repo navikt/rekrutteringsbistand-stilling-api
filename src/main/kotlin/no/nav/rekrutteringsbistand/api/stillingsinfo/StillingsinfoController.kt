@@ -33,7 +33,7 @@ class StillingsinfoController(
         kandidatlisteKlient.oppdaterKandidatliste(Stillingsid(dto.stillingsid))
         arbeidsplassenKlient.triggResendingAvStillingsmeldingFraArbeidsplassen(dto.stillingsid)
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(oppdatertStillingsinfo.asStillingsinfoDto())
+        return ResponseEntity.status(HttpStatus.OK).body(oppdatertStillingsinfo.asStillingsinfoDto())
     }
 
     @GetMapping("/stilling/{id}")

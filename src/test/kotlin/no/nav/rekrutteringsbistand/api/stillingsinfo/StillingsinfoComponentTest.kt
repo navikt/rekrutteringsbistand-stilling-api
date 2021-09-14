@@ -95,7 +95,7 @@ class StillingsinfoComponentTest {
         val stillingsinfoRespons = restTemplate.exchange(url, HttpMethod.PUT, httpEntity(dto), StillingsinfoDto::class.java)
 
         verify(arbeidsplassenKlient, times(1)).triggResendingAvStillingsmeldingFraArbeidsplassen(dto.stillingsid)
-        assertThat(stillingsinfoRespons.statusCode).isEqualTo(HttpStatus.CREATED)
+        assertThat(stillingsinfoRespons.statusCode).isEqualTo(HttpStatus.OK)
 
         stillingsinfoRespons.body!!.apply {
             assertThat(this.stillingsid).isNotNull
@@ -115,7 +115,7 @@ class StillingsinfoComponentTest {
         val stillingsinfoRespons = restTemplate.exchange(url, HttpMethod.PUT, httpEntity(tilLagring), StillingsinfoDto::class.java)
         val lagretStillingsinfo = repository.hentForStilling(enStillingsinfo.stillingsid).getOrElse { fail("fant ikke stillingen") }
 
-        assertThat(stillingsinfoRespons.statusCode).isEqualTo(HttpStatus.CREATED)
+        assertThat(stillingsinfoRespons.statusCode).isEqualTo(HttpStatus.OK)
         assertThat(stillingsinfoRespons.body).isEqualTo(lagretStillingsinfo.asStillingsinfoDto())
     }
 
