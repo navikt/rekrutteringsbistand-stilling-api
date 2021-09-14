@@ -125,19 +125,6 @@ class StillingsinfoComponentTest {
     }
 
     @Test
-    fun `Opprettelse av kandidatliste på ekstern stilling som har kandidatliste fra før skal returnere HTTP 409 Conflict`() {
-        val lagretStillingsinfo = enStillingsinfo
-        val dto = enOpprettKandidatlisteForEksternStillingDto
-
-        repository.opprett(lagretStillingsinfo)
-
-        val url = "$localBaseUrl/rekruttering/kandidatliste"
-        val respons = restTemplate.postForEntity(url, httpEntity(dto), String::class.java)
-
-        assertThat(respons.statusCode).isEqualTo(HttpStatus.CONFLICT)
-    }
-
-    @Test
     fun `Oppdatering av stillingsinfo skal returnere HTTP 200 med oppdatert stillingsinfo`() {
         repository.opprett(enStillingsinfo)
         val oppdatering = enStillingsinfo.copy(eier = Eier(navident = "endretIdent", navn = "endretNavn"))

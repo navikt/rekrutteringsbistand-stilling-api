@@ -1,8 +1,12 @@
 package no.nav.rekrutteringsbistand.api.stillingsinfo
 
+import arrow.core.extensions.either.foldable.isEmpty
+import arrow.core.extensions.either.foldable.isNotEmpty
 import arrow.core.getOrElse
 import no.nav.rekrutteringsbistand.api.arbeidsplassen.ArbeidsplassenKlient
 import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteKlient
+import no.nav.rekrutteringsbistand.api.option.Some
+import no.nav.rekrutteringsbistand.api.option.get
 import no.nav.rekrutteringsbistand.api.support.LOG
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.HttpStatus
@@ -20,17 +24,28 @@ class StillingsinfoController(
     val arbeidsplassenKlient: ArbeidsplassenKlient
 ) {
     @PostMapping("/kandidatliste")
-    fun opprettKandidatlisteForEksternStilling(@RequestBody dto: OpprettKandidatlisteForEksternStillingDto): ResponseEntity<Any> {
-        repo.hentForStilling(Stillingsid(dto.stillingsid)).exists {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("Stillingen har allerede kandidatliste")
-        }
+    fun opprettKandidatlisteForEksternStilling(@RequestBody dto: OpprettKandidatlisteForEksternStillingDto): ResponseEntity<StillingsinfoDto> {
+        val eksisterendeStillingsinfo = repo.hentForStilling(Stillingsid(dto.stillingsid))
 
-        val stillingsinfo = dto.tilNyStillingsinfo()
-        repo.opprett(stillingsinfo)
+        val opprettetStillingsinfo: Stillingsinfo =
+            if (eksisterendeStillingsinfo is Some) {
+                dto.tilOppdaterStillingsinfo(
+                    eksisterendeStillingsinfo.get().stillingsinfoid.asString()
+                ).apply {
+                    repo.oppdaterEierIdentOgEierNavn(
+                        OppdaterEier(this.stillingsinfoid, Eier(dto.eierNavident, dto.eierNavn)),
+                    )
+                }
+            } else {
+                dto.tilOpprettStillingsinfo().apply {
+                    repo.opprett(this)
+                }
+            }
+
         kandidatlisteKlient.oppdaterKandidatliste(Stillingsid(dto.stillingsid))
         arbeidsplassenKlient.triggResendingAvStillingsmeldingFraArbeidsplassen(dto.stillingsid)
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(stillingsinfo.asStillingsinfoDto())
+        return ResponseEntity.status(HttpStatus.CREATED).body(opprettetStillingsinfo.asStillingsinfoDto())
     }
 
     @PostMapping
@@ -76,8 +91,15 @@ data class OpprettKandidatlisteForEksternStillingDto(
     val eierNavident: String?,
     val eierNavn: String?
 ) {
-    fun tilNyStillingsinfo() = Stillingsinfo(
+    fun tilOpprettStillingsinfo() = Stillingsinfo(
         stillingsinfoid = Stillingsinfoid(UUID.randomUUID()),
+        stillingsid = Stillingsid(verdi = stillingsid),
+        eier = Eier(navident = eierNavident, navn = eierNavn),
+        notat = null
+    )
+
+    fun tilOppdaterStillingsinfo(stillingsinfoId: String) = Stillingsinfo(
+        stillingsinfoid = Stillingsinfoid(stillingsinfoId),
         stillingsid = Stillingsid(verdi = stillingsid),
         eier = Eier(navident = eierNavident, navn = eierNavn),
         notat = null
