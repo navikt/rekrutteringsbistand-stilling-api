@@ -62,9 +62,12 @@ class StillingsinfoController(
     }
 
     @GetMapping("/stilling/{id}")
-    fun hentForStilling(@PathVariable id: String): EierDto =
-        repo.hentForStilling(Stillingsid(id)).map { it.asEierDto() }
+    fun hentForStilling(@PathVariable id: String): EierDto {
+        LOG.info("Kaller hentForStilling med id $id")
+        
+        return repo.hentForStilling(Stillingsid(id)).map { it.asEierDto() }
             .getOrElse { throw NotFoundException("Stilling id $id") }
+    }
 
     @GetMapping("/ident/{id}")
     fun hentForIdent(@PathVariable id: String): Collection<EierDto> =
