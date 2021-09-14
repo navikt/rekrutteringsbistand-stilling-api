@@ -37,6 +37,15 @@ class ArbeidsplassenKlient(
         }
     }
 
+    /**
+     * Dette er en "hack" for å sørge for at stillingssøket vårt alltid er oppdatert
+     * med riktig stillingsinfo.
+     *
+     * Vi henter vi en stilling fra Arbeidsplassen og sender den tilbake til dem.
+     * Dette gjør at de sender en ny Kafka-melding med stillingen. Vi lytter på denne
+     * meldingen i stilling-indekseren vår, som vil hente oppdatert stillingsinfo og
+     * oppdaterer indeksen.
+     */
     fun triggResendingAvStillingsmeldingFraArbeidsplassen(stillingsid: String ) {
         val stilling = hentStilling(stillingsid)
         oppdaterStilling(stilling, null)
