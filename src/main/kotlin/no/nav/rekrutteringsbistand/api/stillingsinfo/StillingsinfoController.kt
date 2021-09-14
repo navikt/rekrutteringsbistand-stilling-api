@@ -29,8 +29,11 @@ class StillingsinfoController(
 
         val opprettetStillingsinfo: Stillingsinfo =
             if (eksisterendeStillingsinfo is Some) {
+                val stillingsinfo = eksisterendeStillingsinfo.get()
+
                 dto.tilOppdaterStillingsinfo(
-                    eksisterendeStillingsinfo.get().stillingsinfoid.asString()
+                    stillingsinfo.stillingsinfoid.asString(),
+                    stillingsinfo.notat
                 ).apply {
                     repo.oppdaterEierIdentOgEierNavn(
                         OppdaterEier(this.stillingsinfoid, Eier(dto.eierNavident, dto.eierNavn)),
@@ -98,11 +101,11 @@ data class OpprettKandidatlisteForEksternStillingDto(
         notat = null
     )
 
-    fun tilOppdaterStillingsinfo(stillingsinfoId: String) = Stillingsinfo(
+    fun tilOppdaterStillingsinfo(stillingsinfoId: String, notat: String?) = Stillingsinfo(
         stillingsinfoid = Stillingsinfoid(stillingsinfoId),
         stillingsid = Stillingsid(verdi = stillingsid),
         eier = Eier(navident = eierNavident, navn = eierNavn),
-        notat = null
+        notat = notat
     )
 }
 
