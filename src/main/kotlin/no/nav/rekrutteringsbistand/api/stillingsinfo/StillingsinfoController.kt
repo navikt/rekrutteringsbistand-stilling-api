@@ -23,7 +23,7 @@ class StillingsinfoController(
     val kandidatlisteKlient: KandidatlisteKlient,
     val arbeidsplassenKlient: ArbeidsplassenKlient
 ) {
-    @PostMapping("/kandidatliste")
+    @PostMapping
     fun opprettKandidatlisteForEksternStilling(@RequestBody dto: OpprettKandidatlisteForEksternStillingDto): ResponseEntity<StillingsinfoDto> {
         val eksisterendeStillingsinfo = repo.hentForStilling(Stillingsid(dto.stillingsid))
 
@@ -49,23 +49,6 @@ class StillingsinfoController(
         arbeidsplassenKlient.triggResendingAvStillingsmeldingFraArbeidsplassen(dto.stillingsid)
 
         return ResponseEntity.status(HttpStatus.CREATED).body(opprettetStillingsinfo.asStillingsinfoDto())
-    }
-
-    @PostMapping
-    fun lagre(@RequestBody dto: EierDto): ResponseEntity<EierDto> {
-        if (dto.stillingsinfoid != null) throw BadRequestException("stillingsinfoid må være tom for post")
-
-        return repo.hentForStilling(Stillingsid(dto.stillingsid))
-            .map {
-                oppdater(dto.copy(stillingsinfoid = it.asEierDto().stillingsinfoid))
-            }.getOrElse {
-                val dtoMedId = dto.copy(stillingsinfoid = UUID.randomUUID().toString())
-                LOG.debug("Lager ny eierinformasjon for stilling ${dtoMedId.stillingsid} med stillingsInfoId ${dtoMedId.stillingsinfoid}")
-
-                repo.opprett(dtoMedId.asStillinginfo())
-                kandidatlisteKlient.oppdaterKandidatliste(Stillingsid(dto.stillingsid))
-                ResponseEntity.created(URI("/rekruttering/${dtoMedId.stillingsinfoid}")).body(dtoMedId)
-            }
     }
 
     @PutMapping

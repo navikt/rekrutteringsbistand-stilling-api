@@ -87,30 +87,13 @@ class StillingsinfoComponentTest {
         }
     }
 
-
-    @Test
-    fun `Opprettelse av stillingsinfo skal returnere HTTP 201 med opprettet stillingsinfo`() {
-        val tilLagring = enStillingsinfo.asEierDto().copy(stillingsinfoid = null)
-        mockKandidatlisteOppdatering()
-
-        val url = "$localBaseUrl/rekruttering"
-        val stillingsinfoRespons = restTemplate.postForEntity(url, httpEntity(tilLagring), EierDto::class.java)
-        val lagretStillingsinfo = repository.hentForStilling(enStillingsinfo.stillingsid).getOrElse { fail("fant ikke stillingen") }
-
-        assertThat(stillingsinfoRespons.statusCode).isEqualTo(HttpStatus.CREATED)
-        stillingsinfoRespons.body!!.apply {
-            assertThat(this).isEqualToIgnoringGivenFields(tilLagring, "stillingsinfoid")
-            assertThat(stillingsinfoid).isEqualTo(lagretStillingsinfo.stillingsinfoid.asString())
-        }
-    }
-
     @Test
     fun `Opprettelse av kandidatliste på ekstern stilling skal returnere HTTP 201 med opprettet stillingsinfo, og trigge resending hos Arbeidsplassen`() {
         val dto = enOpprettKandidatlisteForEksternStillingDto
 
         mockKandidatlisteOppdatering()
 
-        val url = "$localBaseUrl/rekruttering/kandidatliste"
+        val url = "$localBaseUrl/rekruttering"
         val stillingsinfoRespons = restTemplate.postForEntity(url, httpEntity(dto), StillingsinfoDto::class.java)
 
         verify(arbeidsplassenKlient, times(1)).triggResendingAvStillingsmeldingFraArbeidsplassen(dto.stillingsid)
@@ -125,6 +108,20 @@ class StillingsinfoComponentTest {
     }
 
     @Test
+    fun `Oppretting av kandidatliste på ekstern stilling med eksisterende stillingsinfo skal returnere HTTP 201 med oppdatert stillingsinfo`() {
+        repository.opprett(enStillingsinfo)
+        val tilLagring = enStillingsinfo.asEierDto().copy(stillingsinfoid = null)
+        mockKandidatlisteOppdatering()
+
+        val url = "$localBaseUrl/rekruttering"
+        val stillingsinfoRespons = restTemplate.postForEntity(url, httpEntity(tilLagring), StillingsinfoDto::class.java)
+        val lagretStillingsinfo = repository.hentForStilling(enStillingsinfo.stillingsid).getOrElse { fail("fant ikke stillingen") }
+
+        assertThat(stillingsinfoRespons.statusCode).isEqualTo(HttpStatus.CREATED)
+        assertThat(stillingsinfoRespons.body).isEqualTo(lagretStillingsinfo.asStillingsinfoDto())
+    }
+
+    @Test
     fun `Oppdatering av stillingsinfo skal returnere HTTP 200 med oppdatert stillingsinfo`() {
         repository.opprett(enStillingsinfo)
         val oppdatering = enStillingsinfo.copy(eier = Eier(navident = "endretIdent", navn = "endretNavn"))
@@ -135,20 +132,6 @@ class StillingsinfoComponentTest {
 
         assertThat(oppdateringRespons.statusCode).isEqualTo(HttpStatus.OK)
         assertThat(oppdateringRespons.body).isEqualTo(lagretStillingsinfo.asEierDto())
-    }
-
-    @Test
-    fun `Lagring av stillingsinfo med eksisterende stillingsinfo skal returnere HTTP 200 med oppdatert stillingsinfo`() {
-        repository.opprett(enStillingsinfo)
-        val tilLagring = enStillingsinfo.asEierDto().copy(stillingsinfoid = null)
-        mockKandidatlisteOppdatering()
-
-        val url = "$localBaseUrl/rekruttering"
-        val stillingsinfoRespons = restTemplate.postForEntity(url, httpEntity(tilLagring), EierDto::class.java)
-        val lagretStillingsinfo = repository.hentForStilling(enStillingsinfo.stillingsid).getOrElse { fail("fant ikke stillingen") }
-
-        assertThat(stillingsinfoRespons.statusCode).isEqualTo(HttpStatus.OK)
-        assertThat(stillingsinfoRespons.body).isEqualTo(lagretStillingsinfo.asEierDto())
     }
 
     @After
