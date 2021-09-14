@@ -5,8 +5,7 @@ import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.github.tomakehurst.wiremock.junit.WireMockRule
 import no.nav.rekrutteringsbistand.api.TestRepository
-import no.nav.rekrutteringsbistand.api.Testdata
-import no.nav.rekrutteringsbistand.api.Testdata.enOpprettKandidatlisteForEksternStillingDto
+import no.nav.rekrutteringsbistand.api.Testdata.enStillingsinfoInboundDto
 import no.nav.rekrutteringsbistand.api.Testdata.enStillingsinfo
 import no.nav.rekrutteringsbistand.api.arbeidsplassen.ArbeidsplassenKlient
 import no.nav.rekrutteringsbistand.api.support.toMultiValueMap
@@ -17,7 +16,6 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mockito
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.springframework.beans.factory.annotation.Autowired
@@ -89,12 +87,12 @@ class StillingsinfoComponentTest {
 
     @Test
     fun `Opprettelse av kandidatliste på ekstern stilling skal returnere HTTP 201 med opprettet stillingsinfo, og trigge resending hos Arbeidsplassen`() {
-        val dto = enOpprettKandidatlisteForEksternStillingDto
+        val dto = enStillingsinfoInboundDto
 
         mockKandidatlisteOppdatering()
 
         val url = "$localBaseUrl/rekruttering"
-        val stillingsinfoRespons = restTemplate.postForEntity(url, httpEntity(dto), StillingsinfoDto::class.java)
+        val stillingsinfoRespons = restTemplate.exchange(url, HttpMethod.PUT, httpEntity(dto), StillingsinfoDto::class.java)
 
         verify(arbeidsplassenKlient, times(1)).triggResendingAvStillingsmeldingFraArbeidsplassen(dto.stillingsid)
         assertThat(stillingsinfoRespons.statusCode).isEqualTo(HttpStatus.CREATED)
@@ -114,24 +112,11 @@ class StillingsinfoComponentTest {
         mockKandidatlisteOppdatering()
 
         val url = "$localBaseUrl/rekruttering"
-        val stillingsinfoRespons = restTemplate.postForEntity(url, httpEntity(tilLagring), StillingsinfoDto::class.java)
+        val stillingsinfoRespons = restTemplate.exchange(url, HttpMethod.PUT, httpEntity(tilLagring), StillingsinfoDto::class.java)
         val lagretStillingsinfo = repository.hentForStilling(enStillingsinfo.stillingsid).getOrElse { fail("fant ikke stillingen") }
 
         assertThat(stillingsinfoRespons.statusCode).isEqualTo(HttpStatus.CREATED)
         assertThat(stillingsinfoRespons.body).isEqualTo(lagretStillingsinfo.asStillingsinfoDto())
-    }
-
-    @Test
-    fun `Oppdatering av stillingsinfo skal returnere HTTP 200 med oppdatert stillingsinfo`() {
-        repository.opprett(enStillingsinfo)
-        val oppdatering = enStillingsinfo.copy(eier = Eier(navident = "endretIdent", navn = "endretNavn"))
-        mockKandidatlisteOppdatering()
-
-        val oppdateringRespons = restTemplate.exchange("$localBaseUrl/rekruttering", HttpMethod.PUT, httpEntity(oppdatering.asEierDto()), EierDto::class.java)
-        val lagretStillingsinfo = repository.hentForStilling(enStillingsinfo.stillingsid).getOrElse { fail("fant ikke stillingen") }
-
-        assertThat(oppdateringRespons.statusCode).isEqualTo(HttpStatus.OK)
-        assertThat(oppdateringRespons.body).isEqualTo(lagretStillingsinfo.asEierDto())
     }
 
     @After

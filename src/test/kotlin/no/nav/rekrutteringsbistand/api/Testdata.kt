@@ -111,7 +111,7 @@ object Testdata {
         notat = etNotat
     )
 
-    val enOpprettKandidatlisteForEksternStillingDto = OpprettKandidatlisteForEksternStillingDto(
+    val enStillingsinfoInboundDto = StillingsinfoInboundDto(
         stillingsid = enStilling.uuid,
         eierNavident = enVeileder.navIdent,
         eierNavn = enVeileder.displayName

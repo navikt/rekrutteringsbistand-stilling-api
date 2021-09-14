@@ -20,45 +20,20 @@ import java.util.*
 @ProtectedWithClaims(issuer = "isso")
 class StillingsinfoController(
     val repo: StillingsinfoRepository,
+    val service: StillingsinfoService,
     val kandidatlisteKlient: KandidatlisteKlient,
     val arbeidsplassenKlient: ArbeidsplassenKlient
 ) {
-    @PostMapping
-    fun opprettKandidatlisteForEksternStilling(@RequestBody dto: OpprettKandidatlisteForEksternStillingDto): ResponseEntity<StillingsinfoDto> {
-        val eksisterendeStillingsinfo = repo.hentForStilling(Stillingsid(dto.stillingsid))
-
-        val opprettetStillingsinfo: Stillingsinfo =
-            if (eksisterendeStillingsinfo is Some) {
-                val stillingsinfo = eksisterendeStillingsinfo.get()
-
-                dto.tilOppdaterStillingsinfo(
-                    stillingsinfo.stillingsinfoid.asString(),
-                    stillingsinfo.notat
-                ).apply {
-                    repo.oppdaterEierIdentOgEierNavn(
-                        OppdaterEier(this.stillingsinfoid, Eier(dto.eierNavident, dto.eierNavn)),
-                    )
-                }
-            } else {
-                dto.tilOpprettStillingsinfo().apply {
-                    repo.opprett(this)
-                }
-            }
+    @PutMapping
+    fun endreEierForEksternStillingOgKandidatliste(
+        @RequestBody dto: StillingsinfoInboundDto
+    ): ResponseEntity<StillingsinfoDto> {
+        val oppdatertStillingsinfo = service.endreEier(dto)
 
         kandidatlisteKlient.oppdaterKandidatliste(Stillingsid(dto.stillingsid))
         arbeidsplassenKlient.triggResendingAvStillingsmeldingFraArbeidsplassen(dto.stillingsid)
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(opprettetStillingsinfo.asStillingsinfoDto())
-    }
-
-    @PutMapping
-    fun oppdater(@RequestBody dto: EierDto): ResponseEntity<EierDto> {
-        if (dto.stillingsinfoid == null) throw BadRequestException("Stillingsinfoid må ha verdi for put")
-
-        LOG.debug("Oppdaterer eierinformasjon for stillingInfoid ${dto.asStillinginfo().stillingsinfoid.asString()} stillingid  ${dto.asStillinginfo().stillingsid.asString()}")
-        repo.oppdaterEierIdentOgEierNavn(dto.asOppdaterEierinfo())
-        kandidatlisteKlient.oppdaterKandidatliste(dto.asStillinginfo().stillingsid)
-        return ResponseEntity.ok().body(dto)
+        return ResponseEntity.status(HttpStatus.CREATED).body(oppdatertStillingsinfo.asStillingsinfoDto())
     }
 
     @GetMapping("/stilling/{id}")
@@ -69,29 +44,27 @@ class StillingsinfoController(
     @GetMapping("/ident/{id}")
     fun hentForIdent(@PathVariable id: String): Collection<EierDto> =
         repo.hentForIdent(id).map { it.asEierDto() }
-
 }
 
-data class OpprettKandidatlisteForEksternStillingDto(
+data class StillingsinfoInboundDto(
     val stillingsid: String,
     val eierNavident: String?,
     val eierNavn: String?
 ) {
-    fun tilOpprettStillingsinfo() = Stillingsinfo(
+    fun tilOpprettetStillingsinfo() = Stillingsinfo(
         stillingsinfoid = Stillingsinfoid(UUID.randomUUID()),
         stillingsid = Stillingsid(verdi = stillingsid),
         eier = Eier(navident = eierNavident, navn = eierNavn),
         notat = null
     )
 
-    fun tilOppdaterStillingsinfo(stillingsinfoId: String, notat: String?) = Stillingsinfo(
+    fun tilOppdatertStillingsinfo(stillingsinfoId: String, notat: String?) = Stillingsinfo(
         stillingsinfoid = Stillingsinfoid(stillingsinfoId),
         stillingsid = Stillingsid(verdi = stillingsid),
         eier = Eier(navident = eierNavident, navn = eierNavn),
         notat = notat
     )
 }
-
 
 @ResponseStatus(HttpStatus.BAD_REQUEST)
 class BadRequestException(message: String) : RuntimeException(message)
