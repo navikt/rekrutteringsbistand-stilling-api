@@ -62,17 +62,6 @@ class StillingsinfoComponentTest {
     }
 
     @Test
-    fun `Henting av stillingsinfo basert på stilling skal returnere HTTP OK med lagret stillingsinfo`() {
-        repository.opprett(enStillingsinfo)
-
-        val url = "$localBaseUrl/stillingsinfo/stilling/${enStillingsinfo.stillingsid}"
-        val stillingsinfoRespons = restTemplate.exchange(url, HttpMethod.GET, httpEntity(null), StillingsinfoDto::class.java)
-
-        assertThat(stillingsinfoRespons.statusCode).isEqualTo(HttpStatus.OK)
-        assertThat(stillingsinfoRespons.body).isEqualTo(enStillingsinfo.asStillingsinfoDto())
-    }
-
-    @Test
     fun `Henting av stillingsinfo basert på bruker skal returnere HTTP 200 med lagret stillingsinfo`() {
         repository.opprett(enStillingsinfo)
 

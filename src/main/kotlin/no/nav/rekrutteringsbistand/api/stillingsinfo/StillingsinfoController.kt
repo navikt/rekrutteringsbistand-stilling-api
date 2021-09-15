@@ -43,6 +43,3 @@ data class StillingsinfoInboundDto(
     val eierNavident: String?,
     val eierNavn: String?
 ) 
-
-@ResponseStatus(HttpStatus.NOT_FOUND)
-class NotFoundException(message: String) : RuntimeException(message)
