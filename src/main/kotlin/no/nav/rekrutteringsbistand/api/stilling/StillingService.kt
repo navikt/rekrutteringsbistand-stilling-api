@@ -4,7 +4,6 @@ import arrow.core.getOrElse
 import no.nav.rekrutteringsbistand.api.RekrutteringsbistandStilling
 import no.nav.rekrutteringsbistand.api.OppdaterRekrutteringsbistandStillingDto
 import no.nav.rekrutteringsbistand.api.arbeidsplassen.ArbeidsplassenKlient
-import no.nav.rekrutteringsbistand.api.arbeidsplassen.OpprettStillingAdministrationDto
 import no.nav.rekrutteringsbistand.api.arbeidsplassen.OpprettStillingDto
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
 import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteKlient
@@ -47,7 +46,7 @@ class StillingService(
         val opprettetStilling = arbeidsplassenKlient.opprettStilling(stilling)
         val id = Stillingsid(opprettetStilling.uuid)
 
-        kandidatlisteKlient.oppdaterKandidatliste(id)
+        kandidatlisteKlient.varsleOmOppdatertStilling(id)
         val stillingsinfo = stillingsinfoService.hentStillingsinfo(opprettetStilling)
 
         return RekrutteringsbistandStilling(
@@ -92,7 +91,7 @@ class StillingService(
         val id = Stillingsid(oppdatertStilling.uuid)
 
         if (oppdatertStilling.source.equals("DIR", false)) {
-            kandidatlisteKlient.oppdaterKandidatliste(id)
+            kandidatlisteKlient.varsleOmOppdatertStilling(id)
         }
 
         if (dto.notat != null) {
@@ -111,7 +110,7 @@ class StillingService(
 
     fun slettStilling(stillingsId: String): Stilling {
         val slettetStilling = arbeidsplassenKlient.slettStilling(stillingsId)
-        kandidatlisteKlient.oppdaterKandidatliste(Stillingsid(stillingsId))
+        kandidatlisteKlient.varsleOmOppdatertStilling(Stillingsid(stillingsId))
         return slettetStilling
     }
 
