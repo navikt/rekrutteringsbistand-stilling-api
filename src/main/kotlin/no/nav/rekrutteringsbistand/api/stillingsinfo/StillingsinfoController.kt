@@ -33,11 +33,6 @@ class StillingsinfoController(
         return ResponseEntity.status(HttpStatus.OK).body(oppdatertStillingsinfo.asStillingsinfoDto())
     }
 
-    @GetMapping("/stilling/{id}")
-    fun hentForStilling(@PathVariable id: String): StillingsinfoDto =
-        repo.hentForStilling(Stillingsid(id)).map { it.asStillingsinfoDto() }
-            .getOrElse { throw NotFoundException("Stilling id $id") }
-
     @GetMapping("/ident/{id}")
     fun hentForIdent(@PathVariable id: String): Collection<StillingsinfoDto> =
         repo.hentForIdent(id).map { it.asStillingsinfoDto() }
