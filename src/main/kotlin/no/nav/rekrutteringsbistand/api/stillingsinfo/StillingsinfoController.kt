@@ -47,21 +47,7 @@ data class StillingsinfoInboundDto(
     val stillingsid: String,
     val eierNavident: String?,
     val eierNavn: String?
-) {
-    fun tilOpprettetStillingsinfo() = Stillingsinfo(
-        stillingsinfoid = Stillingsinfoid(UUID.randomUUID()),
-        stillingsid = Stillingsid(verdi = stillingsid),
-        eier = Eier(navident = eierNavident, navn = eierNavn),
-        notat = null
-    )
-
-    fun tilOppdatertStillingsinfo(stillingsinfoId: String, notat: String?) = Stillingsinfo(
-        stillingsinfoid = Stillingsinfoid(stillingsinfoId),
-        stillingsid = Stillingsid(verdi = stillingsid),
-        eier = Eier(navident = eierNavident, navn = eierNavn),
-        notat = notat
-    )
-}
+) 
 
 @ResponseStatus(HttpStatus.NOT_FOUND)
 class NotFoundException(message: String) : RuntimeException(message)
