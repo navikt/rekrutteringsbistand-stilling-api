@@ -1,18 +1,12 @@
 package no.nav.rekrutteringsbistand.api.stillingsinfo
 
-import arrow.core.extensions.either.foldable.isEmpty
-import arrow.core.extensions.either.foldable.isNotEmpty
 import arrow.core.getOrElse
 import no.nav.rekrutteringsbistand.api.arbeidsplassen.ArbeidsplassenKlient
 import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteKlient
-import no.nav.rekrutteringsbistand.api.option.Some
-import no.nav.rekrutteringsbistand.api.option.get
-import no.nav.rekrutteringsbistand.api.support.LOG
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
-import java.net.URI
 import java.util.*
 
 @RestController
@@ -25,12 +19,15 @@ class StillingsinfoController(
     val arbeidsplassenKlient: ArbeidsplassenKlient
 ) {
     @PutMapping
-    fun endreEierForEksternStillingOgKandidatliste(
+    fun overtaEierskapForEksternStillingOgKandidatliste(
         @RequestBody dto: StillingsinfoInboundDto
     ): ResponseEntity<StillingsinfoDto> {
-        val oppdatertStillingsinfo = service.endreEier(dto)
+        val oppdatertStillingsinfo = service.overtaEierskapForEksternStilling(
+            stillingsId = dto.stillingsid,
+            eier = Eier(dto.eierNavident, dto.eierNavn)
+        )
 
-        kandidatlisteKlient.oppdaterKandidatliste(Stillingsid(dto.stillingsid))
+        kandidatlisteKlient.varsleOmOppdatertStilling(Stillingsid(dto.stillingsid))
         arbeidsplassenKlient.triggResendingAvStillingsmeldingFraArbeidsplassen(dto.stillingsid)
 
         return ResponseEntity.status(HttpStatus.OK).body(oppdatertStillingsinfo.asStillingsinfoDto())

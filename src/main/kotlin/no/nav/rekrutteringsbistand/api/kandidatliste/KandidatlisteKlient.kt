@@ -18,7 +18,7 @@ class KandidatlisteKlient(
     val tokenUtils: TokenUtils,
 ) {
 
-    fun oppdaterKandidatliste(stillingsid: Stillingsid): ResponseEntity<Void> {
+    fun varsleOmOppdatertStilling(stillingsid: Stillingsid): ResponseEntity<Void> {
         val url = buildUpdateNotificationUrl(stillingsid)
         LOG.info("Oppdaterer kandidatliste, stillingsid: $stillingsid")
         return restTemplate.exchange(
