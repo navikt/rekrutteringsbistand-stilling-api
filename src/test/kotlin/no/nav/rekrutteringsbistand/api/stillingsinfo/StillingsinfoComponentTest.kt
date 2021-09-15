@@ -65,7 +65,7 @@ class StillingsinfoComponentTest {
     fun `Henting av stillingsinfo basert på stilling skal returnere HTTP OK med lagret stillingsinfo`() {
         repository.opprett(enStillingsinfo)
 
-        val url = "$localBaseUrl/rekruttering/stilling/${enStillingsinfo.stillingsid}"
+        val url = "$localBaseUrl/stillingsinfo/stilling/${enStillingsinfo.stillingsid}"
         val stillingsinfoRespons = restTemplate.exchange(url, HttpMethod.GET, httpEntity(null), StillingsinfoDto::class.java)
 
         assertThat(stillingsinfoRespons.statusCode).isEqualTo(HttpStatus.OK)
@@ -76,7 +76,7 @@ class StillingsinfoComponentTest {
     fun `Henting av stillingsinfo basert på bruker skal returnere HTTP 200 med lagret stillingsinfo`() {
         repository.opprett(enStillingsinfo)
 
-        val url = "$localBaseUrl/rekruttering/ident/${enStillingsinfo.eier?.navident}"
+        val url = "$localBaseUrl/stillingsinfo/ident/${enStillingsinfo.eier?.navident}"
         val stillingsinfoRespons = restTemplate.exchange(url, HttpMethod.GET, httpEntity(null), object : ParameterizedTypeReference<List<StillingsinfoDto>>() {})
 
         assertThat(stillingsinfoRespons.statusCode).isEqualTo(HttpStatus.OK)
@@ -91,7 +91,7 @@ class StillingsinfoComponentTest {
 
         mockKandidatlisteOppdatering()
 
-        val url = "$localBaseUrl/rekruttering"
+        val url = "$localBaseUrl/stillingsinfo"
         val stillingsinfoRespons = restTemplate.exchange(url, HttpMethod.PUT, httpEntity(dto), StillingsinfoDto::class.java)
 
         verify(arbeidsplassenKlient, times(1)).triggResendingAvStillingsmeldingFraArbeidsplassen(dto.stillingsid)
@@ -111,7 +111,7 @@ class StillingsinfoComponentTest {
         val tilLagring = enStillingsinfoInboundDto
         mockKandidatlisteOppdatering()
 
-        val url = "$localBaseUrl/rekruttering"
+        val url = "$localBaseUrl/stillingsinfo"
         val stillingsinfoRespons = restTemplate.exchange(url, HttpMethod.PUT, httpEntity(tilLagring), StillingsinfoDto::class.java)
         val lagretStillingsinfo = repository.hentForStilling(enStillingsinfo.stillingsid).getOrElse { fail("fant ikke stillingen") }
 

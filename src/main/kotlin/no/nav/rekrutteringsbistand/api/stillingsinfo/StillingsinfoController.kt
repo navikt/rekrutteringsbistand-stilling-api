@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*
 import java.util.*
 
 @RestController
-@RequestMapping("/rekruttering")
+@RequestMapping("/stillingsinfo")
 @ProtectedWithClaims(issuer = "isso")
 class StillingsinfoController(
     val repo: StillingsinfoRepository,
