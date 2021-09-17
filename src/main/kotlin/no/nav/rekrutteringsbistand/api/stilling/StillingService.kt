@@ -68,7 +68,7 @@ class StillingService(
         if (eksisterendeStillingsinfoId is Some) {
             val nyOppdaterNotat = OppdaterNotat(eksisterendeStillingsinfoId.get(), nyttNotat)
             stillingsinfoService.oppdaterNotat(stillingsId, nyOppdaterNotat)
-        } else { //
+        } else {
             val nyStillingsinfo = Stillingsinfo(
                 stillingsinfoid = Stillingsinfoid(UUID.randomUUID()),
                 stillingsid = stillingsId,

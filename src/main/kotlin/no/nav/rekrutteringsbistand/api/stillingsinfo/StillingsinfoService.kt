@@ -27,7 +27,7 @@ class StillingsinfoService(private val stillingsinfoRepository: StillingsinfoRep
             stillingsid = Stillingsid(verdi = stillingsId),
             eier = eier,
             notat = null,
-            oppdragKategori = OppdragKategori.Stilling
+            oppdragKategori = null
         )
 
         stillingsinfoRepository.opprett(stillingsinfo)
