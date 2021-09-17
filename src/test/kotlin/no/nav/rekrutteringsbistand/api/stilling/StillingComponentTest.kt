@@ -9,7 +9,7 @@ import no.nav.rekrutteringsbistand.api.RekrutteringsbistandStilling
 import no.nav.rekrutteringsbistand.api.OppdaterRekrutteringsbistandStillingDto
 import no.nav.rekrutteringsbistand.api.TestRepository
 import no.nav.rekrutteringsbistand.api.Testdata.enAnnenStillingsinfo
-import no.nav.rekrutteringsbistand.api.Testdata.enOpprettStillingDto
+import no.nav.rekrutteringsbistand.api.Testdata.enOpprettRekrutteringsbistandstillingDto
 import no.nav.rekrutteringsbistand.api.Testdata.enOpprettetStilling
 import no.nav.rekrutteringsbistand.api.Testdata.enPageMedStilling
 import no.nav.rekrutteringsbistand.api.Testdata.enRekrutteringsbistandStilling
@@ -17,6 +17,7 @@ import no.nav.rekrutteringsbistand.api.Testdata.enRekrutteringsbistandStillingUt
 import no.nav.rekrutteringsbistand.api.Testdata.enStilling
 import no.nav.rekrutteringsbistand.api.Testdata.enStillingsinfo
 import no.nav.rekrutteringsbistand.api.Testdata.enStillingsinfoUtenEier
+import no.nav.rekrutteringsbistand.api.stillingsinfo.OppdragKategori
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsid
 import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoRepository
 import org.assertj.core.api.Assertions.assertThat
@@ -117,16 +118,17 @@ internal class StillingComponentTest {
 
     @Test
     fun `POST mot stillinger skal returnere opprettet stilling`() {
-        val stilling = enOpprettStillingDto
+        val rekrutteringsbistandStilling = enOpprettRekrutteringsbistandstillingDto
 
         mock(HttpMethod.POST, "/api/v1/ads", enOpprettetStilling)
         mockKandidatlisteOppdatering()
 
         restTemplate.postForObject(
             "$localBaseUrl/rekrutteringsbistandstilling",
-            stilling,
+            rekrutteringsbistandStilling,
             RekrutteringsbistandStilling::class.java
         ).also {
+            val stilling = rekrutteringsbistandStilling.stilling
             assertThat(it.stilling.title).isEqualTo(stilling.title)
             assertThat(it.stilling.administration?.navIdent).isEqualTo(stilling.administration.navIdent)
             assertThat(it.stilling.administration?.reportee).isEqualTo(stilling.administration.reportee)
@@ -136,7 +138,7 @@ internal class StillingComponentTest {
             assertThat(it.stilling.source).isEqualTo(stilling.source)
             assertThat(it.stilling.privacy).isEqualTo(stilling.privacy)
 
-            assertThat(it.stillingsinfo).isNull()
+            assertThat(it.stillingsinfo?.oppdragKategori).isEqualTo(OppdragKategori.Arbeidstrening)
         }
     }
 

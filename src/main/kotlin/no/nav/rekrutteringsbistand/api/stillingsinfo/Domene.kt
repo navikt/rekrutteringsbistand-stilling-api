@@ -29,7 +29,7 @@ data class Stillingsinfo(
                     navn = rs.getString("eier_navn")
                 ),
                 notat = rs.getString("notat"),
-                oppdragKategori = OppdragKategori.fraDatabaseString(rs.getString("oppdrag_kategori"))
+                oppdragKategori = rs.getString("oppdrag_kategori")?.let(OppdragKategori.Companion::fraDatabase)
             )
     }
 }
@@ -69,7 +69,7 @@ data class StillingsinfoDto(
     val oppdragKategori: OppdragKategori?
 )
 
-enum class OppdragKategori(private val verdi: String){
+enum class OppdragKategori(val databaseVerdi: String) {
     Stilling("Stilling"),
     Arrangement("Arrangement"),
     Webinar("Webinar"),
@@ -78,7 +78,7 @@ enum class OppdragKategori(private val verdi: String){
     Annet("Annet");
 
     companion object {
-        fun fraDatabaseString(value: String) = OppdragKategori.valueOf(value)
+        fun fraDatabase(verdi: String) = values().firstOrNull { it.databaseVerdi == verdi }
     }
 }
 

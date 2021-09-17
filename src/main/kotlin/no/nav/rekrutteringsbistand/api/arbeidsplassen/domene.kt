@@ -4,12 +4,12 @@ import no.nav.rekrutteringsbistand.api.stilling.*
 import no.nav.rekrutteringsbistand.api.stillingsinfo.OppdragKategori
 import java.util.HashMap
 
-data class OpprettStillingDto(
-    val stilling: StillingDto,
+data class OpprettRekrutteringsbistandstillingDto(
+    val stilling: OpprettStillingDto,
     val oppdragkategori: OppdragKategori
 )
 
-data class StillingDto(
+data class OpprettStillingDto(
     val title: String,
     val createdBy: String,
     val updatedBy: String,

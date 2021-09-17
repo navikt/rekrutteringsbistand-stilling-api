@@ -22,7 +22,8 @@ class StillingsinfoRepository(
                 STILLINGSID to stillingsinfo.stillingsid.asString(),
                 EIER_NAVIDENT to stillingsinfo.eier?.navident,
                 EIER_NAVN to stillingsinfo.eier?.navn,
-                NOTAT to stillingsinfo.notat
+                NOTAT to stillingsinfo.notat,
+                OPPDRAG_KATEGORI to stillingsinfo.oppdragKategori?.name
             )
         )
     }
@@ -85,5 +86,6 @@ class StillingsinfoRepository(
         const val EIER_NAVIDENT = "eier_navident"
         const val EIER_NAVN = "eier_navn"
         const val NOTAT = "notat"
+        const val OPPDRAG_KATEGORI = "oppdrag_kategori"
     }
 }

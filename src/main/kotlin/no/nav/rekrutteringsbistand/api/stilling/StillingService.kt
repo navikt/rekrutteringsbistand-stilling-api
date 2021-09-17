@@ -4,7 +4,7 @@ import arrow.core.getOrElse
 import no.nav.rekrutteringsbistand.api.OppdaterRekrutteringsbistandStillingDto
 import no.nav.rekrutteringsbistand.api.RekrutteringsbistandStilling
 import no.nav.rekrutteringsbistand.api.arbeidsplassen.ArbeidsplassenKlient
-import no.nav.rekrutteringsbistand.api.arbeidsplassen.OpprettStillingDto
+import no.nav.rekrutteringsbistand.api.arbeidsplassen.OpprettRekrutteringsbistandstillingDto
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
 import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteKlient
 import no.nav.rekrutteringsbistand.api.option.Option
@@ -42,11 +42,11 @@ class StillingService(
         )
     }
 
-    fun opprettStilling(opprettStillingDto: OpprettStillingDto): RekrutteringsbistandStilling {
-        val opprettetStilling = arbeidsplassenKlient.opprettStilling(opprettStillingDto.stilling)
+    fun opprettStilling(opprettRekrutteringsbistandstillingDto: OpprettRekrutteringsbistandstillingDto): RekrutteringsbistandStilling {
+        val opprettetStilling = arbeidsplassenKlient.opprettStilling(opprettRekrutteringsbistandstillingDto.stilling)
         stillingsinfoService.opprettStillingInfo(
             Stillingsid(opprettetStilling.uuid),
-            opprettStillingDto.oppdragkategori
+            opprettRekrutteringsbistandstillingDto.oppdragkategori
         )
         val id = Stillingsid(opprettetStilling.uuid)
 
@@ -89,7 +89,7 @@ class StillingService(
         val eksisterendeStilling = eksisterendeRekrutteringsbistandStilling.stilling
         val kopi = eksisterendeStilling.toKopiertStilling(tokenUtils)
 
-        return opprettStilling(OpprettStillingDto(kopi, kategoriMedDefault(eksisterendeRekrutteringsbistandStilling.stillingsinfo)))
+        return opprettStilling(OpprettRekrutteringsbistandstillingDto(kopi, kategoriMedDefault(eksisterendeRekrutteringsbistandStilling.stillingsinfo)))
     }
 
     fun kategoriMedDefault(stillingsInfo: StillingsinfoDto?) =
