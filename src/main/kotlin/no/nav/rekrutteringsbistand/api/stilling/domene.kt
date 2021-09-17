@@ -2,7 +2,7 @@ package no.nav.rekrutteringsbistand.api.stilling
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import no.nav.rekrutteringsbistand.api.arbeidsplassen.OpprettStillingAdministrationDto
-import no.nav.rekrutteringsbistand.api.arbeidsplassen.OpprettStillingDto
+import no.nav.rekrutteringsbistand.api.arbeidsplassen.StillingDto
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
 import java.time.LocalDateTime
 import java.util.*
@@ -39,7 +39,7 @@ data class Stilling(
     val deactivatedByExpiry: Boolean?,
     val activationOnPublishingDate: Boolean?
 ) {
-    fun toKopiertStilling(tokenUtils: TokenUtils): OpprettStillingDto {
+    fun toKopiertStilling(tokenUtils: TokenUtils): StillingDto {
         return lagNyStilling(
             tittel = "Kopi - $title",
             tokenUtils
@@ -58,10 +58,11 @@ data class Stilling(
             activationOnPublishingDate = activationOnPublishingDate,
         )
     }
+
 }
 
-fun lagNyStilling(tittel: String = "Ny stilling", tokenUtils: TokenUtils): OpprettStillingDto {
-    return OpprettStillingDto(
+fun lagNyStilling(tittel: String = "Ny stilling", tokenUtils: TokenUtils): StillingDto {
+    return StillingDto(
         title = tittel,
         createdBy = "pam-rekrutteringsbistand",
         updatedBy = "pam-rekrutteringsbistand",

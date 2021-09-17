@@ -1,8 +1,8 @@
 package no.nav.rekrutteringsbistand.api.stilling
 
 import arrow.core.getOrElse
-import no.nav.rekrutteringsbistand.api.RekrutteringsbistandStilling
 import no.nav.rekrutteringsbistand.api.OppdaterRekrutteringsbistandStillingDto
+import no.nav.rekrutteringsbistand.api.RekrutteringsbistandStilling
 import no.nav.rekrutteringsbistand.api.arbeidsplassen.ArbeidsplassenKlient
 import no.nav.rekrutteringsbistand.api.arbeidsplassen.OpprettStillingDto
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
@@ -42,8 +42,12 @@ class StillingService(
         )
     }
 
-    fun opprettStilling(stilling: OpprettStillingDto): RekrutteringsbistandStilling {
-        val opprettetStilling = arbeidsplassenKlient.opprettStilling(stilling)
+    fun opprettStilling(opprettStillingDto: OpprettStillingDto): RekrutteringsbistandStilling {
+        val opprettetStilling = arbeidsplassenKlient.opprettStilling(opprettStillingDto.stilling)
+        stillingsinfoService.opprettStillingInfo(
+            Stillingsid(opprettetStilling.uuid),
+            opprettStillingDto.oppdragkategori
+        )
         val id = Stillingsid(opprettetStilling.uuid)
 
         kandidatlisteKlient.varsleOmOppdatertStilling(id)
@@ -64,23 +68,32 @@ class StillingService(
         if (eksisterendeStillingsinfoId is Some) {
             val nyOppdaterNotat = OppdaterNotat(eksisterendeStillingsinfoId.get(), nyttNotat)
             stillingsinfoService.oppdaterNotat(stillingsId, nyOppdaterNotat)
-        } else {
+        } else { //
             val nyStillingsinfo = Stillingsinfo(
                 stillingsinfoid = Stillingsinfoid(UUID.randomUUID()),
                 stillingsid = stillingsId,
                 notat = nyttNotat,
-                eier = null
+                eier = null,
+                oppdragKategori = null
+                // TODO: Vi antar at vi alltid har stillingsinfo når vi legger til nye stillinger.
+                // Kategori skal fortsatt være null på gamle stillinger. Vi vil ikke legge til kategori på gamle stillinger
+                // når vi legger til notat. Det er frontend som vil få ansvaret for å tolke manglende kategori som at dette er en stilling.
+
             )
             stillingsinfoService.lagre(nyStillingsinfo)
         }
     }
 
     fun kopierStilling(stillingsId: String): RekrutteringsbistandStilling {
-        val eksisterendeStilling = hentRekrutteringsbistandStilling(stillingsId).stilling
+        val eksisterendeRekrutteringsbistandStilling = hentRekrutteringsbistandStilling(stillingsId)
+        val eksisterendeStilling = eksisterendeRekrutteringsbistandStilling.stilling
         val kopi = eksisterendeStilling.toKopiertStilling(tokenUtils)
 
-        return opprettStilling(kopi)
+        return opprettStilling(OpprettStillingDto(kopi, kategoriMedDefault(eksisterendeRekrutteringsbistandStilling.stillingsinfo)))
     }
+
+    fun kategoriMedDefault(stillingsInfo: StillingsinfoDto?) =
+        if (stillingsInfo?.oppdragKategori == null) OppdragKategori.Stilling else stillingsInfo.oppdragKategori
 
     fun oppdaterRekrutteringsbistandStilling(
         dto: OppdaterRekrutteringsbistandStillingDto,

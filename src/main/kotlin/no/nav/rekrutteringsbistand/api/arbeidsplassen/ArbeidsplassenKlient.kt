@@ -95,7 +95,7 @@ class ArbeidsplassenKlient(
         }
     }
 
-    fun opprettStilling(stilling: OpprettStillingDto): Stilling {
+    fun opprettStilling(stilling: StillingDto): Stilling {
         val url = "${externalConfiguration.stillingApi.url}/api/v1/ads?classify=true"
 
         try {

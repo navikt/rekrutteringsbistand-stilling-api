@@ -2,10 +2,11 @@ package no.nav.rekrutteringsbistand.api
 
 import no.nav.pam.stilling.ext.avro.*
 import no.nav.rekrutteringsbistand.api.arbeidsplassen.OpprettStillingAdministrationDto
-import no.nav.rekrutteringsbistand.api.arbeidsplassen.OpprettStillingDto
+import no.nav.rekrutteringsbistand.api.arbeidsplassen.StillingDto
 import no.nav.rekrutteringsbistand.api.autorisasjon.InnloggetVeileder
-import no.nav.rekrutteringsbistand.api.stilling.*
 import no.nav.rekrutteringsbistand.api.stilling.Administration
+import no.nav.rekrutteringsbistand.api.stilling.Page
+import no.nav.rekrutteringsbistand.api.stilling.Stilling
 import no.nav.rekrutteringsbistand.api.stilling.ekstern.StillingForPersonbruker
 import no.nav.rekrutteringsbistand.api.stillingsinfo.*
 import java.time.LocalDateTime
@@ -42,14 +43,14 @@ object Testdata {
         activationOnPublishingDate = null
     )
 
-    val enOpprettStillingDto = OpprettStillingDto(
+    val enOpprettStillingDto = StillingDto(
         title = "Ny stilling",
-        createdBy= "pam-rekrutteringsbistand",
-        updatedBy= "pam-rekrutteringsbistand",
-        source= "DIR",
-        privacy= "INTERNAL_NOT_SHOWN",
-        administration= OpprettStillingAdministrationDto(
-            status= "PENDING",
+        createdBy = "pam-rekrutteringsbistand",
+        updatedBy = "pam-rekrutteringsbistand",
+        source = "DIR",
+        privacy = "INTERNAL_NOT_SHOWN",
+        administration = OpprettStillingAdministrationDto(
+            status = "PENDING",
             reportee = enVeileder.displayName,
             navIdent = enVeileder.navIdent,
         ),
@@ -57,12 +58,12 @@ object Testdata {
 
     val enOpprettetStilling = Stilling(
         title = "Ny stilling",
-        createdBy= "pam-rekrutteringsbistand",
-        updatedBy= "pam-rekrutteringsbistand",
-        source= "DIR",
-        privacy= "INTERNAL_NOT_SHOWN",
-        administration= Administration(
-            status= "PENDING",
+        createdBy = "pam-rekrutteringsbistand",
+        updatedBy = "pam-rekrutteringsbistand",
+        source = "DIR",
+        privacy = "INTERNAL_NOT_SHOWN",
+        administration = Administration(
+            status = "PENDING",
             reportee = enVeileder.displayName,
             navIdent = enVeileder.navIdent,
             id = 0,
@@ -108,7 +109,8 @@ object Testdata {
         stillingsinfoid = Stillingsinfoid(UUID.randomUUID()),
         eier = Eier(navident = enVeileder.navIdent, navn = enVeileder.displayName),
         stillingsid = Stillingsid(enStilling.uuid),
-        notat = etNotat
+        notat = etNotat,
+        oppdragKategori = null
     )
 
     val enStillingsinfoInboundDto = StillingsinfoInboundDto(
@@ -121,14 +123,16 @@ object Testdata {
         stillingsinfoid = Stillingsinfoid(UUID.randomUUID()),
         eier = null,
         stillingsid = Stillingsid(enStilling.uuid),
-        notat = etNotat
+        notat = etNotat,
+        oppdragKategori = null
     )
 
     val enAnnenStillingsinfo = Stillingsinfo(
         stillingsinfoid = Stillingsinfoid(UUID.randomUUID()),
         eier = Eier(navident = enVeileder.navIdent, navn = enVeileder.displayName),
         stillingsid = Stillingsid(enAnnenStilling.uuid),
-        notat = etNotat
+        notat = etNotat,
+        oppdragKategori = null
     )
 
     val enStillingsinfoOppdatering = OppdaterEier(
