@@ -93,7 +93,7 @@ class StillingService(
     }
 
     fun kategoriMedDefault(stillingsInfo: StillingsinfoDto?) =
-        if (stillingsInfo?.stillingskategori == null) Stillingskategori.Stilling else stillingsInfo.stillingskategori
+        if (stillingsInfo?.stillingskategori == null) Stillingskategori.STILLING else stillingsInfo.stillingskategori
 
     fun oppdaterRekrutteringsbistandStilling(
         dto: OppdaterRekrutteringsbistandStillingDto,

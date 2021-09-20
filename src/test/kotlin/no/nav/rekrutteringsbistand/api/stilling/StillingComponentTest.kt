@@ -138,7 +138,7 @@ internal class StillingComponentTest {
             assertThat(it.stilling.source).isEqualTo(stilling.source)
             assertThat(it.stilling.privacy).isEqualTo(stilling.privacy)
 
-            assertThat(it.stillingsinfo?.stillingskategori).isEqualTo(Stillingskategori.Arbeidstrening)
+            assertThat(it.stillingsinfo?.stillingskategori).isEqualTo(Stillingskategori.ARBEIDSTRENING)
         }
     }
 

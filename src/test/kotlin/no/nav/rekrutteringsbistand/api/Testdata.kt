@@ -58,8 +58,8 @@ object Testdata {
     )
 
     val enOpprettRekrutteringsbistandstillingDto = OpprettRekrutteringsbistandstillingDto(
-        enOpprettStillingDto,
-        Stillingskategori.Arbeidstrening
+        stilling = enOpprettStillingDto,
+        kategori = Stillingskategori.ARBEIDSTRENING
     )
 
     val enOpprettetStilling = Stilling(

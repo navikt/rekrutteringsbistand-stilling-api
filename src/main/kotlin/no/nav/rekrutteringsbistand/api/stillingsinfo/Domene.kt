@@ -29,7 +29,7 @@ data class Stillingsinfo(
                     navn = rs.getString("eier_navn")
                 ),
                 notat = rs.getString("notat"),
-                stillingskategori = rs.getString("stillingskategori")?.let(Stillingskategori.Companion::fraDatabase)
+                stillingskategori = Stillingskategori.fraDatabase(rs.getString("stillingskategori"))
             )
     }
 }
@@ -69,13 +69,11 @@ data class StillingsinfoDto(
     val stillingskategori: Stillingskategori?
 )
 
-enum class Stillingskategori(val databaseVerdi: String) {
-    Stilling("Stilling"),
-    Formidling("Formidling"),
-    Arbeidstrening("Arbeidstrening");
+enum class Stillingskategori {
+    STILLING, FORMIDLING, ARBEIDSTRENING;
 
     companion object {
-        fun fraDatabase(verdi: String) = values().firstOrNull { it.databaseVerdi == verdi }
+        fun fraDatabase(verdi: String?) = if (verdi == null) null else values().firstOrNull { it.name == verdi }
     }
 }
 
