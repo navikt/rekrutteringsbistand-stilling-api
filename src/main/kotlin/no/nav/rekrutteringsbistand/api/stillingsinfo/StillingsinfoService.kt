@@ -27,7 +27,7 @@ class StillingsinfoService(private val stillingsinfoRepository: StillingsinfoRep
             stillingsid = Stillingsid(verdi = stillingsId),
             eier = eier,
             notat = null,
-            oppdragKategori = null
+            stillingskategori = null
         )
 
         stillingsinfoRepository.opprett(stillingsinfo)
@@ -64,14 +64,14 @@ class StillingsinfoService(private val stillingsinfoRepository: StillingsinfoRep
         stillingsinfoRepository.opprett(stillingsinfo)
     }
 
-    fun opprettStillingInfo(stillingsId: Stillingsid, oppdragkategori: OppdragKategori) {
+    fun opprettStillingsinfo(stillingsId: Stillingsid, stillingskategori: Stillingskategori) {
         stillingsinfoRepository.opprett(
             Stillingsinfo(
                 stillingsinfoid = Stillingsinfoid.ny(),
                 stillingsid = stillingsId,
                 eier = null,
                 notat = null,
-                oppdragKategori = oppdragkategori
+                stillingskategori = stillingskategori
             )
         )
     }

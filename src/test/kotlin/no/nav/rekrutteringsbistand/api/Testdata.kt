@@ -59,7 +59,7 @@ object Testdata {
 
     val enOpprettRekrutteringsbistandstillingDto = OpprettRekrutteringsbistandstillingDto(
         enOpprettStillingDto,
-        OppdragKategori.Arbeidstrening
+        Stillingskategori.Arbeidstrening
     )
 
     val enOpprettetStilling = Stilling(
@@ -116,7 +116,7 @@ object Testdata {
         eier = Eier(navident = enVeileder.navIdent, navn = enVeileder.displayName),
         stillingsid = Stillingsid(enStilling.uuid),
         notat = etNotat,
-        oppdragKategori = null
+        stillingskategori = null
     )
 
     val enStillingsinfoInboundDto = StillingsinfoInboundDto(
@@ -130,7 +130,7 @@ object Testdata {
         eier = null,
         stillingsid = Stillingsid(enStilling.uuid),
         notat = etNotat,
-        oppdragKategori = null
+        stillingskategori = null
     )
 
     val enAnnenStillingsinfo = Stillingsinfo(
@@ -138,7 +138,7 @@ object Testdata {
         eier = Eier(navident = enVeileder.navIdent, navn = enVeileder.displayName),
         stillingsid = Stillingsid(enAnnenStilling.uuid),
         notat = etNotat,
-        oppdragKategori = null
+        stillingskategori = null
     )
 
     val enStillingsinfoOppdatering = OppdaterEier(

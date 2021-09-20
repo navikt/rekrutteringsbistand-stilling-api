@@ -17,7 +17,7 @@ import no.nav.rekrutteringsbistand.api.Testdata.enRekrutteringsbistandStillingUt
 import no.nav.rekrutteringsbistand.api.Testdata.enStilling
 import no.nav.rekrutteringsbistand.api.Testdata.enStillingsinfo
 import no.nav.rekrutteringsbistand.api.Testdata.enStillingsinfoUtenEier
-import no.nav.rekrutteringsbistand.api.stillingsinfo.OppdragKategori
+import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingskategori
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsid
 import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoRepository
 import org.assertj.core.api.Assertions.assertThat
@@ -138,7 +138,7 @@ internal class StillingComponentTest {
             assertThat(it.stilling.source).isEqualTo(stilling.source)
             assertThat(it.stilling.privacy).isEqualTo(stilling.privacy)
 
-            assertThat(it.stillingsinfo?.oppdragKategori).isEqualTo(OppdragKategori.Arbeidstrening)
+            assertThat(it.stillingsinfo?.stillingskategori).isEqualTo(Stillingskategori.Arbeidstrening)
         }
     }
 

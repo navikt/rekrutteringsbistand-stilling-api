@@ -8,7 +8,7 @@ data class Stillingsinfo(
     val stillingsid: Stillingsid,
     val eier: Eier?,
     val notat: String?,
-    val oppdragKategori: OppdragKategori?
+    val stillingskategori: Stillingskategori?
 ) {
     fun asStillingsinfoDto() = StillingsinfoDto(
         stillingsid = this.stillingsid.asString(),
@@ -16,7 +16,7 @@ data class Stillingsinfo(
         notat = this.notat,
         eierNavident = this.eier?.navident,
         eierNavn = this.eier?.navn,
-        oppdragKategori = this.oppdragKategori
+        stillingskategori = this.stillingskategori
     )
 
     companion object {
@@ -29,7 +29,7 @@ data class Stillingsinfo(
                     navn = rs.getString("eier_navn")
                 ),
                 notat = rs.getString("notat"),
-                oppdragKategori = rs.getString("oppdrag_kategori")?.let(OppdragKategori.Companion::fraDatabase)
+                stillingskategori = rs.getString("stillingskategori")?.let(Stillingskategori.Companion::fraDatabase)
             )
     }
 }
@@ -66,16 +66,13 @@ data class StillingsinfoDto(
     val notat: String?,
     val eierNavident: String?,
     val eierNavn: String?,
-    val oppdragKategori: OppdragKategori?
+    val stillingskategori: Stillingskategori?
 )
 
-enum class OppdragKategori(val databaseVerdi: String) {
+enum class Stillingskategori(val databaseVerdi: String) {
     Stilling("Stilling"),
-    Arrangement("Arrangement"),
-    Webinar("Webinar"),
     Formidling("Formidling"),
-    Arbeidstrening("Arbeidstrening"),
-    Annet("Annet");
+    Arbeidstrening("Arbeidstrening");
 
     companion object {
         fun fraDatabase(verdi: String) = values().firstOrNull { it.databaseVerdi == verdi }

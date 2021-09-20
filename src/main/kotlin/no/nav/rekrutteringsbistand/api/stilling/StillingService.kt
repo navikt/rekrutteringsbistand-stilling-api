@@ -44,9 +44,9 @@ class StillingService(
 
     fun opprettStilling(opprettRekrutteringsbistandstillingDto: OpprettRekrutteringsbistandstillingDto): RekrutteringsbistandStilling {
         val opprettetStilling = arbeidsplassenKlient.opprettStilling(opprettRekrutteringsbistandstillingDto.stilling)
-        stillingsinfoService.opprettStillingInfo(
+        stillingsinfoService.opprettStillingsinfo(
             Stillingsid(opprettetStilling.uuid),
-            opprettRekrutteringsbistandstillingDto.oppdragkategori
+            opprettRekrutteringsbistandstillingDto.kategori
         )
         val id = Stillingsid(opprettetStilling.uuid)
 
@@ -74,7 +74,7 @@ class StillingService(
                 stillingsid = stillingsId,
                 notat = nyttNotat,
                 eier = null,
-                oppdragKategori = null
+                stillingskategori = null
                 // TODO: Vi antar at vi alltid har stillingsinfo når vi legger til nye stillinger.
                 // Kategori skal fortsatt være null på gamle stillinger. Vi vil ikke legge til kategori på gamle stillinger
                 // når vi legger til notat. Det er frontend som vil få ansvaret for å tolke manglende kategori som at dette er en stilling.
@@ -93,7 +93,7 @@ class StillingService(
     }
 
     fun kategoriMedDefault(stillingsInfo: StillingsinfoDto?) =
-        if (stillingsInfo?.oppdragKategori == null) OppdragKategori.Stilling else stillingsInfo.oppdragKategori
+        if (stillingsInfo?.stillingskategori == null) Stillingskategori.Stilling else stillingsInfo.stillingskategori
 
     fun oppdaterRekrutteringsbistandStilling(
         dto: OppdaterRekrutteringsbistandStillingDto,
