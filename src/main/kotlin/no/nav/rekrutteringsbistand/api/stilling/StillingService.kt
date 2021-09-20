@@ -44,13 +44,14 @@ class StillingService(
 
     fun opprettStilling(opprettRekrutteringsbistandstillingDto: OpprettRekrutteringsbistandstillingDto): RekrutteringsbistandStilling {
         val opprettetStilling = arbeidsplassenKlient.opprettStilling(opprettRekrutteringsbistandstillingDto.stilling)
-        stillingsinfoService.opprettStillingsinfo(
-            Stillingsid(opprettetStilling.uuid),
-            opprettRekrutteringsbistandstillingDto.kategori
-        )
-        val id = Stillingsid(opprettetStilling.uuid)
+        val stillingsId = Stillingsid(opprettetStilling.uuid)
 
-        kandidatlisteKlient.varsleOmOppdatertStilling(id)
+        stillingsinfoService.opprettStillingsinfo(
+            stillingsId = stillingsId,
+            stillingskategori = opprettRekrutteringsbistandstillingDto.kategori
+        )
+
+        kandidatlisteKlient.varsleOmOppdatertStilling(stillingsId)
         val stillingsinfo = stillingsinfoService.hentStillingsinfo(opprettetStilling)
 
         return RekrutteringsbistandStilling(
