@@ -75,10 +75,6 @@ class StillingService(
                 notat = nyttNotat,
                 eier = null,
                 stillingskategori = null
-                // TODO: Vi antar at vi alltid har stillingsinfo når vi legger til nye stillinger.
-                // Kategori skal fortsatt være null på gamle stillinger. Vi vil ikke legge til kategori på gamle stillinger
-                // når vi legger til notat. Det er frontend som vil få ansvaret for å tolke manglende kategori som at dette er en stilling.
-
             )
             stillingsinfoService.lagre(nyStillingsinfo)
         }
