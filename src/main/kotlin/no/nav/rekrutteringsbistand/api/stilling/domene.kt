@@ -58,6 +58,7 @@ data class Stilling(
             activationOnPublishingDate = activationOnPublishingDate,
         )
     }
+
 }
 
 fun lagNyStilling(tittel: String = "Ny stilling", tokenUtils: TokenUtils): OpprettStillingDto {

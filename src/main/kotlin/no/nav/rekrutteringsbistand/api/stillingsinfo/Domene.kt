@@ -7,14 +7,16 @@ data class Stillingsinfo(
     val stillingsinfoid: Stillingsinfoid,
     val stillingsid: Stillingsid,
     val eier: Eier?,
-    val notat: String?
+    val notat: String?,
+    val stillingskategori: Stillingskategori?
 ) {
     fun asStillingsinfoDto() = StillingsinfoDto(
         stillingsid = this.stillingsid.asString(),
         stillingsinfoid = this.stillingsinfoid.toString(),
         notat = this.notat,
         eierNavident = this.eier?.navident,
-        eierNavn = this.eier?.navn
+        eierNavn = this.eier?.navn,
+        stillingskategori = this.stillingskategori
     )
 
     companion object {
@@ -26,7 +28,8 @@ data class Stillingsinfo(
                     navident = rs.getString("eier_navident"),
                     navn = rs.getString("eier_navn")
                 ),
-                notat = rs.getString("notat")
+                notat = rs.getString("notat"),
+                stillingskategori = Stillingskategori.fraDatabase(rs.getString("stillingskategori"))
             )
     }
 }
@@ -41,6 +44,10 @@ data class Stillingsinfoid(val verdi: UUID) {
     fun asString() = verdi.toString()
     fun asUuid() = verdi
     override fun toString(): String = asString()
+
+    companion object {
+        fun ny() = Stillingsinfoid(UUID.randomUUID())
+    }
 }
 
 data class Stillingsid(val verdi: UUID) {
@@ -58,5 +65,15 @@ data class StillingsinfoDto(
     val stillingsinfoid: String,
     val notat: String?,
     val eierNavident: String?,
-    val eierNavn: String?
+    val eierNavn: String?,
+    val stillingskategori: Stillingskategori?
 )
+
+enum class Stillingskategori {
+    STILLING, FORMIDLING, ARBEIDSTRENING;
+
+    companion object {
+        fun fraDatabase(verdi: String?) = if (verdi == null) null else values().firstOrNull { it.name == verdi }
+    }
+}
+

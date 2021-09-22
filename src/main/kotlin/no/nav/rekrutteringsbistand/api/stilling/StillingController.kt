@@ -2,7 +2,7 @@ package no.nav.rekrutteringsbistand.api.stilling
 
 import no.nav.rekrutteringsbistand.api.RekrutteringsbistandStilling
 import no.nav.rekrutteringsbistand.api.OppdaterRekrutteringsbistandStillingDto
-import no.nav.rekrutteringsbistand.api.arbeidsplassen.OpprettStillingDto
+import no.nav.rekrutteringsbistand.api.arbeidsplassen.OpprettRekrutteringsbistandstillingDto
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.ResponseEntity
 import org.springframework.http.ResponseEntity.ok
@@ -17,7 +17,7 @@ import javax.servlet.http.HttpServletRequest
 class StillingController(val stillingService: StillingService) {
 
     @PostMapping("/rekrutteringsbistandstilling")
-    fun opprettStilling(@RequestBody stilling: OpprettStillingDto): ResponseEntity<RekrutteringsbistandStilling> {
+    fun opprettStilling(@RequestBody stilling: OpprettRekrutteringsbistandstillingDto): ResponseEntity<RekrutteringsbistandStilling> {
         val opprettetStilling = stillingService.opprettStilling(stilling)
         return ok(opprettetStilling)
     }

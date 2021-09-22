@@ -19,13 +19,15 @@ class StillingsinfoService(private val stillingsinfoRepository: StillingsinfoRep
         }
     }
 
+    // TODO: Spesifiser i metodenavnet at dette er for ekstern stilling, når vi oppretter en kandidatliste
     fun opprettEier(stillingsId: String, eier: Eier): Stillingsinfo {
         val uuid = UUID.randomUUID()
         val stillingsinfo = Stillingsinfo(
             stillingsinfoid = Stillingsinfoid(uuid),
             stillingsid = Stillingsid(verdi = stillingsId),
             eier = eier,
-            notat = null
+            notat = null,
+            stillingskategori = null
         )
 
         stillingsinfoRepository.opprett(stillingsinfo)
@@ -60,6 +62,18 @@ class StillingsinfoService(private val stillingsinfoRepository: StillingsinfoRep
 
     fun lagre(stillingsinfo: Stillingsinfo) {
         stillingsinfoRepository.opprett(stillingsinfo)
+    }
+
+    fun opprettStillingsinfo(stillingsId: Stillingsid, stillingskategori: Stillingskategori) {
+        stillingsinfoRepository.opprett(
+            Stillingsinfo(
+                stillingsinfoid = Stillingsinfoid.ny(),
+                stillingsid = stillingsId,
+                eier = null,
+                notat = null,
+                stillingskategori = stillingskategori
+            )
+        )
     }
 
 }

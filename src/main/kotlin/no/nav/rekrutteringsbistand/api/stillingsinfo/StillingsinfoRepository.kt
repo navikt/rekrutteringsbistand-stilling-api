@@ -2,7 +2,6 @@ package no.nav.rekrutteringsbistand.api.stillingsinfo
 
 import no.nav.rekrutteringsbistand.api.option.Option
 import no.nav.rekrutteringsbistand.api.option.optionOf
-import no.nav.rekrutteringsbistand.api.support.LOG
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert
@@ -22,7 +21,8 @@ class StillingsinfoRepository(
                 STILLINGSID to stillingsinfo.stillingsid.asString(),
                 EIER_NAVIDENT to stillingsinfo.eier?.navident,
                 EIER_NAVN to stillingsinfo.eier?.navn,
-                NOTAT to stillingsinfo.notat
+                NOTAT to stillingsinfo.notat,
+                STILLINGSKATEGORI to stillingsinfo.stillingskategori?.name
             )
         )
     }
@@ -85,5 +85,6 @@ class StillingsinfoRepository(
         const val EIER_NAVIDENT = "eier_navident"
         const val EIER_NAVN = "eier_navn"
         const val NOTAT = "notat"
+        const val STILLINGSKATEGORI = "stillingskategori"
     }
 }

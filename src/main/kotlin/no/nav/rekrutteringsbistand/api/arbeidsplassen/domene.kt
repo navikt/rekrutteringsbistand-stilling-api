@@ -1,7 +1,13 @@
 package no.nav.rekrutteringsbistand.api.arbeidsplassen
 
 import no.nav.rekrutteringsbistand.api.stilling.*
+import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingskategori
 import java.util.HashMap
+
+data class OpprettRekrutteringsbistandstillingDto(
+    val stilling: OpprettStillingDto,
+    val kategori: Stillingskategori
+)
 
 data class OpprettStillingDto(
     val title: String,

@@ -1,10 +1,10 @@
 package no.nav.rekrutteringsbistand.api.stilling
 
 import arrow.core.getOrElse
-import no.nav.rekrutteringsbistand.api.RekrutteringsbistandStilling
 import no.nav.rekrutteringsbistand.api.OppdaterRekrutteringsbistandStillingDto
+import no.nav.rekrutteringsbistand.api.RekrutteringsbistandStilling
 import no.nav.rekrutteringsbistand.api.arbeidsplassen.ArbeidsplassenKlient
-import no.nav.rekrutteringsbistand.api.arbeidsplassen.OpprettStillingDto
+import no.nav.rekrutteringsbistand.api.arbeidsplassen.OpprettRekrutteringsbistandstillingDto
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
 import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteKlient
 import no.nav.rekrutteringsbistand.api.option.Option
@@ -42,11 +42,16 @@ class StillingService(
         )
     }
 
-    fun opprettStilling(stilling: OpprettStillingDto): RekrutteringsbistandStilling {
-        val opprettetStilling = arbeidsplassenKlient.opprettStilling(stilling)
-        val id = Stillingsid(opprettetStilling.uuid)
+    fun opprettStilling(opprettRekrutteringsbistandstillingDto: OpprettRekrutteringsbistandstillingDto): RekrutteringsbistandStilling {
+        val opprettetStilling = arbeidsplassenKlient.opprettStilling(opprettRekrutteringsbistandstillingDto.stilling)
+        val stillingsId = Stillingsid(opprettetStilling.uuid)
 
-        kandidatlisteKlient.varsleOmOppdatertStilling(id)
+        stillingsinfoService.opprettStillingsinfo(
+            stillingsId = stillingsId,
+            stillingskategori = opprettRekrutteringsbistandstillingDto.kategori
+        )
+
+        kandidatlisteKlient.varsleOmOppdatertStilling(stillingsId)
         val stillingsinfo = stillingsinfoService.hentStillingsinfo(opprettetStilling)
 
         return RekrutteringsbistandStilling(
@@ -69,18 +74,23 @@ class StillingService(
                 stillingsinfoid = Stillingsinfoid(UUID.randomUUID()),
                 stillingsid = stillingsId,
                 notat = nyttNotat,
-                eier = null
+                eier = null,
+                stillingskategori = null
             )
             stillingsinfoService.lagre(nyStillingsinfo)
         }
     }
 
     fun kopierStilling(stillingsId: String): RekrutteringsbistandStilling {
-        val eksisterendeStilling = hentRekrutteringsbistandStilling(stillingsId).stilling
+        val eksisterendeRekrutteringsbistandStilling = hentRekrutteringsbistandStilling(stillingsId)
+        val eksisterendeStilling = eksisterendeRekrutteringsbistandStilling.stilling
         val kopi = eksisterendeStilling.toKopiertStilling(tokenUtils)
 
-        return opprettStilling(kopi)
+        return opprettStilling(OpprettRekrutteringsbistandstillingDto(kopi, kategoriMedDefault(eksisterendeRekrutteringsbistandStilling.stillingsinfo)))
     }
+
+    fun kategoriMedDefault(stillingsInfo: StillingsinfoDto?) =
+        if (stillingsInfo?.stillingskategori == null) Stillingskategori.STILLING else stillingsInfo.stillingskategori
 
     fun oppdaterRekrutteringsbistandStilling(
         dto: OppdaterRekrutteringsbistandStillingDto,
