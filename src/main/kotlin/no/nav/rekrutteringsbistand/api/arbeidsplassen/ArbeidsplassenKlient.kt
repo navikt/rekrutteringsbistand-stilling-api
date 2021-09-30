@@ -7,7 +7,12 @@ import no.nav.rekrutteringsbistand.api.support.LOG
 import no.nav.rekrutteringsbistand.api.support.config.ExternalConfiguration
 import no.nav.rekrutteringsbistand.api.support.toMultiValueMap
 import org.springframework.core.ParameterizedTypeReference
-import org.springframework.http.*
+import org.springframework.http.HttpEntity
+import org.springframework.http.HttpHeaders.*
+import org.springframework.http.HttpMethod
+import org.springframework.http.HttpStatus
+import org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR
+import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestClientResponseException
 import org.springframework.web.client.RestTemplate
@@ -33,7 +38,11 @@ class ArbeidsplassenKlient(
             return respons.body ?: throw kunneIkkeTolkeBodyException()
 
         } catch (exception: RestClientResponseException) {
-            throw svarMedFeilmelding("Klarte ikke hente stillingen med stillingsId $stillingsId fra Arbeidsplassen", url, exception)
+            throw svarMedFeilmelding(
+                "Klarte ikke hente stillingen med stillingsId $stillingsId fra Arbeidsplassen",
+                url,
+                exception
+            )
         }
     }
 
@@ -46,7 +55,7 @@ class ArbeidsplassenKlient(
      * meldingen i stilling-indekseren vår, som vil hente oppdatert stillingsinfo og
      * oppdaterer indeksen.
      */
-    fun triggResendingAvStillingsmeldingFraArbeidsplassen(stillingsid: String ) {
+    fun triggResendingAvStillingsmeldingFraArbeidsplassen(stillingsid: String) {
         val stilling = hentStilling(stillingsid)
         oppdaterStilling(stilling, null)
 
@@ -70,7 +79,11 @@ class ArbeidsplassenKlient(
             return response.body?.content?.firstOrNull() ?: throw kunneIkkeTolkeBodyException()
 
         } catch (exception: RestClientResponseException) {
-            throw svarMedFeilmelding("Klarte ikke hente stillingen med annonsenr $annonsenr fra Arbeidsplassen", url, exception)
+            throw svarMedFeilmelding(
+                "Klarte ikke hente stillingen med annonsenr $annonsenr fra Arbeidsplassen",
+                url,
+                exception
+            )
         }
     }
 
@@ -146,25 +159,33 @@ class ArbeidsplassenKlient(
         }
     }
 
-    private fun svarMedFeilmelding(melding: String, url: String, exception: RestClientResponseException): ResponseStatusException {
-        LOG.error("$melding. URL: $url, Status: ${exception.rawStatusCode}, Body: ${exception.responseBodyAsString}")
+    private fun svarMedFeilmelding(
+        melding: String,
+        url: String,
+        exception: RestClientResponseException
+    ): ResponseStatusException {
+        val logMsg = "$melding. URL: $url, Status: ${exception.rawStatusCode}, Body: ${exception.responseBodyAsString}"
+        LOG.error(logMsg, exception)
         return ResponseStatusException(HttpStatus.valueOf(exception.rawStatusCode), melding)
     }
 
     private fun kunneIkkeTolkeBodyException(): ResponseStatusException {
-        return ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Klarte ikke å tolke respons fra Arbeidsplassen")
+        return ResponseStatusException(
+            INTERNAL_SERVER_ERROR,
+            "Klarte ikke å tolke respons fra Arbeidsplassen"
+        )
     }
 
     private fun httpHeaders() =
         mapOf(
-            HttpHeaders.CONTENT_TYPE to MediaType.APPLICATION_JSON_VALUE,
-            HttpHeaders.ACCEPT to MediaType.APPLICATION_JSON_VALUE,
-            HttpHeaders.AUTHORIZATION to "Bearer ${tokenUtils.hentOidcToken()}"
+            CONTENT_TYPE to APPLICATION_JSON_VALUE,
+            ACCEPT to APPLICATION_JSON_VALUE,
+            AUTHORIZATION to "Bearer ${tokenUtils.hentOidcToken()}"
         ).toMultiValueMap()
 
     private fun httpHeadersUtenToken() =
         mapOf(
-            HttpHeaders.CONTENT_TYPE to MediaType.APPLICATION_JSON_VALUE,
-            HttpHeaders.ACCEPT to MediaType.APPLICATION_JSON_VALUE
+            CONTENT_TYPE to APPLICATION_JSON_VALUE,
+            ACCEPT to APPLICATION_JSON_VALUE
         ).toMultiValueMap()
 }
