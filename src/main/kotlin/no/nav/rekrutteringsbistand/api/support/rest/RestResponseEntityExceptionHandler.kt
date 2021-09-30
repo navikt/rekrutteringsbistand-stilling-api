@@ -1,6 +1,6 @@
 package no.nav.rekrutteringsbistand.api.support.rest
 
-import no.nav.rekrutteringsbistand.api.support.LOG
+import no.nav.rekrutteringsbistand.api.support.log
 import no.nav.security.token.support.core.exceptions.JwtTokenValidatorException
 import org.springframework.dao.EmptyResultDataAccessException
 import org.springframework.http.HttpStatus
@@ -18,7 +18,7 @@ class RestResponseEntityExceptionHandler : ResponseEntityExceptionHandler() {
     @ExceptionHandler(JwtTokenValidatorException::class)
     protected fun håndterUinnlogget(e: Exception, request: HttpServletRequest): ResponseEntity<String> {
         val msg = "Unauthorized. requestURI=${request.requestURI}, HTTP method=${request.method}"
-        LOG.info(msg, e)
+        log.info(msg, e)
         return ResponseEntity
                 .status(HttpStatus.UNAUTHORIZED)
                 .body("You are not authorized to access this resource")
@@ -29,7 +29,7 @@ class RestResponseEntityExceptionHandler : ResponseEntityExceptionHandler() {
     @Deprecated("Bruk arrow.core.Option eller en tom collection istedenfor. Exceptions for kontrollflyt som ikke er feilsituasjoner er et anti-pattern.")
     protected fun handleNoContent(e: RuntimeException, request: HttpServletRequest): ResponseEntity<Any> {
         val uri = request.requestURI
-        LOG.info("No content found at requestURI=${request.requestURI}, HTTP method=${request.method}")
+        log.info("No content found at requestURI=${request.requestURI}, HTTP method=${request.method}")
         return ResponseEntity
                 .status(HttpStatus.NO_CONTENT)
                 .body(uri)
@@ -42,9 +42,9 @@ class RestResponseEntityExceptionHandler : ResponseEntityExceptionHandler() {
     protected fun handleExceptionFraRestTemplate(e: RestClientResponseException, request: HttpServletRequest): ResponseEntity<String> {
 
         if (e.rawStatusCode == 404) {
-            LOG.info("HTTP 404 fra RestTemplate, URI=${request.requestURI}, HTTP method=${request.method}", e)
+            log.info("HTTP 404 fra RestTemplate, URI=${request.requestURI}, HTTP method=${request.method}", e)
         } else {
-            LOG.error("Exception fra RestTemplate. status=${e.rawStatusCode} URI=${request.requestURI}, HTTP method=${request.method}", e)
+            log.error("Exception fra RestTemplate. status=${e.rawStatusCode} URI=${request.requestURI}, HTTP method=${request.method}", e)
         }
 
         return ResponseEntity

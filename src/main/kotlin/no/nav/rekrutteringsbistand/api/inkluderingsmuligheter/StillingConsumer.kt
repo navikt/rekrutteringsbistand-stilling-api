@@ -1,14 +1,9 @@
 package no.nav.rekrutteringsbistand.api.inkluderingsmuligheter
 
 import no.nav.pam.stilling.ext.avro.Ad
-import no.nav.rekrutteringsbistand.api.support.LOG
 import org.apache.kafka.clients.consumer.Consumer
-import org.apache.kafka.clients.consumer.ConsumerRecords
-import org.apache.kafka.common.errors.WakeupException
-import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import java.io.Closeable
-import java.time.Duration
 import javax.annotation.PreDestroy
 
 @Component

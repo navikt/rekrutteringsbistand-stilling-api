@@ -2,7 +2,7 @@ package no.nav.rekrutteringsbistand.api.inkluderingsmuligheter
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import no.nav.rekrutteringsbistand.api.support.LOG
+import no.nav.rekrutteringsbistand.api.support.log
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert
 import org.springframework.stereotype.Repository
@@ -51,7 +51,7 @@ class InkluderingsmuligheterRepository(val namedJdbcTemplate: NamedParameterJdbc
                         radOpprettetFelt to inkluderingsmulighet.radOpprettet
                 )
         )
-        LOG.info("Lagret inkludering med dbid: $dbId og stillingsid: ${inkluderingsmulighet.stillingsid}")
+        log.info("Lagret inkludering med dbid: $dbId og stillingsid: ${inkluderingsmulighet.stillingsid}")
         return dbId
     }
 

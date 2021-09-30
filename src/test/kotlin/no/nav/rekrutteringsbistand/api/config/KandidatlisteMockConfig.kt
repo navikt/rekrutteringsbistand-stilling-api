@@ -5,7 +5,7 @@ import com.github.tomakehurst.wiremock.client.MappingBuilder
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.common.ConsoleNotifier
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
-import no.nav.rekrutteringsbistand.api.support.LOG
+import no.nav.rekrutteringsbistand.api.support.log
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
@@ -24,7 +24,7 @@ class KandidatlisteMockConfig {
                 .port(8766)).apply {
             stubFor(oppdaterKandidatliste())
             start()
-            LOG.info("Startet WireMock på port ${port()}")
+            log.info("Startet WireMock på port ${port()}")
         }
     }
 

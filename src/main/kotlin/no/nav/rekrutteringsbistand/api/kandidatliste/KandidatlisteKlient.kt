@@ -2,7 +2,7 @@ package no.nav.rekrutteringsbistand.api.kandidatliste
 
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsid
-import no.nav.rekrutteringsbistand.api.support.LOG
+import no.nav.rekrutteringsbistand.api.support.log
 import no.nav.rekrutteringsbistand.api.support.config.ExternalConfiguration
 import no.nav.rekrutteringsbistand.api.support.toMultiValueMap
 import org.springframework.http.*
@@ -20,7 +20,7 @@ class KandidatlisteKlient(
 
     fun varsleOmOppdatertStilling(stillingsid: Stillingsid): ResponseEntity<Void> {
         val url = buildUpdateNotificationUrl(stillingsid)
-        LOG.info("Oppdaterer kandidatliste, stillingsid: $stillingsid")
+        log.info("Oppdaterer kandidatliste, stillingsid: $stillingsid")
         return restTemplate.exchange(
             url,
             HttpMethod.PUT,
@@ -29,7 +29,7 @@ class KandidatlisteKlient(
         )
             .also {
                 if (it.statusCode != HttpStatus.NO_CONTENT) {
-                    LOG.warn("Uventet response fra kandidatliste-api for ad {}: {}", stillingsid.asString(), it.statusCodeValue)
+                    log.warn("Uventet response fra kandidatliste-api for ad {}: {}", stillingsid.asString(), it.statusCodeValue)
                 }
             }
     }

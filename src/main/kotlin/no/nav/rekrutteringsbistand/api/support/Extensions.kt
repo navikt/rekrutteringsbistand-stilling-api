@@ -5,8 +5,8 @@ import org.slf4j.LoggerFactory
 import org.springframework.util.CollectionUtils
 import org.springframework.util.MultiValueMap
 
-val Any.LOG: Logger
+val Any.log: Logger
     get() = LoggerFactory.getLogger(this::class.java)
 
 fun Map<String, String>.toMultiValueMap(): MultiValueMap<String, String> =
-        CollectionUtils.toMultiValueMap(this.mapValues { listOf(it.value) })
+    CollectionUtils.toMultiValueMap(this.mapValues { listOf(it.value) })

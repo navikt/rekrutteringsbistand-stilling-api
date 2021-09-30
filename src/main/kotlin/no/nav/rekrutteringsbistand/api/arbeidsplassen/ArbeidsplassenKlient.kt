@@ -3,7 +3,7 @@ package no.nav.rekrutteringsbistand.api.arbeidsplassen
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
 import no.nav.rekrutteringsbistand.api.stilling.Page
 import no.nav.rekrutteringsbistand.api.stilling.Stilling
-import no.nav.rekrutteringsbistand.api.support.LOG
+import no.nav.rekrutteringsbistand.api.support.log
 import no.nav.rekrutteringsbistand.api.support.config.ExternalConfiguration
 import no.nav.rekrutteringsbistand.api.support.toMultiValueMap
 import org.springframework.core.ParameterizedTypeReference
@@ -60,7 +60,7 @@ class ArbeidsplassenKlient(
         val stilling = hentStilling(stillingsid)
         oppdaterStilling(stilling, null)
 
-        LOG.info("Trigget resending av stillingsmelding fra Arbeidsplassen for stilling $stillingsid")
+        log.info("Trigget resending av stillingsmelding fra Arbeidsplassen for stilling $stillingsid")
     }
 
     fun hentStillingBasertPåAnnonsenr(annonsenr: String): Stilling {
@@ -166,7 +166,7 @@ class ArbeidsplassenKlient(
         exception: RestClientResponseException
     ): ResponseStatusException {
         val logMsg = "$melding. URL: $url, Status: ${exception.rawStatusCode}, Body: ${exception.responseBodyAsString}"
-        if (exception.rawStatusCode == NOT_FOUND.value()) LOG.warn(logMsg, exception) else LOG.error(logMsg, exception)
+        if (exception.rawStatusCode == NOT_FOUND.value()) log.warn(logMsg, exception) else log.error(logMsg, exception)
         return ResponseStatusException(HttpStatus.valueOf(exception.rawStatusCode), melding)
     }
 
