@@ -3,16 +3,15 @@ package no.nav.rekrutteringsbistand.api.arbeidsplassen
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
 import no.nav.rekrutteringsbistand.api.stilling.Page
 import no.nav.rekrutteringsbistand.api.stilling.Stilling
-import no.nav.rekrutteringsbistand.api.support.log
 import no.nav.rekrutteringsbistand.api.support.config.ExternalConfiguration
+import no.nav.rekrutteringsbistand.api.support.log
 import no.nav.rekrutteringsbistand.api.support.toMultiValueMap
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders.*
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
-import org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR
-import org.springframework.http.HttpStatus.NOT_FOUND
+import org.springframework.http.HttpStatus.*
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestClientResponseException
@@ -166,7 +165,12 @@ class ArbeidsplassenKlient(
         exception: RestClientResponseException
     ): ResponseStatusException {
         val logMsg = "$melding. URL: $url, Status: ${exception.rawStatusCode}, Body: ${exception.responseBodyAsString}"
-        if (exception.rawStatusCode == NOT_FOUND.value()) log.warn(logMsg, exception) else log.error(logMsg, exception)
+        when (exception.rawStatusCode) {
+            NOT_FOUND.value() -> log.warn(logMsg, exception)
+            PRECONDITION_FAILED.value() -> log.info(logMsg, exception)
+            else -> log.error(logMsg, exception)
+            // 412 får vi når noen prøver å endre en stilling, men en annen har endret stillingen samtidig. pam-ad sjekker “updated”-timestampen i databasen og sørger for at “updated”-timestampen som kommer inn ikke er eldre enn den som er lagret
+        }
         return ResponseStatusException(HttpStatus.valueOf(exception.rawStatusCode), melding)
     }
 
