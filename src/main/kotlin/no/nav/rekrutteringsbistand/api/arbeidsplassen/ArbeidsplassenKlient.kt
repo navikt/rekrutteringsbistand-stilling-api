@@ -12,6 +12,7 @@ import org.springframework.http.HttpHeaders.*
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR
+import org.springframework.http.HttpStatus.NOT_FOUND
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestClientResponseException
@@ -165,7 +166,7 @@ class ArbeidsplassenKlient(
         exception: RestClientResponseException
     ): ResponseStatusException {
         val logMsg = "$melding. URL: $url, Status: ${exception.rawStatusCode}, Body: ${exception.responseBodyAsString}"
-        LOG.error(logMsg, exception)
+        if (exception.rawStatusCode == NOT_FOUND.value()) LOG.warn(logMsg, exception) else LOG.error(logMsg, exception)
         return ResponseStatusException(HttpStatus.valueOf(exception.rawStatusCode), melding)
     }
 
