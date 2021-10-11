@@ -23,7 +23,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>13</java.version>
         <kotlin.version>1.4.30</kotlin.version>
-        <arrow.version>0.11.0</arrow.version>
+        <arrow.version>0.13.3</arrow.version>
         <vault-jdbc.version>1.3.7</vault-jdbc.version>
         <logstash-logback-encoder.version>6.6</logstash-logback-encoder.version>
         <logback-syslog4j.version>1.0.0</logback-syslog4j.version>
