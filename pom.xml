@@ -29,7 +29,7 @@
         <logback-syslog4j.version>1.0.0</logback-syslog4j.version>
         <micrometer-registry-prometheus.version>1.6.3</micrometer-registry-prometheus.version>
         <wiremock.version>2.27.2</wiremock.version>
-        <jackson-module-kotlin.version>2.12.1</jackson-module-kotlin.version>
+        <jackson-module-kotlin.version>2.13.0</jackson-module-kotlin.version>
         <springfox-swagger.version>3.0.0</springfox-swagger.version>
         <unleash.version>3.3.3</unleash.version>
         <token-validation.version>1.3.7</token-validation.version>
