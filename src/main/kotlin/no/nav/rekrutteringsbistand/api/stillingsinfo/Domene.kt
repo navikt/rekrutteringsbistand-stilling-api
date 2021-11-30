@@ -70,7 +70,7 @@ data class StillingsinfoDto(
 )
 
 enum class Stillingskategori {
-    STILLING, FORMIDLING, ARBEIDSTRENING;
+    STILLING, FORMIDLING, ARBEIDSTRENING, JOBBMESSE;
 
     companion object {
         fun fraDatabase(verdi: String?) = if (verdi == null) null else values().firstOrNull { it.name == verdi }
