@@ -33,6 +33,8 @@ spec:
           cluster: dev-gcp
         - application: rekrutteringsbistand-stilling-indekser
           cluster: dev-gcp
+        - application: rekrutteringsbistand-stillingssok
+          cluster: dev-gcp
   webproxy: false
   env:
     - name: SPRING_PROFILES_ACTIVE
