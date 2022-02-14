@@ -34,6 +34,7 @@ spec:
         - application: rekrutteringsbistand-stilling-indekser
           cluster: dev-gcp
         - application: rekrutteringsbistand-stillingssok
+          namespace: toi
           cluster: dev-gcp
   webproxy: false
   env:
