@@ -11,7 +11,7 @@ import java.time.LocalDateTime
 
 @RestController
 @RequestMapping("/standardsok")
-@ProtectedWithClaims(issuer = "isso")
+@ProtectedWithClaims(issuer = "azuread")
 class StandardsøkController(val standardsøkService: StandardsøkService, val tokenUtils: TokenUtils) {
 
     @PutMapping
