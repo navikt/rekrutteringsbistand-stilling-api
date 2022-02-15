@@ -33,6 +33,9 @@ spec:
           cluster: prod-gcp
         - application: rekrutteringsbistand-stilling-indekser
           cluster: prod-gcp
+        - application: rekrutteringsbistand-stillingssok
+          namespace: toi
+          cluster: prod-gcp
   env:
     - name: SPRING_PROFILES_ACTIVE
       value: prod
