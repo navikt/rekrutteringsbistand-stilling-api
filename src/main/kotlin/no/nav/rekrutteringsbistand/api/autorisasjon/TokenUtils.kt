@@ -9,17 +9,21 @@ class TokenUtils(private val contextHolder: TokenValidationContextHolder) {
 
     companion object {
         const val ISSUER_ISSO = "isso"
+        const val ISSUER_AZUREAD = "azuread"
     }
 
     fun hentInnloggetVeileder(): InnloggetVeileder {
-        return contextHolder.tokenValidationContext.getClaims(ISSUER_ISSO)
-                .run {
-                    InnloggetVeileder(
-                            userName = getStringClaim("unique_name"),
-                            displayName = getStringClaim("name"),
-                            navIdent = getStringClaim("NAVident")
-                    )
-                }
+        val claimsFromIssoIdToken = contextHolder.tokenValidationContext.getClaims(ISSUER_ISSO)
+        val claimsFromAzureAdToken = contextHolder.tokenValidationContext.getClaims(ISSUER_AZUREAD)
+
+        val validClaims = claimsFromIssoIdToken ?: claimsFromAzureAdToken;
+        return validClaims.run {
+            InnloggetVeileder(
+                userName = getStringClaim("unique_name"),
+                displayName = getStringClaim("name"),
+                navIdent = getStringClaim("NAVident")
+            )
+        }
     }
 
     fun tokenUtløper(): Boolean {
