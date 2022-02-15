@@ -34,7 +34,6 @@ class MockLogin(val mockOauth2Server: MockOAuth2Server) {
         response.addCookie(cookie)
     }
 
-    // TODO: ClientId?
     fun hentAzureAdVeilederToken(): String {
         return mockOauth2Server.issueToken(
             issuerId = azureAdIssuer,
