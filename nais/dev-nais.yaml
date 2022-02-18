@@ -26,6 +26,9 @@ spec:
   azure:
     application:
       enabled: true
+      claims:
+        extra:
+          - NAVidentap
   accessPolicy:
     inbound:
       rules:
