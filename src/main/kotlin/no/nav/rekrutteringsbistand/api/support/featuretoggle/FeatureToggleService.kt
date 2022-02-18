@@ -19,8 +19,7 @@ class FeatureToggleService(
     private fun contextMedInnloggetBruker(): UnleashContext {
         val builder = UnleashContext.builder()
         if (tokenUtils.harInnloggingsContext()) {
-            val veileder: InnloggetVeileder = tokenUtils.hentInnloggetVeileder()
-            builder.userId(veileder.navIdent)
+            builder.userId(tokenUtils.hentNavIdent())
         }
         return builder.build()
     }

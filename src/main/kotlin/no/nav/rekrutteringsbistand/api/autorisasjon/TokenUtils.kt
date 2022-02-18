@@ -26,6 +26,14 @@ class TokenUtils(private val contextHolder: TokenValidationContextHolder) {
         }
     }
 
+    fun hentNavIdent(): String {
+        val claimsFromIssoIdToken = contextHolder.tokenValidationContext.getClaims(ISSUER_ISSO)
+        val claimsFromAzureAdToken = contextHolder.tokenValidationContext.getClaims(ISSUER_AZUREAD)
+
+        val validClaims = claimsFromIssoIdToken ?: claimsFromAzureAdToken
+        return validClaims.getStringClaim("NAVident")
+    }
+
     fun tokenUtløper(): Boolean {
         val hasValidToken = contextHolder.tokenValidationContext.hasTokenFor(ISSUER_ISSO)
         val expirationTime = contextHolder.tokenValidationContext.getClaims(ISSUER_ISSO).expirationTime

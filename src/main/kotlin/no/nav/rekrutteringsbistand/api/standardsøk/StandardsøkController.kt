@@ -22,7 +22,7 @@ class StandardsøkController(val standardsøkService: StandardsøkService, val t
     @PutMapping
     fun opprettEllerOppdaterStandardsøk(@RequestBody lagreStandardsøkDto: LagreStandardsøkDto): ResponseEntity<Any> {
         val lagretSøk =
-            standardsøkService.oppdaterStandardsøk(lagreStandardsøkDto, tokenUtils.hentInnloggetVeileder().navIdent)
+            standardsøkService.oppdaterStandardsøk(lagreStandardsøkDto, tokenUtils.hentNavIdent())
         if (lagretSøk != null) {
             return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -36,7 +36,7 @@ class StandardsøkController(val standardsøkService: StandardsøkService, val t
 
     @GetMapping
     fun hentStandardsøk(): ResponseEntity<Any> {
-        val navIdent = tokenUtils.hentInnloggetVeileder().navIdent
+        val navIdent = tokenUtils.hentNavIdent()
         val lagretSøk = standardsøkService.hentStandardsøk(navIdent)
         if (lagretSøk != null) {
             return ResponseEntity
