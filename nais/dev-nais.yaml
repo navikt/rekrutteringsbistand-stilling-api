@@ -28,7 +28,7 @@ spec:
       enabled: true
       claims:
         extra:
-          - NAVidentap
+          - NAVident
   accessPolicy:
     inbound:
       rules:
