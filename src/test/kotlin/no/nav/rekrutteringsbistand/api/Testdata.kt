@@ -15,7 +15,7 @@ import java.util.*
 
 object Testdata {
 
-    val enVeileder = InnloggetVeileder("Clark.Kent@nav.no", "C12345")
+    val enVeileder = InnloggetVeileder("Clark Kent", "C12345")
 
     const val etNotat = "notatet"
 
