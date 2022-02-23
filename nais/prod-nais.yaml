@@ -39,6 +39,9 @@ spec:
         - application: rekrutteringsbistand-stillingssok
           namespace: toi
           cluster: prod-gcp
+        - application: rekrutteringsbistand-container
+          namespace: toi
+          cluster: prod-gcp
   env:
     - name: SPRING_PROFILES_ACTIVE
       value: prod
