@@ -27,6 +27,6 @@ spec:
     - alert: rekrutteringsbistand-stilling-api
       severity: warning
       expr: (100 * sum by (log_app, log_namespace) (rate(logd_messages_total{log_app="rekrutteringsbistand-stilling-api",log_level=~"Warning"}[3m])) / sum by (log_app, log_namespace) (rate(logd_messages_total{log_app="rekrutteringsbistand-stilling-api"}[3m]))) > 5
-      for: 3m
+      for: 5m
       description: Økning i warnings
       action: "https://logs.adeo.no/goto/628dd18b2a5496e186cb99f04cd6b32f"
