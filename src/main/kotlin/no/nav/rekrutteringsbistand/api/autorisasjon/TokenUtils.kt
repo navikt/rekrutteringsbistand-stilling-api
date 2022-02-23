@@ -19,7 +19,6 @@ class TokenUtils(private val contextHolder: TokenValidationContextHolder) {
         val validClaims = claimsFromIssoIdToken ?: claimsFromAzureAdToken;
         return validClaims.run {
             InnloggetVeileder(
-                userName = getStringClaim("unique_name"),
                 displayName = getStringClaim("name"),
                 navIdent = getStringClaim("NAVident")
             )
@@ -54,7 +53,6 @@ class TokenUtils(private val contextHolder: TokenValidationContextHolder) {
 }
 
 data class InnloggetVeileder(
-        val userName: String,
         val displayName: String,
         val navIdent: String
 )
