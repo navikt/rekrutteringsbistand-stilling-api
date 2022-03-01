@@ -33,14 +33,15 @@ class TokenUtils(private val contextHolder: TokenValidationContextHolder) {
         return validClaims.getStringClaim("NAVident")
     }
 
-    fun tokenUtløper(): Boolean {
-        val hasValidToken = contextHolder.tokenValidationContext.hasTokenFor(ISSUER_ISSO)
-        val expirationTime = contextHolder.tokenValidationContext.getClaims(ISSUER_ISSO).expirationTime
-        val inFiveMinutes = Date(System.currentTimeMillis() + 5 * 60000)
-        return hasValidToken && inFiveMinutes.after(expirationTime)
-    }
+    fun hentToken(): String {
+        // TODO: Implementer On behalf of-flow mot Arbeidsplassen
 
-    fun hentOidcToken(): String = contextHolder.tokenValidationContext.getJwtToken(ISSUER_ISSO).tokenAsString
+        val tokenFromIssoIdToken = contextHolder.tokenValidationContext.getJwtToken(ISSUER_ISSO)
+        val tokenFromAzureAdToken = contextHolder.tokenValidationContext.getJwtToken(ISSUER_AZUREAD)
+
+        val validToken = tokenFromIssoIdToken ?: tokenFromAzureAdToken
+        return validToken.tokenAsString
+    }
 
     fun harInnloggingsContext(): Boolean {
         return try {

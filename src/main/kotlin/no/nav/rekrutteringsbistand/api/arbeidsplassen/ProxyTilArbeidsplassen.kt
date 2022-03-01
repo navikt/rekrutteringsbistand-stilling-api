@@ -94,7 +94,7 @@ class ProxyTilArbeidsplassen(
         mapOf(
             HttpHeaders.CONTENT_TYPE to MediaType.APPLICATION_JSON_VALUE,
             HttpHeaders.ACCEPT to MediaType.APPLICATION_JSON_VALUE,
-            HttpHeaders.AUTHORIZATION to "Bearer ${tokenUtils.hentOidcToken()}"
+            HttpHeaders.AUTHORIZATION to "Bearer ${tokenUtils.hentToken()}"
         ).toMultiValueMap()
 
     private fun buildProxyTargetUrl(request: HttpServletRequest, stripPrefix: String, targetUrl: String): URI {

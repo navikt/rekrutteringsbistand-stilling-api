@@ -185,7 +185,7 @@ class ArbeidsplassenKlient(
         mapOf(
             CONTENT_TYPE to APPLICATION_JSON_VALUE,
             ACCEPT to APPLICATION_JSON_VALUE,
-            AUTHORIZATION to "Bearer ${tokenUtils.hentOidcToken()}"
+            AUTHORIZATION to "Bearer ${tokenUtils.hentToken()}"
         ).toMultiValueMap()
 
     private fun httpHeadersUtenToken() =
