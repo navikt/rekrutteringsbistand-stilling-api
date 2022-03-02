@@ -1,11 +1,10 @@
 package no.nav.rekrutteringsbistand.api.autorisasjon
 
-import java.util.*
 import no.nav.security.token.support.core.context.TokenValidationContextHolder
 import org.springframework.stereotype.Component
 
 @Component
-class TokenUtils(private val contextHolder: TokenValidationContextHolder) {
+class TokenUtils(private val contextHolder: TokenValidationContextHolder, private val azureKlient: AzureKlient) {
 
     companion object {
         const val ISSUER_ISSO = "isso"
@@ -34,8 +33,6 @@ class TokenUtils(private val contextHolder: TokenValidationContextHolder) {
     }
 
     fun hentToken(): String {
-        // TODO: Implementer On behalf of-flow mot Arbeidsplassen
-
         val tokenFromIssoIdToken = contextHolder.tokenValidationContext.getJwtToken(ISSUER_ISSO)
         val tokenFromAzureAdToken = contextHolder.tokenValidationContext.getJwtToken(ISSUER_AZUREAD)
 
@@ -51,6 +48,8 @@ class TokenUtils(private val contextHolder: TokenValidationContextHolder) {
             false
         }
     }
+
+    fun hentOBOToken(scope: String): String = azureKlient.hentOBOToken(scope, hentToken())
 }
 
 data class InnloggetVeileder(

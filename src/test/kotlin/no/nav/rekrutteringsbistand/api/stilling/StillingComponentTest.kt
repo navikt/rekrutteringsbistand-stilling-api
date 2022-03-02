@@ -32,6 +32,7 @@ import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders.*
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED_VALUE
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.http.ResponseEntity
 import org.springframework.test.context.junit4.SpringRunner
@@ -45,6 +46,9 @@ internal class StillingComponentTest {
 
     @get:Rule
     val wiremockKandidatliste = WireMockRule(8766)
+
+    @get:Rule
+    val wiremockazure = WireMockRule(9954)
 
     @LocalServerPort
     var port = 0
@@ -109,6 +113,7 @@ internal class StillingComponentTest {
         repository.opprett(stillingsinfo)
 
         mockUtenAuthorization("/b2b/api/v1/ads?id=1000", page)
+        mockAzureObo()
 
         restTemplate.getForObject("$localBaseUrl/rekrutteringsbistandstilling/annonsenr/${stilling.id}", RekrutteringsbistandStilling::class.java).also {
             assertThat(it.stillingsinfo).isEqualTo(stillingsinfo.asStillingsinfoDto())
@@ -122,6 +127,7 @@ internal class StillingComponentTest {
 
         mock(HttpMethod.POST, "/api/v1/ads", enOpprettetStilling)
         mockKandidatlisteOppdatering()
+        mockAzureObo()
 
         restTemplate.postForObject(
             "$localBaseUrl/rekrutteringsbistandstilling",
@@ -150,6 +156,7 @@ internal class StillingComponentTest {
 
         mock(HttpMethod.PUT, "/api/v1/ads/${enRekrutteringsbistandStilling.stilling.uuid}", stilling)
         mockKandidatlisteOppdatering()
+        mockAzureObo()
 
         repository.opprett(stillingsinfo)
 
@@ -176,6 +183,7 @@ internal class StillingComponentTest {
         val rekrutteringsbistandStilling = enRekrutteringsbistandStillingUtenEier
 
         mock(HttpMethod.PUT, "/api/v1/ads/${rekrutteringsbistandStilling.stilling.uuid}", rekrutteringsbistandStilling.stilling)
+        mockAzureObo()
 
         mockKandidatlisteOppdatering()
         repository.opprett(enStillingsinfoUtenEier.copy(notat = null))
@@ -202,6 +210,7 @@ internal class StillingComponentTest {
         val rekrutteringsbistandStilling = enRekrutteringsbistandStillingUtenEier
         mock(HttpMethod.PUT, "/api/v1/ads/${rekrutteringsbistandStilling.stilling.uuid}", rekrutteringsbistandStilling.stilling)
         mockKandidatlisteOppdatering()
+        mockAzureObo()
 
         restTemplate.exchange(
                 "$localBaseUrl/rekrutteringsbistandstilling",
@@ -226,6 +235,7 @@ internal class StillingComponentTest {
 
         mock(HttpMethod.DELETE, "/api/v1/ads/${slettetStilling.uuid}", slettetStilling)
         mockKandidatlisteOppdateringFeiler()
+        mockAzureObo()
 
         restTemplate.exchange(
                 "$localBaseUrl/rekrutteringsbistand/api/v1/ads/${enStilling.uuid}",
@@ -241,6 +251,7 @@ internal class StillingComponentTest {
     @Test
     fun `GET mot mine stillinger skal returnere HTTP 200 med mine stillinger uten stillingsinfo`() {
         mock(HttpMethod.GET, "/api/v1/ads/rekrutteringsbistand/minestillinger", enPageMedStilling)
+        mockAzureObo()
 
         val respons = restTemplate.exchange(
                 "$localBaseUrl/mine-stillinger",
@@ -274,6 +285,7 @@ internal class StillingComponentTest {
             totalPages = 1
         )
         mock(HttpMethod.GET, "/api/v1/ads/rekrutteringsbistand/minestillinger", page)
+        mockAzureObo()
 
         val respons = restTemplate.exchange(
                 "$localBaseUrl/mine-stillinger",
@@ -288,10 +300,32 @@ internal class StillingComponentTest {
     }
 
     @Test
+    fun `GET mot mine stillinger skal ikke returnere stillinger fra andre veiledere`() {
+        val stillingsinfo1 = enStillingsinfo
+        val stillingsinfo2 = enAnnenStillingsinfo
+
+        val stilling1 = enStilling.copy(uuid = stillingsinfo1.stillingsid.asString())
+        val stilling2 = enStilling.copy(uuid = stillingsinfo2.stillingsid.asString())
+
+        repository.opprett(stillingsinfo1)
+        repository.opprett(stillingsinfo2)
+
+        val page = Page(
+            content = listOf(stilling1, stilling2),
+            totalElements = 2,
+            totalPages = 1
+        )
+
+        mock(HttpMethod.GET, "/api/v1/ads/rekrutteringsbistand/minestillinger", page)
+        mockAzureObo()
+    }
+
+    @Test
     fun `DELETE mot stilling skal returnere HTTP 200 med stilling og status DELETED`() {
         val slettetStilling = enStilling.copy(status = "DELETED")
         mock(HttpMethod.DELETE, "/api/v1/ads/${slettetStilling.uuid}", slettetStilling)
         mockKandidatlisteOppdatering()
+        mockAzureObo()
 
         val respons: ResponseEntity<Stilling> = restTemplate.exchange(
             "$localBaseUrl/rekrutteringsbistand/api/v1/ads/${slettetStilling.uuid}",
@@ -302,6 +336,23 @@ internal class StillingComponentTest {
 
         assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)
         assertThat(respons.body).isEqualTo(slettetStilling)
+    }
+
+    private fun mockAzureObo() {
+        wiremockazure.stubFor(
+            request(HttpMethod.GET.name, urlPathMatching("/token"))
+                .withHeader(CONTENT_TYPE, containing(APPLICATION_FORM_URLENCODED_VALUE))
+                .willReturn(
+                    aResponse().withStatus(200)
+                        .withHeader(CONNECTION, "close")
+                        .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+                        .withBody("""
+                            {
+                                "access_token": "eksempeltoken"
+                            }
+                        """.trimIndent())
+                )
+        )
     }
 
     private fun mock(method: HttpMethod, urlPath: String, responseBody: Any) {

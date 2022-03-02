@@ -9,6 +9,9 @@ no.nav.security.jwt:
     accepted_audience: ${AZURE_APP_CLIENT_ID}
     proxyurl: http://webproxy.nais:8088
 
+scope:
+  forarbeidsplassen: api://dev-fss.teampam.pam-ad-api/.default
+
 external:
   stilling-api.url: https://pam-ad-api.nais.preprod.local
   sok-api.url: https://pam-ad-api.nais.preprod.local

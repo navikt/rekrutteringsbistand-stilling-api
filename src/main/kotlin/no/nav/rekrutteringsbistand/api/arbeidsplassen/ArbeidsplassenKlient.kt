@@ -1,11 +1,13 @@
 package no.nav.rekrutteringsbistand.api.arbeidsplassen
 
+import no.nav.rekrutteringsbistand.api.autorisasjon.AzureKlient
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
 import no.nav.rekrutteringsbistand.api.stilling.Page
 import no.nav.rekrutteringsbistand.api.stilling.Stilling
 import no.nav.rekrutteringsbistand.api.support.config.ExternalConfiguration
 import no.nav.rekrutteringsbistand.api.support.log
 import no.nav.rekrutteringsbistand.api.support.toMultiValueMap
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders.*
@@ -24,6 +26,7 @@ class ArbeidsplassenKlient(
     val restTemplate: RestTemplate,
     val externalConfiguration: ExternalConfiguration,
     val tokenUtils: TokenUtils,
+    @Value("\${scope.forarbeidsplassen}") private val scopeMotArbeidsplassen: String
 ) {
     fun hentStilling(stillingsId: String): Stilling {
         val url = "${externalConfiguration.stillingApi.url}/b2b/api/v1/ads/$stillingsId"
@@ -185,7 +188,7 @@ class ArbeidsplassenKlient(
         mapOf(
             CONTENT_TYPE to APPLICATION_JSON_VALUE,
             ACCEPT to APPLICATION_JSON_VALUE,
-            AUTHORIZATION to "Bearer ${tokenUtils.hentToken()}"
+            AUTHORIZATION to "Bearer ${tokenUtils.hentOBOToken(scopeMotArbeidsplassen)}"
         ).toMultiValueMap()
 
     private fun httpHeadersUtenToken() =
