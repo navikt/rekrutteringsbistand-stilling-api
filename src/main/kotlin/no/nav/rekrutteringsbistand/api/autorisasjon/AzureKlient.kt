@@ -21,12 +21,22 @@ class AzureKlient(
         val headers = HttpHeaders().apply {
             contentType = MediaType.APPLICATION_FORM_URLENCODED
         }
+
+        val form = lagForm(scope, assertionToken)
+
+        val loggbarForm = lagForm(scope, assertionToken.split(".")[1]).apply {
+            this.set("client_secret", this["client_secret"]?.size.toString())
+        }
+
+        log.info("Kall til Azure sendes med form $loggbarForm")
+        
         val response = restTemplate.exchange(
             tokenEndpoint,
             HttpMethod.POST,
-            HttpEntity(lagForm(scope, assertionToken), headers),
+            HttpEntity(form, headers),
             AzureResponse::class.java
         )
+
         log.info("Kall til Azure for OBO-token ga response ${response.statusCode}")
         return response.body?.access_token ?: throw Exception("Fikk ikke OBO-token fra azure")
     }
