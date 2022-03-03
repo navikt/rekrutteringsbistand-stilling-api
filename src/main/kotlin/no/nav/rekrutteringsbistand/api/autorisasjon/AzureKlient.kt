@@ -23,7 +23,7 @@ class AzureKlient(
         }
         val response = restTemplate.exchange(
             tokenEndpoint,
-            HttpMethod.GET,
+            HttpMethod.POST,
             HttpEntity(lagForm(scope, assertionToken), headers),
             AzureResponse::class.java
         )
