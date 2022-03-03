@@ -5,6 +5,8 @@ import no.nav.rekrutteringsbistand.api.support.log
 import no.nav.rekrutteringsbistand.api.support.config.ExternalConfiguration
 import no.nav.rekrutteringsbistand.api.support.toMultiValueMap
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import no.nav.security.token.support.core.api.RequiredIssuers
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.*
 import org.springframework.util.MultiValueMap
 import org.springframework.web.bind.annotation.GetMapping
@@ -17,11 +19,17 @@ import java.net.URI
 import javax.servlet.http.HttpServletRequest
 
 @RestController
-@ProtectedWithClaims(issuer = "isso")
+@RequiredIssuers(
+    value = [
+        ProtectedWithClaims(issuer = "isso"),
+        ProtectedWithClaims(issuer = "azuread")
+    ]
+)
 class ProxyTilArbeidsplassen(
     val restTemplate: RestTemplate,
     val externalConfiguration: ExternalConfiguration,
-    val tokenUtils: TokenUtils
+    val tokenUtils: TokenUtils,
+    @Value("\${scope.forarbeidsplassen}") private val scopeMotArbeidsplassen: String
 ) {
 
     @GetMapping("/rekrutteringsbistand/api/v1/geography/municipals")
@@ -94,7 +102,7 @@ class ProxyTilArbeidsplassen(
         mapOf(
             HttpHeaders.CONTENT_TYPE to MediaType.APPLICATION_JSON_VALUE,
             HttpHeaders.ACCEPT to MediaType.APPLICATION_JSON_VALUE,
-            HttpHeaders.AUTHORIZATION to "Bearer ${tokenUtils.hentToken()}"
+            HttpHeaders.AUTHORIZATION to "Bearer ${tokenUtils.hentOBOToken(scopeMotArbeidsplassen)}"
         ).toMultiValueMap()
 
     private fun buildProxyTargetUrl(request: HttpServletRequest, stripPrefix: String, targetUrl: String): URI {

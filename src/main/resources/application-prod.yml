@@ -10,11 +10,11 @@ no.nav.security.jwt:
     proxyurl: http://webproxy.nais:8088
 
 scope:
-  forarbeidsplassen: api://prod-fss.teampam.pam-ad-api/.default
+  forarbeidsplassen: api://prod-gcp.teampam.pam-ad-api/.default
 
 external:
-  stilling-api.url: https://pam-ad-api.nais.adeo.no
-  sok-api.url: https://pam-ad-api.nais.adeo.no
+  stilling-api.url: https://pam-ad-api.intern.nav.no/adapi
+  sok-api.url: https://pam-ad-api.intern.nav.no/adapi
   kandidatliste-api.url: https://rekrutteringsbistand-kandidat-api.nais.adeo.no/rekrutteringsbistand-kandidat-api/rest/veileder/stilling
   unleash.url: https://unleash.nais.io/api/
 
