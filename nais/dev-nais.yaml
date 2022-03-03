@@ -39,7 +39,7 @@ spec:
         - application: rekrutteringsbistand-container
           namespace: toi
           cluster: dev-gcp
-  webproxy: false
+  webproxy: true
   env:
     - name: SPRING_PROFILES_ACTIVE
       value: dev
