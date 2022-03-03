@@ -3,6 +3,7 @@ package no.nav.rekrutteringsbistand.api.organisasjonssøk
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.github.tomakehurst.wiremock.junit.WireMockRule
+import no.nav.rekrutteringsbistand.api.mockAzureObo
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Rule
@@ -21,6 +22,9 @@ internal class OrganisasjonssøkTest {
     @get:Rule
     val wiremock = WireMockRule(WireMockConfiguration.options().port(9934))
 
+    @get:Rule
+    val wiremockAzure = WireMockRule(9954)
+
     @LocalServerPort
     var port = 0
 
@@ -31,6 +35,7 @@ internal class OrganisasjonssøkTest {
     @Before
     fun authenticateClient() {
         restTemplate.getForObject("$localBaseUrl/veileder-token-cookie", Unit::class.java)
+        mockAzureObo(wiremockAzure)
     }
 
     @Test
@@ -60,7 +65,7 @@ internal class OrganisasjonssøkTest {
     }
 
     private fun mock(method: HttpMethod, urlPath: String, responseBody: String) {
-        WireMock.stubFor(
+        wiremock.stubFor(
                 WireMock.request(method.name, WireMock.urlMatching(urlPath))
                         .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
                         .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
@@ -73,7 +78,7 @@ internal class OrganisasjonssøkTest {
     }
 
     private fun mockServerfeil(urlPath: String) {
-        WireMock.stubFor(
+        wiremock.stubFor(
                 WireMock.post(WireMock.urlPathMatching(urlPath))
                         .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
                         .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
