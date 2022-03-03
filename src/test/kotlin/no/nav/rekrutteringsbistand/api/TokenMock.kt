@@ -8,7 +8,7 @@ import org.springframework.http.MediaType
 
 fun mockAzureObo(wiremockAzure: WireMockRule) {
     wiremockAzure.stubFor(
-        WireMock.request(HttpMethod.GET.name, WireMock.urlPathMatching("/token"))
+        WireMock.request(HttpMethod.POST.name, WireMock.urlPathMatching("/token"))
             .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.containing(MediaType.APPLICATION_FORM_URLENCODED_VALUE))
             .willReturn(
                 WireMock.aResponse().withStatus(200)
