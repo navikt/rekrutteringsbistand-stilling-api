@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatus.*
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.stereotype.Component
+import org.springframework.util.MultiValueMap
 import org.springframework.web.client.RestClientResponseException
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.server.ResponseStatusException
@@ -28,14 +29,17 @@ class ArbeidsplassenKlient(
     val tokenUtils: TokenUtils,
     @Value("\${scope.forarbeidsplassen}") private val scopeMotArbeidsplassen: String
 ) {
-    fun hentStilling(stillingsId: String): Stilling {
+    fun hentStilling(stillingsId: String, somSystembruker: Boolean = false): Stilling {
         val url = "${hentBaseUrl()}/b2b/api/v1/ads/$stillingsId"
 
         try {
             val respons = restTemplate.exchange(
                 url,
                 HttpMethod.GET,
-                HttpEntity(null, httpHeaders()),
+                HttpEntity(
+                    null,
+                    if (somSystembruker) httpHeadersSomSystembruker() else httpHeaders()
+                ),
                 Stilling::class.java
             )
             return respons.body ?: throw kunneIkkeTolkeBodyException()
@@ -201,6 +205,13 @@ class ArbeidsplassenKlient(
                     scopeMotArbeidsplassen
                 )
             }"
+        ).toMultiValueMap()
+
+    private fun httpHeadersSomSystembruker() =
+        mapOf(
+            CONTENT_TYPE to APPLICATION_JSON_VALUE,
+            ACCEPT to APPLICATION_JSON_VALUE,
+            AUTHORIZATION to "Bearer ${tokenUtils.hentSystemToken(scopeMotArbeidsplassen)}"
         ).toMultiValueMap()
 
     private fun httpHeadersUtenToken() =

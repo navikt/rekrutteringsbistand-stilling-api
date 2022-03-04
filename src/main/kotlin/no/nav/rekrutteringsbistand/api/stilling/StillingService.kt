@@ -22,8 +22,8 @@ class StillingService(
     val kandidatlisteKlient: KandidatlisteKlient,
     val arbeidsplassenKlient: ArbeidsplassenKlient
 ) {
-    fun hentRekrutteringsbistandStilling(stillingsId: String): RekrutteringsbistandStilling {
-        val stilling = arbeidsplassenKlient.hentStilling(stillingsId)
+    fun hentRekrutteringsbistandStilling(stillingsId: String, somSystembruker: Boolean = false): RekrutteringsbistandStilling {
+        val stilling = arbeidsplassenKlient.hentStilling(stillingsId, somSystembruker)
         val stillingsinfo: Option<Stillingsinfo> = stillingsinfoService.hentStillingsinfo(stilling)
 
         return RekrutteringsbistandStilling(

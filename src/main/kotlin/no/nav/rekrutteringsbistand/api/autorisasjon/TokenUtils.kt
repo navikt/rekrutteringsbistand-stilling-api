@@ -4,8 +4,10 @@ import no.nav.security.token.support.core.context.TokenValidationContextHolder
 import org.springframework.stereotype.Component
 
 @Component
-class TokenUtils(private val contextHolder: TokenValidationContextHolder, private val azureKlient: AzureKlient) {
-
+class TokenUtils(
+    private val contextHolder: TokenValidationContextHolder,
+    private val azureKlient: AzureKlient,
+) {
     companion object {
         const val ISSUER_ISSO = "isso"
         const val ISSUER_AZUREAD = "azuread"
@@ -54,7 +56,8 @@ class TokenUtils(private val contextHolder: TokenValidationContextHolder, privat
         }
     }
 
-    fun hentOBOToken(scope: String): String = azureKlient.hentOBOToken(scope, hentToken())
+    fun hentOBOToken(scope: String): String = azureKlient.hentOBOToken(scope, hentNavIdent(), hentToken())
+    fun hentSystemToken(scope: String): String = azureKlient.hentSystemToken(scope)
 }
 
 data class InnloggetVeileder(
