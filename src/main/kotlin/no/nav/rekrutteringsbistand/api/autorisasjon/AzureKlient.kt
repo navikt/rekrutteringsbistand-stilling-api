@@ -10,7 +10,7 @@ import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
 
-const val systembrukerScope = "system"
+const val systembrukerCacheKey = "system"
 
 @Component
 class AzureKlient(
@@ -56,7 +56,7 @@ class AzureKlient(
     }
 
     fun hentSystemToken(scope: String): String {
-        val cachedToken = azureCache.hentOBOToken(scope, systembrukerScope)
+        val cachedToken = azureCache.hentOBOToken(scope, systembrukerCacheKey)
         if (cachedToken != null) {
             return cachedToken
         }
@@ -66,6 +66,11 @@ class AzureKlient(
         }
 
         val form = lagFormForSystemRequest(scope)
+        val loggbarForm = lagFormForSystemRequest(scope).apply {
+            this.set("client_secret", this["client_secret"]?.size.toString())
+        }
+
+        log.info("Kall til Azure sendes for systembruker med form $loggbarForm")
         val response = restTemplate.exchange(
             tokenEndpoint,
             HttpMethod.POST,
@@ -75,7 +80,7 @@ class AzureKlient(
 
         val responseBody = response.body
         if (responseBody != null) {
-            azureCache.lagreOBOToken(scope, systembrukerScope, responseBody)
+            azureCache.lagreOBOToken(scope, systembrukerCacheKey, responseBody)
             return responseBody.access_token
         } else {
             throw Exception("Fikk ikke system-token fra azure")
