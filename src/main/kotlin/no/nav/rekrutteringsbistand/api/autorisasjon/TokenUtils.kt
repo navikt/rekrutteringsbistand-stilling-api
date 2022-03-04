@@ -40,6 +40,11 @@ class TokenUtils(private val contextHolder: TokenValidationContextHolder, privat
         return validToken.tokenAsString
     }
 
+    fun brukerIssoIdToken(): Boolean {
+        val tokenFromIssoIdToken = contextHolder.tokenValidationContext.getJwtToken(ISSUER_ISSO)
+        return tokenFromIssoIdToken !== null;
+    }
+
     fun harInnloggingsContext(): Boolean {
         return try {
             contextHolder.tokenValidationContext

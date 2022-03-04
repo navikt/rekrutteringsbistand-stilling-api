@@ -29,7 +29,7 @@ class ArbeidsplassenKlient(
     @Value("\${scope.forarbeidsplassen}") private val scopeMotArbeidsplassen: String
 ) {
     fun hentStilling(stillingsId: String): Stilling {
-        val url = "${externalConfiguration.stillingApi.url}/b2b/api/v1/ads/$stillingsId"
+        val url = "${hentBaseUrl()}/b2b/api/v1/ads/$stillingsId"
 
         try {
             val respons = restTemplate.exchange(
@@ -67,7 +67,7 @@ class ArbeidsplassenKlient(
 
     fun hentStillingBasertPåAnnonsenr(annonsenr: String): Stilling {
         val url = UriComponentsBuilder
-            .fromHttpUrl("${externalConfiguration.stillingApi.url}/b2b/api/v1/ads")
+            .fromHttpUrl("${hentBaseUrl()}/b2b/api/v1/ads")
             .query("id=${annonsenr}")
             .build()
             .toString()
@@ -92,7 +92,7 @@ class ArbeidsplassenKlient(
 
     fun hentMineStillinger(queryString: String?): Page<Stilling> {
         val url = UriComponentsBuilder
-            .fromHttpUrl("${externalConfiguration.stillingApi.url}/api/v1/ads/rekrutteringsbistand/minestillinger")
+            .fromHttpUrl("${hentBaseUrl()}/api/v1/ads/rekrutteringsbistand/minestillinger")
             .query(queryString)
             .build()
             .toString()
@@ -112,7 +112,7 @@ class ArbeidsplassenKlient(
     }
 
     fun opprettStilling(stilling: OpprettStillingDto): Stilling {
-        val url = "${externalConfiguration.stillingApi.url}/api/v1/ads?classify=true"
+        val url = "${hentBaseUrl()}/api/v1/ads?classify=true"
 
         try {
             val response = restTemplate.exchange(
@@ -129,7 +129,7 @@ class ArbeidsplassenKlient(
     }
 
     fun oppdaterStilling(stilling: Stilling, queryString: String?): Stilling {
-        val url = "${externalConfiguration.stillingApi.url}/api/v1/ads/${stilling.uuid}"
+        val url = "${hentBaseUrl()}/api/v1/ads/${stilling.uuid}"
 
         try {
             val response = restTemplate.exchange(
@@ -146,7 +146,7 @@ class ArbeidsplassenKlient(
     }
 
     fun slettStilling(stillingsId: String): Stilling {
-        val url = "${externalConfiguration.stillingApi.url}/api/v1/ads/$stillingsId"
+        val url = "${hentBaseUrl()}/api/v1/ads/$stillingsId"
 
         try {
             val response = restTemplate.exchange(
@@ -184,11 +184,23 @@ class ArbeidsplassenKlient(
         )
     }
 
+    private fun hentBaseUrl(): String {
+        val skalBrukeFssIngress = tokenUtils.brukerIssoIdToken()
+
+        return if (skalBrukeFssIngress)
+            externalConfiguration.pamAdApiFss.url
+        else externalConfiguration.pamAdApiGcp.url
+    }
+
     private fun httpHeaders() =
         mapOf(
             CONTENT_TYPE to APPLICATION_JSON_VALUE,
             ACCEPT to APPLICATION_JSON_VALUE,
-            AUTHORIZATION to "Bearer ${tokenUtils.hentOBOToken(scopeMotArbeidsplassen)}"
+            AUTHORIZATION to "Bearer ${
+                if (tokenUtils.brukerIssoIdToken()) tokenUtils.hentToken() else tokenUtils.hentOBOToken(
+                    scopeMotArbeidsplassen
+                )
+            }"
         ).toMultiValueMap()
 
     private fun httpHeadersUtenToken() =

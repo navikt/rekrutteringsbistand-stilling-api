@@ -29,7 +29,7 @@ class AzureKlient(
         }
 
         log.info("Kall til Azure sendes med form $loggbarForm")
-        
+
         val response = restTemplate.exchange(
             tokenEndpoint,
             HttpMethod.POST,
