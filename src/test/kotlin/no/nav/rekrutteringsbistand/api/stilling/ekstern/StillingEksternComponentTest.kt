@@ -8,6 +8,7 @@ import com.github.tomakehurst.wiremock.junit.WireMockRule
 import no.nav.rekrutteringsbistand.api.Testdata.enStilling
 import no.nav.rekrutteringsbistand.api.Testdata.enStillingForPersonbruker
 import no.nav.rekrutteringsbistand.api.config.MockLogin
+import no.nav.rekrutteringsbistand.api.mockAzureObo
 import no.nav.rekrutteringsbistand.api.support.toMultiValueMap
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Rule
@@ -37,6 +38,9 @@ internal class StillingEksternComponentTest {
     @get:Rule
     val wiremockKandidatliste = WireMockRule(8766)
 
+    @get:Rule
+    val wiremockAzure = WireMockRule(9954)
+
     @Autowired
     lateinit var mockLogin: MockLogin
 
@@ -57,6 +61,7 @@ internal class StillingEksternComponentTest {
         val stilling = enStilling
 
         mockUtenAuthorization("/b2b/api/v1/ads/${stilling.uuid}", stilling)
+        mockAzureObo(wiremockAzure)
 
         val token = mockLogin.hentAzureAdMaskinTilMaskinToken(clientIdTilVisStilling)
 
