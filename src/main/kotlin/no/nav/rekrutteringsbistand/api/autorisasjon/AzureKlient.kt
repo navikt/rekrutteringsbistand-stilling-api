@@ -3,11 +3,9 @@ package no.nav.rekrutteringsbistand.api.autorisasjon
 import no.nav.rekrutteringsbistand.api.support.log
 import no.nav.rekrutteringsbistand.api.support.toMultiValueMap
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.http.HttpEntity
-import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpMethod
-import org.springframework.http.MediaType
+import org.springframework.http.*
 import org.springframework.stereotype.Component
+import org.springframework.web.client.RestClientException
 import org.springframework.web.client.RestTemplate
 
 const val systembrukerCacheKey = "system"
@@ -66,24 +64,20 @@ class AzureKlient(
         }
 
         val form = lagFormForSystemRequest(scope)
-        val loggbarForm = lagFormForSystemRequest(scope).apply {
-            this.set("client_secret", this["client_secret"]?.size.toString())
-        }
+        log.info("Kall til Azure sendes for systembruker med form $form")
+        try {
+            val response = restTemplate.exchange(
+                tokenEndpoint,
+                HttpMethod.POST,
+                HttpEntity(form, headers),
+                AzureResponse::class.java
+            )
 
-        log.info("Kall til Azure sendes for systembruker med form $loggbarForm")
-        val response = restTemplate.exchange(
-            tokenEndpoint,
-            HttpMethod.POST,
-            HttpEntity(form, headers),
-            AzureResponse::class.java
-        )
-
-        val responseBody = response.body
-        if (responseBody != null) {
+            val responseBody = response.body!!
             azureCache.lagreOBOToken(scope, systembrukerCacheKey, responseBody)
             return responseBody.access_token
-        } else {
-            throw Exception("Fikk ikke system-token fra azure")
+        } catch (exception: RestClientException) {
+            throw Exception("Fikk ikke system-token fra azure:", exception)
         }
     }
 
@@ -107,4 +101,9 @@ class AzureKlient(
 data class AzureResponse(
     val access_token: String,
     val expires_in: Int,
+)
+
+data class AzureFailureResponse(
+    val error: String,
+    val error_description: Int,
 )
