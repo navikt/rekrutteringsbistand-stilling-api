@@ -32,7 +32,7 @@ internal class StillingEksternComponentTest {
     private val clientIdTilVisStilling: String = ""
 
     @get:Rule
-    val wiremock = WireMockRule(9914)
+    val wiremock = WireMockRule(9934)
 
     @get:Rule
     val wiremockKandidatliste = WireMockRule(8766)

@@ -20,7 +20,7 @@ import org.springframework.test.context.junit4.SpringRunner
 internal class OrganisasjonssøkTest {
 
     @get:Rule
-    val wiremock = WireMockRule(WireMockConfiguration.options().port(9934))
+    val wiremock = WireMockRule(WireMockConfiguration.options().port(9914))
 
     @get:Rule
     val wiremockAzure = WireMockRule(9954)
