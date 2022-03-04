@@ -35,7 +35,7 @@ class ArbeidsplassenKlient(
             val respons = restTemplate.exchange(
                 url,
                 HttpMethod.GET,
-                HttpEntity(null, httpHeadersUtenToken()),
+                HttpEntity(null, httpHeaders()),
                 Stilling::class.java
             )
             return respons.body ?: throw kunneIkkeTolkeBodyException()
