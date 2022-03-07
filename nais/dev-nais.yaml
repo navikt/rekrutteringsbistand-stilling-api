@@ -36,6 +36,7 @@ spec:
           cluster: dev-gcp
         - application: rekrutteringsbistand-stilling-indekser
           cluster: dev-gcp
+          namespace: toi
         - application: rekrutteringsbistand-container
           namespace: toi
           cluster: dev-gcp
