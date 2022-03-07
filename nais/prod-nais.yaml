@@ -40,6 +40,9 @@ spec:
         - application: rekrutteringsbistand-container
           namespace: toi
           cluster: prod-gcp
+        - application: rekrutteringsbistand-kandidat-api
+          namespace: toi
+          cluster: prod-fss
   webproxy: true
   env:
     - name: SPRING_PROFILES_ACTIVE
