@@ -9,9 +9,12 @@ no.nav.security.jwt:
     accepted_audience: ${AZURE_APP_CLIENT_ID}
     proxyurl: http://webproxy.nais:8088
 
+scope:
+  forarbeidsplassen: api://dev-gcp.teampam.pam-ad-api/.default
+
 external:
-  stilling-api.url: https://pam-ad-api.nais.preprod.local
-  sok-api.url: https://pam-ad-api.nais.preprod.local
+  pam-ad-api-fss.url: https://pam-ad-api.nais.preprod.local
+  pam-ad-api-gcp.url: https://pam-ad-api.dev.intern.nav.no/adapi
   kandidatliste-api.url: https://rekrutteringsbistand-kandidat-api.nais.preprod.local/rekrutteringsbistand-kandidat-api/rest/veileder/stilling
   unleash.url: https://unleash.nais.io/api/
 

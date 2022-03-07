@@ -1,12 +1,13 @@
 package no.nav.rekrutteringsbistand.api.autorisasjon
 
-import java.util.*
 import no.nav.security.token.support.core.context.TokenValidationContextHolder
 import org.springframework.stereotype.Component
 
 @Component
-class TokenUtils(private val contextHolder: TokenValidationContextHolder) {
-
+class TokenUtils(
+    private val contextHolder: TokenValidationContextHolder,
+    private val azureKlient: AzureKlient,
+) {
     companion object {
         const val ISSUER_ISSO = "isso"
         const val ISSUER_AZUREAD = "azuread"
@@ -19,7 +20,6 @@ class TokenUtils(private val contextHolder: TokenValidationContextHolder) {
         val validClaims = claimsFromIssoIdToken ?: claimsFromAzureAdToken;
         return validClaims.run {
             InnloggetVeileder(
-                userName = getStringClaim("unique_name"),
                 displayName = getStringClaim("name"),
                 navIdent = getStringClaim("NAVident")
             )
@@ -34,14 +34,18 @@ class TokenUtils(private val contextHolder: TokenValidationContextHolder) {
         return validClaims.getStringClaim("NAVident")
     }
 
-    fun tokenUtløper(): Boolean {
-        val hasValidToken = contextHolder.tokenValidationContext.hasTokenFor(ISSUER_ISSO)
-        val expirationTime = contextHolder.tokenValidationContext.getClaims(ISSUER_ISSO).expirationTime
-        val inFiveMinutes = Date(System.currentTimeMillis() + 5 * 60000)
-        return hasValidToken && inFiveMinutes.after(expirationTime)
+    fun hentToken(): String {
+        val tokenFromIssoIdToken = contextHolder.tokenValidationContext.getJwtToken(ISSUER_ISSO)
+        val tokenFromAzureAdToken = contextHolder.tokenValidationContext.getJwtToken(ISSUER_AZUREAD)
+
+        val validToken = tokenFromIssoIdToken ?: tokenFromAzureAdToken
+        return validToken.tokenAsString
     }
 
-    fun hentOidcToken(): String = contextHolder.tokenValidationContext.getJwtToken(ISSUER_ISSO).tokenAsString
+    fun brukerIssoIdToken(): Boolean {
+        val tokenFromIssoIdToken = contextHolder.tokenValidationContext.getJwtToken(ISSUER_ISSO)
+        return tokenFromIssoIdToken !== null;
+    }
 
     fun harInnloggingsContext(): Boolean {
         return try {
@@ -51,10 +55,12 @@ class TokenUtils(private val contextHolder: TokenValidationContextHolder) {
             false
         }
     }
+
+    fun hentOBOToken(scope: String): String = azureKlient.hentOBOToken(scope, hentNavIdent(), hentToken())
+    fun hentSystemToken(scope: String): String = azureKlient.hentSystemToken(scope)
 }
 
 data class InnloggetVeileder(
-        val userName: String,
         val displayName: String,
         val navIdent: String
 )

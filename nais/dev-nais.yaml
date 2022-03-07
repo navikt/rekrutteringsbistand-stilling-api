@@ -36,14 +36,10 @@ spec:
           cluster: dev-gcp
         - application: rekrutteringsbistand-stilling-indekser
           cluster: dev-gcp
-          namespace: toi
-        - application: rekrutteringsbistand-stillingssok
-          namespace: toi
-          cluster: dev-gcp
         - application: rekrutteringsbistand-container
           namespace: toi
           cluster: dev-gcp
-  webproxy: false
+  webproxy: true
   env:
     - name: SPRING_PROFILES_ACTIVE
       value: dev

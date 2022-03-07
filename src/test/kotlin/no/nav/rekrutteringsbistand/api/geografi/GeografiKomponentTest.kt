@@ -3,6 +3,7 @@ package no.nav.rekrutteringsbistand.api.geografi
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.github.tomakehurst.wiremock.junit.WireMockRule
+import no.nav.rekrutteringsbistand.api.mockAzureObo
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Rule
@@ -12,6 +13,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.test.context.junit4.SpringRunner
@@ -23,6 +25,9 @@ internal class GeografiKomponentTest {
     @get:Rule
     val wiremock = WireMockRule(WireMockConfiguration.options().port(9914))
 
+    @get:Rule
+    val wiremockAzure = WireMockRule(9954)
+
     @LocalServerPort
     private var port = 0
 
@@ -33,6 +38,7 @@ internal class GeografiKomponentTest {
     @Before
     fun authenticateClient() {
         restTemplate.getForObject("$localBaseUrl/veileder-token-cookie", Unit::class.java)
+        mockAzureObo(wiremockAzure)
     }
 
     @Test
@@ -47,11 +53,13 @@ internal class GeografiKomponentTest {
     @Test
     fun `GET mot countries skal returnere HTTP 200 med land`() {
         mockString("/api/v1/geography/countries", landResponsBody)
+
         restTemplate.getForEntity("$localBaseUrl/rekrutteringsbistand/api/v1/geography/countries", String::class.java).also {
             assertThat(it.statusCode).isEqualTo(HttpStatus.OK)
             assertThat(it.body).isEqualTo(landResponsBody)
         }
     }
+
 
     @Test
     fun `GET mot municipals skal returnere HTTP 200 med kommuner`() {
@@ -79,7 +87,6 @@ internal class GeografiKomponentTest {
             assertThat(it.body).isEqualTo(postnumreJson)
         }
     }
-
 
     private fun mockString(urlPath: String, responseBody: String) {
         wiremock.stubFor(

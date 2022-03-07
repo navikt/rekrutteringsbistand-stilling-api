@@ -5,6 +5,8 @@ import no.nav.rekrutteringsbistand.api.support.log
 import no.nav.rekrutteringsbistand.api.support.config.ExternalConfiguration
 import no.nav.rekrutteringsbistand.api.support.toMultiValueMap
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import no.nav.security.token.support.core.api.RequiredIssuers
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.*
 import org.springframework.util.MultiValueMap
 import org.springframework.web.bind.annotation.GetMapping
@@ -17,59 +19,65 @@ import java.net.URI
 import javax.servlet.http.HttpServletRequest
 
 @RestController
-@ProtectedWithClaims(issuer = "isso")
+@RequiredIssuers(
+    value = [
+        ProtectedWithClaims(issuer = "isso"),
+        ProtectedWithClaims(issuer = "azuread")
+    ]
+)
 class ProxyTilArbeidsplassen(
     val restTemplate: RestTemplate,
     val externalConfiguration: ExternalConfiguration,
-    val tokenUtils: TokenUtils
+    val tokenUtils: TokenUtils,
+    @Value("\${scope.forarbeidsplassen}") private val scopeMotArbeidsplassen: String
 ) {
 
     @GetMapping("/rekrutteringsbistand/api/v1/geography/municipals")
     fun proxyGetMunicipals(request: HttpServletRequest): ResponseEntity<String> {
         log.debug("Mottok ${request.method} til ${request.requestURI}")
-        val respons = proxyJsonRequest(HttpMethod.GET, request, replaceRekrutteringsbistandInUrl, null, externalConfiguration.stillingApi.url)
+        val respons = proxyJsonRequest(HttpMethod.GET, request, replaceRekrutteringsbistandInUrl, null, hentBaseUrl())
         return ResponseEntity(respons.body, respons.statusCode)
     }
 
     @GetMapping("/rekrutteringsbistand/api/v1/geography/counties")
     fun proxyGetCounties(request: HttpServletRequest): ResponseEntity<String> {
         log.debug("Mottok ${request.method} til ${request.requestURI}")
-        val respons = proxyJsonRequest(HttpMethod.GET, request, replaceRekrutteringsbistandInUrl, null, externalConfiguration.stillingApi.url)
+        val respons = proxyJsonRequest(HttpMethod.GET, request, replaceRekrutteringsbistandInUrl, null, hentBaseUrl())
         return ResponseEntity(respons.body, respons.statusCode)
     }
 
     @GetMapping("/rekrutteringsbistand/api/v1/geography/countries")
     fun proxyGetCountries(request: HttpServletRequest): ResponseEntity<String> {
         log.debug("Mottok ${request.method} til ${request.requestURI}")
-        val respons = proxyJsonRequest(HttpMethod.GET, request, replaceRekrutteringsbistandInUrl, null, externalConfiguration.stillingApi.url)
+        val respons = proxyJsonRequest(HttpMethod.GET, request, replaceRekrutteringsbistandInUrl, null, hentBaseUrl())
         return ResponseEntity(respons.body, respons.statusCode)
     }
 
     @GetMapping("/rekrutteringsbistand/api/v1/categories-with-altnames")
     fun proxyGetCategoriesWithAltnames(request: HttpServletRequest): ResponseEntity<String> {
         log.debug("Mottok ${request.method} til ${request.requestURI}")
-        val respons = proxyJsonRequest(HttpMethod.GET, request, replaceRekrutteringsbistandInUrl, null, externalConfiguration.stillingApi.url)
+        val respons = proxyJsonRequest(HttpMethod.GET, request, replaceRekrutteringsbistandInUrl, null, hentBaseUrl())
         return ResponseEntity(respons.body, respons.statusCode)
     }
 
     @GetMapping("/rekrutteringsbistand/api/v1/postdata")
     fun proxyGetPostdata(request: HttpServletRequest): ResponseEntity<String> {
         log.debug("Mottok ${request.method} til ${request.requestURI}")
-        val respons = proxyJsonRequest(HttpMethod.GET, request, replaceRekrutteringsbistandInUrl, null, externalConfiguration.stillingApi.url)
+        val respons = proxyJsonRequest(HttpMethod.GET, request, replaceRekrutteringsbistandInUrl, null, hentBaseUrl())
         return ResponseEntity(respons.body, respons.statusCode)
     }
 
     @GetMapping("/search-api/underenhet/_search")
     private fun getSokTilPamAdApi(request: HttpServletRequest): ResponseEntity<String> {
         log.debug("Mottok ${request.method} til ${request.requestURI}")
-        val respons = proxyJsonRequest(HttpMethod.GET, request, "", null, externalConfiguration.sokApi.url)
+        val respons = proxyJsonRequest(HttpMethod.GET, request, "", null, hentBaseUrl())
         return ResponseEntity(respons.body, respons.statusCode)
     }
 
     @PostMapping("/search-api/underenhet/_search")
     private fun postSokTilPamAdApi(request: HttpServletRequest, @RequestBody requestBody: String): ResponseEntity<String> {
         log.debug("Mottok ${request.method} til ${request.requestURI}")
-        val respons = proxyJsonRequest(HttpMethod.POST, request, "", requestBody, externalConfiguration.sokApi.url)
+        val respons = proxyJsonRequest(HttpMethod.POST, request, "", requestBody, hentBaseUrl())
         return ResponseEntity(respons.body, respons.statusCode)
     }
 
@@ -90,11 +98,23 @@ class ProxyTilArbeidsplassen(
         )
     }
 
+    private fun hentBaseUrl(): String {
+        val skalBrukeFssIngress = tokenUtils.brukerIssoIdToken()
+
+        return if (skalBrukeFssIngress)
+            externalConfiguration.pamAdApiFss.url
+        else externalConfiguration.pamAdApiGcp.url
+    }
+
     private fun proxyHeaders(): MultiValueMap<String, String> =
         mapOf(
             HttpHeaders.CONTENT_TYPE to MediaType.APPLICATION_JSON_VALUE,
             HttpHeaders.ACCEPT to MediaType.APPLICATION_JSON_VALUE,
-            HttpHeaders.AUTHORIZATION to "Bearer ${tokenUtils.hentOidcToken()}"
+            HttpHeaders.AUTHORIZATION to "Bearer ${
+                if (tokenUtils.brukerIssoIdToken()) tokenUtils.hentToken() else tokenUtils.hentOBOToken(
+                    scopeMotArbeidsplassen
+                )
+            }"
         ).toMultiValueMap()
 
     private fun buildProxyTargetUrl(request: HttpServletRequest, stripPrefix: String, targetUrl: String): URI {
