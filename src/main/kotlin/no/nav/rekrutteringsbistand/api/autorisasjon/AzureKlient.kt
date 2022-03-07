@@ -30,10 +30,6 @@ class AzureKlient(
 
         val form = lagFormForOboRequest(scope, assertionToken)
 
-        val loggbarForm = lagFormForOboRequest(scope, assertionToken.split(".")[1]).apply {
-            this.set("client_secret", this["client_secret"]?.size.toString())
-        }
-
         val response = restTemplate.exchange(
             tokenEndpoint,
             HttpMethod.POST,
