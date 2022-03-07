@@ -34,7 +34,6 @@ class AzureKlient(
             this.set("client_secret", this["client_secret"]?.size.toString())
         }
 
-        log.info("Kall til Azure sendes med form $loggbarForm")
         val response = restTemplate.exchange(
             tokenEndpoint,
             HttpMethod.POST,
@@ -42,7 +41,6 @@ class AzureKlient(
             AzureResponse::class.java
         )
 
-        log.info("Kall til Azure for OBO-token ga response ${response.statusCode}")
         val responseBody = response.body
 
         if (responseBody != null) {
@@ -64,7 +62,6 @@ class AzureKlient(
         }
 
         val form = lagFormForSystemRequest(scope)
-        log.info("Kall til Azure sendes for systembruker med form $form")
         try {
             val response = restTemplate.exchange(
                 tokenEndpoint,
