@@ -5,6 +5,7 @@ import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsid
 import no.nav.rekrutteringsbistand.api.support.log
 import no.nav.rekrutteringsbistand.api.support.config.ExternalConfiguration
 import no.nav.rekrutteringsbistand.api.support.toMultiValueMap
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.*
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
@@ -13,9 +14,11 @@ import java.net.URI
 
 @Component
 class KandidatlisteKlient(
-    val restTemplate: RestTemplate,
-    val externalConfiguration: ExternalConfiguration,
-    val tokenUtils: TokenUtils,
+    private val restTemplate: RestTemplate,
+    private val externalConfiguration: ExternalConfiguration,
+    private val tokenUtils: TokenUtils,
+    @Value("\${scope.kandidat-api}")
+    private val scopeTilKandidatApi: String
 ) {
 
     fun varsleOmOppdatertStilling(stillingsid: Stillingsid): ResponseEntity<Void> {
@@ -46,6 +49,7 @@ class KandidatlisteKlient(
         mapOf(
             HttpHeaders.CONTENT_TYPE to MediaType.APPLICATION_JSON_VALUE,
             HttpHeaders.ACCEPT to MediaType.APPLICATION_JSON_VALUE,
-            HttpHeaders.AUTHORIZATION to "Bearer ${tokenUtils.hentToken()}"
+            HttpHeaders.AUTHORIZATION to "Bearer ${if (tokenUtils.brukerIssoIdToken()) tokenUtils.hentToken() else tokenUtils.hentOBOToken(
+                scopeTilKandidatApi)}"
         ).toMultiValueMap()
 }

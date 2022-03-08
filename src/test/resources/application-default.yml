@@ -19,6 +19,7 @@ AZURE_APP_CLIENT_SECRET: placeholder
 
 scope:
   forarbeidsplassen: placeholder
+  kandidat-api: placeholder
 
 external:
   pam-ad-api-fss.url: http://localhost:9914

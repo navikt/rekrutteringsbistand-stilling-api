@@ -11,6 +11,7 @@ no.nav.security.jwt:
 
 scope:
   forarbeidsplassen: api://prod-gcp.teampam.pam-ad-api/.default
+  kandidat-api: api://prod-fss.toi.rekrutteringsbistand-kandidat-api/.default
 
 external:
   pam-ad-api-fss.url: https://pam-ad-api.nais.adeo.no
