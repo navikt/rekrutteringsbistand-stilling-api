@@ -1,6 +1,5 @@
 package no.nav.rekrutteringsbistand.api.arbeidsplassen
 
-import no.nav.rekrutteringsbistand.api.autorisasjon.AzureKlient
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
 import no.nav.rekrutteringsbistand.api.stilling.Page
 import no.nav.rekrutteringsbistand.api.stilling.Stilling
@@ -16,9 +15,9 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatus.*
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.stereotype.Component
-import org.springframework.util.MultiValueMap
 import org.springframework.web.client.RestClientResponseException
 import org.springframework.web.client.RestTemplate
+import org.springframework.web.client.UnknownContentTypeException
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.util.UriComponentsBuilder
 
@@ -160,7 +159,8 @@ class ArbeidsplassenKlient(
                 Stilling::class.java
             )
             return response.body ?: throw kunneIkkeTolkeBodyException()
-
+        } catch (e: UnknownContentTypeException) {
+            throw kunneIkkeTolkeBodyException(e)
         } catch (exception: RestClientResponseException) {
             throw svarMedFeilmelding("Klarte ikke å slette stilling hos arbeidsplassen", url, exception)
         }
@@ -178,13 +178,14 @@ class ArbeidsplassenKlient(
             else -> log.error(logMsg, exception)
             // 412 får vi når noen prøver å endre en stilling, men en annen har endret stillingen samtidig. pam-ad sjekker “updated”-timestampen i databasen og sørger for at “updated”-timestampen som kommer inn ikke er eldre enn den som er lagret
         }
-        return ResponseStatusException(HttpStatus.valueOf(exception.rawStatusCode), melding)
+        return ResponseStatusException(valueOf(exception.rawStatusCode), melding)
     }
 
-    private fun kunneIkkeTolkeBodyException(): ResponseStatusException {
+    private fun kunneIkkeTolkeBodyException(cause: Throwable? = null): ResponseStatusException {
         return ResponseStatusException(
             INTERNAL_SERVER_ERROR,
-            "Klarte ikke å tolke respons fra Arbeidsplassen"
+            "Klarte ikke å tolke respons fra Arbeidsplassen",
+            cause
         )
     }
 
