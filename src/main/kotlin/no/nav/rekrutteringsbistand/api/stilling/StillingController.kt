@@ -3,6 +3,7 @@ package no.nav.rekrutteringsbistand.api.stilling
 import no.nav.rekrutteringsbistand.api.RekrutteringsbistandStilling
 import no.nav.rekrutteringsbistand.api.OppdaterRekrutteringsbistandStillingDto
 import no.nav.rekrutteringsbistand.api.arbeidsplassen.OpprettRekrutteringsbistandstillingDto
+import no.nav.security.token.support.core.api.Protected
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.security.token.support.core.api.RequiredIssuers
 import org.springframework.http.ResponseEntity
@@ -14,12 +15,7 @@ import javax.servlet.http.HttpServletRequest
 
 
 @RestController
-@RequiredIssuers(
-    value = [
-        ProtectedWithClaims(issuer = "isso"),
-        ProtectedWithClaims(issuer = "azuread")
-    ]
-)
+@Protected
 class StillingController(val stillingService: StillingService) {
 
     @PostMapping("/rekrutteringsbistandstilling")

@@ -2,20 +2,14 @@ package no.nav.rekrutteringsbistand.api.stillingsinfo
 
 import no.nav.rekrutteringsbistand.api.arbeidsplassen.ArbeidsplassenKlient
 import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteKlient
-import no.nav.security.token.support.core.api.ProtectedWithClaims
-import no.nav.security.token.support.core.api.RequiredIssuers
+import no.nav.security.token.support.core.api.Protected
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/stillingsinfo")
-@RequiredIssuers(
-    value = [
-        ProtectedWithClaims(issuer = "isso"),
-        ProtectedWithClaims(issuer = "azuread")
-    ]
-)
+@Protected
 class StillingsinfoController(
     val repo: StillingsinfoRepository,
     val service: StillingsinfoService,

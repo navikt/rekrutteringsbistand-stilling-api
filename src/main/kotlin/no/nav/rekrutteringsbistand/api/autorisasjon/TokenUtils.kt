@@ -9,16 +9,13 @@ class TokenUtils(
     private val azureKlient: AzureKlient,
 ) {
     companion object {
-        const val ISSUER_ISSO = "isso"
         const val ISSUER_AZUREAD = "azuread"
     }
 
     fun hentInnloggetVeileder(): InnloggetVeileder {
-        val claimsFromIssoIdToken = contextHolder.tokenValidationContext.getClaims(ISSUER_ISSO)
-        val claimsFromAzureAdToken = contextHolder.tokenValidationContext.getClaims(ISSUER_AZUREAD)
+        val claims = contextHolder.tokenValidationContext.getClaims(ISSUER_AZUREAD)
 
-        val validClaims = claimsFromIssoIdToken ?: claimsFromAzureAdToken;
-        return validClaims.run {
+        return claims.run {
             InnloggetVeileder(
                 displayName = getStringClaim("name"),
                 navIdent = getStringClaim("NAVident")
@@ -27,24 +24,13 @@ class TokenUtils(
     }
 
     fun hentNavIdent(): String {
-        val claimsFromIssoIdToken = contextHolder.tokenValidationContext.getClaims(ISSUER_ISSO)
-        val claimsFromAzureAdToken = contextHolder.tokenValidationContext.getClaims(ISSUER_AZUREAD)
-
-        val validClaims = claimsFromIssoIdToken ?: claimsFromAzureAdToken
-        return validClaims.getStringClaim("NAVident")
+        val claims = contextHolder.tokenValidationContext.getClaims(ISSUER_AZUREAD)
+        return claims.getStringClaim("NAVident")
     }
 
     fun hentToken(): String {
-        val tokenFromIssoIdToken = contextHolder.tokenValidationContext.getJwtToken(ISSUER_ISSO)
-        val tokenFromAzureAdToken = contextHolder.tokenValidationContext.getJwtToken(ISSUER_AZUREAD)
-
-        val validToken = tokenFromIssoIdToken ?: tokenFromAzureAdToken
-        return validToken.tokenAsString
-    }
-
-    fun brukerIssoIdToken(): Boolean {
-        val tokenFromIssoIdToken = contextHolder.tokenValidationContext.getJwtToken(ISSUER_ISSO)
-        return tokenFromIssoIdToken !== null;
+        val token = contextHolder.tokenValidationContext.getJwtToken(ISSUER_AZUREAD)
+        return token.tokenAsString
     }
 
     fun harInnloggingsContext(): Boolean {

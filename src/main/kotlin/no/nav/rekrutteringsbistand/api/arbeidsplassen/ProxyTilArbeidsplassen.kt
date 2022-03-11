@@ -98,23 +98,13 @@ class ProxyTilArbeidsplassen(
         )
     }
 
-    private fun hentBaseUrl(): String {
-        val skalBrukeFssIngress = tokenUtils.brukerIssoIdToken()
-
-        return if (skalBrukeFssIngress)
-            externalConfiguration.pamAdApiFss.url
-        else externalConfiguration.pamAdApiGcp.url
-    }
+    private fun hentBaseUrl(): String = externalConfiguration.pamAdApiGcp.url
 
     private fun proxyHeaders(): MultiValueMap<String, String> =
         mapOf(
             HttpHeaders.CONTENT_TYPE to MediaType.APPLICATION_JSON_VALUE,
             HttpHeaders.ACCEPT to MediaType.APPLICATION_JSON_VALUE,
-            HttpHeaders.AUTHORIZATION to "Bearer ${
-                if (tokenUtils.brukerIssoIdToken()) tokenUtils.hentToken() else tokenUtils.hentOBOToken(
-                    scopeMotArbeidsplassen
-                )
-            }"
+            HttpHeaders.AUTHORIZATION to "Bearer ${tokenUtils.hentOBOToken(scopeMotArbeidsplassen)}"
         ).toMultiValueMap()
 
     private fun buildProxyTargetUrl(request: HttpServletRequest, stripPrefix: String, targetUrl: String): URI {

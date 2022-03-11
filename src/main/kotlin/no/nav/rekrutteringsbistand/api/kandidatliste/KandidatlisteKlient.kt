@@ -49,7 +49,6 @@ class KandidatlisteKlient(
         mapOf(
             HttpHeaders.CONTENT_TYPE to MediaType.APPLICATION_JSON_VALUE,
             HttpHeaders.ACCEPT to MediaType.APPLICATION_JSON_VALUE,
-            HttpHeaders.AUTHORIZATION to "Bearer ${if (tokenUtils.brukerIssoIdToken()) tokenUtils.hentToken() else tokenUtils.hentOBOToken(
-                scopeTilKandidatApi)}"
+            HttpHeaders.AUTHORIZATION to "Bearer ${tokenUtils.hentOBOToken(scopeTilKandidatApi)}"
         ).toMultiValueMap()
 }
