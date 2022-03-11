@@ -42,7 +42,8 @@ class ArbeidsplassenKlient(
                 Stilling::class.java
             )
             return respons.body ?: throw kunneIkkeTolkeBodyException()
-
+        } catch (e: UnknownContentTypeException) {
+            throw kunneIkkeTolkeBodyException(e)
         } catch (exception: RestClientResponseException) {
             throw svarMedFeilmelding(
                 "Klarte ikke hente stillingen med stillingsId $stillingsId fra Arbeidsplassen",
