@@ -11,10 +11,10 @@ import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders.*
 import org.springframework.http.HttpMethod
-import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatus.*
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.stereotype.Component
+import org.springframework.web.client.RestClientException
 import org.springframework.web.client.RestClientResponseException
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.client.UnknownContentTypeException
@@ -110,8 +110,14 @@ class ArbeidsplassenKlient(
             )
             return response.body ?: throw kunneIkkeTolkeBodyException()
 
-        } catch (exception: RestClientResponseException) {
-            throw svarMedFeilmelding("Klarte ikke hente mine stillinger fra Arbeidsplassen", url, exception)
+        } catch (e: RestClientResponseException) {
+            throw svarMedFeilmelding("Klarte ikke hente mine stillinger fra Arbeidsplassen", url, e)
+        } catch (e: RestClientException) {
+            throw ResponseStatusException(
+                INTERNAL_SERVER_ERROR,
+                "Klarte ikke hente mine stillinger fra Arbeidsplassen",
+                e
+            );
         }
     }
 
