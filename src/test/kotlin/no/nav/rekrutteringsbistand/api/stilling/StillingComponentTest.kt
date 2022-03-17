@@ -109,7 +109,7 @@ internal class StillingComponentTest {
         val stilling = enStilling
         val page = Page(
             content = listOf(stilling),
-            totalPages = 1,ARBEIDS
+            totalPages = 1,
             totalElements = 1
         )
         val stillingsinfo = enStillingsinfo.copy(stillingsid = Stillingsid(stilling.uuid))
