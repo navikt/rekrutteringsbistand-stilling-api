@@ -16,6 +16,7 @@ import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.test.context.junit4.SpringRunner
+import org.springframework.web.client.RestTemplate
 import java.time.LocalDateTime
 
 @RunWith(SpringRunner::class)
@@ -33,11 +34,11 @@ class StandardsøkTest {
 
     val localBaseUrl by lazy { "http://localhost:$port" }
 
-    private val restTemplate = TestRestTemplate(TestRestTemplate.HttpClientOption.ENABLE_COOKIES)
+    private val restTemplate = RestTemplate()
 
     @Before
     fun authenticateClient() {
-        restTemplate.getForObject("$localBaseUrl/veileder-token-cookie", Unit::class.java)
+        mockLogin.leggAzureVeilederTokenPåAlleRequests(restTemplate)
     }
 
     @Test

@@ -8,6 +8,7 @@ import no.nav.rekrutteringsbistand.api.TestRepository
 import no.nav.rekrutteringsbistand.api.Testdata.enStillingsinfoInboundDto
 import no.nav.rekrutteringsbistand.api.Testdata.enStillingsinfo
 import no.nav.rekrutteringsbistand.api.arbeidsplassen.ArbeidsplassenKlient
+import no.nav.rekrutteringsbistand.api.config.MockLogin
 import no.nav.rekrutteringsbistand.api.support.toMultiValueMap
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.fail
@@ -32,6 +33,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatus.NO_CONTENT
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.test.context.junit4.SpringRunner
+import org.springframework.web.client.RestTemplate
 
 @RunWith(SpringRunner::class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -45,7 +47,10 @@ class StillingsinfoComponentTest {
 
     val localBaseUrl by lazy { "http://localhost:$port" }
 
-    val restTemplate = TestRestTemplate(ENABLE_COOKIES)
+    @Autowired
+    lateinit var mockLogin: MockLogin
+
+    private val restTemplate = RestTemplate()
 
     @MockBean
     lateinit var arbeidsplassenKlient: ArbeidsplassenKlient
@@ -58,7 +63,7 @@ class StillingsinfoComponentTest {
 
     @Before
     fun authenticateClient() {
-        restTemplate.getForObject("$localBaseUrl/veileder-token-cookie", Unit::class.java)
+        mockLogin.leggAzureVeilederTokenPåAlleRequests(restTemplate)
     }
 
     @Test

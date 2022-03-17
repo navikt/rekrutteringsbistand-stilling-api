@@ -17,6 +17,7 @@ import no.nav.rekrutteringsbistand.api.Testdata.enRekrutteringsbistandStillingUt
 import no.nav.rekrutteringsbistand.api.Testdata.enStilling
 import no.nav.rekrutteringsbistand.api.Testdata.enStillingsinfo
 import no.nav.rekrutteringsbistand.api.Testdata.enStillingsinfoUtenEier
+import no.nav.rekrutteringsbistand.api.config.MockLogin
 import no.nav.rekrutteringsbistand.api.mockAzureObo
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingskategori
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsid
@@ -26,17 +27,16 @@ import org.junit.*
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders.*
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
-import org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED_VALUE
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.http.ResponseEntity
 import org.springframework.test.context.junit4.SpringRunner
+import org.springframework.web.client.RestTemplate
 
 @RunWith(SpringRunner::class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -62,7 +62,10 @@ internal class StillingComponentTest {
     @Autowired
     lateinit var testRepository: TestRepository
 
-    private val restTemplate = TestRestTemplate(TestRestTemplate.HttpClientOption.ENABLE_COOKIES)
+    @Autowired
+    lateinit var mockLogin: MockLogin
+
+    private val restTemplate = RestTemplate()
 
     val objectMapper = ObjectMapper()
             .registerModule(JavaTimeModule())
@@ -70,7 +73,7 @@ internal class StillingComponentTest {
 
     @Before
     fun authenticateClient() {
-        restTemplate.getForObject("$localBaseUrl/veileder-token-cookie", Unit::class.java)
+        mockLogin.leggAzureVeilederTokenPåAlleRequests(restTemplate)
     }
 
     @Test
@@ -79,7 +82,7 @@ internal class StillingComponentTest {
         mockUtenAuthorization("/b2b/api/v1/ads/${stilling.uuid}", stilling)
 
         restTemplate.getForObject("$localBaseUrl/rekrutteringsbistandstilling/${stilling.uuid}", RekrutteringsbistandStilling::class.java).also {
-            assertThat(it.stillingsinfo).isNull()
+            assertThat(it!!.stillingsinfo).isNull()
             assertThat(it.stilling).isEqualTo(stilling)
         }
     }
@@ -94,7 +97,7 @@ internal class StillingComponentTest {
         repository.opprett(stillingsinfo)
 
         restTemplate.getForObject("$localBaseUrl/rekrutteringsbistandstilling/${stilling.uuid}", RekrutteringsbistandStilling::class.java).also {
-            assertThat(it.stilling).isEqualTo(stilling)
+            assertThat(it!!.stilling).isEqualTo(stilling)
             assertThat(it.stillingsinfo).isEqualTo(stillingsinfo.asStillingsinfoDto())
         }
     }
@@ -106,7 +109,7 @@ internal class StillingComponentTest {
         val stilling = enStilling
         val page = Page(
             content = listOf(stilling),
-            totalPages = 1,
+            totalPages = 1,ARBEIDS
             totalElements = 1
         )
         val stillingsinfo = enStillingsinfo.copy(stillingsid = Stillingsid(stilling.uuid))
@@ -117,7 +120,7 @@ internal class StillingComponentTest {
         mockAzureObo(wiremockAzure)
 
         restTemplate.getForObject("$localBaseUrl/rekrutteringsbistandstilling/annonsenr/${stilling.id}", RekrutteringsbistandStilling::class.java).also {
-            assertThat(it.stillingsinfo).isEqualTo(stillingsinfo.asStillingsinfoDto())
+            assertThat(it!!.stillingsinfo).isEqualTo(stillingsinfo.asStillingsinfoDto())
             assertThat(it.stilling).isEqualTo(stilling)
         }
     }
@@ -136,7 +139,7 @@ internal class StillingComponentTest {
             RekrutteringsbistandStilling::class.java
         ).also {
             val stilling = rekrutteringsbistandStilling.stilling
-            assertThat(it.stilling.title).isEqualTo(stilling.title)
+            assertThat(it!!.stilling.title).isEqualTo(stilling.title)
             assertThat(it.stilling.administration?.navIdent).isEqualTo(stilling.administration.navIdent)
             assertThat(it.stilling.administration?.reportee).isEqualTo(stilling.administration.reportee)
             assertThat(it.stilling.administration?.status).isEqualTo(stilling.administration.status)

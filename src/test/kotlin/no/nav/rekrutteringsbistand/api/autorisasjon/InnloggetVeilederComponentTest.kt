@@ -1,14 +1,24 @@
 package no.nav.rekrutteringsbistand.api.autorisasjon
 
 import no.nav.rekrutteringsbistand.api.Testdata.enVeileder
+import no.nav.rekrutteringsbistand.api.config.MockLogin
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.boot.web.server.LocalServerPort
+import org.springframework.http.HttpEntity
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpMethod
+import org.springframework.http.HttpRequest
+import org.springframework.http.client.ClientHttpRequestExecution
+import org.springframework.http.client.ClientHttpRequestInterceptor
+import org.springframework.http.client.ClientHttpResponse
 import org.springframework.test.context.junit4.SpringRunner
+import org.springframework.web.client.RestTemplate
 
 @RunWith(SpringRunner::class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -17,13 +27,16 @@ internal class InnloggetVeilederComponentTest {
     @LocalServerPort
     var port = 0
 
-    private fun localBaseUrl(): String = "http://localhost:$port"
+    @Autowired
+    lateinit var mockLogin: MockLogin
 
-    private val restTemplate = TestRestTemplate(TestRestTemplate.HttpClientOption.ENABLE_COOKIES)
+    private val restTemplate = RestTemplate()
+
+    private fun localBaseUrl(): String = "http://localhost:$port"
 
     @Before
     fun authenticateClient() {
-        restTemplate.getForEntity("${localBaseUrl()}/veileder-token-cookie", Unit::class.java)
+        mockLogin.leggAzureVeilederTokenPåAlleRequests(restTemplate)
     }
 
     @Test
