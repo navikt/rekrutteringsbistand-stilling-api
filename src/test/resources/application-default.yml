@@ -22,7 +22,6 @@ scope:
   kandidat-api: placeholder
 
 external:
-  pam-ad-api-fss.url: http://localhost:9914
   pam-ad-api-gcp.url: http://localhost:9934
   kandidatliste-api.url: http://localhost:8766/rekrutteringsbistand-kandidat-api/rest/veileder/stilling
 

@@ -3,17 +3,18 @@ package no.nav.rekrutteringsbistand.api.geografi
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.github.tomakehurst.wiremock.junit.WireMockRule
+import no.nav.rekrutteringsbistand.api.config.MockLogin
 import no.nav.rekrutteringsbistand.api.mockAzureObo
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.test.context.junit4.SpringRunner
@@ -23,7 +24,7 @@ import org.springframework.test.context.junit4.SpringRunner
 internal class GeografiKomponentTest {
 
     @get:Rule
-    val wiremock = WireMockRule(WireMockConfiguration.options().port(9914))
+    val wiremock = WireMockRule(WireMockConfiguration.options().port(9934))
 
     @get:Rule
     val wiremockAzure = WireMockRule(9954)
@@ -33,11 +34,14 @@ internal class GeografiKomponentTest {
 
     val localBaseUrl by lazy { "http://localhost:$port" }
 
-    private val restTemplate = TestRestTemplate(TestRestTemplate.HttpClientOption.ENABLE_COOKIES)
+    @Autowired
+    lateinit var mockLogin: MockLogin
+
+    private val restTemplate = TestRestTemplate()
 
     @Before
     fun authenticateClient() {
-        restTemplate.getForObject("$localBaseUrl/veileder-token-cookie", Unit::class.java)
+        mockLogin.leggAzureVeilederTokenPåAlleRequests(restTemplate)
         mockAzureObo(wiremockAzure)
     }
 

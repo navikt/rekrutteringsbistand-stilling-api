@@ -1,6 +1,5 @@
 package no.nav.rekrutteringsbistand.api.autorisasjon
 
-import no.nav.rekrutteringsbistand.api.support.log
 import no.nav.rekrutteringsbistand.api.support.toMultiValueMap
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.*

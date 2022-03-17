@@ -16,7 +16,6 @@ import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.test.context.junit4.SpringRunner
-import org.springframework.web.client.RestTemplate
 import java.time.LocalDateTime
 
 @RunWith(SpringRunner::class)
@@ -34,7 +33,7 @@ class StandardsøkTest {
 
     val localBaseUrl by lazy { "http://localhost:$port" }
 
-    private val restTemplate = RestTemplate()
+    private val restTemplate = TestRestTemplate()
 
     @Before
     fun authenticateClient() {

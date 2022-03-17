@@ -9,9 +9,7 @@ import org.springframework.context.annotation.Import
 import org.springframework.http.HttpRequest
 import org.springframework.http.client.ClientHttpRequestExecution
 import org.springframework.http.client.ClientHttpRequestInterceptor
-import org.springframework.http.client.ClientHttpResponse
 import org.springframework.web.bind.annotation.RestController
-import org.springframework.web.client.RestTemplate
 
 @Import(MockOAuth2ServerAutoConfiguration::class)
 @RestController
@@ -29,14 +27,12 @@ class MockLogin(val mockOauth2Server: MockOAuth2Server) {
         ).serialize()
     }
 
-    fun leggAzureVeilederTokenPåAlleRequests(restTemplate: RestTemplate) {
+    fun leggAzureVeilederTokenPåAlleRequests(testRestTemplate: TestRestTemplate) {
         val token = hentAzureAdVeilederToken()
 
-        restTemplate.interceptors.add(object: ClientHttpRequestInterceptor {
-            override fun intercept(request: HttpRequest, body: ByteArray, execution: ClientHttpRequestExecution): ClientHttpResponse {
-                request.headers.set("Authorization", "Bearer $token")
-                return execution.execute(request, body)
-            }
+        testRestTemplate.restTemplate.interceptors.add(ClientHttpRequestInterceptor { request, body, execution ->
+            request.headers.set("Authorization", "Bearer $token")
+            execution.execute(request, body)
         })
     }
 

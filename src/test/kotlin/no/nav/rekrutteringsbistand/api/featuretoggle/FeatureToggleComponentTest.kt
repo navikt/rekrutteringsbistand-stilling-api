@@ -12,11 +12,7 @@ import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.http.HttpRequest
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.http.client.ClientHttpRequestExecution
-import org.springframework.http.client.ClientHttpRequestInterceptor
-import org.springframework.http.client.ClientHttpResponse
 import org.springframework.test.context.junit4.SpringRunner
-import org.springframework.web.client.RestTemplate
 
 @RunWith(SpringRunner::class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -30,7 +26,7 @@ class FeatureToggleComponentTest {
     @Autowired
     lateinit var mockLogin: MockLogin
 
-    private val restTemplate = RestTemplate()
+    private val restTemplate = TestRestTemplate()
 
     @Before
     fun authenticateClient() {

@@ -27,6 +27,7 @@ import org.junit.*
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.HttpEntity
@@ -36,14 +37,13 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.http.ResponseEntity
 import org.springframework.test.context.junit4.SpringRunner
-import org.springframework.web.client.RestTemplate
 
 @RunWith(SpringRunner::class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 internal class StillingComponentTest {
 
     @get:Rule
-    val wiremock = WireMockRule(9914)
+    val wiremockPamAdApi = WireMockRule(9934)
 
     @get:Rule
     val wiremockKandidatliste = WireMockRule(8766)
@@ -65,7 +65,7 @@ internal class StillingComponentTest {
     @Autowired
     lateinit var mockLogin: MockLogin
 
-    private val restTemplate = RestTemplate()
+    private val restTemplate = TestRestTemplate()
 
     val objectMapper = ObjectMapper()
             .registerModule(JavaTimeModule())
@@ -80,9 +80,10 @@ internal class StillingComponentTest {
     fun `GET mot en stilling skal returnere en stilling uten stillingsinfo hvis det ikke er lagret`() {
         val stilling = enStilling
         mockUtenAuthorization("/b2b/api/v1/ads/${stilling.uuid}", stilling)
+        mockAzureObo(wiremockAzure)
 
         restTemplate.getForObject("$localBaseUrl/rekrutteringsbistandstilling/${stilling.uuid}", RekrutteringsbistandStilling::class.java).also {
-            assertThat(it!!.stillingsinfo).isNull()
+            assertThat(it.stillingsinfo).isNull()
             assertThat(it.stilling).isEqualTo(stilling)
         }
     }
@@ -94,10 +95,12 @@ internal class StillingComponentTest {
         val stillingsinfo = enStillingsinfo.copy(stillingsid = Stillingsid(stilling.uuid))
 
         mockUtenAuthorization("/b2b/api/v1/ads/${stilling.uuid}", stilling)
+        mockAzureObo(wiremockAzure)
+
         repository.opprett(stillingsinfo)
 
         restTemplate.getForObject("$localBaseUrl/rekrutteringsbistandstilling/${stilling.uuid}", RekrutteringsbistandStilling::class.java).also {
-            assertThat(it!!.stilling).isEqualTo(stilling)
+            assertThat(it.stilling).isEqualTo(stilling)
             assertThat(it.stillingsinfo).isEqualTo(stillingsinfo.asStillingsinfoDto())
         }
     }
@@ -343,7 +346,7 @@ internal class StillingComponentTest {
     }
 
     private fun mock(method: HttpMethod, urlPath: String, responseBody: Any) {
-        wiremock.stubFor(
+        wiremockPamAdApi.stubFor(
             request(method.name, urlPathMatching(urlPath))
                 .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
                 .withHeader(ACCEPT, equalTo(APPLICATION_JSON_VALUE))
@@ -356,7 +359,7 @@ internal class StillingComponentTest {
     }
 
     private fun mockUtenAuthorization(urlPath: String, responseBody: Any) {
-        wiremock.stubFor(
+        wiremockPamAdApi.stubFor(
             get(urlEqualTo(urlPath))
                 .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
                 .withHeader(ACCEPT, equalTo(APPLICATION_JSON_VALUE))
