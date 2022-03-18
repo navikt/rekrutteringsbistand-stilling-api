@@ -190,7 +190,7 @@ class ArbeidsplassenKlient(
         )
     }
 
-    private fun hentBaseUrl() = externalConfiguration.pamAdApiGcp.url
+    private fun hentBaseUrl() = externalConfiguration.pamAdApi.url
 
     private fun httpHeaders() =
         mapOf(

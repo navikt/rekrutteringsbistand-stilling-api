@@ -98,7 +98,7 @@ class ProxyTilArbeidsplassen(
         )
     }
 
-    private fun hentBaseUrl(): String = externalConfiguration.pamAdApiGcp.url
+    private fun hentBaseUrl(): String = externalConfiguration.pamAdApi.url
 
     private fun proxyHeaders(): MultiValueMap<String, String> =
         mapOf(

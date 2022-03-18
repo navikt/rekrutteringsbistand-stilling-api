@@ -9,7 +9,7 @@ scope:
   kandidat-api: api://dev-fss.toi.rekrutteringsbistand-kandidat-api/.default
 
 external:
-  pam-ad-api-gcp.url: https://pam-ad-api.dev.intern.nav.no/adapi
+  pam-ad-api.url: https://pam-ad-api.dev.intern.nav.no/adapi
   kandidatliste-api.url: https://rekrutteringsbistand-kandidat-api.nais.preprod.local/rekrutteringsbistand-kandidat-api/rest/veileder/stilling
   unleash.url: https://unleash.nais.io/api/
 

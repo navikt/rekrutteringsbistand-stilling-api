@@ -6,9 +6,9 @@ import org.springframework.stereotype.Component
 @Component
 @ConfigurationProperties(prefix = "external")
 class ExternalConfiguration(
-        val pamAdApiGcp: PamAdApiGcp = PamAdApiGcp(),
+        val pamAdApi: PamAdApi = PamAdApi(),
         val kandidatlisteApi: KandidatlisteApi = KandidatlisteApi()
 ) {
-    class PamAdApiGcp(var url: String = "")
+    class PamAdApi(var url: String = "")
     class KandidatlisteApi(var url: String = "")
 }
