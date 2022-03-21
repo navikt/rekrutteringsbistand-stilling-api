@@ -8,6 +8,8 @@ import no.nav.rekrutteringsbistand.api.TestRepository
 import no.nav.rekrutteringsbistand.api.Testdata.enStillingsinfoInboundDto
 import no.nav.rekrutteringsbistand.api.Testdata.enStillingsinfo
 import no.nav.rekrutteringsbistand.api.arbeidsplassen.ArbeidsplassenKlient
+import no.nav.rekrutteringsbistand.api.config.MockLogin
+import no.nav.rekrutteringsbistand.api.mockAzureObo
 import no.nav.rekrutteringsbistand.api.support.toMultiValueMap
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.fail
@@ -22,7 +24,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.boot.test.web.client.TestRestTemplate
-import org.springframework.boot.test.web.client.TestRestTemplate.HttpClientOption.ENABLE_COOKIES
 import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.HttpEntity
@@ -38,14 +39,20 @@ import org.springframework.test.context.junit4.SpringRunner
 class StillingsinfoComponentTest {
 
     @get:Rule
-    val wiremock = WireMockRule(WireMockConfiguration.options().port(8766))
+    val wiremockKandidatApi = WireMockRule(WireMockConfiguration.options().port(8766))
+
+    @get:Rule
+    val wiremockAzure = WireMockRule(9954)
 
     @LocalServerPort
     private var port = 0
 
     val localBaseUrl by lazy { "http://localhost:$port" }
 
-    val restTemplate = TestRestTemplate(ENABLE_COOKIES)
+    @Autowired
+    lateinit var mockLogin: MockLogin
+
+    private val restTemplate = TestRestTemplate()
 
     @MockBean
     lateinit var arbeidsplassenKlient: ArbeidsplassenKlient
@@ -58,7 +65,7 @@ class StillingsinfoComponentTest {
 
     @Before
     fun authenticateClient() {
-        restTemplate.getForObject("$localBaseUrl/veileder-token-cookie", Unit::class.java)
+        mockLogin.leggAzureVeilederTokenPåAlleRequests(restTemplate)
     }
 
     @Test
@@ -79,6 +86,7 @@ class StillingsinfoComponentTest {
         val dto = enStillingsinfoInboundDto
 
         mockKandidatlisteOppdatering()
+        mockAzureObo(wiremockAzure)
 
         val url = "$localBaseUrl/stillingsinfo"
         val stillingsinfoRespons = restTemplate.exchange(url, HttpMethod.PUT, httpEntity(dto), StillingsinfoDto::class.java)
@@ -99,6 +107,7 @@ class StillingsinfoComponentTest {
         repository.opprett(enStillingsinfo)
         val tilLagring = enStillingsinfoInboundDto
         mockKandidatlisteOppdatering()
+        mockAzureObo(wiremockAzure)
 
         val url = "$localBaseUrl/stillingsinfo"
         val stillingsinfoRespons = restTemplate.exchange(url, HttpMethod.PUT, httpEntity(tilLagring), StillingsinfoDto::class.java)
@@ -122,7 +131,7 @@ class StillingsinfoComponentTest {
     }
 
     private fun mockKandidatlisteOppdatering() {
-        wiremock.stubFor(
+        wiremockKandidatApi.stubFor(
                 put(urlPathMatching("/rekrutteringsbistand-kandidat-api/rest/veileder/stilling/.*/kandidatliste"))
                         .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
                         .withHeader(ACCEPT, equalTo(APPLICATION_JSON_VALUE))

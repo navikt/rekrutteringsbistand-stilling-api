@@ -33,11 +33,11 @@ class StandardsøkTest {
 
     val localBaseUrl by lazy { "http://localhost:$port" }
 
-    private val restTemplate = TestRestTemplate(TestRestTemplate.HttpClientOption.ENABLE_COOKIES)
+    private val restTemplate = TestRestTemplate()
 
     @Before
     fun authenticateClient() {
-        restTemplate.getForObject("$localBaseUrl/veileder-token-cookie", Unit::class.java)
+        mockLogin.leggAzureVeilederTokenPåAlleRequests(restTemplate)
     }
 
     @Test

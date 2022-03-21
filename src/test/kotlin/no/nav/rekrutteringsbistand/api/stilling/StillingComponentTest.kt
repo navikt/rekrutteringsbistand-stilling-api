@@ -17,6 +17,7 @@ import no.nav.rekrutteringsbistand.api.Testdata.enRekrutteringsbistandStillingUt
 import no.nav.rekrutteringsbistand.api.Testdata.enStilling
 import no.nav.rekrutteringsbistand.api.Testdata.enStillingsinfo
 import no.nav.rekrutteringsbistand.api.Testdata.enStillingsinfoUtenEier
+import no.nav.rekrutteringsbistand.api.config.MockLogin
 import no.nav.rekrutteringsbistand.api.mockAzureObo
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingskategori
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsid
@@ -33,7 +34,6 @@ import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders.*
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
-import org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED_VALUE
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.http.ResponseEntity
 import org.springframework.test.context.junit4.SpringRunner
@@ -43,7 +43,7 @@ import org.springframework.test.context.junit4.SpringRunner
 internal class StillingComponentTest {
 
     @get:Rule
-    val wiremock = WireMockRule(9914)
+    val wiremockPamAdApi = WireMockRule(9934)
 
     @get:Rule
     val wiremockKandidatliste = WireMockRule(8766)
@@ -62,7 +62,10 @@ internal class StillingComponentTest {
     @Autowired
     lateinit var testRepository: TestRepository
 
-    private val restTemplate = TestRestTemplate(TestRestTemplate.HttpClientOption.ENABLE_COOKIES)
+    @Autowired
+    lateinit var mockLogin: MockLogin
+
+    private val restTemplate = TestRestTemplate()
 
     val objectMapper = ObjectMapper()
             .registerModule(JavaTimeModule())
@@ -70,13 +73,14 @@ internal class StillingComponentTest {
 
     @Before
     fun authenticateClient() {
-        restTemplate.getForObject("$localBaseUrl/veileder-token-cookie", Unit::class.java)
+        mockLogin.leggAzureVeilederTokenPåAlleRequests(restTemplate)
     }
 
     @Test
     fun `GET mot en stilling skal returnere en stilling uten stillingsinfo hvis det ikke er lagret`() {
         val stilling = enStilling
         mockUtenAuthorization("/b2b/api/v1/ads/${stilling.uuid}", stilling)
+        mockAzureObo(wiremockAzure)
 
         restTemplate.getForObject("$localBaseUrl/rekrutteringsbistandstilling/${stilling.uuid}", RekrutteringsbistandStilling::class.java).also {
             assertThat(it.stillingsinfo).isNull()
@@ -91,6 +95,8 @@ internal class StillingComponentTest {
         val stillingsinfo = enStillingsinfo.copy(stillingsid = Stillingsid(stilling.uuid))
 
         mockUtenAuthorization("/b2b/api/v1/ads/${stilling.uuid}", stilling)
+        mockAzureObo(wiremockAzure)
+
         repository.opprett(stillingsinfo)
 
         restTemplate.getForObject("$localBaseUrl/rekrutteringsbistandstilling/${stilling.uuid}", RekrutteringsbistandStilling::class.java).also {
@@ -117,7 +123,7 @@ internal class StillingComponentTest {
         mockAzureObo(wiremockAzure)
 
         restTemplate.getForObject("$localBaseUrl/rekrutteringsbistandstilling/annonsenr/${stilling.id}", RekrutteringsbistandStilling::class.java).also {
-            assertThat(it.stillingsinfo).isEqualTo(stillingsinfo.asStillingsinfoDto())
+            assertThat(it!!.stillingsinfo).isEqualTo(stillingsinfo.asStillingsinfoDto())
             assertThat(it.stilling).isEqualTo(stilling)
         }
     }
@@ -136,7 +142,7 @@ internal class StillingComponentTest {
             RekrutteringsbistandStilling::class.java
         ).also {
             val stilling = rekrutteringsbistandStilling.stilling
-            assertThat(it.stilling.title).isEqualTo(stilling.title)
+            assertThat(it!!.stilling.title).isEqualTo(stilling.title)
             assertThat(it.stilling.administration?.navIdent).isEqualTo(stilling.administration.navIdent)
             assertThat(it.stilling.administration?.reportee).isEqualTo(stilling.administration.reportee)
             assertThat(it.stilling.administration?.status).isEqualTo(stilling.administration.status)
@@ -340,7 +346,7 @@ internal class StillingComponentTest {
     }
 
     private fun mock(method: HttpMethod, urlPath: String, responseBody: Any) {
-        wiremock.stubFor(
+        wiremockPamAdApi.stubFor(
             request(method.name, urlPathMatching(urlPath))
                 .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
                 .withHeader(ACCEPT, equalTo(APPLICATION_JSON_VALUE))
@@ -353,7 +359,7 @@ internal class StillingComponentTest {
     }
 
     private fun mockUtenAuthorization(urlPath: String, responseBody: Any) {
-        wiremock.stubFor(
+        wiremockPamAdApi.stubFor(
             get(urlEqualTo(urlPath))
                 .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
                 .withHeader(ACCEPT, equalTo(APPLICATION_JSON_VALUE))

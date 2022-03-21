@@ -196,23 +196,13 @@ class ArbeidsplassenKlient(
         )
     }
 
-    private fun hentBaseUrl(): String {
-        val skalBrukeFssIngress = tokenUtils.brukerIssoIdToken()
-
-        return if (skalBrukeFssIngress)
-            externalConfiguration.pamAdApiFss.url
-        else externalConfiguration.pamAdApiGcp.url
-    }
+    private fun hentBaseUrl() = externalConfiguration.pamAdApi.url
 
     private fun httpHeaders() =
         mapOf(
             CONTENT_TYPE to APPLICATION_JSON_VALUE,
             ACCEPT to APPLICATION_JSON_VALUE,
-            AUTHORIZATION to "Bearer ${
-                if (tokenUtils.brukerIssoIdToken()) tokenUtils.hentToken() else tokenUtils.hentOBOToken(
-                    scopeMotArbeidsplassen
-                )
-            }"
+            AUTHORIZATION to "Bearer ${tokenUtils.hentOBOToken(scopeMotArbeidsplassen)}"
         ).toMultiValueMap()
 
     private fun httpHeadersSomSystembruker() =
@@ -220,11 +210,5 @@ class ArbeidsplassenKlient(
             CONTENT_TYPE to APPLICATION_JSON_VALUE,
             ACCEPT to APPLICATION_JSON_VALUE,
             AUTHORIZATION to "Bearer ${tokenUtils.hentSystemToken(scopeMotArbeidsplassen)}"
-        ).toMultiValueMap()
-
-    private fun httpHeadersUtenToken() =
-        mapOf(
-            CONTENT_TYPE to APPLICATION_JSON_VALUE,
-            ACCEPT to APPLICATION_JSON_VALUE
         ).toMultiValueMap()
 }
