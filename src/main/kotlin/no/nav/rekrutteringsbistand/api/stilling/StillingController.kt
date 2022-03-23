@@ -36,6 +36,12 @@ class StillingController(val stillingService: StillingService) {
         return ok(oppdatertStilling)
     }
 
+    @DeleteMapping("/rekrutteringsbistandstilling/{stillingsId}")
+    fun slettRekrutteringsbistandStilling(@PathVariable(value = "stillingsId") stillingsId: String): ResponseEntity<Stilling> {
+        val slettetStilling = stillingService.slettRekrutteringsbistandStilling(stillingsId)
+        return ok(slettetStilling)
+    }
+
     @DeleteMapping("/rekrutteringsbistand/api/v1/ads/{stillingsId}")
     fun slettStilling(@PathVariable(value = "stillingsId") stillingsId: String): ResponseEntity<Stilling> {
         val slettetStilling = stillingService.slettStilling(stillingsId)

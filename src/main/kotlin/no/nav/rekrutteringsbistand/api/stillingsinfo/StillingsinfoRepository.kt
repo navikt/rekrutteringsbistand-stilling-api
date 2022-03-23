@@ -10,9 +10,10 @@ import java.sql.ResultSet
 
 @Repository
 class StillingsinfoRepository(
-        val namedJdbcTemplate: NamedParameterJdbcTemplate,
+    val namedJdbcTemplate: NamedParameterJdbcTemplate,
 ) {
-    val simpleJdbcInsert = SimpleJdbcInsert(namedJdbcTemplate.jdbcTemplate).withTableName("Stillingsinfo").usingGeneratedKeyColumns("id")
+    val simpleJdbcInsert =
+        SimpleJdbcInsert(namedJdbcTemplate.jdbcTemplate).withTableName("Stillingsinfo").usingGeneratedKeyColumns("id")
 
     fun opprett(stillingsinfo: Stillingsinfo) {
         simpleJdbcInsert.executeAndReturnKey(
@@ -26,6 +27,14 @@ class StillingsinfoRepository(
             )
         )
     }
+
+    fun slett(stillingsid: String) =
+        namedJdbcTemplate.update(
+            "delete from $STILLINGSINFO where $STILLINGSID=:stillingsid",
+            mapOf(
+                "stillingsid" to stillingsid
+            )
+        )
 
     fun oppdaterEierIdentOgEierNavn(oppdatering: OppdaterEier) =
         namedJdbcTemplate.update(

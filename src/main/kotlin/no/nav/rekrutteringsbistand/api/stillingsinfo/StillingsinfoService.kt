@@ -64,6 +64,10 @@ class StillingsinfoService(private val stillingsinfoRepository: StillingsinfoRep
         stillingsinfoRepository.opprett(stillingsinfo)
     }
 
+    fun slett(stillingsId: String) {
+        stillingsinfoRepository.slett(stillingsId)
+    }
+
     fun opprettStillingsinfo(stillingsId: Stillingsid, stillingskategori: Stillingskategori) {
         stillingsinfoRepository.opprett(
             Stillingsinfo(

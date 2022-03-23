@@ -22,7 +22,7 @@ class KandidatlisteKlient(
 ) {
 
     fun varsleOmOppdatertStilling(stillingsid: Stillingsid): ResponseEntity<Void> {
-        val url = buildUpdateNotificationUrl(stillingsid)
+        val url = buildNotificationUrl(stillingsid)
         log.info("Oppdaterer kandidatliste, stillingsid: $stillingsid")
         return restTemplate.exchange(
             url,
@@ -37,7 +37,23 @@ class KandidatlisteKlient(
             }
     }
 
-    private fun buildUpdateNotificationUrl(stillingsid: Stillingsid): URI {
+    fun varsleOmSlettetStilling(stillingsid: Stillingsid): ResponseEntity<Void> {
+        val url = buildNotificationUrl(stillingsid)
+        log.info("Slett kandidatliste, stillingsid: $stillingsid")
+        return restTemplate.exchange(
+            url,
+            HttpMethod.DELETE,
+            HttpEntity(null, headers()),
+            Void::class.java
+        )
+            .also {
+                if (it.statusCode != HttpStatus.NO_CONTENT) {
+                    log.warn("Uventet response fra kandidatliste-api for ad {}: {}", stillingsid.asString(), it.statusCodeValue)
+                }
+            }
+    }
+
+    private fun buildNotificationUrl(stillingsid: Stillingsid): URI {
         return UriComponentsBuilder.fromUriString(externalConfiguration.kandidatlisteApi.url)
             .pathSegment(stillingsid.asString())
             .pathSegment("kandidatliste")
