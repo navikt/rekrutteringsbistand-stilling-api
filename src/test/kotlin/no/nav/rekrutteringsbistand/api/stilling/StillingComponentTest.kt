@@ -3,8 +3,10 @@ package no.nav.rekrutteringsbistand.api.stilling
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.github.tomakehurst.wiremock.client.MappingBuilder
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.junit.WireMockRule
+import com.github.tomakehurst.wiremock.matching.UrlPattern
 import no.nav.rekrutteringsbistand.api.RekrutteringsbistandStilling
 import no.nav.rekrutteringsbistand.api.OppdaterRekrutteringsbistandStillingDto
 import no.nav.rekrutteringsbistand.api.TestRepository
@@ -152,6 +154,32 @@ internal class StillingComponentTest {
             assertThat(it.stilling.privacy).isEqualTo(stilling.privacy)
 
             assertThat(it.stillingsinfo?.stillingskategori).isEqualTo(Stillingskategori.ARBEIDSTRENING)
+        }
+    }
+
+    @Test
+    fun `DELETE mot stillinger skal slette stilling`() {
+        val slettetStilling = enStilling.copy(status = "DELETED")
+        mock(HttpMethod.DELETE, "/api/v1/ads/${slettetStilling.uuid}", slettetStilling)
+        mockKandidatlisteOppdatering(::delete)
+        mockAzureObo(wiremockAzure)
+
+        restTemplate.exchange(
+            "$localBaseUrl/rekrutteringsbistandstilling/${slettetStilling.uuid}",
+            HttpMethod.DELETE,
+            HttpEntity(null,null),
+            Stilling::class.java
+        ).also {
+            val stilling = it.body
+            assertThat(stilling?.title).isEqualTo(slettetStilling.title)
+            assertThat(stilling?.administration?.navIdent).isEqualTo(slettetStilling.administration?.navIdent)
+            assertThat(stilling?.administration?.reportee).isEqualTo(slettetStilling.administration?.reportee)
+            assertThat(stilling?.administration?.status).isEqualTo(slettetStilling.administration?.status)
+            assertThat(stilling?.createdBy).isEqualTo(slettetStilling.createdBy)
+            assertThat(stilling?.updatedBy).isEqualTo(slettetStilling.updatedBy)
+            assertThat(stilling?.source).isEqualTo(slettetStilling.source)
+            assertThat(stilling?.privacy).isEqualTo(slettetStilling.privacy)
+            assertThat(stilling?.status).isEqualTo("DELETED")
         }
     }
 
@@ -370,9 +398,9 @@ internal class StillingComponentTest {
         )
     }
 
-    private fun mockKandidatlisteOppdatering() {
+    private fun mockKandidatlisteOppdatering(metodeFunksjon: (UrlPattern)-> MappingBuilder = ::put) {
         wiremockKandidatliste.stubFor(
-            put(urlPathMatching("/rekrutteringsbistand-kandidat-api/rest/veileder/stilling/.*/kandidatliste"))
+            metodeFunksjon(urlPathMatching("/rekrutteringsbistand-kandidat-api/rest/veileder/stilling/.*/kandidatliste"))
                 .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
                 .withHeader(ACCEPT, equalTo(APPLICATION_JSON_VALUE))
                 .willReturn(aResponse().withStatus(HttpStatus.NO_CONTENT.value())
