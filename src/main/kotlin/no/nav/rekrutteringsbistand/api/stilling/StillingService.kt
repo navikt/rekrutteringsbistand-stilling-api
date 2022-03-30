@@ -118,10 +118,11 @@ class StillingService(
         )
     }
 
-    fun slettRekrutteringsbistandStilling(stillingsId: String) : Stilling { // Usikker på om vi burde ha retur her
+    fun slettRekrutteringsbistandStilling(stillingsId: String) : Stilling {
+        kandidatlisteKlient.varsleOmSlettetStilling(Stillingsid(stillingsId))
         val slettetStilling = arbeidsplassenKlient.slettStilling(stillingsId)
         stillingsinfoService.slett(stillingsId)
-        kandidatlisteKlient.varsleOmSlettetStilling(Stillingsid(stillingsId))
+
         return slettetStilling
     }
 
