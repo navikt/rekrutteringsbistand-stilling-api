@@ -47,7 +47,8 @@ class KandidatlisteKlient(
             Void::class.java
         )
             .also {
-                if (it.statusCode != HttpStatus.NO_CONTENT) {
+                log.info("Varsle kandidatliste om sletting av stilling ${stillingsid.asString()} returnerte ${it.statusCode}")
+                if(it.statusCode != HttpStatus.NOT_FOUND && it.statusCode != HttpStatus.NO_CONTENT) {
                     log.warn("Uventet response fra kandidatliste-api for ad {}: {}", stillingsid.asString(), it.statusCodeValue)
                 }
             }
