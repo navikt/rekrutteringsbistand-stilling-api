@@ -1,25 +1,25 @@
 package no.nav.rekrutteringsbistand.api.support.config
 
+import io.swagger.annotations.SwaggerDefinition
+import io.swagger.v3.oas.models.OpenAPI
+import io.swagger.v3.oas.models.info.Info
+import io.swagger.v3.oas.models.info.License
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.web.bind.annotation.RestController
-import springfox.documentation.builders.PathSelectors
-import springfox.documentation.builders.RequestHandlerSelectors.withClassAnnotation
-import springfox.documentation.spi.DocumentationType
-import springfox.documentation.spring.web.plugins.Docket
-import springfox.documentation.swagger2.annotations.EnableSwagger2
 
 @Configuration
-@EnableSwagger2
+@SwaggerDefinition
 class SwaggerConfig {
 
     @Bean
-    fun swagger(): Docket {
-        return Docket(DocumentationType.SWAGGER_2)
-                .select()
-                .apis(withClassAnnotation(RestController::class.java))
-                .paths(PathSelectors.any())
-                .build()
+    fun springShopOpenAPI(): OpenAPI? {
+        return OpenAPI()
+            .info(
+                Info().title("Rekrutteringsbistand-stilling-api")
+                    .description("Internt API for Team TOI")
+                    .version("v0.0.1")
+                    .license(License().name("Apache 2.0").url("http://springdoc.org"))
+            )
     }
 }
 
