@@ -2,8 +2,6 @@ package no.nav.rekrutteringsbistand.api.standardsøk
 
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
 import no.nav.security.token.support.core.api.Protected
-import no.nav.security.token.support.core.api.ProtectedWithClaims
-import no.nav.security.token.support.core.api.RequiredIssuers
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
