@@ -33,8 +33,8 @@
         <springdoc-openapi-ui.version>1.6.7</springdoc-openapi-ui.version>
         <unleash.version>4.4.1</unleash.version>
         <token-validation.version>2.0.14</token-validation.version>
-        <avro.version>1.10.1</avro.version>
-        <avro-serializer.version>6.0.1 </avro-serializer.version>
+        <avro.version>1.10.2</avro.version> <!-- Kan ikke gå til 1.11.0 pga.: https://issues.apache.org/jira/browse/AVRO-3251 -->
+        <avro-serializer.version>6.0.1</avro-serializer.version>
         <kafka-clients.version>2.7.0</kafka-clients.version>
     </properties>
 
