@@ -14,10 +14,7 @@ stillingMock er default.
 
 
 ### Starte applikasjonen i utviklingsmiljø
-Start main i klassen RekrutteringsbistandApplication. 
-
-## Åpne i browser
-[http://localhost:9501/rekrutteringsbistand-stilling-api/swagger-ui.html](http://localhost:9501/rekrutteringsbistand-stilling-api/swagger-ui.html)
+Start main i klassen RekrutteringsbistandApplication.
 
 ## Docker
 1. Bygg image: `docker build -t rekrutteringsbistand-stilling-api .`

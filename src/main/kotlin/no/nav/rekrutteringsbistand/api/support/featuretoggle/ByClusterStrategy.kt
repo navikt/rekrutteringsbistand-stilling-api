@@ -10,8 +10,8 @@ class ByClusterStrategy: Strategy {
     @Value("\${nais.cluster-name}")
     lateinit var clusterName: String
 
-    override fun isEnabled(parameters: MutableMap<String, String>?): Boolean {
-        if (parameters.isNullOrEmpty()) return false
+    override fun isEnabled(parameters: MutableMap<String, String>): Boolean {
+        if (parameters.isEmpty()) return false
         return parameters["cluster"]?.contains(clusterName) ?: false
     }
 
