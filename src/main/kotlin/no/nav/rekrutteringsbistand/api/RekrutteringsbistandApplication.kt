@@ -8,8 +8,7 @@ import org.springframework.scheduling.annotation.EnableScheduling
 @SpringBootApplication
 @EnableScheduling
 @EnableJwtTokenValidation(ignore = [
-    "org.springframework",
-    "springfox.documentation.swagger.web.ApiResourceController"
+    "org.springframework"
 ])
 class RekrutteringsbistandApplication
 

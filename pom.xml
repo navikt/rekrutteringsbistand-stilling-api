@@ -30,12 +30,11 @@
         <micrometer-registry-prometheus.version>1.8.4</micrometer-registry-prometheus.version>
         <wiremock.version>2.27.2</wiremock.version>
         <jackson-module-kotlin.version>2.13.2</jackson-module-kotlin.version>
-        <springdoc-openapi-ui.version>1.6.7</springdoc-openapi-ui.version>
         <unleash.version>4.4.1</unleash.version>
         <token-validation.version>2.0.14</token-validation.version>
         <avro.version>1.10.2</avro.version> <!-- Kan ikke gå til 1.11.0 pga.: https://issues.apache.org/jira/browse/AVRO-3251 -->
-        <avro-serializer.version>6.0.1</avro-serializer.version>
-        <kafka-clients.version>2.7.0</kafka-clients.version>
+        <avro-serializer.version>7.1.0</avro-serializer.version>
+        <kafka-clients.version>3.1.0</kafka-clients.version>
     </properties>
 
     <dependencies>
@@ -144,11 +143,6 @@
             <groupId>com.fasterxml.jackson.module</groupId>
             <artifactId>jackson-module-kotlin</artifactId>
             <version>${jackson-module-kotlin.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springdoc</groupId>
-            <artifactId>springdoc-openapi-ui</artifactId>
-            <version>${springdoc-openapi-ui.version}</version>
         </dependency>
         <dependency>
             <groupId>io.arrow-kt</groupId>
