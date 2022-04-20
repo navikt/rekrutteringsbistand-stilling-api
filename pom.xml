@@ -32,7 +32,7 @@
         <jackson-module-kotlin.version>2.13.2</jackson-module-kotlin.version>
         <unleash.version>4.4.1</unleash.version>
         <token-validation.version>2.0.14</token-validation.version>
-        <avro.version>1.10.2</avro.version> <!-- Kan ikke gå til 1.11.0 pga.: https://issues.apache.org/jira/browse/AVRO-3251 -->
+        <avro.version>1.11.0</avro.version> <!-- Kan ikke gå til 1.11.0 pga.: https://issues.apache.org/jira/browse/AVRO-3251 -->
         <avro-serializer.version>7.1.0</avro-serializer.version>
         <kafka-clients.version>3.1.0</kafka-clients.version>
     </properties>
