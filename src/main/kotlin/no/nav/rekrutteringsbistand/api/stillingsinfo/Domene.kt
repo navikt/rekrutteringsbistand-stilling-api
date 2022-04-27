@@ -7,8 +7,8 @@ data class Stillingsinfo(
     val stillingsinfoid: Stillingsinfoid,
     val stillingsid: Stillingsid,
     val eier: Eier?,
-    val notat: String?,
-    val stillingskategori: Stillingskategori?
+    val notat: String? = null,
+    val stillingskategori: Stillingskategori? = Stillingskategori.STILLING
 ) {
     fun asStillingsinfoDto() = StillingsinfoDto(
         stillingsid = this.stillingsid.asString(),
