@@ -15,19 +15,16 @@ class StillingsinfoService(private val stillingsinfoRepository: StillingsinfoRep
         return if (eksisterendeStillingsinfo is Some) {
             oppdaterEier(eksisterendeStillingsinfo.get(), eier)
         } else {
-            opprettEier(stillingsId, eier)
+            opprettEierForEksternStilling(stillingsId, eier)
         }
     }
 
-    // TODO: Spesifiser i metodenavnet at dette er for ekstern stilling, når vi oppretter en kandidatliste
-    fun opprettEier(stillingsId: String, eier: Eier): Stillingsinfo {
+    private fun opprettEierForEksternStilling(stillingsId: String, eier: Eier): Stillingsinfo {
         val uuid = UUID.randomUUID()
         val stillingsinfo = Stillingsinfo(
             stillingsinfoid = Stillingsinfoid(uuid),
             stillingsid = Stillingsid(verdi = stillingsId),
-            eier = eier,
-            notat = null,
-            stillingskategori = null
+            eier = eier
         )
 
         stillingsinfoRepository.opprett(stillingsinfo)
@@ -44,7 +41,7 @@ class StillingsinfoService(private val stillingsinfoRepository: StillingsinfoRep
             OppdaterEier(oppdatertStillingsinfo.stillingsinfoid, nyEier)
         )
 
-        return oppdatertStillingsinfo;
+        return oppdatertStillingsinfo
     }
 
     fun hentStillingsinfo(stilling: Stilling): Option<Stillingsinfo> =
