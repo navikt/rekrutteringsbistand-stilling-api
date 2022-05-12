@@ -227,14 +227,6 @@ fun <T> timer(timerName: String, toBeTimed: () -> T): T =
     Timer.builder(timerName)
         .publishPercentiles(0.5, 0.75, 0.9, 0.99)
         .publishPercentileHistogram()
-        .serviceLevelObjectives(
-            Duration.ofMillis(500),
-            Duration.ofMillis(1000),
-            Duration.ofSeconds(5),
-            Duration.ofSeconds(10),
-            Duration.ofSeconds(30),
-            Duration.ofSeconds(60)
-        )
         .minimumExpectedValue(Duration.ofMillis(1))
         .maximumExpectedValue(Duration.ofSeconds(61))
         .register(Metrics.globalRegistry)
