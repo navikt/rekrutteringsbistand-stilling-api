@@ -1,6 +1,7 @@
 package no.nav.rekrutteringsbistand.api.arbeidsplassen
 
 import io.micrometer.core.instrument.Metrics
+import io.micrometer.core.instrument.Timer
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
 import no.nav.rekrutteringsbistand.api.stilling.Page
 import no.nav.rekrutteringsbistand.api.stilling.Stilling
@@ -21,6 +22,7 @@ import org.springframework.web.client.RestTemplate
 import org.springframework.web.client.UnknownContentTypeException
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.util.UriComponentsBuilder
+import java.time.Duration
 
 @Component
 class ArbeidsplassenKlient(
@@ -29,7 +31,8 @@ class ArbeidsplassenKlient(
     val tokenUtils: TokenUtils,
     @Value("\${scope.forarbeidsplassen}") private val scopeMotArbeidsplassen: String
 ) {
-    fun hentStilling(stillingsId: String, somSystembruker: Boolean = false): Stilling = timer("rekrutteringsbistand.stilling.arbeidsplassen.hentStilling.kall.tid") {
+    fun hentStilling(stillingsId: String, somSystembruker: Boolean = false): Stilling =
+        timer("rekrutteringsbistand.stilling.arbeidsplassen.hentStilling.kall.tid") {
             val url = "${hentBaseUrl()}/b2b/api/v1/ads/$stillingsId"
 
             try {
@@ -63,116 +66,122 @@ class ArbeidsplassenKlient(
      * meldingen i stilling-indekseren vår, som vil hente oppdatert stillingsinfo og
      * oppdaterer indeksen.
      */
-    fun triggResendingAvStillingsmeldingFraArbeidsplassen(stillingsid: String) = timer("rekrutteringsbistand.stilling.arbeidsplassen.triggResendingAvStillingsmeldingFraArbeidsplassen.kall.tid") {
-        val stilling = hentStilling(stillingsid)
-        oppdaterStilling(stilling, null)
+    fun triggResendingAvStillingsmeldingFraArbeidsplassen(stillingsid: String) =
+        timer("rekrutteringsbistand.stilling.arbeidsplassen.triggResendingAvStillingsmeldingFraArbeidsplassen.kall.tid") {
+            val stilling = hentStilling(stillingsid)
+            oppdaterStilling(stilling, null)
 
-        log.info("Trigget resending av stillingsmelding fra Arbeidsplassen for stilling $stillingsid")
-    }
-
-    fun hentStillingBasertPåAnnonsenr(annonsenr: String): Stilling = timer("rekrutteringsbistand.stilling.arbeidsplassen.hentStillingBasertPåAnnonsenr.kall.tid") {
-        val url = UriComponentsBuilder
-            .fromHttpUrl("${hentBaseUrl()}/b2b/api/v1/ads")
-            .query("id=${annonsenr}")
-            .build()
-            .toString()
-
-        try {
-            val response = restTemplate.exchange(
-                url,
-                HttpMethod.GET,
-                HttpEntity(null, httpHeaders()),
-                object : ParameterizedTypeReference<Page<Stilling>>() {}
-            )
-            return@timer response.body?.content?.firstOrNull() ?: throw kunneIkkeTolkeBodyException()
-
-        } catch (exception: RestClientResponseException) {
-            throw svarMedFeilmelding(
-                "Klarte ikke hente stillingen med annonsenr $annonsenr fra Arbeidsplassen",
-                url,
-                exception
-            )
+            log.info("Trigget resending av stillingsmelding fra Arbeidsplassen for stilling $stillingsid")
         }
-    }
 
-    fun hentMineStillinger(queryString: String?): Page<Stilling> = timer("rekrutteringsbistand.stilling.arbeidsplassen.hentMineStillinger.kall.tid") {
-        val url = UriComponentsBuilder
-            .fromHttpUrl("${hentBaseUrl()}/api/v1/ads/rekrutteringsbistand/minestillinger")
-            .query(queryString)
-            .build()
-            .toString()
+    fun hentStillingBasertPåAnnonsenr(annonsenr: String): Stilling =
+        timer("rekrutteringsbistand.stilling.arbeidsplassen.hentStillingBasertPåAnnonsenr.kall.tid") {
+            val url = UriComponentsBuilder
+                .fromHttpUrl("${hentBaseUrl()}/b2b/api/v1/ads")
+                .query("id=${annonsenr}")
+                .build()
+                .toString()
 
-        try {
-            val response = restTemplate.exchange(
-                url,
-                HttpMethod.GET,
-                HttpEntity(null, httpHeaders()),
-                object : ParameterizedTypeReference<Page<Stilling>>() {}
-            )
-            return@timer response.body ?: throw kunneIkkeTolkeBodyException()
+            try {
+                val response = restTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    HttpEntity(null, httpHeaders()),
+                    object : ParameterizedTypeReference<Page<Stilling>>() {}
+                )
+                return@timer response.body?.content?.firstOrNull() ?: throw kunneIkkeTolkeBodyException()
 
-        } catch (e: RestClientResponseException) {
-            throw svarMedFeilmelding("Klarte ikke hente mine stillinger fra Arbeidsplassen", url, e)
-        } catch (e: RestClientException) {
-            throw ResponseStatusException(
-                INTERNAL_SERVER_ERROR,
-                "Klarte ikke hente mine stillinger fra Arbeidsplassen",
-                e
-            );
+            } catch (exception: RestClientResponseException) {
+                throw svarMedFeilmelding(
+                    "Klarte ikke hente stillingen med annonsenr $annonsenr fra Arbeidsplassen",
+                    url,
+                    exception
+                )
+            }
         }
-    }
 
-    fun opprettStilling(stilling: OpprettStillingDto): Stilling = timer("rekrutteringsbistand.stilling.arbeidsplassen.opprettStilling.kall.tid")  {
-        val url = "${hentBaseUrl()}/api/v1/ads?classify=true"
+    fun hentMineStillinger(queryString: String?): Page<Stilling> =
+        timer("rekrutteringsbistand.stilling.arbeidsplassen.hentMineStillinger.kall.tid") {
+            val url = UriComponentsBuilder
+                .fromHttpUrl("${hentBaseUrl()}/api/v1/ads/rekrutteringsbistand/minestillinger")
+                .query(queryString)
+                .build()
+                .toString()
 
-        try {
-            val response = restTemplate.exchange(
-                url,
-                HttpMethod.POST,
-                HttpEntity(stilling, httpHeaders()),
-                Stilling::class.java
-            )
-            return@timer response.body ?: throw kunneIkkeTolkeBodyException()
+            try {
+                val response = restTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    HttpEntity(null, httpHeaders()),
+                    object : ParameterizedTypeReference<Page<Stilling>>() {}
+                )
+                return@timer response.body ?: throw kunneIkkeTolkeBodyException()
 
-        } catch (exception: RestClientResponseException) {
-            throw svarMedFeilmelding("Klarte ikke å opprette stilling hos Arbeidsplassen", url, exception)
+            } catch (e: RestClientResponseException) {
+                throw svarMedFeilmelding("Klarte ikke hente mine stillinger fra Arbeidsplassen", url, e)
+            } catch (e: RestClientException) {
+                throw ResponseStatusException(
+                    INTERNAL_SERVER_ERROR,
+                    "Klarte ikke hente mine stillinger fra Arbeidsplassen",
+                    e
+                )
+            }
         }
-    }
 
-    fun oppdaterStilling(stilling: Stilling, queryString: String?): Stilling = timer("rekrutteringsbistand.stilling.arbeidsplassen.oppdaterStilling.kall.tid") {
-        val url = "${hentBaseUrl()}/api/v1/ads/${stilling.uuid}"
+    fun opprettStilling(stilling: OpprettStillingDto): Stilling =
+        timer("rekrutteringsbistand.stilling.arbeidsplassen.opprettStilling.kall.tid") {
+            val url = "${hentBaseUrl()}/api/v1/ads?classify=true"
 
-        try {
-            val response = restTemplate.exchange(
-                url + if (queryString != null) "?$queryString" else "",
-                HttpMethod.PUT,
-                HttpEntity(stilling, httpHeaders()),
-                Stilling::class.java
-            )
-            return@timer response.body ?: throw kunneIkkeTolkeBodyException()
+            try {
+                val response = restTemplate.exchange(
+                    url,
+                    HttpMethod.POST,
+                    HttpEntity(stilling, httpHeaders()),
+                    Stilling::class.java
+                )
+                return@timer response.body ?: throw kunneIkkeTolkeBodyException()
 
-        } catch (exception: RestClientResponseException) {
-            throw svarMedFeilmelding("Klarte ikke å oppdatere stilling hos Arbeidsplassen", url, exception)
+            } catch (exception: RestClientResponseException) {
+                throw svarMedFeilmelding("Klarte ikke å opprette stilling hos Arbeidsplassen", url, exception)
+            }
         }
-    }
 
-    fun slettStilling(stillingsId: String): Stilling = timer("rekrutteringsbistand.stilling.arbeidsplassen.slettStilling.kall.tid") {
-        val url = "${hentBaseUrl()}/api/v1/ads/$stillingsId"
+    fun oppdaterStilling(stilling: Stilling, queryString: String?): Stilling =
+        timer("rekrutteringsbistand.stilling.arbeidsplassen.oppdaterStilling.kall.tid") {
+            val url = "${hentBaseUrl()}/api/v1/ads/${stilling.uuid}"
 
-        try {
-            val response = restTemplate.exchange(
-                url,
-                HttpMethod.DELETE,
-                HttpEntity(null, httpHeaders()),
-                Stilling::class.java
-            )
-            return@timer response.body ?: throw kunneIkkeTolkeBodyException()
-        } catch (e: UnknownContentTypeException) {
-            throw kunneIkkeTolkeBodyException(e)
-        } catch (exception: RestClientResponseException) {
-            throw svarMedFeilmelding("Klarte ikke å slette stilling hos arbeidsplassen", url, exception)
+            try {
+                val response = restTemplate.exchange(
+                    url + if (queryString != null) "?$queryString" else "",
+                    HttpMethod.PUT,
+                    HttpEntity(stilling, httpHeaders()),
+                    Stilling::class.java
+                )
+                return@timer response.body ?: throw kunneIkkeTolkeBodyException()
+
+            } catch (exception: RestClientResponseException) {
+                throw svarMedFeilmelding("Klarte ikke å oppdatere stilling hos Arbeidsplassen", url, exception)
+            }
         }
-    }
+
+    fun slettStilling(stillingsId: String): Stilling =
+        timer("rekrutteringsbistand.stilling.arbeidsplassen.slettStilling.kall.tid") {
+            val url = "${hentBaseUrl()}/api/v1/ads/$stillingsId"
+
+            try {
+                val response = restTemplate.exchange(
+                    url,
+                    HttpMethod.DELETE,
+                    HttpEntity(null, httpHeaders()),
+                    Stilling::class.java
+                )
+                return@timer response.body ?: throw kunneIkkeTolkeBodyException()
+            } catch (e: UnknownContentTypeException) {
+                throw kunneIkkeTolkeBodyException(e)
+            } catch (exception: RestClientResponseException) {
+                throw svarMedFeilmelding("Klarte ikke å slette stilling hos arbeidsplassen", url, exception)
+            }
+        }
 
     private fun svarMedFeilmelding(
         melding: String,
@@ -214,4 +223,20 @@ class ArbeidsplassenKlient(
         ).toMultiValueMap()
 }
 
-private fun <T> timer(string: String, function: () -> T): T = Metrics.timer(string).record(function)!!
+fun <T> timer(timerName: String, toBeTimed: () -> T): T =
+    Timer.builder(timerName)
+        .publishPercentiles(0.5, 0.75, 0.9, 0.99)
+        .publishPercentileHistogram()
+        .serviceLevelObjectives(
+            Duration.ofMillis(500),
+            Duration.ofMillis(1000),
+            Duration.ofSeconds(5),
+            Duration.ofSeconds(10),
+            Duration.ofSeconds(30),
+            Duration.ofSeconds(60)
+        )
+        .minimumExpectedValue(Duration.ofMillis(1))
+        .maximumExpectedValue(Duration.ofSeconds(61))
+        .register(Metrics.globalRegistry)
+        .record(toBeTimed)!!
+
