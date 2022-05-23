@@ -33,15 +33,6 @@ class TokenUtils(
         return token.tokenAsString
     }
 
-    fun harInnloggingsContext(): Boolean {
-        return try {
-            contextHolder.tokenValidationContext
-            true
-        } catch (exception: IllegalStateException) { // Kaster exception hvis man prøver å hente context utenfor et request initiert av en bruker
-            false
-        }
-    }
-
     fun hentOBOToken(scope: String): String = azureKlient.hentOBOToken(scope, hentNavIdent(), hentToken())
     fun hentSystemToken(scope: String): String = azureKlient.hentSystemToken(scope)
 }
