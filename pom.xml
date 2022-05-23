@@ -32,9 +32,6 @@
         <jackson-module-kotlin.version>2.13.2</jackson-module-kotlin.version>
         <unleash.version>4.4.1</unleash.version>
         <token-validation.version>2.0.14</token-validation.version>
-        <avro.version>1.10.2</avro.version> <!-- Kan ikke gå til 1.11.0 pga.: https://issues.apache.org/jira/browse/AVRO-3251 -->
-        <avro-serializer.version>7.1.0</avro-serializer.version>
-        <kafka-clients.version>3.1.0</kafka-clients.version>
     </properties>
 
     <dependencies>
@@ -191,21 +188,6 @@
             <artifactId>json-smart</artifactId>
             <version>2.4.8</version>
         </dependency>
-        <dependency>
-            <groupId>org.apache.avro</groupId>
-            <artifactId>avro</artifactId>
-            <version>${avro.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.confluent</groupId>
-            <artifactId>kafka-avro-serializer</artifactId>
-            <version>${avro-serializer.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.kafka</groupId>
-            <artifactId>kafka-clients</artifactId>
-            <version>${kafka-clients.version}</version>
-        </dependency>
         <!-- Slutt, dependencies relatert til login -->
 
     </dependencies>
@@ -266,7 +248,6 @@
                         </goals>
                         <configuration>
                             <compileSourceRoots>${project.basedir}/src/main/java</compileSourceRoots>
-                            <compileSourceRoots>${project.build.directory}/generated-sources/avro</compileSourceRoots>
                         </configuration>
                     </execution>
                     <execution>
@@ -295,23 +276,6 @@
                             <goal>display-dependency-updates</goal>
                             <goal>display-plugin-updates</goal>
                         </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.avro</groupId>
-                <artifactId>avro-maven-plugin</artifactId>
-                <version>${avro.version}</version>
-                <executions>
-                    <execution>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>idl-protocol</goal>
-                        </goals>
-                        <configuration>
-                            <sourceDirectory>src/main/avro/</sourceDirectory>
-                            <outputDirectory>${project.build.directory}/generated-sources/avro</outputDirectory>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>

@@ -1,18 +1,9 @@
 package no.nav.rekrutteringsbistand.api.inkluderingsmuligheter
 
-import no.nav.pam.stilling.ext.avro.Ad
-import no.nav.rekrutteringsbistand.api.Testdata.enAd
-import no.nav.rekrutteringsbistand.api.Testdata.enAdUtenTag
-import org.apache.kafka.clients.consumer.ConsumerRecord
-import org.apache.kafka.clients.consumer.MockConsumer
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.junit4.SpringRunner
-import java.time.LocalDateTime
-import java.util.*
 
 
 @RunWith(SpringRunner::class)

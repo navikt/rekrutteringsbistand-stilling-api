@@ -51,5 +51,3 @@ spec:
       value: d8e2c2ad-e073-43d1-8c1d-aa6fad6d7195
     - name: REKRUTTERINGSBISTAND_STILLING_INDEKSER_CLIENT_ID
       value: 1df98d81-f13d-46cb-a8d3-fcc3b030859e
-  kafka:
-    pool: nav-prod
