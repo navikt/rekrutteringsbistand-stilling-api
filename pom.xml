@@ -30,7 +30,6 @@
         <micrometer-registry-prometheus.version>1.8.4</micrometer-registry-prometheus.version>
         <wiremock.version>2.27.2</wiremock.version>
         <jackson-module-kotlin.version>2.13.2</jackson-module-kotlin.version>
-        <unleash.version>4.4.1</unleash.version>
         <token-validation.version>2.0.14</token-validation.version>
     </properties>
 
@@ -147,11 +146,6 @@
             <groupId>io.arrow-kt</groupId>
             <artifactId>arrow-core</artifactId>
             <version>${arrow.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>no.finn.unleash</groupId>
-            <artifactId>unleash-client-java</artifactId>
-            <version>${unleash.version}</version>
         </dependency>
 
         <!-- Dependencies relatert til login -->
