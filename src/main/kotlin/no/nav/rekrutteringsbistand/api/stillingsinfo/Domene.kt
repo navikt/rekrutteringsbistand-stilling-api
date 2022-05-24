@@ -54,7 +54,6 @@ data class Stillingsid(val verdi: UUID) {
     constructor(verdi: String) : this(UUID.fromString(verdi))
 
     fun asString() = verdi.toString()
-    fun asUuid() = verdi
     override fun toString(): String = asString()
 }
 

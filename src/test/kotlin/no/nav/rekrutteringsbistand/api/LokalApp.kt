@@ -4,6 +4,6 @@ import org.springframework.boot.runApplication
 
 fun main(args: Array<String>) {
     runApplication<RekrutteringsbistandApplication>(*args) {
-        setAdditionalProfiles("default", "sokMock", "kandidatlisteMock", "stillingMock", "kafka")
+        setAdditionalProfiles("default", "sokMock", "kandidatlisteMock", "stillingMock")
     }
 }
