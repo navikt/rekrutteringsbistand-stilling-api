@@ -50,6 +50,6 @@ spec:
     - name: VIS_STILLING_CLIENT_ID
       value: 4d3876c0-dfae-4bad-aecf-4415d549954a
     - name: REKRUTTERINGSBISTAND_STILLING_INDEKSER_CLIENT_ID
-      value: b79f9479-8fe7-470c-9f8a-facacdf43d62
+      value: 103b46ab-62ab-47e7-b51c-babdc41aaf1d
   kafka:
     pool: nav-dev
