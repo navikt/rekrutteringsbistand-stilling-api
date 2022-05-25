@@ -16,6 +16,4 @@ database:
   navn: rekrutteringsbistand
   url: jdbc:postgresql://A01DBVL010.adeo.no:5432/rekrutteringsbistand
 
-vault.mount-path: postgresql/prod-fss
-
 nais.cluster-name: ${NAIS_CLUSTER_NAME}

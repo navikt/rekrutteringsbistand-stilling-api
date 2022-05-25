@@ -19,8 +19,6 @@ spec:
   prometheus:
     enabled: true
     path: /internal/actuator/prometheus
-  vault:
-    enabled: true
   gcp:
     sqlInstances:
       - type: POSTGRES_12

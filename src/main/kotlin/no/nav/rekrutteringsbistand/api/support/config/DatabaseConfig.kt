@@ -2,7 +2,6 @@ package no.nav.rekrutteringsbistand.api.support.config
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
-import no.nav.vault.jdbc.hikaricp.HikariCPVaultUtil
 import org.flywaydb.core.Flyway
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.flyway.FlywayMigrationStrategy
@@ -27,9 +26,6 @@ class DatabaseConfig {
 
     @Value("\${database.passord}")
     private val databasePassord: String? = null
-
-    @Value("\${vault.mount-path}")
-    private val mountPath: String? = null
 
     @Bean
     fun userDataSource(): DataSource {
