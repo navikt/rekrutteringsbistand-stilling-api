@@ -44,6 +44,14 @@ spec:
         - application: rekrutteringsbistand-kandidat-api
           namespace: toi
           cluster: prod-fss
+    outbound:
+      rules:
+        - application: pam-ad-api
+          cluster: prod-gcp
+          namespace: teampam
+        - application: rekrutteringsbistand-kandidat-api
+          cluster: prod-fss
+          namespace: toi
   webproxy: true
   env:
     - name: SPRING_PROFILES_ACTIVE
