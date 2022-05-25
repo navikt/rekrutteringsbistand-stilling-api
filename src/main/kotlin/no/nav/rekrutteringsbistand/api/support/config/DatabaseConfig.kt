@@ -22,6 +22,12 @@ class DatabaseConfig {
     @Value("\${database.navn}")
     private val databaseNavn: String? = null
 
+    @Value("\${database.brukernavn}")
+    private val databaseBrukernavn: String? = null
+
+    @Value("\${database.passord}")
+    private val databasePassord: String? = null
+
     @Value("\${vault.mount-path}")
     private val mountPath: String? = null
 
@@ -35,7 +41,10 @@ class DatabaseConfig {
         config.jdbcUrl = databaseUrl
         config.maximumPoolSize = 2
         config.minimumIdle = 1
-        return HikariCPVaultUtil.createHikariDataSourceWithVaultIntegration(config, mountPath, dbRole(user))
+        config.username = databaseBrukernavn
+        config.password = databasePassord
+        config.validate()
+        return HikariDataSource(config)
     }
 
     @Bean

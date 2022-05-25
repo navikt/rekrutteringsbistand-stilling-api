@@ -21,6 +21,11 @@ spec:
     path: /internal/actuator/prometheus
   vault:
     enabled: true
+  gcp:
+    sqlInstances:
+      - type: POSTGRES_12
+        databases:
+          - name: rekrutteringsbistand
   azure:
     application:
       enabled: true
