@@ -29,7 +29,7 @@ jobs:
     #########################
     ### DEVELOPERS: Insert your feature branch name below (in addition to master) if you want to deploy it to dev
     #########################
-    if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/opprydning'
+    if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/migrering-gcp'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
@@ -54,7 +54,7 @@ jobs:
       - uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
-          CLUSTER: dev-fss
+          CLUSTER: dev-gcp
           VAR: version=${{ env.IMAGE }}
           RESOURCE: nais/dev-nais.yaml
 

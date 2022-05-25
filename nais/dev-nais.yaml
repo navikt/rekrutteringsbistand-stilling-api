@@ -2,16 +2,14 @@ apiVersion: nais.io/v1alpha1
 kind: Application
 metadata:
   name: rekrutteringsbistand-stilling-api
-  namespace: arbeidsgiver
+  namespace: toi
   labels:
-    team: arbeidsgiver
+    team: toi
 spec:
   image: {{version}}
   port: 9501
   ingresses:
-    - https://rekrutteringsbistand-stilling-api.nais.preprod.local
     - https://rekrutteringsbistand-stilling-api.dev.intern.nav.no
-    - https://rekrutteringsbistand-stilling-api.dev-fss-pub.nais.io
   liveness:
     path: /internal/actuator/health
     initialDelay: 30
@@ -51,5 +49,4 @@ spec:
       value: 4d3876c0-dfae-4bad-aecf-4415d549954a
     - name: REKRUTTERINGSBISTAND_STILLING_INDEKSER_CLIENT_ID
       value: 103b46ab-62ab-47e7-b51c-babdc41aaf1d
-  kafka:
-    pool: nav-dev
+
