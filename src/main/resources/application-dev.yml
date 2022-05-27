@@ -11,10 +11,4 @@ external:
   pam-ad-api.url: https://pam-ad-api.dev.intern.nav.no/adapi
   kandidatliste-api.url: https://rekrutteringsbistand-kandidat-api.nais.preprod.local/rekrutteringsbistand-kandidat-api/rest/veileder/stilling
 
-database:
-  navn: rekrutteringsbistand
-  url: ${NAIS_DATABASE_REKRUTTERINGSBISTAND_STILLING_API_REKRUTTERINGSBISTAND_DATABASE}
-  brukernavn: ${NAIS_DATABASE_REKRUTTERINGSBISTAND_STILLING_API_REKRUTTERINGSBISTAND_USERNAME}
-  passord: ${NAIS_DATABASE_REKRUTTERINGSBISTAND_STILLING_API_REKRUTTERINGSBISTAND_PASSWORD}
-
 nais.cluster-name: ${NAIS_CLUSTER_NAME}
