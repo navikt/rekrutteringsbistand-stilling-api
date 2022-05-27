@@ -1,8 +1,3 @@
-no.nav.security.jwt:
-  issuer.azuread:
-    discoveryurl: ${AZURE_APP_WELL_KNOWN_URL}
-    accepted_audience: ${AZURE_APP_CLIENT_ID}
-
 scope:
   forarbeidsplassen: api://prod-gcp.teampam.pam-ad-api/.default
   kandidat-api: api://prod-fss.toi.rekrutteringsbistand-kandidat-api/.default
@@ -10,5 +5,3 @@ scope:
 external:
   pam-ad-api.url: https://pam-ad-api.intern.nav.no/adapi
   kandidatliste-api.url: https://rekrutteringsbistand-kandidat-api.nais.adeo.no/rekrutteringsbistand-kandidat-api/rest/veileder/stilling
-
-nais.cluster-name: ${NAIS_CLUSTER_NAME}
