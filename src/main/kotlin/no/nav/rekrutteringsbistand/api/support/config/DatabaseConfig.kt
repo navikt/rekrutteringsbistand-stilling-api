@@ -35,6 +35,8 @@ class DatabaseConfig {
         config.jdbcUrl = "jdbc:postgresql://$databaseHostname:$databasePort/$databaseNavn"
         config.maximumPoolSize = 2
         config.minimumIdle = 1
+        config.driverClassName = "org.postgresql.Driver"
+        config.initializationFailTimeout = 5000
         config.username = databaseBrukernavn
         config.password = databasePassord
         config.validate()
