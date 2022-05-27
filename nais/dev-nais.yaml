@@ -16,6 +16,9 @@ spec:
   readiness:
     path: /internal/actuator/health
     initialDelay: 30
+  replicas:
+    max: 1
+    min: 1
   prometheus:
     enabled: true
     path: /internal/actuator/prometheus
