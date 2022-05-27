@@ -2,7 +2,7 @@ package no.nav.rekrutteringsbistand.api.support.config
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
-import org.flywaydb.core.Flyway
+//import org.flywaydb.core.Flyway
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.flyway.FlywayMigrationStrategy
@@ -18,7 +18,7 @@ class DatabaseConfig {
     @Autowired
     private lateinit var dataSource: DataSource
 
-    @Bean
+    /*@Bean
     fun flywayMigrationStrategy(): FlywayMigrationStrategy {
         return FlywayMigrationStrategy {
             Flyway.configure()
@@ -26,5 +26,5 @@ class DatabaseConfig {
                 .load()
                 .migrate()
         }
-    }
+    }*/
 }
