@@ -5,3 +5,10 @@ scope:
 external:
   pam-ad-api.url: https://pam-ad-api.intern.nav.no/adapi
   kandidatliste-api.url: https://rekrutteringsbistand-kandidat-api.nais.adeo.no/rekrutteringsbistand-kandidat-api/rest/veileder/stilling
+
+spring:
+  datasource:
+    url: jdbc:postgresql://${NAIS_DATABASE_REKRUTTERINGSBISTAND_STILLING_API_REKRUTTERINGSBISTAND_HOST}:${NAIS_DATABASE_REKRUTTERINGSBISTAND_STILLING_API_REKRUTTERINGSBISTAND_PORT}/${NAIS_DATABASE_REKRUTTERINGSBISTAND_STILLING_API_REKRUTTERINGSBISTAND_DATABASE}
+    username: ${NAIS_DATABASE_REKRUTTERINGSBISTAND_STILLING_API_REKRUTTERINGSBISTAND_USERNAME}
+    password: ${NAIS_DATABASE_REKRUTTERINGSBISTAND_STILLING_API_REKRUTTERINGSBISTAND_PASSWORD}
+    driver: org.postgresql.Driver
