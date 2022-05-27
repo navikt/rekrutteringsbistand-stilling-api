@@ -30,12 +30,7 @@ class DatabaseConfig {
     @Value("\${database.passord}")
     private val databasePassord: String? = null
 
-    @Bean
-    fun userDataSource(): DataSource {
-        return dataSource("user")
-    }
-
-    private fun dataSource(user: String): HikariDataSource {
+    private fun dataSource(): HikariDataSource {
         val config = HikariConfig()
         config.jdbcUrl = "jdbc:postgresql://$databaseHostname:$databasePort/$databaseNavn"
         config.maximumPoolSize = 2
@@ -50,10 +45,9 @@ class DatabaseConfig {
     fun flywayMigrationStrategy(): FlywayMigrationStrategy {
         return FlywayMigrationStrategy {
             Flyway.configure()
-                    .dataSource(dataSource("admin"))
-                    .initSql(String.format("SET ROLE \"%s\"", dbRole("admin")))
-                    .load()
-                    .migrate()
+                .dataSource(dataSource())
+                .load()
+                .migrate()
         }
     }
 
