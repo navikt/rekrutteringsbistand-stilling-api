@@ -15,8 +15,11 @@ import javax.sql.DataSource
 @Profile("dev", "prod")
 class DatabaseConfig {
 
-    @Value("\${database.url}")
-    private val databaseUrl: String? = null
+    @Value("\${database.hostname}")
+    private val databaseHostname: String? = null
+
+    @Value("\${database.port}")
+    private val databasePort: String? = null
 
     @Value("\${database.navn}")
     private val databaseNavn: String? = null
@@ -34,7 +37,7 @@ class DatabaseConfig {
 
     private fun dataSource(user: String): HikariDataSource {
         val config = HikariConfig()
-        config.jdbcUrl = databaseUrl
+        config.jdbcUrl = "jdbc:postgresql://$databaseHostname:$databasePort/$databaseNavn"
         config.maximumPoolSize = 2
         config.minimumIdle = 1
         config.username = databaseBrukernavn
