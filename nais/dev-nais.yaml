@@ -55,7 +55,6 @@ spec:
         - application: rekrutteringsbistand-kandidat-api
           cluster: dev-fss
           namespace: toi
-  webproxy: true
   env:
     - name: SPRING_PROFILES_ACTIVE
       value: dev
