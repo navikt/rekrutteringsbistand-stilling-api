@@ -37,6 +37,7 @@ spec:
     inbound:
       rules:
         - application: vis-stilling
+          namespace: arbeidsgiver
           cluster: dev-gcp
         - application: rekrutteringsbistand-stilling-indekser
           cluster: dev-gcp
