@@ -1,21 +1,16 @@
-no.nav.security.jwt:
-  issuer.azuread:
-    discoveryurl: ${AZURE_APP_WELL_KNOWN_URL}
-    accepted_audience: ${AZURE_APP_CLIENT_ID}
-    proxyurl: http://webproxy.nais:8088
-
 scope:
   forarbeidsplassen: api://prod-gcp.teampam.pam-ad-api/.default
   kandidat-api: api://prod-fss.toi.rekrutteringsbistand-kandidat-api/.default
 
 external:
   pam-ad-api.url: https://pam-ad-api.intern.nav.no/adapi
-  kandidatliste-api.url: https://rekrutteringsbistand-kandidat-api.nais.adeo.no/rekrutteringsbistand-kandidat-api/rest/veileder/stilling
+  kandidatliste-api.url: https://rekrutteringsbistand-kandidat-api.prod-fss-pub.nais.io/rekrutteringsbistand-kandidat-api/rest/veileder/stilling
 
-database:
-  navn: rekrutteringsbistand
-  url: jdbc:postgresql://A01DBVL010.adeo.no:5432/rekrutteringsbistand
-
-vault.mount-path: postgresql/prod-fss
-
-nais.cluster-name: ${NAIS_CLUSTER_NAME}
+spring:
+  datasource:
+    url: jdbc:postgresql://${NAIS_DATABASE_REKRUTTERINGSBISTAND_STILLING_API_REKRUTTERINGSBISTAND_HOST}:${NAIS_DATABASE_REKRUTTERINGSBISTAND_STILLING_API_REKRUTTERINGSBISTAND_PORT}/${NAIS_DATABASE_REKRUTTERINGSBISTAND_STILLING_API_REKRUTTERINGSBISTAND_DATABASE}
+    username: ${NAIS_DATABASE_REKRUTTERINGSBISTAND_STILLING_API_REKRUTTERINGSBISTAND_USERNAME}
+    password: ${NAIS_DATABASE_REKRUTTERINGSBISTAND_STILLING_API_REKRUTTERINGSBISTAND_PASSWORD}
+    driver: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 5

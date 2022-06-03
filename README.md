@@ -3,7 +3,7 @@
 Administrerer Nav-veilders rekrutteringsdata" for NAV
 Fungerer også som en proxy for operasjoner mot stillingsystemet til Nav.
 
-# Komme i gang
+# Komme i gang 
 ## Bygge
 Maven: `mvn clean install`
 

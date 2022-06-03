@@ -1,17 +1,15 @@
-apiVersion: "nais.io/v1alpha1"
-kind: "Application"
+apiVersion: nais.io/v1alpha1
+kind: Application
 metadata:
   name: rekrutteringsbistand-stilling-api
-  namespace: arbeidsgiver
+  namespace: toi
   labels:
-    team: arbeidsgiver
+    team: toi
 spec:
   image: {{version}}
   port: 9501
   ingresses:
-    - https://rekrutteringsbistand-stilling-api.nais.adeo.no
     - https://rekrutteringsbistand-stilling-api.intern.nav.no
-    - https://rekrutteringsbistand-stilling-api.prod-fss-pub.nais.io
   liveness:
     path: /internal/actuator/health
     initialDelay: 30
@@ -21,8 +19,11 @@ spec:
   prometheus:
     enabled: true
     path: /internal/actuator/prometheus
-  vault:
-    enabled: true
+  gcp:
+    sqlInstances:
+      - type: POSTGRES_12
+        databases:
+          - name: rekrutteringsbistand
   azure:
     application:
       enabled: true
@@ -33,6 +34,7 @@ spec:
     inbound:
       rules:
         - application: vis-stilling
+          namespace: arbeidsgiver
           cluster: prod-gcp
         - application: rekrutteringsbistand-stilling-indekser
           cluster: prod-gcp
@@ -43,6 +45,14 @@ spec:
         - application: rekrutteringsbistand-kandidat-api
           namespace: toi
           cluster: prod-fss
+    outbound:
+      rules:
+        - application: pam-ad-api
+          cluster: prod-gcp
+          namespace: teampam
+        - application: rekrutteringsbistand-kandidat-api
+          cluster: prod-fss
+          namespace: toi
   webproxy: true
   env:
     - name: SPRING_PROFILES_ACTIVE
