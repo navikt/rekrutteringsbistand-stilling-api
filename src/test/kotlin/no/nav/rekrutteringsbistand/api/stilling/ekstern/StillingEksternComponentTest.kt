@@ -29,8 +29,8 @@ import org.springframework.test.context.junit4.SpringRunner
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 internal class StillingEksternComponentTest {
 
-    @Value("\${vis-stilling.client.id}")
-    private val clientIdTilVisStilling: String = ""
+    @Value("\${vis-stilling.uri}")
+    private val uriTilVisStilling: String = "uriTilVisStilling"
 
     @get:Rule
     val wiremock = WireMockRule(9934)
@@ -63,7 +63,7 @@ internal class StillingEksternComponentTest {
         mockUtenAuthorization("/b2b/api/v1/ads/${stilling.uuid}", stilling)
         mockAzureObo(wiremockAzure)
 
-        val token = mockLogin.hentAzureAdMaskinTilMaskinToken(clientIdTilVisStilling)
+        val token = mockLogin.hentAzureAdMaskinTilMaskinToken(uriTilVisStilling)
 
         restTemplate.exchange(
                 "$localBaseUrl/rekrutteringsbistand/ekstern/api/v1/stilling/${stilling.uuid}",

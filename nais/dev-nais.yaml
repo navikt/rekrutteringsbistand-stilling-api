@@ -33,6 +33,7 @@ spec:
       claims:
         extra:
           - NAVident
+          - azp_name
   accessPolicy:
     inbound:
       rules:
@@ -59,8 +60,8 @@ spec:
   env:
     - name: SPRING_PROFILES_ACTIVE
       value: dev
-    - name: VIS_STILLING_CLIENT_ID
-      value: 4d3876c0-dfae-4bad-aecf-4415d549954a
-    - name: REKRUTTERINGSBISTAND_STILLING_INDEKSER_CLIENT_ID
-      value: 103b46ab-62ab-47e7-b51c-babdc41aaf1d
+    - name: VIS_STILLING_URI
+      value: "dev-gcp:arbeidsgiver:vis-stilling"
+    - name: REKRUTTERINGSBISTAND_STILLING_INDEKSER_URI
+      value: "dev-gcp:toi:rekrutteringsbistand-stilling-indekser"
 
