@@ -34,11 +34,13 @@ class MockLogin(private val mockOauth2Server: MockOAuth2Server) {
         })
     }
 
-    fun hentAzureAdMaskinTilMaskinToken(clientId: String): String {
+    fun hentAzureAdMaskinTilMaskinToken(clientUri: String): String {
         return mockOauth2Server.issueToken(
             azureAdIssuer,
-            clientId,
-            DefaultOAuth2TokenCallback()
+            "dummyClientId",
+            DefaultOAuth2TokenCallback(
+                claims = mapOf("azp_name" to clientUri)
+            )
         ).serialize()
     }
 }

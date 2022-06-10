@@ -10,23 +10,23 @@ const val azureAdIssuer = "azuread"
 class AuthorizedPartyUtils(
         private val contextHolder: TokenValidationContextHolder,
 ) {
-    private val authorizedPartyClaim = "azp"
+    private val authorizedPartyUriClaim = "azp_name"
 
-    @Value("\${rekrutteringsbistand.stilling.indekser.client.id}")
-    private val clientIdTilStillingIndekser: String = ""
+    @Value("\${rekrutteringsbistand.stilling.indekser.uri}")
+    private val stillingIndekserUri: String = ""
 
-    @Value("\${vis-stilling.client.id}")
-    private val clientIdTilVisStilling: String = ""
+    @Value("\${vis-stilling.uri}")
+    private val visStillingUri: String = ""
 
     fun kallKommerFraStillingIndekser(): Boolean {
-        return clientIdTilKallendeApp() == clientIdTilStillingIndekser
+        return uriTilKallendeApp() == stillingIndekserUri
     }
 
     fun kallKommerFraVisStilling(): Boolean {
-        return clientIdTilKallendeApp() == clientIdTilVisStilling
+        return uriTilKallendeApp() == visStillingUri
     }
 
-    private fun clientIdTilKallendeApp(): String {
-        return contextHolder.tokenValidationContext.getClaims(azureAdIssuer).getStringClaim(authorizedPartyClaim)
+    private fun uriTilKallendeApp(): String {
+        return contextHolder.tokenValidationContext.getClaims(azureAdIssuer).getStringClaim(authorizedPartyUriClaim)
     }
 }
