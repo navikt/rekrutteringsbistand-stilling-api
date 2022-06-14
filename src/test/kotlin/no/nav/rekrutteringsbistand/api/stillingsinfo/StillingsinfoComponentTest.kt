@@ -1,5 +1,6 @@
 package no.nav.rekrutteringsbistand.api.stillingsinfo
 
+import arrow.core.extensions.either.foldable.isEmpty
 import arrow.core.getOrElse
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
@@ -18,8 +19,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mockito.times
-import org.mockito.Mockito.verify
+import org.mockito.Mockito.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
@@ -115,6 +115,25 @@ class StillingsinfoComponentTest {
 
         assertThat(stillingsinfoRespons.statusCode).isEqualTo(HttpStatus.OK)
         assertThat(stillingsinfoRespons.body).isEqualTo(lagretStillingsinfo.asStillingsinfoDto())
+    }
+
+    @Test
+    fun `Oppretting av kandidatliste på ekstern stilling skal returnere 500 og ikke lagre noe i databasen hvis kall mot Arbeidsplassen feiler`() {
+        val dto = enStillingsinfoInboundDto
+        mockKandidatlisteOppdatering()
+        mockAzureObo(wiremockAzure)
+        `when`(arbeidsplassenKlient.triggResendingAvStillingsmeldingFraArbeidsplassen(dto.stillingsid)).thenThrow(RuntimeException::class.java)
+
+        val respons = restTemplate.exchange("$localBaseUrl/stillingsinfo", HttpMethod.PUT, httpEntity(dto), String::class.java)
+        assertThat(respons.statusCodeValue).isEqualTo(500)
+
+        val stillingsinfo = repository.hentForStilling(Stillingsid(dto.stillingsid)).orNull()
+        assertThat(stillingsinfo).isNull()
+    }
+
+    @Test
+    fun `Oppretting av kandidatliste på ekstern stilling skal returnere 500 og ikke lagre noe i databasen hvis kall mot kandidat-api feiler`() {
+
     }
 
     @After
