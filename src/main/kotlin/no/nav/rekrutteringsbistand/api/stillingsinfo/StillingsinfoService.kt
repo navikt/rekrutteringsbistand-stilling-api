@@ -14,23 +14,27 @@ class StillingsinfoService(
     private val arbeidsplassenKlient: ArbeidsplassenKlient,
 ) {
 
-    fun overtaEierskapForEksternStillingOgKandidatliste(stillingsId: String, eier: Eier): Stillingsinfo {
+    /**
+     * NB: Reversering av databaseendringer kan ikke gjøres med @Transactional. Dette skyldes at endringer i databasen
+     * må være "committed" til databasen når kall til kandidat-api gjøres. Dette skyldes at kandidat-api vil gjøre et kall
+     * tilbake til stilling-api for å hente stillingsinfo som da må være lagret for at kandidat-api ikke skal kaste feil.
+     *
+     * Dersom løkka mellom kandidat-api og stilling-api fjernes er manuell håndtering av databasereversering unødvendig.
+     * Man kan da putte på en @Transactional på for eksempel endepunktet.
+     */
+    fun overtaEierskapForEksternStillingOgKandidatliste(stillingsId: String, nyEier: Eier): Stillingsinfo {
         val eksisterendeStillingsinfo = stillingsinfoRepository.hentForStilling(Stillingsid(stillingsId)).orNull()
 
         val oppdatertStillingsinfo = if (eksisterendeStillingsinfo != null) {
-            oppdaterEier(eksisterendeStillingsinfo, eier)
+            oppdaterEier(eksisterendeStillingsinfo, nyEier)
         } else {
-            opprettEierForEksternStilling(stillingsId, eier)
+            opprettEier(stillingsId, nyEier)
         }
 
         try {
             kandidatlisteKlient.varsleOmOppdatertStilling(Stillingsid(stillingsId))
         } catch (e: Exception) {
-            if (eksisterendeStillingsinfo != null) {
-                oppdaterEier(eksisterendeStillingsinfo, eksisterendeStillingsinfo.eier!!)
-            } else {
-                stillingsinfoRepository.slett(stillingsId)
-            }
+            reverserEierskapsendring(stillingsId, eksisterendeStillingsinfo)
             throw RuntimeException("Varsel til kandidat-api om oppdatert ekstern stilling feilet")
         }
 
@@ -38,7 +42,15 @@ class StillingsinfoService(
         return oppdatertStillingsinfo
     }
 
-    private fun opprettEierForEksternStilling(stillingsId: String, eier: Eier): Stillingsinfo {
+    private fun reverserEierskapsendring(stillingsId: String, opprinneligStillingsinfo: Stillingsinfo?) {
+        if (opprinneligStillingsinfo != null) {
+            oppdaterEier(opprinneligStillingsinfo, opprinneligStillingsinfo.eier!!)
+        } else {
+            stillingsinfoRepository.slett(stillingsId)
+        }
+    }
+
+    private fun opprettEier(stillingsId: String, eier: Eier): Stillingsinfo {
         val uuid = UUID.randomUUID()
         val stillingsinfo = Stillingsinfo(
             stillingsinfoid = Stillingsinfoid(uuid),
