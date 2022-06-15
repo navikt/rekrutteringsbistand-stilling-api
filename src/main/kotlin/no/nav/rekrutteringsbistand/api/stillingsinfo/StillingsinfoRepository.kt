@@ -78,7 +78,7 @@ class StillingsinfoRepository(
         }
     }
 
-    fun hentForIdent(ident: String): Collection<Stillingsinfo> =
+    fun hentForIdent(ident: String): List<Stillingsinfo> =
         namedJdbcTemplate.query(
             "SELECT * FROM $STILLINGSINFO WHERE $EIER_NAVIDENT = :eier_navident",
             MapSqlParameterSource("eier_navident", ident)

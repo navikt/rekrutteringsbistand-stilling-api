@@ -1,8 +1,6 @@
 package no.nav.rekrutteringsbistand.api.stillingsinfo
 
-import arrow.core.extensions.either.foldable.isEmpty
 import arrow.core.getOrElse
-import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.github.tomakehurst.wiremock.junit.WireMockRule
 import no.nav.rekrutteringsbistand.api.TestRepository
@@ -127,7 +125,7 @@ class StillingsinfoComponentTest {
     }
 
     @Test
-    fun `Oppretting av kandidatliste på ekstern stilling skal returnere 500 og ikke lagre noe i databasen hvis kall mot Arbeidsplassen feiler`() {
+    fun `Oppretting av kandidatliste på ekstern stilling skal lagre i databasen men reversere lagring og returnere 500 hvis kall mot Arbeidsplassen feiler`() {
         val dto = enStillingsinfoInboundDto
         mockAzureObo(wiremockAzure)
         `when`(arbeidsplassenKlient.triggResendingAvStillingsmeldingFraArbeidsplassen(dto.stillingsid)).thenThrow(
