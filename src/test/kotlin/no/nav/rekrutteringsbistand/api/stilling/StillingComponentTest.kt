@@ -1,7 +1,5 @@
 package no.nav.rekrutteringsbistand.api.stilling
 
-import arrow.core.extensions.either.foldable.get
-import arrow.core.left
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
@@ -136,7 +134,7 @@ internal class StillingComponentTest {
     fun `POST mot stillinger skal returnere opprettet stilling`() {
         val rekrutteringsbistandStilling = enOpprettRekrutteringsbistandstillingDto
 
-        mockPamAdApi(HttpMethod.POST, "/api/v1/ads", enOpprettetStilling)
+        mock(HttpMethod.POST, "/api/v1/ads", enOpprettetStilling)
         mockKandidatlisteOppdatering()
         mockAzureObo(wiremockAzure)
 
@@ -162,7 +160,7 @@ internal class StillingComponentTest {
     @Test
     fun `DELETE mot stillinger skal slette stilling`() {
         val slettetStilling = enStilling.copy(status = "DELETED")
-        mockPamAdApi(HttpMethod.DELETE, "/api/v1/ads/${slettetStilling.uuid}", slettetStilling)
+        mock(HttpMethod.DELETE, "/api/v1/ads/${slettetStilling.uuid}", slettetStilling)
         mockKandidatlisteOppdatering(::delete)
         mockAzureObo(wiremockAzure)
 
@@ -186,68 +184,12 @@ internal class StillingComponentTest {
     }
 
     @Test
-    fun `PUT mot stilling skal returnere 500 og ikke gjøre endringer i databasen når kall mot Arbeidsplassen feiler`() {
-        val stilling = enStilling
-        val stillingsinfo = enStillingsinfo
-        repository.opprett(stillingsinfo)
-        mockAzureObo(wiremockAzure)
-        mockKandidatlisteOppdatering()
-        mockPamAdApiError(HttpMethod.PUT, "/api/v1/ads/${stilling.uuid}", stilling)
-
-        val dto = OppdaterRekrutteringsbistandStillingDto(
-            stillingsinfoid = stillingsinfo.stillingsinfoid.asString(),
-            notat = "oppdatert notat",
-            stilling = stilling
-        )
-
-        restTemplate.exchange(
-            "$localBaseUrl/rekrutteringsbistandstilling",
-            HttpMethod.PUT,
-            HttpEntity(dto),
-            String::class.java
-        ).also {
-            assertThat(it.statusCodeValue).isEqualTo(500)
-
-            val lagretStillingsinfo = repository.hentForStilling(Stillingsid(stilling.uuid)).orNull()!!
-            assertThat(lagretStillingsinfo.notat).isEqualTo(stillingsinfo.notat)
-        }
-    }
-
-    @Test
-    fun `PUT mot stilling skal returnere 500 og ikke gjøre endringer i database når kall mot kandidat-api feiler`() {
-        val stilling = enOpprettetStilling
-        val stillingsinfo = enStillingsinfo.copy(stillingsid = Stillingsid(stilling.uuid))
-        repository.opprett(stillingsinfo)
-        mockAzureObo(wiremockAzure)
-        mockPamAdApi(HttpMethod.PUT, "/api/v1/ads/${stilling.uuid}", stilling)
-        mockKandidatlisteOppdateringFeiler()
-
-        val dto = OppdaterRekrutteringsbistandStillingDto(
-            stillingsinfoid = stillingsinfo.stillingsinfoid.asString(),
-            notat = "oppdatert notat",
-            stilling = stilling
-        )
-
-        restTemplate.exchange(
-            "$localBaseUrl/rekrutteringsbistandstilling",
-            HttpMethod.PUT,
-            HttpEntity(dto),
-            String::class.java
-        ).also {
-            assertThat(it.statusCodeValue).isEqualTo(500)
-
-            val lagretStillingsinfo = repository.hentForStilling(Stillingsid(stilling.uuid)).orNull()!!
-            assertThat(lagretStillingsinfo.notat).isEqualTo(stillingsinfo.notat)
-        }
-    }
-
-    @Test
     fun `PUT mot stilling med notat skal returnere endret stilling når stillingsinfo finnes`() {
 
         val stilling = enStilling
         val stillingsinfo = enStillingsinfo.copy(notat = "gammelt notat")
 
-        mockPamAdApi(HttpMethod.PUT, "/api/v1/ads/${enRekrutteringsbistandStilling.stilling.uuid}", stilling)
+        mock(HttpMethod.PUT, "/api/v1/ads/${enRekrutteringsbistandStilling.stilling.uuid}", stilling)
         mockKandidatlisteOppdatering()
         mockAzureObo(wiremockAzure)
 
@@ -275,7 +217,7 @@ internal class StillingComponentTest {
     fun `PUT mot stilling med notat skal returnere endret stilling når stillingsinfo ikke har eier`() {
         val rekrutteringsbistandStilling = enRekrutteringsbistandStillingUtenEier
 
-        mockPamAdApi(HttpMethod.PUT, "/api/v1/ads/${rekrutteringsbistandStilling.stilling.uuid}", rekrutteringsbistandStilling.stilling)
+        mock(HttpMethod.PUT, "/api/v1/ads/${rekrutteringsbistandStilling.stilling.uuid}", rekrutteringsbistandStilling.stilling)
         mockAzureObo(wiremockAzure)
 
         mockKandidatlisteOppdatering()
@@ -301,7 +243,7 @@ internal class StillingComponentTest {
     @Test
     fun `PUT mot stilling med notat skal returnere endret stilling når stillingsinfo ikke finnes`() {
         val rekrutteringsbistandStilling = enRekrutteringsbistandStillingUtenEier
-        mockPamAdApi(HttpMethod.PUT, "/api/v1/ads/${rekrutteringsbistandStilling.stilling.uuid}", rekrutteringsbistandStilling.stilling)
+        mock(HttpMethod.PUT, "/api/v1/ads/${rekrutteringsbistandStilling.stilling.uuid}", rekrutteringsbistandStilling.stilling)
         mockKandidatlisteOppdatering()
         mockAzureObo(wiremockAzure)
 
@@ -326,7 +268,7 @@ internal class StillingComponentTest {
     fun `DELETE mot stilling med kandidatlistefeil skal returnere status 500`() {
         val slettetStilling = enStilling.copy(status = "DELETED")
 
-        mockPamAdApi(HttpMethod.DELETE, "/api/v1/ads/${slettetStilling.uuid}", slettetStilling)
+        mock(HttpMethod.DELETE, "/api/v1/ads/${slettetStilling.uuid}", slettetStilling)
         mockKandidatlisteOppdateringFeiler()
         mockAzureObo(wiremockAzure)
 
@@ -343,7 +285,7 @@ internal class StillingComponentTest {
 
     @Test
     fun `GET mot mine stillinger skal returnere HTTP 200 med mine stillinger uten stillingsinfo`() {
-        mockPamAdApi(HttpMethod.GET, "/api/v1/ads/rekrutteringsbistand/minestillinger", enPageMedStilling)
+        mock(HttpMethod.GET, "/api/v1/ads/rekrutteringsbistand/minestillinger", enPageMedStilling)
         mockAzureObo(wiremockAzure)
 
         val respons = restTemplate.exchange(
@@ -377,7 +319,7 @@ internal class StillingComponentTest {
             totalElements = 2,
             totalPages = 1
         )
-        mockPamAdApi(HttpMethod.GET, "/api/v1/ads/rekrutteringsbistand/minestillinger", page)
+        mock(HttpMethod.GET, "/api/v1/ads/rekrutteringsbistand/minestillinger", page)
         mockAzureObo(wiremockAzure)
 
         val respons = restTemplate.exchange(
@@ -409,14 +351,14 @@ internal class StillingComponentTest {
             totalPages = 1
         )
 
-        mockPamAdApi(HttpMethod.GET, "/api/v1/ads/rekrutteringsbistand/minestillinger", page)
+        mock(HttpMethod.GET, "/api/v1/ads/rekrutteringsbistand/minestillinger", page)
         mockAzureObo(wiremockAzure)
     }
 
     @Test
     fun `DELETE mot stilling skal returnere HTTP 200 med stilling og status DELETED`() {
         val slettetStilling = enStilling.copy(status = "DELETED")
-        mockPamAdApi(HttpMethod.DELETE, "/api/v1/ads/${slettetStilling.uuid}", slettetStilling)
+        mock(HttpMethod.DELETE, "/api/v1/ads/${slettetStilling.uuid}", slettetStilling)
         mockKandidatlisteOppdatering()
         mockAzureObo(wiremockAzure)
 
@@ -431,7 +373,7 @@ internal class StillingComponentTest {
         assertThat(respons.body).isEqualTo(slettetStilling)
     }
 
-    private fun mockPamAdApi(method: HttpMethod, urlPath: String, responseBody: Any) {
+    private fun mock(method: HttpMethod, urlPath: String, responseBody: Any) {
         wiremockPamAdApi.stubFor(
             request(method.name, urlPathMatching(urlPath))
                 .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
@@ -442,15 +384,6 @@ internal class StillingComponentTest {
                     .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
                     .withBody(objectMapper.writeValueAsString(responseBody)))
         )
-    }
-
-    private fun mockPamAdApiError(method: HttpMethod, urlPath: String, responseBody: Any) {
-        wiremockPamAdApi.stubFor(
-            request(method.name, urlPathMatching(urlPath))
-                .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
-                .withHeader(ACCEPT, equalTo(APPLICATION_JSON_VALUE))
-                .withHeader(AUTHORIZATION, matching("Bearer .*"))
-                .willReturn(aResponse().withStatus(500)))
     }
 
     private fun mockUtenAuthorization(urlPath: String, responseBody: Any) {

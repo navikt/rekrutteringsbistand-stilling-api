@@ -5,7 +5,6 @@ import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteKlient
 import no.nav.security.token.support.core.api.Protected
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -18,7 +17,6 @@ class StillingsinfoController(
     val arbeidsplassenKlient: ArbeidsplassenKlient
 ) {
     @PutMapping
-    @Transactional
     fun overtaEierskapForEksternStillingOgKandidatliste(
         @RequestBody dto: StillingsinfoInboundDto
     ): ResponseEntity<StillingsinfoDto> {
