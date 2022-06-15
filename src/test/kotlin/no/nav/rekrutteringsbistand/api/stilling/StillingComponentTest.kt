@@ -196,7 +196,7 @@ internal class StillingComponentTest {
 
         val dto = OppdaterRekrutteringsbistandStillingDto(
             stillingsinfoid = stillingsinfo.stillingsinfoid.asString(),
-            notat = stillingsinfo.notat,
+            notat = "oppdatert notat",
             stilling = stilling
         )
 
