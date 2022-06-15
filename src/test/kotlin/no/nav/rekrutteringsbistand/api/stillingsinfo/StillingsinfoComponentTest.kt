@@ -29,7 +29,6 @@ import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders.*
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
-import org.springframework.http.HttpStatus.NO_CONTENT
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.test.context.junit4.SpringRunner
 
@@ -125,22 +124,6 @@ class StillingsinfoComponentTest {
     }
 
     @Test
-    fun `Oppretting av kandidatliste på ekstern stilling skal lagre i databasen men reversere lagring og returnere 500 hvis kall mot Arbeidsplassen feiler`() {
-        val dto = enStillingsinfoInboundDto
-        mockAzureObo(wiremockAzure)
-        `when`(arbeidsplassenKlient.triggResendingAvStillingsmeldingFraArbeidsplassen(dto.stillingsid)).thenThrow(
-            RuntimeException::class.java
-        )
-
-        val respons =
-            restTemplate.exchange("$localBaseUrl/stillingsinfo", HttpMethod.PUT, httpEntity(dto), String::class.java)
-
-        assertThat(respons.statusCodeValue).isEqualTo(500)
-        val stillingsinfo = repository.hentForStilling(Stillingsid(dto.stillingsid)).orNull()
-        assertThat(stillingsinfo).isNull()
-    }
-
-    @Test
     fun `Oppretting av kandidatliste på ekstern stilling skal returnere 500 og ikke lagre noe i databasen hvis kall mot kandidat-api feiler`() {
         val dto = enStillingsinfoInboundDto
         mockAzureObo(wiremockAzure)
@@ -152,27 +135,6 @@ class StillingsinfoComponentTest {
         assertThat(respons.statusCodeValue).isEqualTo(500)
         val stillingsinfo = repository.hentForStilling(Stillingsid(dto.stillingsid)).orNull()
         assertThat(stillingsinfo).isNull()
-    }
-
-    @Test
-    fun `Endring av eier av kandidatliste for ekstern stilling skal returnere 500 og ikke lagre endringer i databasen hvis kall mot Arbeidsplassen feiler`() {
-        val stillingsinfo = enStillingsinfo.copy(eier = Eier("Y111111", "Et Navn"))
-        repository.opprett(stillingsinfo)
-        val endringDto = StillingsinfoInboundDto(
-            stillingsid = stillingsinfo.stillingsid.asString(),
-            eierNavident = "X998877",
-            eierNavn = "Helt Annet Navn"
-        )
-        mockAzureObo(wiremockAzure)
-        `when`(arbeidsplassenKlient.triggResendingAvStillingsmeldingFraArbeidsplassen(endringDto.stillingsid)).thenThrow(
-            RuntimeException::class.java
-        )
-
-        val respons = restTemplate.exchange("$localBaseUrl/stillingsinfo", HttpMethod.PUT, httpEntity(endringDto), String::class.java)
-
-        assertThat(respons.statusCodeValue).isEqualTo(500)
-        val lagretStillingsinfo = repository.hentForStilling(stillingsinfo.stillingsid).orNull()
-        assertThat(lagretStillingsinfo!!.eier).isEqualTo(stillingsinfo.eier)
     }
 
     @Test

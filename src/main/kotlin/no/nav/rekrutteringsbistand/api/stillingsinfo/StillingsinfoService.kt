@@ -3,8 +3,6 @@ package no.nav.rekrutteringsbistand.api.stillingsinfo
 import no.nav.rekrutteringsbistand.api.arbeidsplassen.ArbeidsplassenKlient
 import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteKlient
 import no.nav.rekrutteringsbistand.api.option.Option
-import no.nav.rekrutteringsbistand.api.option.Some
-import no.nav.rekrutteringsbistand.api.option.get
 import no.nav.rekrutteringsbistand.api.stilling.Stilling
 import org.springframework.stereotype.Service
 import java.util.*
@@ -12,27 +10,32 @@ import java.util.*
 @Service
 class StillingsinfoService(
     private val stillingsinfoRepository: StillingsinfoRepository,
-    val kandidatlisteKlient: KandidatlisteKlient,
-    val arbeidsplassenKlient: ArbeidsplassenKlient,
-    val repo: StillingsinfoRepository)
-{
+    private val kandidatlisteKlient: KandidatlisteKlient,
+    private val arbeidsplassenKlient: ArbeidsplassenKlient,
+) {
 
     fun overtaEierskapForEksternStillingOgKandidatliste(stillingsId: String, eier: Eier): Stillingsinfo {
-        val oppdatertStillingsinfo = overtaEierskapForEksternStilling(stillingsId, eier)
-        kandidatlisteKlient.varsleOmOppdatertStilling(Stillingsid(stillingsId))
-        arbeidsplassenKlient.triggResendingAvStillingsmeldingFraArbeidsplassen(stillingsId)
-        return oppdatertStillingsinfo;
-    }
+        val eksisterendeStillingsinfo = stillingsinfoRepository.hentForStilling(Stillingsid(stillingsId)).orNull()
 
-
-    private fun overtaEierskapForEksternStilling(stillingsId: String, eier: Eier): Stillingsinfo {
-        val eksisterendeStillingsinfo = stillingsinfoRepository.hentForStilling(Stillingsid(stillingsId))
-
-        return if (eksisterendeStillingsinfo is Some) {
-            oppdaterEier(eksisterendeStillingsinfo.get(), eier)
+        val oppdatertStillingsinfo = if (eksisterendeStillingsinfo != null) {
+            oppdaterEier(eksisterendeStillingsinfo, eier)
         } else {
             opprettEierForEksternStilling(stillingsId, eier)
         }
+
+        try {
+            kandidatlisteKlient.varsleOmOppdatertStilling(Stillingsid(stillingsId))
+        } catch (e: Exception) {
+            if (eksisterendeStillingsinfo != null) {
+                oppdaterEier(eksisterendeStillingsinfo, eksisterendeStillingsinfo.eier!!)
+            } else {
+                stillingsinfoRepository.slett(stillingsId)
+            }
+            throw RuntimeException("Varsel til kandidat-api om oppdatert ekstern stilling feilet")
+        }
+
+        arbeidsplassenKlient.triggResendingAvStillingsmeldingFraArbeidsplassen(stillingsId)
+        return oppdatertStillingsinfo
     }
 
     private fun opprettEierForEksternStilling(stillingsId: String, eier: Eier): Stillingsinfo {
