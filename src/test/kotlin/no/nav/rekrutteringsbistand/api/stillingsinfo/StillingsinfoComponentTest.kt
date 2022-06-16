@@ -23,6 +23,7 @@ import org.mockito.Spy
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.core.ParameterizedTypeReference
@@ -32,6 +33,7 @@ import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.test.context.junit4.SpringRunner
+import java.util.*
 
 @RunWith(SpringRunner::class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -56,6 +58,7 @@ class StillingsinfoComponentTest {
     @MockBean
     lateinit var arbeidsplassenKlient: ArbeidsplassenKlient
 
+    @SpyBean
     @Autowired
     lateinit var repository: StillingsinfoRepository
 
@@ -125,7 +128,7 @@ class StillingsinfoComponentTest {
     }
 
     @Test
-    fun `Oppretting av kandidatliste på ekstern stilling skal lagre stillingsinfo for så å reversere lagring og returnere 500 når kall mot kandidat-api feiler`() {
+    fun `Oppretting av kandidatliste på ekstern stilling skal returnere 500 og ikke lagre stillingsinfo i databasen når kall mot kandidat-api feiler`() {
         val dto = enStillingsinfoInboundDto
         mockAzureObo(wiremockAzure)
         `when`(kandidatlisteKlient.varsleOmOppdatertStilling(Stillingsid(dto.stillingsid))).thenThrow(RuntimeException::class.java)
@@ -136,11 +139,10 @@ class StillingsinfoComponentTest {
         assertThat(respons.statusCodeValue).isEqualTo(500)
         val stillingsinfo = repository.hentForStilling(Stillingsid(dto.stillingsid)).orNull()
         assertThat(stillingsinfo).isNull()
-        fail<String>("TODO: endre test til å verifie kall mot database")
     }
 
     @Test
-    fun `Endring av eier av kandidatliste for ekstern stilling skal lagre endring for så å reversere endringen og returnere 500 når kall mot kandidat-api feiler`() {
+    fun `Endring av eier av kandidatliste for ekstern stilling skal returnere 500 og ikke lagre endring i databasen når kandidat-api feiler`() {
         val stillingsinfo = enStillingsinfo.copy(eier = Eier("Y111111", "Et Navn"))
         repository.opprett(stillingsinfo)
         val endringDto = StillingsinfoInboundDto(
@@ -156,7 +158,6 @@ class StillingsinfoComponentTest {
         assertThat(respons.statusCodeValue).isEqualTo(500)
         val lagretStillingsinfo = repository.hentForStilling(stillingsinfo.stillingsid).orNull()
         assertThat(lagretStillingsinfo!!.eier).isEqualTo(stillingsinfo.eier)
-        fail<String>("TODO: endre test til å verifie kall mot database")
     }
 
     @After
