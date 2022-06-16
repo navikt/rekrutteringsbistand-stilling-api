@@ -35,7 +35,7 @@ class StillingsinfoService(
             kandidatlisteKlient.varsleOmOppdatertStilling(Stillingsid(stillingsId))
         } catch (e: Exception) {
             reverserEierskapsendring(stillingsId, eksisterendeStillingsinfo)
-            throw RuntimeException("Varsel til kandidat-api om oppdatert ekstern stilling feilet")
+            throw RuntimeException("Varsel til kandidat-api om oppdatert ekstern stilling feilet", e)
         }
 
         arbeidsplassenKlient.triggResendingAvStillingsmeldingFraArbeidsplassen(stillingsId)
