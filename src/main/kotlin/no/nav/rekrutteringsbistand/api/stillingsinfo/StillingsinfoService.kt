@@ -22,8 +22,18 @@ class StillingsinfoService(
      * Dersom løkka mellom kandidat-api og stilling-api fjernes er manuell håndtering av databasereversering unødvendig.
      * Man kan da putte på en @Transactional på for eksempel endepunktet.
      */
-    fun overtaEierskapForEksternStillingOgKandidatliste(stillingsId: String, nyEier: Eier): Stillingsinfo {
-        val eksisterendeStillingsinfo = repository.hentForStilling(Stillingsid(stillingsId)).orNull()
+    fun overtaEierskapForEksternStillingOgKandidatliste(stillingsId: Stillingsid, nyEier: Eier): Stillingsinfo {
+        val eksisterendeStillingsinfo = repository.hentForStilling(stillingsId).orNull()
+        val stillingHarEier = eksisterendeStillingsinfo?.eier != null
+
+        return if (stillingHarEier) {
+            endreEier(eksisterendeStillingsinfo, nyEier)
+        } else {
+            opprettEier()
+        }
+
+
+
 
         val oppdatertStillingsinfo = if (eksisterendeStillingsinfo != null) {
             oppdaterEier(eksisterendeStillingsinfo, nyEier)
@@ -40,6 +50,31 @@ class StillingsinfoService(
 
         arbeidsplassenKlient.triggResendingAvStillingsmeldingFraArbeidsplassen(stillingsId)
         return oppdatertStillingsinfo
+    }
+
+    private fun endreEier(stillingsinfo: Stillingsinfo, eier: Eier): Stillingsinfo {
+        // Lagre ny eier i database
+        repository.oppdaterEier(stillingsinfo.stillingsinfoid, eier)
+        // Varsle kandidat-api om ny eier
+            // Hvis feiler reverser endring og kast exception
+        // Returner stillingsinfo med oppdatert eier
+
+
+        /*
+                val oppdatertStillingsinfo = eksisterendeStillingsinfo.copy(
+            eier = nyEier
+        )
+
+        repository.oppdaterEierIdentOgEierNavn(
+            OppdaterEier(oppdatertStillingsinfo.stillingsinfoid, nyEier)
+        )
+
+        return oppdatertStillingsinfo
+         */
+    }
+
+    private fun opprettEierPåEksternStilling(stillingsId: String, eier: Eier) {
+
     }
 
     private fun reverserEierskapsendring(stillingsId: String, opprinneligStillingsinfo: Stillingsinfo?) {
@@ -68,7 +103,7 @@ class StillingsinfoService(
             eier = nyEier
         )
 
-        repository.oppdaterEierIdentOgEierNavn(
+        repository.oppdaterEier(
             OppdaterEier(oppdatertStillingsinfo.stillingsinfoid, nyEier)
         )
 

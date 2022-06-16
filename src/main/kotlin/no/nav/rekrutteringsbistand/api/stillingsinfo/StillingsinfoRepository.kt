@@ -36,15 +36,14 @@ class StillingsinfoRepository(
             )
         )
 
-    fun oppdaterEierIdentOgEierNavn(oppdatering: OppdaterEier) =
+    fun oppdaterEier(stillingsinfoId: Stillingsinfoid, nyEier: Eier) =
         namedJdbcTemplate.update(
             "update $STILLINGSINFO set $EIER_NAVIDENT=:eier_navident, $EIER_NAVN=:eier_navn where $STILLINGSINFOID=:stillingsinfoid",
             mapOf(
-                "stillingsinfoid" to oppdatering.stillingsinfoid.asString(),
-                "eier_navident" to oppdatering.eier.navident,
-                "eier_navn" to oppdatering.eier.navn
+                "stillingsinfoid" to stillingsinfoId.asString(),
+                "eier_navident" to nyEier.navident,
+                "eier_navn" to nyEier.navn
             )
-
         )
 
     fun oppdaterNotat(oppdatering: OppdaterNotat) {

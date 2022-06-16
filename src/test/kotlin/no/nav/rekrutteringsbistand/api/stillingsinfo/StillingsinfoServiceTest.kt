@@ -1,6 +1,5 @@
 package no.nav.rekrutteringsbistand.api.stillingsinfo
 
-import no.nav.rekrutteringsbistand.api.Testdata
 import no.nav.rekrutteringsbistand.api.Testdata.enStillingsinfo
 import no.nav.rekrutteringsbistand.api.arbeidsplassen.ArbeidsplassenKlient
 import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteKlient
@@ -42,8 +41,8 @@ class StillingsinfoServiceTest {
             stillingsinfoService.overtaEierskapForEksternStillingOgKandidatliste(eksisterendeStillingsinfo.stillingsid.asString(), Eier("DummyIdent", "DummyNavn"))
         }
 
-        verify(repository, times(1)).oppdaterEierIdentOgEierNavn(OppdaterEier(eksisterendeStillingsinfo.stillingsinfoid, nyEier))
-        verify(repository, times(1)).oppdaterEierIdentOgEierNavn(OppdaterEier(eksisterendeStillingsinfo.stillingsinfoid, eksisterendeEier))
+        verify(repository, times(1)).oppdaterEier(OppdaterEier(eksisterendeStillingsinfo.stillingsinfoid, nyEier))
+        verify(repository, times(1)).oppdaterEier(OppdaterEier(eksisterendeStillingsinfo.stillingsinfoid, eksisterendeEier))
     }
 
     private fun <T> anyObject(type: Class<T>): T = Mockito.any<T>(type)
