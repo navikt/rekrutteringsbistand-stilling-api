@@ -26,88 +26,56 @@ class StillingsinfoService(
         val eksisterendeStillingsinfo = repository.hentForStilling(stillingsId).orNull()
         val stillingHarEier = eksisterendeStillingsinfo?.eier != null
 
-        return if (stillingHarEier) {
-            endreEier(eksisterendeStillingsinfo, nyEier)
+        val oppdatertStillingsinfo = if (stillingHarEier) {
+            endreEier(eksisterendeStillingsinfo!!, nyEier)
         } else {
-            opprettEier()
+            opprettEierPåEksternStilling(stillingsId, nyEier)
         }
 
+        arbeidsplassenKlient.triggResendingAvStillingsmeldingFraArbeidsplassen(stillingsId.asString())
+        return oppdatertStillingsinfo
+    }
 
-
-
-        val oppdatertStillingsinfo = if (eksisterendeStillingsinfo != null) {
-            oppdaterEier(eksisterendeStillingsinfo, nyEier)
-        } else {
-            opprettEier(stillingsId, nyEier)
-        }
+    private fun endreEier(stillingsinfo: Stillingsinfo, nyEier: Eier): Stillingsinfo {
+        repository.oppdaterEier(stillingsinfo.stillingsinfoid, nyEier)
 
         try {
-            kandidatlisteKlient.varsleOmOppdatertStilling(Stillingsid(stillingsId))
+            kandidatlisteKlient.varsleOmOppdatertStilling(stillingsinfo.stillingsid)
         } catch (e: Exception) {
-            reverserEierskapsendring(stillingsId, eksisterendeStillingsinfo)
-            throw RuntimeException("Varsel til kandidat-api om oppdatert ekstern stilling feilet", e)
+            repository.oppdaterEier(stillingsinfo, stillingsinfo.eier) // Sette tilbake til forrige eier
+            throw RuntimeException("Varsel til kandidat-api om endret eierskap for ekstern stilling feilet", e)
         }
 
-        arbeidsplassenKlient.triggResendingAvStillingsmeldingFraArbeidsplassen(stillingsId)
-        return oppdatertStillingsinfo
+        return stillingsinfo.copy(eier = nyEier)
     }
 
-    private fun endreEier(stillingsinfo: Stillingsinfo, eier: Eier): Stillingsinfo {
-        // Lagre ny eier i database
-        repository.oppdaterEier(stillingsinfo.stillingsinfoid, eier)
-        // Varsle kandidat-api om ny eier
-            // Hvis feiler reverser endring og kast exception
-        // Returner stillingsinfo med oppdatert eier
-
-
-        /*
-                val oppdatertStillingsinfo = eksisterendeStillingsinfo.copy(
-            eier = nyEier
-        )
-
-        repository.oppdaterEierIdentOgEierNavn(
-            OppdaterEier(oppdatertStillingsinfo.stillingsinfoid, nyEier)
-        )
-
-        return oppdatertStillingsinfo
-         */
-    }
-
-    private fun opprettEierPåEksternStilling(stillingsId: String, eier: Eier) {
-
-    }
-
-    private fun reverserEierskapsendring(stillingsId: String, opprinneligStillingsinfo: Stillingsinfo?) {
-        if (opprinneligStillingsinfo != null) {
-            oppdaterEier(opprinneligStillingsinfo, opprinneligStillingsinfo.eier!!)
-        } else {
-            repository.slett(stillingsId)
-        }
-    }
-
-    private fun opprettEier(stillingsId: String, eier: Eier): Stillingsinfo {
-        val uuid = UUID.randomUUID()
+    private fun opprettEierPåEksternStilling(stillingsId: Stillingsid, eier: Eier): Stillingsinfo {
         val stillingsinfo = Stillingsinfo(
-            stillingsinfoid = Stillingsinfoid(uuid),
-            stillingsid = Stillingsid(verdi = stillingsId),
+            stillingsinfoid = Stillingsinfoid(UUID.randomUUID()),
+            stillingsid = stillingsId,
             eier = eier
         )
-
         repository.opprett(stillingsinfo)
 
+        val varselTilKandidatliste = varsleKandidatlistaOmNyEier(stillingsId)
+
+//        try {
+//            kandidatlisteKlient.varsleOmOppdatertStilling(stillingsinfo.stillingsid)
+//        } catch (e: Exception) {
+//            repository.slett(stillingsId.asString())
+//            throw RuntimeException("Varsel til kandidat-api om opprettet eier for ekstern stilling feilet", e)
+//        }
         return stillingsinfo
     }
 
-    private fun oppdaterEier(eksisterendeStillingsinfo: Stillingsinfo, nyEier: Eier): Stillingsinfo {
-        val oppdatertStillingsinfo = eksisterendeStillingsinfo.copy(
-            eier = nyEier
-        )
-
-        repository.oppdaterEier(
-            OppdaterEier(oppdatertStillingsinfo.stillingsinfoid, nyEier)
-        )
-
-        return oppdatertStillingsinfo
+    // Bruke Arrow til å returnere noe gøy?
+    private fun varsleKandidatlistaOmNyEier(stillingsId: Stillingsid): Pair<Boolean, Exception?> {
+        try {
+            kandidatlisteKlient.varsleOmOppdatertStilling(stillingsId)
+        } catch (e: Exception) {
+            return Pair(false, RuntimeException("Varsel til kandidat-api om oppdatert ekstern stilling feilet", e))
+        }
+        return Pair(true, null)
     }
 
     fun hentStillingsinfo(stilling: Stilling): Option<Stillingsinfo> =
