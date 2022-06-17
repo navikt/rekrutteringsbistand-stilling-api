@@ -25,8 +25,8 @@ class StillingsinfoServiceTest {
             stillingsinfoService.overtaEierskapForEksternStillingOgKandidatliste(Stillingsid(UUID.randomUUID()), Eier("DummyIdent", "DummyNavn"))
         }
 
-        verify(repository, times(1)).opprett(anyObject(Stillingsinfo::class.java))
-        verify(repository, times(1)).slett(anyString())
+        verify(repository, times(1)).upsert(anyObject(Stillingsinfo::class.java))
+        verify(repository, times(1)).slett(anyObject(Stillingsid::class.java))
     }
 
     @Test
@@ -34,15 +34,15 @@ class StillingsinfoServiceTest {
         val eksisterendeStillingsinfo = enStillingsinfo
         `when`(repository.hentForStilling(eksisterendeStillingsinfo.stillingsid)).thenReturn(optionOf(enStillingsinfo))
         `when`(kandidatlisteKlient.sendStillingOppdatert(anyObject(Stillingsid::class.java))).thenThrow(RuntimeException::class.java)
-        val eksisterendeEier = eksisterendeStillingsinfo.eier!!
         val nyEier = Eier("DummyIdent", "DummyNavn")
 
         assertThrows<RuntimeException> {
-            stillingsinfoService.overtaEierskapForEksternStillingOgKandidatliste(eksisterendeStillingsinfo.stillingsid.asString(), Eier("DummyIdent", "DummyNavn"))
+            stillingsinfoService.overtaEierskapForEksternStillingOgKandidatliste(eksisterendeStillingsinfo.stillingsid, nyEier)
         }
 
-        verify(repository, times(1)).oppdaterEier(OppdaterEier(eksisterendeStillingsinfo.stillingsinfoid, nyEier))
-        verify(repository, times(1)).oppdaterEier(OppdaterEier(eksisterendeStillingsinfo.stillingsinfoid, eksisterendeEier))
+        verify(repository, times(1)).upsert(eksisterendeStillingsinfo)
+        val stillingsnifoMedNyEier = enStillingsinfo.copy(eier = nyEier)
+        verify(repository, times(1)).upsert(stillingsnifoMedNyEier)
     }
 
     private fun <T> anyObject(type: Class<T>): T = Mockito.any<T>(type)
