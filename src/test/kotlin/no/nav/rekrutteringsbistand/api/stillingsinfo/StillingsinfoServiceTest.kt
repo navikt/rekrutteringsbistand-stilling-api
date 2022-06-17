@@ -19,10 +19,10 @@ class StillingsinfoServiceTest {
     @Test
     fun `Oppretting av kandidatliste på ekstern stilling skal lagre stillingsinfo for så å reversere lagring når kall mot kandidat-api feiler`() {
         `when`(repository.hentForStilling(anyObject(Stillingsid::class.java))).thenReturn(optionOf(null))
-        `when`(kandidatlisteKlient.varsleOmOppdatertStilling(anyObject(Stillingsid::class.java))).thenThrow(RuntimeException::class.java)
+        `when`(kandidatlisteKlient.sendStillingOppdatert(anyObject(Stillingsid::class.java))).thenThrow(RuntimeException::class.java)
 
         assertThrows<RuntimeException> {
-            stillingsinfoService.overtaEierskapForEksternStillingOgKandidatliste(UUID.randomUUID().toString(), Eier("DummyIdent", "DummyNavn"))
+            stillingsinfoService.overtaEierskapForEksternStillingOgKandidatliste(Stillingsid(UUID.randomUUID()), Eier("DummyIdent", "DummyNavn"))
         }
 
         verify(repository, times(1)).opprett(anyObject(Stillingsinfo::class.java))
@@ -33,7 +33,7 @@ class StillingsinfoServiceTest {
     fun `Oppretting av kandidatliste på ekstern stilling skal lagre endret stillingsinfo for så å reversere endringa når kall mot kandidat-api feiler`() {
         val eksisterendeStillingsinfo = enStillingsinfo
         `when`(repository.hentForStilling(eksisterendeStillingsinfo.stillingsid)).thenReturn(optionOf(enStillingsinfo))
-        `when`(kandidatlisteKlient.varsleOmOppdatertStilling(anyObject(Stillingsid::class.java))).thenThrow(RuntimeException::class.java)
+        `when`(kandidatlisteKlient.sendStillingOppdatert(anyObject(Stillingsid::class.java))).thenThrow(RuntimeException::class.java)
         val eksisterendeEier = eksisterendeStillingsinfo.eier!!
         val nyEier = Eier("DummyIdent", "DummyNavn")
 

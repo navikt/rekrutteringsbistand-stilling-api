@@ -19,7 +19,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.*
-import org.mockito.Spy
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
@@ -33,7 +32,6 @@ import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.test.context.junit4.SpringRunner
-import java.util.*
 
 @RunWith(SpringRunner::class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -131,7 +129,7 @@ class StillingsinfoComponentTest {
     fun `Oppretting av kandidatliste på ekstern stilling skal returnere 500 og ikke lagre stillingsinfo i databasen når kall mot kandidat-api feiler`() {
         val dto = enStillingsinfoInboundDto
         mockAzureObo(wiremockAzure)
-        `when`(kandidatlisteKlient.varsleOmOppdatertStilling(Stillingsid(dto.stillingsid))).thenThrow(RuntimeException::class.java)
+        `when`(kandidatlisteKlient.sendStillingOppdatert(Stillingsid(dto.stillingsid))).thenThrow(RuntimeException::class.java)
 
         val respons =
             restTemplate.exchange("$localBaseUrl/stillingsinfo", HttpMethod.PUT, httpEntity(dto), String::class.java)
@@ -151,7 +149,7 @@ class StillingsinfoComponentTest {
             eierNavn = "Helt Annet Navn"
         )
         mockAzureObo(wiremockAzure)
-        `when`(kandidatlisteKlient.varsleOmOppdatertStilling(stillingsinfo.stillingsid)).thenThrow(RuntimeException::class.java)
+        `when`(kandidatlisteKlient.sendStillingOppdatert(stillingsinfo.stillingsid)).thenThrow(RuntimeException::class.java)
 
         val respons = restTemplate.exchange("$localBaseUrl/stillingsinfo", HttpMethod.PUT, httpEntity(endringDto), String::class.java)
 

@@ -55,7 +55,7 @@ class StillingsinfoRepositoryTest {
     @Test
     fun `Skal kunne oppdatere eierident og eiernavn på stillingsinfo`() {
         repository.opprett(tilLagring)
-        repository.oppdaterEier(enStillingsinfoOppdatering)
+        repository.oppdaterEier(enStillingsinfoOppdatering.stillingsinfoid, enStillingsinfoOppdatering.eier)
 
         val endretRekrutteringsbistand =
             repository.hentForStilling(tilLagring.stillingsid).getOrElse { fail("Testsetup") }

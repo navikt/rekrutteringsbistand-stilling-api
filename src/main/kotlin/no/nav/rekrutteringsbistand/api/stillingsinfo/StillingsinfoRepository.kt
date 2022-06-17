@@ -28,6 +28,9 @@ class StillingsinfoRepository(
         )
     }
 
+    fun slett(stillingsid: Stillingsid) = slett(stillingsid.asString())
+
+
     fun slett(stillingsid: String) =
         namedJdbcTemplate.update(
             "delete from $STILLINGSINFO where $STILLINGSID=:stillingsid",
@@ -85,6 +88,10 @@ class StillingsinfoRepository(
         { rs: ResultSet, _: Int ->
             Stillingsinfo.fromDB(rs)
         }
+
+    fun upsert(stillingsinfo: Stillingsinfo) {
+        TODO("Not yet implemented")
+    }
 
     companion object {
         const val STILLINGSINFO = "Stillingsinfo"
