@@ -39,13 +39,13 @@ class StillingsinfoRepository(
             )
         )
 
-    fun oppdaterEier(stillingsinfoId: Stillingsinfoid, nyEier: Eier) =
+    fun oppdaterEier(stillingsinfoId: Stillingsinfoid, nyEier: Eier?) =
         namedJdbcTemplate.update(
             "update $STILLINGSINFO set $EIER_NAVIDENT=:eier_navident, $EIER_NAVN=:eier_navn where $STILLINGSINFOID=:stillingsinfoid",
             mapOf(
                 "stillingsinfoid" to stillingsinfoId.asString(),
-                "eier_navident" to nyEier.navident,
-                "eier_navn" to nyEier.navn
+                "eier_navident" to nyEier?.navident,
+                "eier_navn" to nyEier?.navn
             )
         )
 
@@ -88,10 +88,6 @@ class StillingsinfoRepository(
         { rs: ResultSet, _: Int ->
             Stillingsinfo.fromDB(rs)
         }
-
-    fun upsert(stillingsinfo: Stillingsinfo) {
-        TODO("Not yet implemented")
-    }
 
     companion object {
         const val STILLINGSINFO = "Stillingsinfo"

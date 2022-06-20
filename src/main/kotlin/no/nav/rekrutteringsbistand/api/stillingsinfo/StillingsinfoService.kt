@@ -14,26 +14,6 @@ class StillingsinfoService(
     private val arbeidsplassenKlient: ArbeidsplassenKlient,
 ) {
 
-    fun overtaEierskapForEksternStillingOgKandidatliste(stillingsId: Stillingsid, nyEier: Eier): Stillingsinfo {
-        val opprinneligStillingsinfo = repository.hentForStilling(stillingsId).orNull()
-        val stillingsinfoMedNyEier = opprinneligStillingsinfo?.copy(eier = nyEier) ?: Stillingsinfo(
-            stillingsinfoid = Stillingsinfoid(UUID.randomUUID()),
-            stillingsid = stillingsId,
-            eier = nyEier
-        )
-
-        repository.upsert(stillingsinfoMedNyEier)
-        try {
-            kandidatlisteKlient.sendStillingOppdatert(stillingsId)
-        } catch (e: Exception) {
-            reverser(opprinneligStillingsinfo, stillingsId)
-            throw RuntimeException("Varsel til rekbis-kandidat-api om endring av eier for ekstern stilling feilet", e)
-        }
-
-        arbeidsplassenKlient.triggResendingAvStillingsmeldingFraArbeidsplassen(stillingsId.asString())
-        return stillingsinfoMedNyEier
-    }
-
     /**
      * Reversering av databaseendringer kan ikke gjøres med @Transactional på REST-endepunktet. Dette skyldes at endringer i databasen
      * må være committa til databasen når kall til rekbis-kandidat-api gjøres. Fordi rekbis-kandidat-api vil gjøre et kall
@@ -42,8 +22,30 @@ class StillingsinfoService(
      * Dersom løkka mellom kandidat-api og stilling-api fjernes er manuell håndtering av databasereversering unødvendig.
      * Man kan da putte på en @Transactional på for eksempel endepunktet.
      */
-    private fun reverser(opprinneligStillingsinfo: Stillingsinfo?, stillingsId: Stillingsid) {
-        opprinneligStillingsinfo?.let { repository.upsert(it) } ?: repository.slett(stillingsId)
+    fun overtaEierskapForEksternStillingOgKandidatliste(stillingsId: Stillingsid, nyEier: Eier): Stillingsinfo {
+        val opprinneligStillingsinfo = repository.hentForStilling(stillingsId).orNull()
+        val stillingsinfoMedNyEier = opprinneligStillingsinfo?.copy(eier = nyEier) ?: Stillingsinfo(
+            stillingsinfoid = Stillingsinfoid(UUID.randomUUID()),
+            stillingsid = stillingsId,
+            eier = nyEier
+        )
+        fun endreEier() {
+            opprinneligStillingsinfo?.let { repository.oppdaterEier(it.stillingsinfoid, nyEier) } ?: repository.opprett(stillingsinfoMedNyEier)
+        }
+        fun reverser() {
+            opprinneligStillingsinfo?.let { repository.oppdaterEier(it.stillingsinfoid, opprinneligStillingsinfo.eier) } ?: repository.slett(stillingsId)
+        }
+
+        endreEier()
+        try {
+            kandidatlisteKlient.sendStillingOppdatert(stillingsId)
+        } catch (e: Exception) {
+            reverser()
+            throw RuntimeException("Varsel til rekbis-kandidat-api om endring av eier for ekstern stilling feilet", e)
+        }
+
+        arbeidsplassenKlient.triggResendingAvStillingsmeldingFraArbeidsplassen(stillingsId.asString())
+        return stillingsinfoMedNyEier
     }
 
     fun hentStillingsinfo(stilling: Stilling): Option<Stillingsinfo> =

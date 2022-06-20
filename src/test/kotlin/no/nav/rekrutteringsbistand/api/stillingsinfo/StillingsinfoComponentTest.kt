@@ -126,7 +126,7 @@ class StillingsinfoComponentTest {
     }
 
     @Test
-    fun `Oppretting av kandidatliste på ekstern stilling skal returnere 500 og ikke lagre stillingsinfo i databasen når kall mot kandidat-api feiler`() {
+    fun `Når vi prøver å opprette eier og kall mot kandidat-api feiler så skal ingenting ha blitt lagret`() {
         val dto = enStillingsinfoInboundDto
         mockAzureObo(wiremockAzure)
         `when`(kandidatlisteKlient.sendStillingOppdatert(Stillingsid(dto.stillingsid))).thenThrow(RuntimeException::class.java)
@@ -140,7 +140,7 @@ class StillingsinfoComponentTest {
     }
 
     @Test
-    fun `Endring av eier av kandidatliste for ekstern stilling skal returnere 500 og ikke lagre endring i databasen når kandidat-api feiler`() {
+    fun `Når vi prøver å endre eier og kall mot kandidat-api feiler så skal ingen endringer ha blitt lagret`() {
         val stillingsinfo = enStillingsinfo.copy(eier = Eier("Y111111", "Et Navn"))
         repository.opprett(stillingsinfo)
         val endringDto = StillingsinfoInboundDto(
@@ -156,6 +156,25 @@ class StillingsinfoComponentTest {
         assertThat(respons.statusCodeValue).isEqualTo(500)
         val lagretStillingsinfo = repository.hentForStilling(stillingsinfo.stillingsid).orNull()
         assertThat(lagretStillingsinfo!!.eier).isEqualTo(stillingsinfo.eier)
+    }
+
+    @Test
+    fun `Når vi prøver å endre eier og kall mot kandidat-api feiler så skal ingen endringer ha blitt lagret gitt at eksisterende eier er null`() {
+        val stillingsinfoDerEierErNull = enStillingsinfo.copy(eier = null)
+        repository.opprett(stillingsinfoDerEierErNull)
+        mockAzureObo(wiremockAzure)
+        val endringDto = StillingsinfoInboundDto(
+            stillingsid = stillingsinfoDerEierErNull.stillingsid.asString(),
+            eierNavident = "X998877",
+            eierNavn = "Helt Annet Navn"
+        )
+        `when`(kandidatlisteKlient.sendStillingOppdatert(stillingsinfoDerEierErNull.stillingsid)).thenThrow(RuntimeException::class.java)
+
+        val respons = restTemplate.exchange("$localBaseUrl/stillingsinfo", HttpMethod.PUT, httpEntity(endringDto), String::class.java)
+
+        assertThat(respons.statusCodeValue).isEqualTo(500)
+        val lagretStillingsinfo = repository.hentForStilling(stillingsinfoDerEierErNull.stillingsid).orNull()
+        assertThat(lagretStillingsinfo!!.eier).isNull()
     }
 
     @After

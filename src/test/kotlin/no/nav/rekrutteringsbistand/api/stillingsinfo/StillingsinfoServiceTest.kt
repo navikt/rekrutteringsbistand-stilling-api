@@ -17,7 +17,7 @@ class StillingsinfoServiceTest {
     private val stillingsinfoService = StillingsinfoService(repository, kandidatlisteKlient, arbeidsplassenKlient)
 
     @Test
-    fun `Oppretting av kandidatliste på ekstern stilling skal lagre stillingsinfo for så å reversere lagring når kall mot kandidat-api feiler`() {
+    fun `Når vi prøver å opprette eier skal vi lagre ny stillingsinfo men slette igjen når påfølgende kall mot kandidat-api feiler`() {
         `when`(repository.hentForStilling(anyObject(Stillingsid::class.java))).thenReturn(optionOf(null))
         `when`(kandidatlisteKlient.sendStillingOppdatert(anyObject(Stillingsid::class.java))).thenThrow(RuntimeException::class.java)
 
@@ -25,12 +25,12 @@ class StillingsinfoServiceTest {
             stillingsinfoService.overtaEierskapForEksternStillingOgKandidatliste(Stillingsid(UUID.randomUUID()), Eier("DummyIdent", "DummyNavn"))
         }
 
-        verify(repository, times(1)).upsert(anyObject(Stillingsinfo::class.java))
+        verify(repository, times(1)).opprett(anyObject(Stillingsinfo::class.java))
         verify(repository, times(1)).slett(anyObject(Stillingsid::class.java))
     }
 
     @Test
-    fun `Oppretting av kandidatliste på ekstern stilling skal lagre endret stillingsinfo for så å reversere endringa når kall mot kandidat-api feiler`() {
+    fun `Når vi prøver å endre eier skal vi lagre ny eier men reversere når påfølgende kall mot kandidat-api feiler`() {
         val eksisterendeStillingsinfo = enStillingsinfo
         `when`(repository.hentForStilling(eksisterendeStillingsinfo.stillingsid)).thenReturn(optionOf(enStillingsinfo))
         `when`(kandidatlisteKlient.sendStillingOppdatert(anyObject(Stillingsid::class.java))).thenThrow(RuntimeException::class.java)
@@ -40,9 +40,8 @@ class StillingsinfoServiceTest {
             stillingsinfoService.overtaEierskapForEksternStillingOgKandidatliste(eksisterendeStillingsinfo.stillingsid, nyEier)
         }
 
-        verify(repository, times(1)).upsert(eksisterendeStillingsinfo)
-        val stillingsnifoMedNyEier = enStillingsinfo.copy(eier = nyEier)
-        verify(repository, times(1)).upsert(stillingsnifoMedNyEier)
+        verify(repository, times(1)).oppdaterEier(eksisterendeStillingsinfo.stillingsinfoid, nyEier)
+        verify(repository, times(1)).oppdaterEier(eksisterendeStillingsinfo.stillingsinfoid, eksisterendeStillingsinfo.eier)
     }
 
     private fun <T> anyObject(type: Class<T>): T = Mockito.any<T>(type)
