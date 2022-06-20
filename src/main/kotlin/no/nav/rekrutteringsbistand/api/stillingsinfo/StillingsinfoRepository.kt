@@ -28,6 +28,9 @@ class StillingsinfoRepository(
         )
     }
 
+    fun slett(stillingsid: Stillingsid) = slett(stillingsid.asString())
+
+
     fun slett(stillingsid: String) =
         namedJdbcTemplate.update(
             "delete from $STILLINGSINFO where $STILLINGSID=:stillingsid",
@@ -36,15 +39,14 @@ class StillingsinfoRepository(
             )
         )
 
-    fun oppdaterEierIdentOgEierNavn(oppdatering: OppdaterEier) =
+    fun oppdaterEier(stillingsinfoId: Stillingsinfoid, nyEier: Eier?) =
         namedJdbcTemplate.update(
             "update $STILLINGSINFO set $EIER_NAVIDENT=:eier_navident, $EIER_NAVN=:eier_navn where $STILLINGSINFOID=:stillingsinfoid",
             mapOf(
-                "stillingsinfoid" to oppdatering.stillingsinfoid.asString(),
-                "eier_navident" to oppdatering.eier.navident,
-                "eier_navn" to oppdatering.eier.navn
+                "stillingsinfoid" to stillingsinfoId.asString(),
+                "eier_navident" to nyEier?.navident,
+                "eier_navn" to nyEier?.navn
             )
-
         )
 
     fun oppdaterNotat(oppdatering: OppdaterNotat) {
@@ -78,7 +80,7 @@ class StillingsinfoRepository(
         }
     }
 
-    fun hentForIdent(ident: String): Collection<Stillingsinfo> =
+    fun hentForIdent(ident: String): List<Stillingsinfo> =
         namedJdbcTemplate.query(
             "SELECT * FROM $STILLINGSINFO WHERE $EIER_NAVIDENT = :eier_navident",
             MapSqlParameterSource("eier_navident", ident)

@@ -21,7 +21,7 @@ class KandidatlisteKlient(
     private val scopeTilKandidatApi: String
 ) {
 
-    fun varsleOmOppdatertStilling(stillingsid: Stillingsid): ResponseEntity<Void> {
+    fun sendStillingOppdatert(stillingsid: Stillingsid): ResponseEntity<Void> {
         val url = buildNotificationUrl(stillingsid)
         log.info("Oppdaterer kandidatliste, stillingsid: $stillingsid")
         return restTemplate.exchange(

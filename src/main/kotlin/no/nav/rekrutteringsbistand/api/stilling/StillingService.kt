@@ -51,7 +51,7 @@ class StillingService(
             stillingskategori = opprettRekrutteringsbistandstillingDto.kategori
         )
 
-        kandidatlisteKlient.varsleOmOppdatertStilling(stillingsId)
+        kandidatlisteKlient.sendStillingOppdatert(stillingsId)
         val stillingsinfo = stillingsinfoService.hentStillingsinfo(opprettetStilling)
 
         return RekrutteringsbistandStilling(
@@ -101,7 +101,7 @@ class StillingService(
         val id = Stillingsid(oppdatertStilling.uuid)
 
         if (oppdatertStilling.source.equals("DIR", false)) {
-            kandidatlisteKlient.varsleOmOppdatertStilling(id)
+            kandidatlisteKlient.sendStillingOppdatert(id)
         }
 
         if (dto.notat != null) {
@@ -128,7 +128,7 @@ class StillingService(
 
     fun slettStilling(stillingsId: String): Stilling {
         val slettetStilling = arbeidsplassenKlient.slettStilling(stillingsId)
-        kandidatlisteKlient.varsleOmOppdatertStilling(Stillingsid(stillingsId))
+        kandidatlisteKlient.sendStillingOppdatert(Stillingsid(stillingsId))
         return slettetStilling
     }
 
