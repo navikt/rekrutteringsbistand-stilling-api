@@ -9,7 +9,7 @@ import java.util.*
 
 @Service
 class StillingsinfoService(
-    private val repository: StillingsinfoRepository,
+    private val repo: StillingsinfoRepository,
     private val kandidatlisteKlient: KandidatlisteKlient,
     private val arbeidsplassenKlient: ArbeidsplassenKlient,
 ) {
@@ -23,17 +23,17 @@ class StillingsinfoService(
      * Man kan da putte på en @Transactional på for eksempel endepunktet.
      */
     fun overtaEierskapForEksternStillingOgKandidatliste(stillingsId: Stillingsid, nyEier: Eier): Stillingsinfo {
-        val opprinneligStillingsinfo = repository.hentForStilling(stillingsId).orNull()
+        val opprinneligStillingsinfo = repo.hentForStilling(stillingsId).orNull()
         val stillingsinfoMedNyEier = opprinneligStillingsinfo?.copy(eier = nyEier) ?: Stillingsinfo(
             stillingsinfoid = Stillingsinfoid(UUID.randomUUID()),
             stillingsid = stillingsId,
             eier = nyEier
         )
         fun endreEier() {
-            opprinneligStillingsinfo?.let { repository.oppdaterEier(it.stillingsinfoid, nyEier) } ?: repository.opprett(stillingsinfoMedNyEier)
+            opprinneligStillingsinfo?.let { repo.oppdaterEier(it.stillingsinfoid, nyEier) } ?: repo.opprett(stillingsinfoMedNyEier)
         }
         fun reverser() {
-            opprinneligStillingsinfo?.let { repository.oppdaterEier(it.stillingsinfoid, opprinneligStillingsinfo.eier) } ?: repository.slett(stillingsId)
+            opprinneligStillingsinfo?.let { repo.oppdaterEier(it.stillingsinfoid, opprinneligStillingsinfo.eier) } ?: repo.slett(stillingsId)
         }
 
         endreEier()
@@ -52,28 +52,28 @@ class StillingsinfoService(
         hentForStilling(Stillingsid(stilling.uuid))
 
     fun hentForStilling(stillingId: Stillingsid): Option<Stillingsinfo> =
-        repository.hentForStilling(stillingId)
+        repo.hentForStilling(stillingId)
 
     fun hentForStillinger(stillingIder: List<Stillingsid>): List<Stillingsinfo> =
-        repository.hentForStillinger(stillingIder)
+        repo.hentForStillinger(stillingIder)
 
     fun hentForIdent(navIdent: String): List<Stillingsinfo> =
-        repository.hentForIdent(navIdent)
+        repo.hentForIdent(navIdent)
 
     fun oppdaterNotat(stillingId: Stillingsid, oppdaterNotat: OppdaterNotat) {
-        repository.oppdaterNotat(oppdaterNotat)
+        repo.oppdaterNotat(oppdaterNotat)
     }
 
     fun lagre(stillingsinfo: Stillingsinfo) {
-        repository.opprett(stillingsinfo)
+        repo.opprett(stillingsinfo)
     }
 
     fun slett(stillingsId: String) {
-        repository.slett(stillingsId)
+        repo.slett(stillingsId)
     }
 
     fun opprettStillingsinfo(stillingsId: Stillingsid, stillingskategori: Stillingskategori) {
-        repository.opprett(
+        repo.opprett(
             Stillingsinfo(
                 stillingsinfoid = Stillingsinfoid.ny(),
                 stillingsid = stillingsId,
