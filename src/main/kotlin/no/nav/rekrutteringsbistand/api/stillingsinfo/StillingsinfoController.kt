@@ -22,7 +22,7 @@ class StillingsinfoController(
 
     @GetMapping("/ident/{navident}")
     fun hentForIdent(@PathVariable navident: String): Collection<StillingsinfoDto> =
-        service.hentForIdenter(navident).map { it.asStillingsinfoDto() }
+        service.hentForIdent(navident).map { it.asStillingsinfoDto() }
 }
 
 data class StillingsinfoInboundDto(

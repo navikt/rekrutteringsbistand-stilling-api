@@ -57,7 +57,7 @@ class StillingsinfoService(
     fun hentForStillinger(stillingIder: List<Stillingsid>): List<Stillingsinfo> =
         repository.hentForStillinger(stillingIder)
 
-    fun hentForIdenter(navIdent: String): List<Stillingsinfo> =
+    fun hentForIdent(navIdent: String): List<Stillingsinfo> =
         repository.hentForIdent(navIdent)
 
     fun oppdaterNotat(stillingId: Stillingsid, oppdaterNotat: OppdaterNotat) {
