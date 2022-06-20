@@ -25,8 +25,8 @@ class StillingsinfoServiceTest {
             stillingsinfoService.overtaEierskapForEksternStillingOgKandidatliste(Stillingsid(UUID.randomUUID()), Eier("DummyIdent", "DummyNavn"))
         }
 
-        verify(repository, times(1)).opprett(anyObject(Stillingsinfo::class.java))
-        verify(repository, times(1)).slett(anyObject(Stillingsid::class.java))
+        verify(repository).opprett(anyObject(Stillingsinfo::class.java))
+        verify(repository).slett(anyObject(Stillingsid::class.java))
     }
 
     @Test
@@ -40,8 +40,8 @@ class StillingsinfoServiceTest {
             stillingsinfoService.overtaEierskapForEksternStillingOgKandidatliste(eksisterendeStillingsinfo.stillingsid, nyEier)
         }
 
-        verify(repository, times(1)).oppdaterEier(eksisterendeStillingsinfo.stillingsinfoid, nyEier)
-        verify(repository, times(1)).oppdaterEier(eksisterendeStillingsinfo.stillingsinfoid, eksisterendeStillingsinfo.eier)
+        verify(repository).oppdaterEier(eksisterendeStillingsinfo.stillingsinfoid, nyEier)
+        verify(repository).oppdaterEier(eksisterendeStillingsinfo.stillingsinfoid, eksisterendeStillingsinfo.eier)
     }
 
     private fun <T> anyObject(type: Class<T>): T = Mockito.any<T>(type)
