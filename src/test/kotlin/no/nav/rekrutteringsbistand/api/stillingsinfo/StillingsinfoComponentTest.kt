@@ -56,7 +56,6 @@ class StillingsinfoComponentTest {
     @MockBean
     lateinit var arbeidsplassenKlient: ArbeidsplassenKlient
 
-    @SpyBean
     @Autowired
     lateinit var repository: StillingsinfoRepository
 
