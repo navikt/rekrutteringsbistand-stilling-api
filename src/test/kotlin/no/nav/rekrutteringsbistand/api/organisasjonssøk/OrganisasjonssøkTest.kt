@@ -62,13 +62,7 @@ internal class OrganisasjonssøkTest {
         }
     }
 
-    @Test
-    fun `POST mot søk skal videresende HTTP error respons fra pam-ad-api uendret`() {
-        mockServerfeil("/search-api/underenhet/_search")
-        restTemplate.postForEntity("$localBaseUrl/search-api/underenhet/_search", HttpEntity(organisasjonssøkPayload, HttpHeaders()), String::class.java).also {
-            assertThat(it.statusCode).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
-        }
-    }
+
 
     private fun mock(method: HttpMethod, urlPath: String, responseBody: String) {
         wiremock.stubFor(
