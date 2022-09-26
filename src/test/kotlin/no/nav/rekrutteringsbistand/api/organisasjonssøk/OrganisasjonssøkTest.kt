@@ -77,18 +77,6 @@ internal class OrganisasjonssøkTest {
         )
     }
 
-    private fun mockServerfeil(urlPath: String) {
-        wiremock.stubFor(
-                WireMock.post(WireMock.urlPathMatching(urlPath))
-                        .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
-                        .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
-                        .withHeader(HttpHeaders.AUTHORIZATION, WireMock.matching("Bearer .*"))
-                        .willReturn(WireMock.serverError()
-                                .withHeader(HttpHeaders.CONNECTION, "close") // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
-                                .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                        ))
-    }
-
     private val organisasjonssøkPayload =
             """
                 {"query":{"match_phrase":{"navn_ngram_completion":{"query":"asdfas","slop":5}}},"size":50}
