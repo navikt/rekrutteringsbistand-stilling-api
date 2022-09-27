@@ -1,12 +1,13 @@
 package no.nav.rekrutteringsbistand.api.stilling
 
-import arrow.core.extensions.either.foldable.get
-import arrow.core.left
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.github.tomakehurst.wiremock.client.MappingBuilder
 import com.github.tomakehurst.wiremock.client.WireMock.*
+import com.github.tomakehurst.wiremock.common.Slf4jNotifier
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration
+import com.github.tomakehurst.wiremock.extension.responsetemplating.ResponseTemplateTransformer
 import com.github.tomakehurst.wiremock.junit.WireMockRule
 import com.github.tomakehurst.wiremock.matching.UrlPattern
 import no.nav.rekrutteringsbistand.api.RekrutteringsbistandStilling
@@ -43,11 +44,16 @@ import org.springframework.http.ResponseEntity
 import org.springframework.test.context.junit4.SpringRunner
 
 @RunWith(SpringRunner::class)
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = arrayOf( "external.pam-ad-api.url=http://localhost:9935"))
 internal class StillingComponentTest {
 
     @get:Rule
-    val wiremockPamAdApi = WireMockRule(9934)
+    val wiremockPamAdApi = WireMockRule(
+        WireMockConfiguration
+        .options()
+        .port(9935)
+        .notifier(Slf4jNotifier(true))
+        .extensions(ResponseTemplateTransformer(true)))
 
     @get:Rule
     val wiremockKandidatliste = WireMockRule(8766)
@@ -56,7 +62,7 @@ internal class StillingComponentTest {
     val wiremockAzure = WireMockRule(9954)
 
     @LocalServerPort
-    var port = 0
+    private var port = 0
 
     val localBaseUrl by lazy { "http://localhost:$port" }
 
@@ -244,10 +250,10 @@ internal class StillingComponentTest {
     @Test
     fun `PUT mot stilling med notat skal returnere endret stilling når stillingsinfo finnes`() {
 
-        val stilling = enStilling
+        val rekrutteringsbistandStilling = enRekrutteringsbistandStilling
         val stillingsinfo = enStillingsinfo.copy(notat = "gammelt notat")
 
-        mockPamAdApi(HttpMethod.PUT, "/api/v1/ads/${enRekrutteringsbistandStilling.stilling.uuid}", stilling)
+        mockPamAdApi(HttpMethod.PUT, "/api/v1/ads/${rekrutteringsbistandStilling.stilling.uuid}", rekrutteringsbistandStilling.stilling)
         mockKandidatlisteOppdatering()
         mockAzureObo(wiremockAzure)
 
@@ -256,7 +262,7 @@ internal class StillingComponentTest {
         val dto = OppdaterRekrutteringsbistandStillingDto(
             stillingsinfoid = stillingsinfo.stillingsinfoid.asString(),
             notat = stillingsinfo.notat,
-            stilling = stilling
+            stilling = rekrutteringsbistandStilling.stilling
         )
 
         restTemplate.exchange(
@@ -265,7 +271,7 @@ internal class StillingComponentTest {
                 HttpEntity(dto),
                 OppdaterRekrutteringsbistandStillingDto::class.java
         ).body!!.also {
-            assertThat(it.stilling).isEqualTo(stilling)
+            assertThat(it.stilling).isEqualTo(rekrutteringsbistandStilling.stilling)
             assertThat(it.notat).isEqualTo(stillingsinfo.notat)
             assertThat(it.stillingsinfoid).isEqualTo(stillingsinfo.stillingsinfoid.asString())
         }
