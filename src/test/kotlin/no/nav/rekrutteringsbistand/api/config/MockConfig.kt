@@ -20,7 +20,7 @@ class MockConfig {
     fun wireMockServer(): WireMockServer {
         return WireMockServer(wireMockConfig()
                 .notifier(ConsoleNotifier(true))
-                .port(9914)).apply {
+                .port(9934)).apply {
             stubFor(hentStillinger())
             stubFor(hentStilling())
             stubFor(postStilling())
