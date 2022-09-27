@@ -62,7 +62,7 @@ internal class StillingComponentTest {
     val wiremockAzure = WireMockRule(9954)
 
     @LocalServerPort
-    var port = 0
+    private var port = 0
 
     val localBaseUrl by lazy { "http://localhost:$port" }
 
