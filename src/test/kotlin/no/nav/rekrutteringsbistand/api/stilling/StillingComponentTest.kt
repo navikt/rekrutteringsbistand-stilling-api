@@ -44,14 +44,14 @@ import org.springframework.http.ResponseEntity
 import org.springframework.test.context.junit4.SpringRunner
 
 @RunWith(SpringRunner::class)
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = arrayOf( "external.pam-ad-api.url=http://localhost:9935"))
 internal class StillingComponentTest {
 
     @get:Rule
     val wiremockPamAdApi = WireMockRule(
         WireMockConfiguration
         .options()
-        .port(9934)
+        .port(9935)
         .notifier(Slf4jNotifier(true))
         .extensions(ResponseTemplateTransformer(true)))
 
