@@ -1,7 +1,9 @@
 package no.nav.rekrutteringsbistand.api.organisasjonssøk
 
 import com.github.tomakehurst.wiremock.client.WireMock
+import com.github.tomakehurst.wiremock.common.Slf4jNotifier
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
+import com.github.tomakehurst.wiremock.extension.responsetemplating.ResponseTemplateTransformer
 import com.github.tomakehurst.wiremock.junit.WireMockRule
 import no.nav.rekrutteringsbistand.api.config.MockLogin
 import no.nav.rekrutteringsbistand.api.mockAzureObo
@@ -22,7 +24,11 @@ import org.springframework.test.context.junit4.SpringRunner
 internal class OrganisasjonssøkTest {
 
     @get:Rule
-    val wiremock = WireMockRule(WireMockConfiguration.options().port(9934))
+    val wiremockPamAdApi = WireMockRule(WireMockConfiguration
+        .options()
+        .port(9934)
+        .notifier(Slf4jNotifier(true))
+        .extensions(ResponseTemplateTransformer(true)))
 
     @get:Rule
     val wiremockAzure = WireMockRule(9954)
@@ -70,7 +76,7 @@ internal class OrganisasjonssøkTest {
     }
 
     private fun mock(method: HttpMethod, urlPath: String, responseBody: String) {
-        wiremock.stubFor(
+        wiremockPamAdApi.stubFor(
                 WireMock.request(method.name, WireMock.urlPathMatching(urlPath))
                         .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
                         .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
@@ -83,7 +89,7 @@ internal class OrganisasjonssøkTest {
     }
 
     private fun mockRegex(method: HttpMethod, urlPath: String, responseBody: String) {
-        wiremock.stubFor(
+        wiremockPamAdApi.stubFor(
             WireMock.request(method.name, WireMock.urlMatching(urlPath))
                 .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
                 .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
@@ -96,7 +102,7 @@ internal class OrganisasjonssøkTest {
     }
 
     private fun mockServerfeil(urlPath: String) {
-        wiremock.stubFor(
+        wiremockPamAdApi.stubFor(
                 WireMock.post(WireMock.urlPathMatching(urlPath))
                         .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
                         .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))

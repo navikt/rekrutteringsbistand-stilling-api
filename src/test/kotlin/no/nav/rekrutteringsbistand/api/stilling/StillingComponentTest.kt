@@ -5,6 +5,9 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.github.tomakehurst.wiremock.client.MappingBuilder
 import com.github.tomakehurst.wiremock.client.WireMock.*
+import com.github.tomakehurst.wiremock.common.Slf4jNotifier
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration
+import com.github.tomakehurst.wiremock.extension.responsetemplating.ResponseTemplateTransformer
 import com.github.tomakehurst.wiremock.junit.WireMockRule
 import com.github.tomakehurst.wiremock.matching.UrlPattern
 import no.nav.rekrutteringsbistand.api.RekrutteringsbistandStilling
@@ -45,7 +48,12 @@ import org.springframework.test.context.junit4.SpringRunner
 internal class StillingComponentTest {
 
     @get:Rule
-    val wiremockPamAdApi = WireMockRule(9934)
+    val wiremockPamAdApi = WireMockRule(
+        WireMockConfiguration
+        .options()
+        .port(9934)
+        .notifier(Slf4jNotifier(true))
+        .extensions(ResponseTemplateTransformer(true)))
 
     @get:Rule
     val wiremockKandidatliste = WireMockRule(8766)
