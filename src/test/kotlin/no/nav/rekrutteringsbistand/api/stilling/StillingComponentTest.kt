@@ -1,7 +1,5 @@
 package no.nav.rekrutteringsbistand.api.stilling
 
-import arrow.core.extensions.either.foldable.get
-import arrow.core.left
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
@@ -244,10 +242,10 @@ internal class StillingComponentTest {
     @Test
     fun `PUT mot stilling med notat skal returnere endret stilling når stillingsinfo finnes`() {
 
-        val stilling = enStilling
+        val rekrutteringsbistandStilling = enRekrutteringsbistandStilling
         val stillingsinfo = enStillingsinfo.copy(notat = "gammelt notat")
 
-        mockPamAdApi(HttpMethod.PUT, "/api/v1/ads/${enRekrutteringsbistandStilling.stilling.uuid}", stilling)
+        mockPamAdApi(HttpMethod.PUT, "/api/v1/ads/${rekrutteringsbistandStilling.stilling.uuid}", rekrutteringsbistandStilling.stilling)
         mockKandidatlisteOppdatering()
         mockAzureObo(wiremockAzure)
 
@@ -256,7 +254,7 @@ internal class StillingComponentTest {
         val dto = OppdaterRekrutteringsbistandStillingDto(
             stillingsinfoid = stillingsinfo.stillingsinfoid.asString(),
             notat = stillingsinfo.notat,
-            stilling = stilling
+            stilling = rekrutteringsbistandStilling.stilling
         )
 
         restTemplate.exchange(
@@ -265,7 +263,7 @@ internal class StillingComponentTest {
                 HttpEntity(dto),
                 OppdaterRekrutteringsbistandStillingDto::class.java
         ).body!!.also {
-            assertThat(it.stilling).isEqualTo(stilling)
+            assertThat(it.stilling).isEqualTo(rekrutteringsbistandStilling.stilling)
             assertThat(it.notat).isEqualTo(stillingsinfo.notat)
             assertThat(it.stillingsinfoid).isEqualTo(stillingsinfo.stillingsinfoid.asString())
         }
