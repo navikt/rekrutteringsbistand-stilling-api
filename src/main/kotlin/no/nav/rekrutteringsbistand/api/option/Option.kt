@@ -2,6 +2,8 @@ package no.nav.rekrutteringsbistand.api.option
 
 import arrow.core.Either
 import arrow.core.getOrElse
+import arrow.core.left
+import arrow.core.right
 
 /**
  * Hvorfor implementere Option på denne måten: https://github.com/arrow-kt/arrow-core/issues/114
@@ -14,7 +16,7 @@ typealias Some<A> = Either.Right<A>
  * Hvorfor implementere Option på denne måten: https://github.com/arrow-kt/arrow-core/issues/114
  */
 fun <A> optionOf(nullable: A?): Option<A> =
-    if (nullable == null) Either.left(Unit) else Either.right(nullable)
+    nullable?.right() ?: Unit.left()
 
 /**
  * Appliser en prosedyre/kommando på verdien hvis den finnes
