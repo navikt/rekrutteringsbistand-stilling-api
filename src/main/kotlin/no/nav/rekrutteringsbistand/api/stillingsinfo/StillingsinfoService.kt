@@ -1,15 +1,15 @@
 package no.nav.rekrutteringsbistand.api.stillingsinfo
 
+import arrow.core.Option
 import no.nav.rekrutteringsbistand.api.arbeidsplassen.ArbeidsplassenKlient
 import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteKlient
-import no.nav.rekrutteringsbistand.api.option.Option
 import no.nav.rekrutteringsbistand.api.stilling.Stilling
 import org.springframework.stereotype.Service
 import java.util.*
 
 @Service
 class StillingsinfoService(
-    private val repo: StillingsinfoRepository,
+    private val   repo: StillingsinfoRepository,
     private val kandidatlisteKlient: KandidatlisteKlient,
     private val arbeidsplassenKlient: ArbeidsplassenKlient,
 ) {

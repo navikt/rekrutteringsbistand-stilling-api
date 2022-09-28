@@ -1,5 +1,7 @@
 package no.nav.rekrutteringsbistand.api.stilling
 
+import arrow.core.Option
+import arrow.core.Some
 import arrow.core.getOrElse
 import no.nav.rekrutteringsbistand.api.OppdaterRekrutteringsbistandStillingDto
 import no.nav.rekrutteringsbistand.api.RekrutteringsbistandStilling
@@ -7,9 +9,6 @@ import no.nav.rekrutteringsbistand.api.arbeidsplassen.ArbeidsplassenKlient
 import no.nav.rekrutteringsbistand.api.arbeidsplassen.OpprettRekrutteringsbistandstillingDto
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
 import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteKlient
-import no.nav.rekrutteringsbistand.api.option.Option
-import no.nav.rekrutteringsbistand.api.option.Some
-import no.nav.rekrutteringsbistand.api.option.get
 import no.nav.rekrutteringsbistand.api.stillingsinfo.*
 import org.springframework.stereotype.Service
 import java.util.*
@@ -67,7 +66,7 @@ class StillingService(
         val eksisterendeStillingsinfoId = stillingsinfoService.hentForStilling(stillingsId).map { it.stillingsinfoid }
 
         if (eksisterendeStillingsinfoId is Some) {
-            val nyOppdaterNotat = OppdaterNotat(eksisterendeStillingsinfoId.get(), nyttNotat)
+            val nyOppdaterNotat = OppdaterNotat(eksisterendeStillingsinfoId.value, nyttNotat)
             stillingsinfoService.oppdaterNotat(stillingsId, nyOppdaterNotat)
         } else {
             val nyStillingsinfo = Stillingsinfo(
