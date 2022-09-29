@@ -1,12 +1,12 @@
 package no.nav.rekrutteringsbistand.api.stillingsinfo
 
+import arrow.core.Option
 import arrow.core.getOrElse
+import arrow.core.toOption
 import no.nav.rekrutteringsbistand.api.TestRepository
 import no.nav.rekrutteringsbistand.api.Testdata.enAnnenStillingsinfo
 import no.nav.rekrutteringsbistand.api.Testdata.enStillingsinfo
 import no.nav.rekrutteringsbistand.api.Testdata.enStillingsinfoOppdatering
-import no.nav.rekrutteringsbistand.api.option.Option
-import no.nav.rekrutteringsbistand.api.option.optionOf
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.fail
 import org.junit.After
@@ -33,7 +33,7 @@ class StillingsinfoRepositoryTest {
         repository.opprett(tilLagring)
         val lagretStillingsinfo: Option<Stillingsinfo> = repository.hentForStilling(tilLagring.stillingsid)
 
-        assertThat(lagretStillingsinfo).isEqualTo(optionOf(tilLagring))
+        assertThat(lagretStillingsinfo).isEqualTo(tilLagring.toOption())
     }
 
     @Test

@@ -1,9 +1,10 @@
 package no.nav.rekrutteringsbistand.api.stillingsinfo
 
+import arrow.core.None
+import arrow.core.toOption
 import no.nav.rekrutteringsbistand.api.Testdata.enStillingsinfo
 import no.nav.rekrutteringsbistand.api.arbeidsplassen.ArbeidsplassenKlient
 import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteKlient
-import no.nav.rekrutteringsbistand.api.option.optionOf
 import org.junit.Test
 import org.junit.jupiter.api.assertThrows
 import org.mockito.Mockito
@@ -18,7 +19,7 @@ class StillingsinfoServiceTest {
 
     @Test
     fun `Når vi prøver å opprette eier skal vi lagre ny stillingsinfo men slette igjen når påfølgende kall mot kandidat-api feiler`() {
-        `when`(repository.hentForStilling(anyObject(Stillingsid::class.java))).thenReturn(optionOf(null))
+        `when`(repository.hentForStilling(anyObject(Stillingsid::class.java))).thenReturn(None)
         `when`(kandidatlisteKlient.sendStillingOppdatert(anyObject(Stillingsid::class.java))).thenThrow(RuntimeException::class.java)
 
         assertThrows<RuntimeException> {
@@ -32,7 +33,7 @@ class StillingsinfoServiceTest {
     @Test
     fun `Når vi prøver å endre eier skal vi lagre ny eier men reversere når påfølgende kall mot kandidat-api feiler`() {
         val eksisterendeStillingsinfo = enStillingsinfo
-        `when`(repository.hentForStilling(eksisterendeStillingsinfo.stillingsid)).thenReturn(optionOf(enStillingsinfo))
+        `when`(repository.hentForStilling(eksisterendeStillingsinfo.stillingsid)).thenReturn(enStillingsinfo.toOption())
         `when`(kandidatlisteKlient.sendStillingOppdatert(anyObject(Stillingsid::class.java))).thenThrow(RuntimeException::class.java)
         val nyEier = Eier("DummyIdent", "DummyNavn")
 
