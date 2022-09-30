@@ -90,7 +90,14 @@ class ArbeidsplassenKlient(
                     object : ParameterizedTypeReference<Page<Stilling>>() {}
                 )
                 log.info("body for hentstilling for annonsenummer ${response.body} statuscode: ${response.statusCode}")
-                return@timer response.body?.content?.firstOrNull() ?: throw kunneIkkeTolkeBodyException()
+                val content = response.body?.content
+                if(content != null && content.isEmpty()) {
+                     throw ResponseStatusException(
+                         NOT_FOUND,
+                        "Fant ikke stilling med annonsenummer"
+                    )
+                }
+                return@timer content?.firstOrNull() ?: throw kunneIkkeTolkeBodyException()
 
             } catch (exception: RestClientResponseException) {
                 throw svarMedFeilmelding(
