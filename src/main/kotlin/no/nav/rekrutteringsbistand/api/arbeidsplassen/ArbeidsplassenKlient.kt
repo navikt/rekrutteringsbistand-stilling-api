@@ -89,9 +89,7 @@ class ArbeidsplassenKlient(
                     HttpEntity(null, httpHeaders()),
                     object : ParameterizedTypeReference<Page<Stilling>>() {}
                 )
-                if(response.body == null) {
-                    log.info("Tom body fra hentStilling", response.statusCode)
-                }
+                log.info("body for hentstilling for annonsenummer ${response.body} statuscode: ${response.statusCode}")
                 return@timer response.body?.content?.firstOrNull() ?: throw kunneIkkeTolkeBodyException()
 
             } catch (exception: RestClientResponseException) {
