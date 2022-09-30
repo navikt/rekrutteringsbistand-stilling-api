@@ -1,5 +1,6 @@
 package no.nav.rekrutteringsbistand.api.stilling
 
+import arrow.core.None
 import arrow.core.Option
 import arrow.core.Some
 import arrow.core.getOrElse
@@ -10,6 +11,7 @@ import no.nav.rekrutteringsbistand.api.arbeidsplassen.OpprettRekrutteringsbistan
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
 import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteKlient
 import no.nav.rekrutteringsbistand.api.stillingsinfo.*
+import no.nav.rekrutteringsbistand.api.support.log
 import org.springframework.stereotype.Service
 import java.util.*
 
@@ -21,7 +23,10 @@ class StillingService(
     val kandidatlisteKlient: KandidatlisteKlient,
     val arbeidsplassenKlient: ArbeidsplassenKlient
 ) {
-    fun hentRekrutteringsbistandStilling(stillingsId: String, somSystembruker: Boolean = false): RekrutteringsbistandStilling {
+    fun hentRekrutteringsbistandStilling(
+        stillingsId: String,
+        somSystembruker: Boolean = false
+    ): RekrutteringsbistandStilling {
         val stilling = arbeidsplassenKlient.hentStilling(stillingsId, somSystembruker)
         val stillingsinfo: Option<Stillingsinfo> = stillingsinfoService.hentStillingsinfo(stilling)
 
@@ -32,12 +37,26 @@ class StillingService(
     }
 
     fun hentRekrutteringsbistandStillingBasertPåAnnonsenr(annonsenr: String): RekrutteringsbistandStilling {
-        val stilling = arbeidsplassenKlient.hentStillingBasertPåAnnonsenr(annonsenr)
-        val stillingsinfo: Option<Stillingsinfo> = stillingsinfoService.hentStillingsinfo(stilling)
+
+        var stilling:Stilling? = null;
+        try {
+            stilling = arbeidsplassenKlient.hentStillingBasertPåAnnonsenr(annonsenr)
+        } catch (e: Exception) {
+            log.error("Kunne ikke hente stilling fra arbeidsplassen", e)
+            throw e
+        }
+        var stillingsInfo: Option<Stillingsinfo> = None
+        try {
+
+            stillingsInfo  = stillingsinfoService.hentStillingsinfo(stilling!!)
+        } catch (e: Exception) {
+            log.error("Kunne ikke hente stilligsinfon fra databasen", e)
+            throw e
+        }
 
         return RekrutteringsbistandStilling(
             stilling = stilling,
-            stillingsinfo = stillingsinfo.map { it.asStillingsinfoDto() }.getOrElse { null }
+            stillingsinfo = stillingsInfo.map { it.asStillingsinfoDto() }.getOrElse { null }
         )
     }
 
@@ -85,7 +104,12 @@ class StillingService(
         val eksisterendeStilling = eksisterendeRekrutteringsbistandStilling.stilling
         val kopi = eksisterendeStilling.toKopiertStilling(tokenUtils)
 
-        return opprettStilling(OpprettRekrutteringsbistandstillingDto(kopi, kategoriMedDefault(eksisterendeRekrutteringsbistandStilling.stillingsinfo)))
+        return opprettStilling(
+            OpprettRekrutteringsbistandstillingDto(
+                kopi,
+                kategoriMedDefault(eksisterendeRekrutteringsbistandStilling.stillingsinfo)
+            )
+        )
     }
 
     fun kategoriMedDefault(stillingsInfo: StillingsinfoDto?) =
@@ -117,7 +141,7 @@ class StillingService(
         )
     }
 
-    fun slettRekrutteringsbistandStilling(stillingsId: String) : Stilling {
+    fun slettRekrutteringsbistandStilling(stillingsId: String): Stilling {
         kandidatlisteKlient.varsleOmSlettetStilling(Stillingsid(stillingsId))
         val slettetStilling = arbeidsplassenKlient.slettStilling(stillingsId)
         stillingsinfoService.slett(stillingsId)
