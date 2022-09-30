@@ -45,9 +45,6 @@ class ArbeidsplassenKlient(
                     ),
                     Stilling::class.java
                 )
-                if(respons.body == null) {
-                    log.info("Tom body fra hentStilling", respons.statusCode)
-                }
                 return@timer respons.body ?: throw kunneIkkeTolkeBodyException()
             } catch (e: UnknownContentTypeException) {
                 throw kunneIkkeTolkeBodyException(e)
@@ -92,6 +89,9 @@ class ArbeidsplassenKlient(
                     HttpEntity(null, httpHeaders()),
                     object : ParameterizedTypeReference<Page<Stilling>>() {}
                 )
+                if(response.body == null) {
+                    log.info("Tom body fra hentStilling", response.statusCode)
+                }
                 return@timer response.body?.content?.firstOrNull() ?: throw kunneIkkeTolkeBodyException()
 
             } catch (exception: RestClientResponseException) {
