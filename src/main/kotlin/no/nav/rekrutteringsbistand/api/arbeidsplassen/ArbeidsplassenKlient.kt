@@ -1,5 +1,7 @@
 package no.nav.rekrutteringsbistand.api.arbeidsplassen
 
+import arrow.core.Option
+import arrow.core.firstOrNone
 import io.micrometer.core.instrument.Metrics
 import io.micrometer.core.instrument.Timer
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
@@ -74,7 +76,7 @@ class ArbeidsplassenKlient(
             log.info("Trigget resending av stillingsmelding fra Arbeidsplassen for stilling $stillingsid")
         }
 
-    fun hentStillingBasertPåAnnonsenr(annonsenr: String): Stilling =
+    fun hentStillingBasertPåAnnonsenr(annonsenr: String): Option<Stilling> =
         timer("rekrutteringsbistand.stilling.arbeidsplassen.hentStillingBasertPåAnnonsenr.kall.tid") {
             val url = UriComponentsBuilder
                 .fromHttpUrl("${hentBaseUrl()}/b2b/api/v1/ads")
@@ -89,7 +91,7 @@ class ArbeidsplassenKlient(
                     HttpEntity(null, httpHeaders()),
                     object : ParameterizedTypeReference<Page<Stilling>>() {}
                 )
-                return@timer response.body?.content?.firstOrNull() ?: throw kunneIkkeTolkeBodyException()
+                return@timer response.body?.content?.firstOrNone() ?: throw kunneIkkeTolkeBodyException()
 
             } catch (exception: RestClientResponseException) {
                 throw svarMedFeilmelding(

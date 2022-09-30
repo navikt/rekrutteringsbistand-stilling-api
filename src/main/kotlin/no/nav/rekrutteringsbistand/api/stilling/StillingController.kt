@@ -1,5 +1,7 @@
 package no.nav.rekrutteringsbistand.api.stilling
 
+import arrow.core.getOrElse
+import arrow.core.orElse
 import no.nav.rekrutteringsbistand.api.RekrutteringsbistandStilling
 import no.nav.rekrutteringsbistand.api.OppdaterRekrutteringsbistandStillingDto
 import no.nav.rekrutteringsbistand.api.arbeidsplassen.OpprettRekrutteringsbistandstillingDto
@@ -7,6 +9,7 @@ import no.nav.security.token.support.core.api.Protected
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import no.nav.security.token.support.core.api.RequiredIssuers
 import org.springframework.http.ResponseEntity
+import org.springframework.http.ResponseEntity.notFound
 import org.springframework.http.ResponseEntity.ok
 import org.springframework.web.bind.annotation.*
 import java.net.URLDecoder
@@ -55,7 +58,8 @@ class StillingController(val stillingService: StillingService) {
 
     @GetMapping("/rekrutteringsbistandstilling/annonsenr/{annonsenr}")
     fun hentRekrutteringsbistandStillingBasertPåAnnonsenr(@PathVariable annonsenr: String): ResponseEntity<RekrutteringsbistandStilling> {
-        return ok(stillingService.hentRekrutteringsbistandStillingBasertPåAnnonsenr(annonsenr))
+        val stilling = stillingService.hentRekrutteringsbistandStillingBasertPåAnnonsenr(annonsenr)
+        return stilling.map { ok(it) }.getOrElse { notFound().build() }
     }
 
     @GetMapping("/mine-stillinger")
