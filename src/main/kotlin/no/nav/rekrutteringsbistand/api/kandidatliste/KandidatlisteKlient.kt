@@ -2,8 +2,8 @@ package no.nav.rekrutteringsbistand.api.kandidatliste
 
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsid
-import no.nav.rekrutteringsbistand.api.support.log
 import no.nav.rekrutteringsbistand.api.support.config.ExternalConfiguration
+import no.nav.rekrutteringsbistand.api.support.log
 import no.nav.rekrutteringsbistand.api.support.toMultiValueMap
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.*
@@ -32,24 +32,33 @@ class KandidatlisteKlient(
         )
             .also {
                 if (it.statusCode != HttpStatus.NO_CONTENT) {
-                    log.warn("Uventet response fra kandidatliste-api for ad {}: {}", stillingsid.asString(), it.statusCodeValue)
+                    log.warn(
+                        "Uventet response fra kandidatliste-api for ad {}: {}",
+                        stillingsid.asString(),
+                        it.statusCodeValue
+                    )
                 }
             }
     }
 
     fun varsleOmSlettetStilling(stillingsid: Stillingsid): ResponseEntity<Void> {
-        val url = buildNotificationUrl(stillingsid)
-        log.info("Slett kandidatliste, stillingsid: $stillingsid")
+        val url: URI = buildNotificationUrl(stillingsid)
+        val httpMethod = HttpMethod.DELETE
+        log.info("Skal slette kandidatliste med stillingsid $stillingsid ved å sende en HTTP $httpMethod til URL $url")
         return restTemplate.exchange(
             url,
-            HttpMethod.DELETE,
+            httpMethod,
             HttpEntity(null, headers()),
             Void::class.java
         )
             .also {
                 log.info("Varsle kandidatliste om sletting av stilling ${stillingsid.asString()} returnerte ${it.statusCode}")
-                if(it.statusCode != HttpStatus.NOT_FOUND && it.statusCode != HttpStatus.NO_CONTENT) {
-                    log.warn("Uventet response fra kandidatliste-api for ad {}: {}", stillingsid.asString(), it.statusCodeValue)
+                if (it.statusCode != HttpStatus.NOT_FOUND && it.statusCode != HttpStatus.NO_CONTENT) {
+                    log.warn(
+                        "Uventet response fra kandidatliste-api for ad {}: {}",
+                        stillingsid.asString(),
+                        it.statusCodeValue
+                    )
                 }
             }
     }
