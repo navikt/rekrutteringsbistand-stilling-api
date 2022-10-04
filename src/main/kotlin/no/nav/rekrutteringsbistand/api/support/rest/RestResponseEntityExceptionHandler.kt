@@ -3,7 +3,8 @@ package no.nav.rekrutteringsbistand.api.support.rest
 import no.nav.rekrutteringsbistand.api.support.log
 import no.nav.security.token.support.core.exceptions.JwtTokenValidatorException
 import org.springframework.dao.EmptyResultDataAccessException
-import org.springframework.http.HttpStatus
+import org.springframework.http.HttpStatus.NO_CONTENT
+import org.springframework.http.HttpStatus.UNAUTHORIZED
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
@@ -19,9 +20,7 @@ class RestResponseEntityExceptionHandler : ResponseEntityExceptionHandler() {
     protected fun håndterUinnlogget(e: Exception, request: HttpServletRequest): ResponseEntity<String> {
         val msg = "Unauthorized. requestURI=${request.requestURI}, HTTP method=${request.method}"
         log.info(msg, e)
-        return ResponseEntity
-                .status(HttpStatus.UNAUTHORIZED)
-                .body("You are not authorized to access this resource")
+        return ResponseEntity.status(UNAUTHORIZED).body("You are not authorized to access this resource")
     }
 
     @ExceptionHandler(value = [EmptyResultDataAccessException::class, NoContentException::class])
@@ -30,25 +29,22 @@ class RestResponseEntityExceptionHandler : ResponseEntityExceptionHandler() {
     protected fun handleNoContent(e: RuntimeException, request: HttpServletRequest): ResponseEntity<Any> {
         val uri = request.requestURI
         log.info("No content found at requestURI=${request.requestURI}, HTTP method=${request.method}")
-        return ResponseEntity
-                .status(HttpStatus.NO_CONTENT)
-                .body(uri)
+        return ResponseEntity.status(NO_CONTENT).body(uri)
     }
 
     class NoContentException(message: String?) : RuntimeException(message)
 
     @ExceptionHandler(value = [RestClientResponseException::class])
     @ResponseBody
-    protected fun handleExceptionFraRestTemplate(e: RestClientResponseException, request: HttpServletRequest): ResponseEntity<String> {
-
-        if (e.rawStatusCode == 404) {
-            log.info("HTTP 404 fra RestTemplate, URI=${request.requestURI}, HTTP method=${request.method}", e)
-        } else {
-            log.error("Exception fra RestTemplate. status=${e.rawStatusCode} URI=${request.requestURI}, HTTP method=${request.method}", e)
+    protected fun handleExceptionFraRestTemplate(
+        e: RestClientResponseException, request: HttpServletRequest
+    ): ResponseEntity<String> {
+        val msg = "Mottok HTTP respons ${e.rawStatusCode} fra ${request.method} mot URL ${request.requestURL}"
+        when (e.rawStatusCode) {
+            403 -> log.warn(msg, e)
+            404 -> log.info(msg, e)
+            else -> log.error(msg, e)
         }
-
-        return ResponseEntity
-                .status(e.rawStatusCode)
-                .body(e.responseBodyAsString)
+        return ResponseEntity.status(e.rawStatusCode).body(e.responseBodyAsString)
     }
 }
