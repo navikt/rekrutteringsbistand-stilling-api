@@ -64,3 +64,9 @@ spec:
       value: "prod-gcp:arbeidsgiver:vis-stilling"
     - name: REKRUTTERINGSBISTAND_STILLING_INDEKSER_URI
       value: "prod-gcp:toi:rekrutteringsbistand-stilling-indekser"
+    - name: KAFKA_RAPID_TOPIC
+      value: toi.rapid-1
+    - name: KAFKA_CONSUMER_GROUP_ID
+      value: rekrutteringsbistand-stilling-rapidconsumer-1
+    - name: KAFKA_RESET_POLICY
+      value: "earliest"
