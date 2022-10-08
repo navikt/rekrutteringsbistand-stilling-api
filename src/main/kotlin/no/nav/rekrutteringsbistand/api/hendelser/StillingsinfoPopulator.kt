@@ -11,26 +11,16 @@ class StillingsinfoPopulator(
 ) : River.PacketListener {
     init {
         River(rapidsConnection).apply {
-            validate { it.demandAtFørstkommendeUløsteBehovEr("stilling") }
             validate { it.requireKey("kandidathendelse.stillingsId") }
+            validate { it.rejectKey("stilling") }
         }.register(this)
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
-        val stillingsId: String = packet["kandidathendelse"]["stillingsId"].asText()
-        packet["stilling"] = stillingsinfoRepository.hentForStilling(Stillingsid(stillingsId))
-        context.publish(packet.toJson())
-    }
-}
-
-private fun JsonMessage.demandAtFørstkommendeUløsteBehovEr(informasjonsElement: String) {
-    demand("@behov") { behovNode ->
-        if (behovNode
-                .toList()
-                .map(JsonNode::asText)
-                .onEach { interestedIn(it) }
-                .first { this[it].isMissingOrNull() } != informasjonsElement
-        )
-            throw Exception("Uinteressant hendelse")
+        val stillingsId: String = packet["kandidathendelse.stillingsId"].asText()
+        stillingsinfoRepository.hentForStilling(Stillingsid(stillingsId)).map {
+            packet["stilling"] = it
+            context.publish(packet.toJson())
+        }
     }
 }
