@@ -2,8 +2,7 @@ package no.nav.rekrutteringsbistand.api.hendelser
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.rapids_rivers.*
-import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsid
-import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoRepository
+import no.nav.rekrutteringsbistand.api.stillingsinfo.*
 
 class StillingsinfoPopulator(
     rapidsConnection: RapidsConnection,
@@ -19,8 +18,19 @@ class StillingsinfoPopulator(
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
         val stillingsId: String = packet["kandidathendelse.stillingsId"].asText()
         stillingsinfoRepository.hentForStilling(Stillingsid(stillingsId)).map {
-            packet["stilling"] = it
+            packet["stilling"] = it.tilStillingsinfoIHendelse()
             context.publish(packet.toJson())
         }
     }
 }
+
+private fun Stillingsinfo.tilStillingsinfoIHendelse() =
+    StillingsinfoIHendelse(stillingsinfoid.asString(), stillingsid.asString(), eier, notat, stillingskategori)
+
+private data class StillingsinfoIHendelse(
+    val stillingsinfoid: String,
+    val stillingsid: String,
+    val eier: Eier?,
+    val notat: String?,
+    val stillingskategori: Stillingskategori?
+)
