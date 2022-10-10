@@ -17,5 +17,6 @@ class RapidApplikasjon(
     override fun afterPropertiesSet() {
         StillingsinfoPopulator(rapidsConnection, stillingsinfoRepository)
         Appkiller(rapidsConnection, context)
+        rapidsConnection.start()
     }
 }
