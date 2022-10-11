@@ -34,6 +34,8 @@ spec:
         extra:
           - NAVident
           - azp_name
+  kafka:
+    pool: nav-dev
   accessPolicy:
     inbound:
       rules:
