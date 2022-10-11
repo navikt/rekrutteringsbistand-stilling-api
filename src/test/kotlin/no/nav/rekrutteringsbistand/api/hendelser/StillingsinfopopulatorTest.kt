@@ -3,6 +3,7 @@ package no.nav.rekrutteringsbistand.api.hendelser
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.isMissingOrNull
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
+import no.nav.rekrutteringsbistand.api.hendelser.RapidApplikasjon.Companion.registrerLyttere
 import no.nav.rekrutteringsbistand.api.stillingsinfo.*
 import org.junit.Before
 import org.junit.Test
@@ -10,20 +11,22 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.context.ApplicationContext
 import org.springframework.test.context.junit4.SpringRunner
 import java.util.*
 
 @RunWith(SpringRunner::class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class StillingsinfopopulatorTest {
-    @Autowired private lateinit var rapidsConnection: RapidsConnection
-    private val testRapid
-        get() = if (rapidsConnection is TestRapid) rapidsConnection as TestRapid
-        else throw AssertionError("rapidsConnection skal være en TestRapid i test-miljøet")
+
 
     @Autowired private lateinit var stillingsinfoRepository: StillingsinfoRepository
+    @Autowired private lateinit var context: ApplicationContext
+    private lateinit var testRapid: TestRapid
+
 
     @Before fun setUp(){
+        if(!this::testRapid.isInitialized) testRapid = TestRapid().registrerLyttere(stillingsinfoRepository, context)
         testRapid.reset()
     }
     @Test
