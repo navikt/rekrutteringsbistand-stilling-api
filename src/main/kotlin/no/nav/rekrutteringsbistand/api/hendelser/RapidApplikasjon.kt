@@ -31,7 +31,7 @@ class RapidApplikasjon(
     }
 
     override fun afterPropertiesSet() {
-        RapidApplication.create(environment.toMap()).registrerLyttere(stillingsinfoRepository, context).start()
+        RapidApplicationWithoutShutdownHook.create(environment.toMap()).registrerLyttere(stillingsinfoRepository, context).start()
     }
 }
 
