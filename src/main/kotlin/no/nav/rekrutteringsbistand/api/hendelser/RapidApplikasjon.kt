@@ -26,7 +26,7 @@ class RapidApplikasjon(
             context: ApplicationContext
         ) = apply {
             StillingsinfoPopulator(this, stillingsinfoRepository)
-            Appkiller(this, context)
+            //Appkiller(this, context)
         }
     }
 
