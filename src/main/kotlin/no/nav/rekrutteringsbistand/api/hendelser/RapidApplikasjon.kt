@@ -1,12 +1,12 @@
 package no.nav.rekrutteringsbistand.api.hendelser
 
-import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoRepository
-import org.springframework.beans.factory.InitializingBean
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Profile
+import org.springframework.context.event.EventListener
 import org.springframework.core.env.AbstractEnvironment
 import org.springframework.core.env.Environment
 import org.springframework.core.env.MapPropertySource
@@ -18,7 +18,7 @@ class RapidApplikasjon(
     @Autowired private val context: ApplicationContext,
     @Autowired private val stillingsinfoRepository: StillingsinfoRepository,
     @Autowired private val environment: Environment
-) : InitializingBean {
+): Runnable {
 
     companion object {
         fun <T: RapidsConnection> T.registrerLyttere(
@@ -30,8 +30,14 @@ class RapidApplikasjon(
         }
     }
 
-    override fun afterPropertiesSet() {
-        RapidApplicationWithoutShutdownHook.create(environment.toMap()).registrerLyttere(stillingsinfoRepository, context).start()
+    @EventListener(ApplicationReadyEvent::class)
+    fun afterPropertiesSet() {
+        Thread(this).start()
+    }
+
+    override fun run() {
+        RapidApplicationWithoutShutdownHook.create(environment.toMap())
+            .registrerLyttere(stillingsinfoRepository, context).start()
     }
 }
 
