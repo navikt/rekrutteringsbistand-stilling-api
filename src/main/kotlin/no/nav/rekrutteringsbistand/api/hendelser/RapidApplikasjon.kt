@@ -1,5 +1,6 @@
 package no.nav.rekrutteringsbistand.api.hendelser
 
+import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoRepository
 import org.springframework.beans.factory.annotation.Autowired
@@ -26,7 +27,7 @@ class RapidApplikasjon(
             context: ApplicationContext
         ) = apply {
             StillingsinfoPopulator(this, stillingsinfoRepository)
-            //Appkiller(this, context)
+            Appkiller(this, context)
         }
     }
 
@@ -36,7 +37,7 @@ class RapidApplikasjon(
     }
 
     override fun run() {
-        RapidApplicationWithoutShutdownHook.create(environment.toMap())
+        RapidApplication.create(environment.toMap())
             .registrerLyttere(stillingsinfoRepository, context).start()
     }
 }
