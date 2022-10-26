@@ -183,6 +183,11 @@
             <version>2.4.8</version>
         </dependency>
         <!-- Slutt, dependencies relatert til login -->
+        <dependency>
+            <groupId>com.github.navikt</groupId>
+            <artifactId>rapids-and-rivers</artifactId>
+            <version>2022092314391663936769.9d5d33074875</version>
+        </dependency>
 
     </dependencies>
 
@@ -280,6 +285,11 @@
             <id>confluent repo</id>
             <name>confluent repo</name>
             <url>https://packages.confluent.io/maven/</url>
+        </repository>
+        <repository>
+            <id>jitpack</id>
+            <name>jitpack</name>
+            <url>https://jitpack.io</url>
         </repository>
     </repositories>
 
