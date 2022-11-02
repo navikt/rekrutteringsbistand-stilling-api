@@ -11,14 +11,14 @@ class StillingsinfoPopulator(
     init {
         River(rapidsConnection).apply {
             validate { it.requireKey("kandidathendelse.stillingsId") }
-            validate { it.rejectKey("stilling") }
+            validate { it.rejectKey("stillingsinfo") }
         }.register(this)
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
         val stillingsId: String = packet["kandidathendelse.stillingsId"].asText()
         stillingsinfoRepository.hentForStilling(Stillingsid(stillingsId)).map {
-            packet["stilling"] = it.tilStillingsinfoIHendelse()
+            packet["stillingsinfo"] = it.tilStillingsinfoIHendelse()
             context.publish(packet.toJson())
         }
     }

@@ -52,7 +52,7 @@ class StillingsinfopopulatorTest {
         assertEquals("felt", message.get("uinteressant").asText())
         assertEquals("felt2", message.path("kandidathendelse").get("uinteressant2").asText())
         assertEquals(stillingsId.asString(), message.path("kandidathendelse").get("stillingsId").asText())
-        val stillingNode = message.path("stilling")
+        val stillingNode = message.path("stillingsinfo")
         assertFalse(stillingNode.isMissingOrNull())
         assertEquals(stillingsinfo.stillingsinfoid.asString(), stillingNode.path("stillingsinfoid").asText())
         assertEquals(stillingsinfo.stillingsid.asString(), stillingNode.path("stillingsid").asText())
@@ -81,7 +81,7 @@ class StillingsinfopopulatorTest {
                 "kandidathendelse": {
                     "uinteressant2": "felt2",
                 },
-                "stilling": {}
+                "stillingsinfo": {}
             }
         """.trimIndent())
         assertEquals(0, testRapid.inspektør.size)
