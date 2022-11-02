@@ -2,11 +2,13 @@ package no.nav.rekrutteringsbistand.api.hendelser
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.rapids_rivers.*
+import no.nav.rekrutteringsbistand.api.arbeidsplassen.ArbeidsplassenKlient
 import no.nav.rekrutteringsbistand.api.stillingsinfo.*
 
 class StillingsinfoPopulator(
     rapidsConnection: RapidsConnection,
-    private val stillingsinfoRepository: StillingsinfoRepository
+    private val stillingsinfoRepository: StillingsinfoRepository,
+    private val arbeidsplassenKlient: ArbeidsplassenKlient
 ) : River.PacketListener {
     init {
         River(rapidsConnection).apply {
@@ -19,8 +21,11 @@ class StillingsinfoPopulator(
         val stillingsId: String = packet["kandidathendelse.stillingsId"].asText()
         stillingsinfoRepository.hentForStilling(Stillingsid(stillingsId)).map {
             packet["stillingsinfo"] = it.tilStillingsinfoIHendelse()
-            context.publish(packet.toJson())
         }
+        arbeidsplassenKlient.hentStillingBasertPåUUID(stillingsId).map {
+            packet["stillingstittel"] = it.title
+        }
+        context.publish(packet.toJson())
     }
 }
 

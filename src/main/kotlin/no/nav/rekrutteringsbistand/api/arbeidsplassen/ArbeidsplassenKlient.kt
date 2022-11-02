@@ -102,6 +102,32 @@ class ArbeidsplassenKlient(
             }
         }
 
+    fun hentStillingBasertPåUUID(uuid: String): Option<Stilling> =
+        timer("rekrutteringsbistand.stilling.arbeidsplassen.hentStillingBasertPåUUID.kall.tid") {
+            val url = UriComponentsBuilder
+                .fromHttpUrl("${hentBaseUrl()}/b2b/api/v1/ads")
+                .query("uuid=${uuid}")
+                .build()
+                .toString()
+
+            try {
+                val response = restTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    HttpEntity(null, httpHeaders()),
+                    object : ParameterizedTypeReference<Page<Stilling>>() {}
+                )
+                return@timer response.body?.content?.firstOrNone() ?: throw kunneIkkeTolkeBodyException()
+
+            } catch (exception: RestClientResponseException) {
+                throw svarMedFeilmelding(
+                    "Klarte ikke hente stillingen med uuid $uuid fra Arbeidsplassen",
+                    url,
+                    exception
+                )
+            }
+        }
+
     fun hentMineStillinger(queryString: String?): Page<Stilling> =
         timer("rekrutteringsbistand.stilling.arbeidsplassen.hentMineStillinger.kall.tid") {
             val url = UriComponentsBuilder
