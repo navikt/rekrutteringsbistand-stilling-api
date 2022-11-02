@@ -114,7 +114,7 @@ class ArbeidsplassenKlient(
                 val response = restTemplate.exchange(
                     url,
                     HttpMethod.GET,
-                    HttpEntity(null, httpHeaders()),
+                    HttpEntity(null, httpHeadersSomSystembruker()),
                     object : ParameterizedTypeReference<Page<Stilling>>() {}
                 )
                 return@timer response.body?.content?.firstOrNone() ?: throw kunneIkkeTolkeBodyException()
