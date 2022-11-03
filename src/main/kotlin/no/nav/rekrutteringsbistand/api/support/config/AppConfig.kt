@@ -5,8 +5,10 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.converter.StringHttpMessageConverter
 import org.springframework.web.client.RestTemplate
+import org.springframework.web.context.request.RequestContextListener
 import java.nio.charset.StandardCharsets
 import java.time.Duration
+import javax.servlet.annotation.WebListener
 
 
 @Configuration

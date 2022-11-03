@@ -1,16 +1,20 @@
 package no.nav.rekrutteringsbistand.api.hendelser
 
-import no.nav.helse.rapids_rivers.RapidsConnection
+import arrow.core.Some
 import no.nav.helse.rapids_rivers.isMissingOrNull
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
+import no.nav.rekrutteringsbistand.api.Testdata.enStilling
+import no.nav.rekrutteringsbistand.api.arbeidsplassen.ArbeidsplassenKlient
 import no.nav.rekrutteringsbistand.api.hendelser.RapidApplikasjon.Companion.registrerLyttere
 import no.nav.rekrutteringsbistand.api.stillingsinfo.*
 import org.junit.Before
 import org.junit.Test
 import org.junit.jupiter.api.Assertions.*
 import org.junit.runner.RunWith
+import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.context.ApplicationContext
 import org.springframework.test.context.junit4.SpringRunner
 import java.util.*
@@ -22,17 +26,20 @@ class StillingsinfopopulatorTest {
 
     @Autowired private lateinit var stillingsinfoRepository: StillingsinfoRepository
     @Autowired private lateinit var context: ApplicationContext
+    @MockBean private lateinit var arbeidsplassenKlient: ArbeidsplassenKlient
     private lateinit var testRapid: TestRapid
 
 
     @Before fun setUp(){
-        if(!this::testRapid.isInitialized) testRapid = TestRapid().registrerLyttere(stillingsinfoRepository, context)
+        if(!this::testRapid.isInitialized) testRapid = TestRapid().registrerLyttere(stillingsinfoRepository, context, arbeidsplassenKlient)
         testRapid.reset()
     }
     @Test
     fun `populering av en stilling`() {
-        val stillingsinfoid = Stillingsinfoid(UUID.randomUUID())
         val stillingsId = Stillingsid(UUID.randomUUID())
+        val stillingsTittel = "Klovn på sirkus"
+        Mockito.`when`(arbeidsplassenKlient.hentStillingBasertPåUUID(stillingsId.toString())).thenReturn(Some(enStilling.copy(title = stillingsTittel)))
+        val stillingsinfoid = Stillingsinfoid(UUID.randomUUID())
         val eier = Eier("AB123456", "Navnesen")
         val notat = "Et notat"
         val stillingskategori = Stillingskategori.ARBEIDSTRENING
@@ -52,6 +59,7 @@ class StillingsinfopopulatorTest {
         assertEquals("felt", message.get("uinteressant").asText())
         assertEquals("felt2", message.path("kandidathendelse").get("uinteressant2").asText())
         assertEquals(stillingsId.asString(), message.path("kandidathendelse").get("stillingsId").asText())
+        assertEquals(stillingsTittel, message.path("stillingstittel").asText())
         val stillingNode = message.path("stillingsinfo")
         assertFalse(stillingNode.isMissingOrNull())
         assertEquals(stillingsinfo.stillingsinfoid.asString(), stillingNode.path("stillingsinfoid").asText())
