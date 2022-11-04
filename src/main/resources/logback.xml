@@ -34,5 +34,5 @@
         <appender-ref ref="consoleJsonAppender"/>
     </root>
 
-    <logger name="no.nav.rekrutteringsbistand.api" level="DEBUG"/>
+    <logger name="no.nav.rekrutteringsbistand.api" level="info"/>
 </configuration>
