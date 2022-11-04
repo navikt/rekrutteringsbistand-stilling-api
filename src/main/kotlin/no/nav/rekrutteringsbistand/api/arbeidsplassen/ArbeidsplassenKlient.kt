@@ -17,6 +17,7 @@ import org.springframework.http.HttpHeaders.*
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus.*
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
+import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestClientException
 import org.springframework.web.client.RestClientResponseException
@@ -109,9 +110,8 @@ class ArbeidsplassenKlient(
                 .query("uuid=${uuid}")
                 .build()
                 .toString()
-
             try {
-                val response = restTemplate.exchange(
+                val response: ResponseEntity<Page<Stilling>> = restTemplate.exchange(
                     url,
                     HttpMethod.GET,
                     HttpEntity(null, httpHeadersSomSystembruker()),
@@ -125,6 +125,8 @@ class ArbeidsplassenKlient(
                     url,
                     exception
                 )
+            } catch (e: UnknownContentTypeException) {
+                throw kunneIkkeTolkeBodyException(e)
             }
         }
 
