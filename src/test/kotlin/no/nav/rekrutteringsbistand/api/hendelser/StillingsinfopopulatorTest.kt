@@ -34,6 +34,7 @@ class StillingsinfopopulatorTest {
         if(!this::testRapid.isInitialized) testRapid = TestRapid().registrerLyttere(stillingsinfoRepository, context, arbeidsplassenKlient)
         testRapid.reset()
     }
+
     @Test
     fun `populering av en stilling`() {
         val stillingsId = Stillingsid(UUID.randomUUID())
@@ -59,7 +60,7 @@ class StillingsinfopopulatorTest {
         assertEquals("felt", message.get("uinteressant").asText())
         assertEquals("felt2", message.path("kandidathendelse").get("uinteressant2").asText())
         assertEquals(stillingsId.asString(), message.path("kandidathendelse").get("stillingsId").asText())
-        assertEquals(stillingsTittel, message.path("stillingstittel").asText())
+        assertEquals(stillingsTittel, message.path("stilling").get("stillingstittel").asText())
         val stillingNode = message.path("stillingsinfo")
         assertFalse(stillingNode.isMissingOrNull())
         assertEquals(stillingsinfo.stillingsinfoid.asString(), stillingNode.path("stillingsinfoid").asText())

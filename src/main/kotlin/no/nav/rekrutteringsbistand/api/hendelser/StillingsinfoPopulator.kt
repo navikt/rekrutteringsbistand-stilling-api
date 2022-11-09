@@ -23,7 +23,7 @@ class StillingsinfoPopulator(
             packet["stillingsinfo"] = it.tilStillingsinfoIHendelse()
         }
         arbeidsplassenKlient.hentStillingBasertPåUUID(stillingsId).map {
-            packet["stillingstittel"] = it.title
+            packet["stilling"] = Stilling(it.title)
         }
         context.publish(packet.toJson())
     }
@@ -38,4 +38,8 @@ private data class StillingsinfoIHendelse(
     val eier: Eier?,
     val notat: String?,
     val stillingskategori: Stillingskategori?
+)
+
+private data class Stilling(
+    val stillingstittel: String
 )
