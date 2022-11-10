@@ -84,7 +84,7 @@ jobs:
           CLUSTER: prod-gcp
           RESOURCE: nais/prod-alerts.yaml
 
-  snyk-monitor-java:
+  snyk-monitor:
     name: Monitor dependencies with Snyk
     if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
