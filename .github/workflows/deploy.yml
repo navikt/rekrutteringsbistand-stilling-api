@@ -83,3 +83,26 @@ jobs:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: prod-gcp
           RESOURCE: nais/prod-alerts.yaml
+
+  snyk-monitor-java:
+    name: Monitor dependencies with Snyk
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v1
+      - name: Setup Java v17.x
+        uses: actions/setup-java@v1
+        with:
+          java-version: '17.x'
+      - name: Install Snyk CLI
+        uses: snyk/actions/setup@master
+      - name: Monitor dependencies with Snyk
+        run: >
+          snyk monitor
+          --org=toi
+          --project-name=${{ github.repository }}
+          --remote-repo-url=https://github.com/${{ github.repository }}.git
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
