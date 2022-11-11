@@ -40,8 +40,9 @@ class StillingsinfoPopulator(
          */
         val kafkaMaxRequestSizeBytes = 1048576
         val messageSizeBytes = message.toByteArray().size
+        log.debug("Utgående Kafka-melding med stillingsId=$stillingsId har størrelse i antall bytes: " + messageSizeBytes)
         if (messageSizeBytes > kafkaMaxRequestSizeBytes) {
-            log.warn("Utgående melding kan være for stor til å bli sendt. stillingsId=$stillingsId, messageSizeBytes=$messageSizeBytes, kafkaMaxRequestSizeBytes=$kafkaMaxRequestSizeBytes")
+            log.warn("Utgående Kafka-melding kan være for stor til å bli sendt. stillingsId=$stillingsId, messageSizeBytes=$messageSizeBytes, kafkaMaxRequestSizeBytes=$kafkaMaxRequestSizeBytes")
         }
 
         context.publish(message)
