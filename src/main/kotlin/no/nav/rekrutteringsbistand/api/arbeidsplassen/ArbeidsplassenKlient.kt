@@ -42,20 +42,21 @@ class ArbeidsplassenKlient(
                 val respons = restTemplate.exchange(
                     url,
                     HttpMethod.GET,
-                    HttpEntity(
-                        null,
-                        if (somSystembruker) httpHeadersSomSystembruker() else httpHeaders()
-                    ),
+                    HttpEntity(null, if (somSystembruker) httpHeadersSomSystembruker() else httpHeaders()),
                     Stilling::class.java
                 )
                 return@timer respons.body ?: throw kunneIkkeTolkeBodyException()
             } catch (e: UnknownContentTypeException) {
-                throw kunneIkkeTolkeBodyException(e)
-            } catch (exception: RestClientResponseException) {
                 throw svarMedFeilmelding(
                     "Klarte ikke hente stillingen med stillingsId $stillingsId fra Arbeidsplassen",
                     url,
-                    exception
+                    e
+                )
+            } catch (e: RestClientResponseException) {
+                throw svarMedFeilmelding(
+                    "Klarte ikke hente stillingen med stillingsId $stillingsId fra Arbeidsplassen",
+                    url,
+                    e
                 )
             }
         }
@@ -79,81 +80,60 @@ class ArbeidsplassenKlient(
 
     fun hentStillingBasertPåAnnonsenr(annonsenr: String): Option<Stilling> =
         timer("rekrutteringsbistand.stilling.arbeidsplassen.hentStillingBasertPåAnnonsenr.kall.tid") {
-            val url = UriComponentsBuilder
-                .fromHttpUrl("${hentBaseUrl()}/b2b/api/v1/ads")
-                .query("id=${annonsenr}")
-                .build()
-                .toString()
+            val url =
+                UriComponentsBuilder.fromHttpUrl("${hentBaseUrl()}/b2b/api/v1/ads").query("id=${annonsenr}").build()
+                    .toString()
 
             try {
-                val response = restTemplate.exchange(
-                    url,
+                val response = restTemplate.exchange(url,
                     HttpMethod.GET,
                     HttpEntity(null, httpHeaders()),
-                    object : ParameterizedTypeReference<Page<Stilling>>() {}
-                )
+                    object : ParameterizedTypeReference<Page<Stilling>>() {})
                 return@timer response.body?.content?.firstOrNone() ?: throw kunneIkkeTolkeBodyException()
 
             } catch (exception: RestClientResponseException) {
                 throw svarMedFeilmelding(
-                    "Klarte ikke hente stillingen med annonsenr $annonsenr fra Arbeidsplassen",
-                    url,
-                    exception
+                    "Klarte ikke hente stillingen med annonsenr $annonsenr fra Arbeidsplassen", url, exception
                 )
             }
         }
 
     fun hentStillingBasertPåUUID(uuid: String): Option<Stilling> =
         timer("rekrutteringsbistand.stilling.arbeidsplassen.hentStillingBasertPåUUID.kall.tid") {
-            val url = UriComponentsBuilder
-                .fromHttpUrl("${hentBaseUrl()}/b2b/api/v1/ads")
-                .query("uuid=${uuid}")
-                .build()
+            val url = UriComponentsBuilder.fromHttpUrl("${hentBaseUrl()}/b2b/api/v1/ads").query("uuid=${uuid}").build()
                 .toString()
             try {
-                val response: ResponseEntity<Page<Stilling>> = restTemplate.exchange(
-                    url,
+                val response: ResponseEntity<Page<Stilling>> = restTemplate.exchange(url,
                     HttpMethod.GET,
                     HttpEntity(null, httpHeadersSomSystembruker()),
-                    object : ParameterizedTypeReference<Page<Stilling>>() {}
-                )
+                    object : ParameterizedTypeReference<Page<Stilling>>() {})
                 return@timer response.body?.content?.firstOrNone() ?: throw kunneIkkeTolkeBodyException()
 
-            } catch (exception: RestClientResponseException) {
-                throw svarMedFeilmelding(
-                    "Klarte ikke hente stillingen med uuid $uuid fra Arbeidsplassen",
-                    url,
-                    exception
-                )
+            } catch (e: RestClientResponseException) {
+                throw svarMedFeilmelding("Klarte ikke hente stillingen med uuid $uuid fra Arbeidsplassen", url, e)
             } catch (e: UnknownContentTypeException) {
-                throw kunneIkkeTolkeBodyException(e)
+                throw svarMedFeilmelding("Klarte ikke hente stillingen med uuid $uuid fra Arbeidsplassen", url, e)
             }
         }
 
     fun hentMineStillinger(queryString: String?): Page<Stilling> =
         timer("rekrutteringsbistand.stilling.arbeidsplassen.hentMineStillinger.kall.tid") {
-            val url = UriComponentsBuilder
-                .fromHttpUrl("${hentBaseUrl()}/api/v1/ads/rekrutteringsbistand/minestillinger")
-                .query(queryString)
-                .build()
-                .toString()
+            val url =
+                UriComponentsBuilder.fromHttpUrl("${hentBaseUrl()}/api/v1/ads/rekrutteringsbistand/minestillinger")
+                    .query(queryString).build().toString()
 
             try {
-                val response = restTemplate.exchange(
-                    url,
+                val response = restTemplate.exchange(url,
                     HttpMethod.GET,
                     HttpEntity(null, httpHeaders()),
-                    object : ParameterizedTypeReference<Page<Stilling>>() {}
-                )
+                    object : ParameterizedTypeReference<Page<Stilling>>() {})
                 return@timer response.body ?: throw kunneIkkeTolkeBodyException()
 
             } catch (e: RestClientResponseException) {
                 throw svarMedFeilmelding("Klarte ikke hente mine stillinger fra Arbeidsplassen", url, e)
             } catch (e: RestClientException) {
                 throw ResponseStatusException(
-                    INTERNAL_SERVER_ERROR,
-                    "Klarte ikke hente mine stillinger fra Arbeidsplassen",
-                    e
+                    INTERNAL_SERVER_ERROR, "Klarte ikke hente mine stillinger fra Arbeidsplassen", e
                 )
             }
         }
@@ -164,10 +144,7 @@ class ArbeidsplassenKlient(
 
             try {
                 val response = restTemplate.exchange(
-                    url,
-                    HttpMethod.POST,
-                    HttpEntity(stilling, httpHeaders()),
-                    Stilling::class.java
+                    url, HttpMethod.POST, HttpEntity(stilling, httpHeaders()), Stilling::class.java
                 )
                 return@timer response.body ?: throw kunneIkkeTolkeBodyException()
 
@@ -200,23 +177,18 @@ class ArbeidsplassenKlient(
 
             try {
                 val response = restTemplate.exchange(
-                    url,
-                    HttpMethod.DELETE,
-                    HttpEntity(null, httpHeaders()),
-                    Stilling::class.java
+                    url, HttpMethod.DELETE, HttpEntity(null, httpHeaders()), Stilling::class.java
                 )
                 return@timer response.body ?: throw kunneIkkeTolkeBodyException()
             } catch (e: UnknownContentTypeException) {
-                throw kunneIkkeTolkeBodyException(e)
-            } catch (exception: RestClientResponseException) {
-                throw svarMedFeilmelding("Klarte ikke å slette stilling hos arbeidsplassen", url, exception)
+                throw svarMedFeilmelding("Klarte ikke å slette stilling hos arbeidsplassen", url, e)
+            } catch (e: RestClientResponseException) {
+                throw svarMedFeilmelding("Klarte ikke å slette stilling hos arbeidsplassen", url, e)
             }
         }
 
     private fun svarMedFeilmelding(
-        melding: String,
-        url: String,
-        exception: RestClientResponseException
+        melding: String, url: String, exception: RestClientResponseException
     ): ResponseStatusException {
         val logMsg = "$melding. URL: $url, Status: ${exception.rawStatusCode}, Body: ${exception.responseBodyAsString}"
         when (exception.rawStatusCode) {
@@ -228,37 +200,39 @@ class ArbeidsplassenKlient(
         return ResponseStatusException(valueOf(exception.rawStatusCode), melding)
     }
 
-    private fun kunneIkkeTolkeBodyException(cause: Throwable? = null): ResponseStatusException {
-        return ResponseStatusException(
-            INTERNAL_SERVER_ERROR,
-            "Klarte ikke å tolke respons fra Arbeidsplassen",
-            cause
-        )
+    /**
+     * Det er mulig å tenke seg at HTTP respons statsukode fra Arbeidsplassen er 200 ok samtidig som responsens content type er uventet.
+     * Så her logger vi statuskoden mottatt fra Arbeidsplassen men returnerer _alltid_ statuskode 500 server error.
+     */
+    private fun svarMedFeilmelding(
+        melding: String, url: String, exception: UnknownContentTypeException
+    ): ResponseStatusException {
+        val logMsg = "$melding. URL: $url, Status: ${exception.rawStatusCode}, Body: ${exception.responseBodyAsString}"
+        log.error(logMsg, exception)
+        return ResponseStatusException(INTERNAL_SERVER_ERROR, melding)
     }
+
+    // Jeg mistenker at denne aldri blir kalt ved kjøretid. Are 2022-11-12
+    private fun kunneIkkeTolkeBodyException(): ResponseStatusException =
+        ResponseStatusException(INTERNAL_SERVER_ERROR, "Klarte ikke å tolke respons fra Arbeidsplassen")
 
     private fun hentBaseUrl() = externalConfiguration.pamAdApi.url
 
-    private fun httpHeaders() =
-        mapOf(
-            CONTENT_TYPE to APPLICATION_JSON_VALUE,
-            ACCEPT to APPLICATION_JSON_VALUE,
-            AUTHORIZATION to "Bearer ${tokenUtils.hentOBOToken(scopeMotArbeidsplassen)}"
-        ).toMultiValueMap()
+    private fun httpHeaders() = mapOf(
+        CONTENT_TYPE to APPLICATION_JSON_VALUE,
+        ACCEPT to APPLICATION_JSON_VALUE,
+        AUTHORIZATION to "Bearer ${tokenUtils.hentOBOToken(scopeMotArbeidsplassen)}"
+    ).toMultiValueMap()
 
-    private fun httpHeadersSomSystembruker() =
-        mapOf(
-            CONTENT_TYPE to APPLICATION_JSON_VALUE,
-            ACCEPT to APPLICATION_JSON_VALUE,
-            AUTHORIZATION to "Bearer ${tokenUtils.hentSystemToken(scopeMotArbeidsplassen)}"
-        ).toMultiValueMap()
+    private fun httpHeadersSomSystembruker() = mapOf(
+        CONTENT_TYPE to APPLICATION_JSON_VALUE,
+        ACCEPT to APPLICATION_JSON_VALUE,
+        AUTHORIZATION to "Bearer ${tokenUtils.hentSystemToken(scopeMotArbeidsplassen)}"
+    ).toMultiValueMap()
 }
 
 fun <T> timer(timerName: String, toBeTimed: () -> T): T =
-    Timer.builder(timerName)
-        .publishPercentiles(0.5, 0.75, 0.9, 0.99)
-        .publishPercentileHistogram()
-        .minimumExpectedValue(Duration.ofMillis(1))
-        .maximumExpectedValue(Duration.ofSeconds(61))
-        .register(Metrics.globalRegistry)
-        .record(toBeTimed)!!
+    Timer.builder(timerName).publishPercentiles(0.5, 0.75, 0.9, 0.99).publishPercentileHistogram()
+        .minimumExpectedValue(Duration.ofMillis(1)).maximumExpectedValue(Duration.ofSeconds(61))
+        .register(Metrics.globalRegistry).record(toBeTimed)!!
 
