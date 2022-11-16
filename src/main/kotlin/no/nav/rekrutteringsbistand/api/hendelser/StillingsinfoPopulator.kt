@@ -1,5 +1,6 @@
 package no.nav.rekrutteringsbistand.api.hendelser
 
+import arrow.core.orElse
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -21,11 +22,13 @@ class StillingsinfoPopulator(
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
-        val stillingsId: String = packet["kandidathendelse.stillingsId"].asText()
-        stillingsinfoRepository.hentForStilling(Stillingsid(stillingsId)).map {
+        val stillingsId = Stillingsid(packet["kandidathendelse.stillingsId"].asText())
+
+        stillingsinfoRepository.hentForStilling(stillingsId).map {
             packet["stillingsinfo"] = it.tilStillingsinfoIHendelse()
-        }
-        arbeidsplassenKlient.hentStillingBasertPåUUID(stillingsId).map {
+        }.orElse { throw IllegalStateException("Det burde finnes en Stillingsinfo i db for stillingsId=$stillingsId") }
+
+        arbeidsplassenKlient.hentStillingBasertPåUUID(stillingsId.asString()).map {
             packet["stilling"] = Stilling(it.title)
         }
         val message: String = packet.toJson()

@@ -26,6 +26,7 @@ import org.springframework.web.client.UnknownContentTypeException
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.util.UriComponentsBuilder
 import java.time.Duration
+import java.util.*
 
 @Component
 class ArbeidsplassenKlient(
