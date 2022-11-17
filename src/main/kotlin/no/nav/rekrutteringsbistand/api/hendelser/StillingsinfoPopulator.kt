@@ -28,6 +28,7 @@ class StillingsinfoPopulator(
             packet["stillingsinfo"] = it.tilStillingsinfoIHendelse()
         }.getOrElse {
             log.error("Det burde finnes en Stillingsinfo i db for stillingsId=$stillingsId fordi stillingen har en kandidatliste")
+            return
         }
 
         arbeidsplassenKlient.hentStillingBasertPåUUID(stillingsId.asString()).map {
