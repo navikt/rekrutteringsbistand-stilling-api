@@ -1,6 +1,6 @@
 package no.nav.rekrutteringsbistand.api.hendelser
 
-import arrow.core.orElse
+import arrow.core.getOrElse
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -26,7 +26,9 @@ class StillingsinfoPopulator(
 
         stillingsinfoRepository.hentForStilling(stillingsId).map {
             packet["stillingsinfo"] = it.tilStillingsinfoIHendelse()
-        }.orElse { throw IllegalStateException("Det burde finnes en Stillingsinfo i db for stillingsId=$stillingsId fordi stillingen har en kandidatliste") }
+        }.getOrElse {
+            log.error("Det burde finnes en Stillingsinfo i db for stillingsId=$stillingsId fordi stillingen har en kandidatliste")
+        }
 
         arbeidsplassenKlient.hentStillingBasertPåUUID(stillingsId.asString()).map {
             packet["stilling"] = Stilling(it.title)
