@@ -69,6 +69,6 @@ spec:
     - name: KAFKA_RAPID_TOPIC
       value: toi.rapid-1
     - name: KAFKA_CONSUMER_GROUP_ID
-      value: rekrutteringsbistand-stilling-rapidconsumer-1
+      value: rekrutteringsbistand-stilling-rapidconsumer-2
     - name: KAFKA_RESET_POLICY
       value: "earliest"
