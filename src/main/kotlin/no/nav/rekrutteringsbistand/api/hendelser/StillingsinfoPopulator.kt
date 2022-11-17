@@ -26,7 +26,7 @@ class StillingsinfoPopulator(
 
         stillingsinfoRepository.hentForStilling(stillingsId).map {
             packet["stillingsinfo"] = it.tilStillingsinfoIHendelse()
-        }.orElse { throw IllegalStateException("Det burde finnes en Stillingsinfo i db for stillingsId=$stillingsId") }
+        }.orElse { throw IllegalStateException("Det burde finnes en Stillingsinfo i db for stillingsId=$stillingsId fordi stillingen har en kandidatliste") }
 
         arbeidsplassenKlient.hentStillingBasertPåUUID(stillingsId.asString()).map {
             packet["stilling"] = Stilling(it.title)
