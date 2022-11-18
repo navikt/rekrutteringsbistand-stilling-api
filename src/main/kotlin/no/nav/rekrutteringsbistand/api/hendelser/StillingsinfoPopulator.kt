@@ -34,23 +34,8 @@ class StillingsinfoPopulator(
         arbeidsplassenKlient.hentStillingBasertPåUUID(stillingsId.asString()).map {
             packet["stilling"] = Stilling(it.title)
         }
+
         val message: String = packet.toJson()
-
-        /**
-         * Sjekk for å unngå at følgende exception logges men IKKE kastes, og som derfor lar systemet fortsette å konsumere nye meldinger,
-         * og det blir feil data sendt til DVH/team Arbeidsmarkedsdata
-         *
-         * Kibana log message: `Shutting down rapid due to fatal error: The message is 1048751 bytes when serialized which is larger than 1048576, which is the value of the max.request.size configuration.`
-         *
-         * Kibana stacktrace: `org.apache.kafka.common.errors.RecordTooLargeException: The message is 1048751 bytes when serialized which is larger than 1048576, which is the value of the max.request.size configuration.`
-         */
-        val kafkaMaxRequestSizeBytes = 1048576
-        val messageSizeBytes = message.toByteArray().size
-        log.debug("Utgående Kafka-melding med stillingsId=$stillingsId har størrelse i antall bytes: $messageSizeBytes (maksimalt tillatt $kafkaMaxRequestSizeBytes)")
-        if (messageSizeBytes > kafkaMaxRequestSizeBytes) {
-            log.warn("Utgående Kafka-melding kan være for stor til å bli sendt. stillingsId=$stillingsId, messageSizeBytes=$messageSizeBytes, kafkaMaxRequestSizeBytes=$kafkaMaxRequestSizeBytes")
-        }
-
         context.publish(message)
     }
 }
