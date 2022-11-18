@@ -25,6 +25,7 @@ import org.springframework.web.client.RestTemplate
 import org.springframework.web.client.UnknownContentTypeException
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.util.UriComponentsBuilder
+import java.io.EOFException
 import java.time.Duration
 import java.util.*
 
@@ -59,6 +60,9 @@ class ArbeidsplassenKlient(
                     url,
                     e
                 )
+            } catch (e: EOFException) {
+                log.error("SSL-feil mot kall til arbeidsplassen", e)
+                throw e
             }
         }
 

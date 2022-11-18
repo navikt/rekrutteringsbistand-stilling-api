@@ -1,11 +1,13 @@
 package no.nav.rekrutteringsbistand.api.autorisasjon
 
+import no.nav.rekrutteringsbistand.api.support.log
 import no.nav.rekrutteringsbistand.api.support.toMultiValueMap
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.*
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestClientException
 import org.springframework.web.client.RestTemplate
+import java.io.EOFException
 
 const val systembrukerCacheKey = "system"
 
@@ -29,12 +31,17 @@ class AzureKlient(
 
         val form = lagFormForOboRequest(scope, assertionToken)
 
-        val response = restTemplate.exchange(
-            tokenEndpoint,
-            HttpMethod.POST,
-            HttpEntity(form, headers),
-            AzureResponse::class.java
-        )
+        val response = try {
+            restTemplate.exchange(
+                tokenEndpoint,
+                HttpMethod.POST,
+                HttpEntity(form, headers),
+                AzureResponse::class.java
+            )
+        } catch (e: EOFException) {
+            log.error("SSL-feil mot kall til arbeidsplassen", e)
+            throw e
+        }
 
         val responseBody = response.body
 
