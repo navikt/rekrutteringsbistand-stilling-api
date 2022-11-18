@@ -13,8 +13,8 @@ class AzureCache {
         return if (cachetToken == null) {
             null
         } else {
-            val erFremdelesGyldig = cachetToken.expires.isAfter(LocalDateTime.now())
-            if (erFremdelesGyldig) cachetToken.token else null
+            val erFremdelesGyldigOmEttSekund = cachetToken.expires.isAfter(LocalDateTime.now().plusSeconds(1))
+            if (erFremdelesGyldigOmEttSekund) cachetToken.token else null
         }
     }
 
