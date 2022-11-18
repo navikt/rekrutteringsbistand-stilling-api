@@ -21,7 +21,10 @@ class StillingService(
     val kandidatlisteKlient: KandidatlisteKlient,
     val arbeidsplassenKlient: ArbeidsplassenKlient
 ) {
-    fun hentRekrutteringsbistandStilling(stillingsId: String, somSystembruker: Boolean = false): RekrutteringsbistandStilling {
+    fun hentRekrutteringsbistandStilling(
+        stillingsId: String,
+        somSystembruker: Boolean = false
+    ): RekrutteringsbistandStilling {
         val stilling = arbeidsplassenKlient.hentStilling(stillingsId, somSystembruker)
         val stillingsinfo: Option<Stillingsinfo> = stillingsinfoService.hentStillingsinfo(stilling)
 
@@ -87,7 +90,12 @@ class StillingService(
         val eksisterendeStilling = eksisterendeRekrutteringsbistandStilling.stilling
         val kopi = eksisterendeStilling.toKopiertStilling(tokenUtils)
 
-        return opprettStilling(OpprettRekrutteringsbistandstillingDto(kopi, kategoriMedDefault(eksisterendeRekrutteringsbistandStilling.stillingsinfo)))
+        return opprettStilling(
+            OpprettRekrutteringsbistandstillingDto(
+                kopi,
+                kategoriMedDefault(eksisterendeRekrutteringsbistandStilling.stillingsinfo)
+            )
+        )
     }
 
     fun kategoriMedDefault(stillingsInfo: StillingsinfoDto?) =
@@ -119,12 +127,9 @@ class StillingService(
         )
     }
 
-    fun slettRekrutteringsbistandStilling(stillingsId: String) : Stilling {
+    fun slettRekrutteringsbistandStilling(stillingsId: String): Stilling {
         kandidatlisteKlient.varsleOmSlettetStilling(Stillingsid(stillingsId))
-        val slettetStilling = arbeidsplassenKlient.slettStilling(stillingsId)
-        stillingsinfoService.slett(stillingsId)
-
-        return slettetStilling
+        return arbeidsplassenKlient.slettStilling(stillingsId)
     }
 
     fun slettStilling(stillingsId: String): Stilling {
