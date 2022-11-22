@@ -8,6 +8,7 @@ import no.nav.helse.rapids_rivers.River
 import no.nav.rekrutteringsbistand.api.arbeidsplassen.ArbeidsplassenKlient
 import no.nav.rekrutteringsbistand.api.stillingsinfo.*
 import no.nav.rekrutteringsbistand.api.support.log
+import java.util.*
 
 class StillingsinfoPopulator(
     rapidsConnection: RapidsConnection,
@@ -24,12 +25,18 @@ class StillingsinfoPopulator(
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
         val stillingsId = Stillingsid(packet["kandidathendelse.stillingsId"].asText())
 
-        stillingsinfoRepository.hentForStilling(stillingsId).map {
-            packet["stillingsinfo"] = it.tilStillingsinfoIHendelse()
-        }.getOrElse {
-            log.error("Det burde finnes en Stillingsinfo i db for stillingsId=$stillingsId fordi stillingen har en kandidatliste")
-            return
+        val stillingsinfo = stillingsinfoRepository.hentForStilling(stillingsId).getOrElse {
+            val nyStillingsinfo = Stillingsinfo(
+                stillingsinfoid =  Stillingsinfoid(UUID.randomUUID()),
+                stillingsid = stillingsId,
+                notat = null,
+                eier = null,
+                stillingskategori = null
+            )
+            stillingsinfoRepository.opprett(nyStillingsinfo)
+            nyStillingsinfo
         }
+        packet["stillingsinfo"] = stillingsinfo.tilStillingsinfoIHendelse()
 
         arbeidsplassenKlient.hentStillingBasertPåUUID(stillingsId.asString()).map {
             packet["stilling"] = Stilling(it.title)
