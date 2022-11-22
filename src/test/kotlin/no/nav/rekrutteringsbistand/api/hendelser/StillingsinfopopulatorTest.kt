@@ -1,6 +1,7 @@
 package no.nav.rekrutteringsbistand.api.hendelser
 
 import arrow.core.Some
+import arrow.core.getOrElse
 import no.nav.helse.rapids_rivers.isMissingOrNull
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.rekrutteringsbistand.api.Testdata.enStilling
@@ -83,7 +84,7 @@ class StillingsinfopopulatorTest {
     }
 
     @Test
-    fun `skal ikke publisere ny melding når vi mottar hendelse for stilling uten stillingsinfo`() {
+    fun `skal lagre stillinginfo og publisere ny melding når vi mottar hendelse for stilling uten stillingsinfo`() {
         val stillingsId = Stillingsid(UUID.randomUUID())
         stillingsinfoRepository.hentForStilling(stillingsId).tap {
             fail("Setup")
@@ -101,7 +102,24 @@ class StillingsinfopopulatorTest {
         """.trimIndent()
         )
 
-        assertThat(testRapid.inspektør.size).isZero
+        val lagretStillingsinfo = stillingsinfoRepository.hentForStilling(stillingsId).getOrElse {
+            fail("Stillingsinfo ikke lagret")
+        }
+        assertNull(lagretStillingsinfo.eier)
+        assertNull(lagretStillingsinfo.notat)
+        assertNull(lagretStillingsinfo.stillingskategori)
+        assertThat(lagretStillingsinfo.stillingsid).isEqualTo(stillingsId)
+        assertNotNull(lagretStillingsinfo.stillingsinfoid)
+
+        assertThat(testRapid.inspektør.size).isOne
+        val message = testRapid.inspektør.message(0)
+        val stillingsinfo = message.path("stillingsinfo")
+        assertThat(UUID.fromString(stillingsinfo.path("stillingsinfoid").asText())).isEqualTo(lagretStillingsinfo.stillingsinfoid)
+        assertThat(UUID.fromString(stillingsinfo.path("stillingsid").asText())).isEqualTo(lagretStillingsinfo.stillingsid)
+        assertNull(stillingsinfo.path("stillingskategori"))
+        assertNull(stillingsinfo.path("navident"))
+        assertNull(stillingsinfo.path("navn"))
+        assertNull(stillingsinfo.path("stillingskategori"))
     }
 
     @Test
