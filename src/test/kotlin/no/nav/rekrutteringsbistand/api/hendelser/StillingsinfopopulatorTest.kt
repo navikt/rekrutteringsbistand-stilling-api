@@ -86,6 +86,8 @@ class StillingsinfopopulatorTest {
     @Test
     fun `skal lagre stillinginfo og publisere ny melding når vi mottar hendelse for stilling uten stillingsinfo`() {
         val stillingsId = Stillingsid(UUID.randomUUID())
+        Mockito.`when`(arbeidsplassenKlient.hentStillingBasertPåUUID(stillingsId.toString()))
+            .thenReturn(Some(enStilling.copy(title = "Dummy-tittel")))
         stillingsinfoRepository.hentForStilling(stillingsId).tap {
             fail("Setup")
         }
@@ -114,12 +116,11 @@ class StillingsinfopopulatorTest {
         assertThat(testRapid.inspektør.size).isOne
         val message = testRapid.inspektør.message(0)
         val stillingsinfo = message.path("stillingsinfo")
-        assertThat(UUID.fromString(stillingsinfo.path("stillingsinfoid").asText())).isEqualTo(lagretStillingsinfo.stillingsinfoid)
-        assertThat(UUID.fromString(stillingsinfo.path("stillingsid").asText())).isEqualTo(lagretStillingsinfo.stillingsid)
-        assertNull(stillingsinfo.path("stillingskategori"))
-        assertNull(stillingsinfo.path("navident"))
-        assertNull(stillingsinfo.path("navn"))
-        assertNull(stillingsinfo.path("stillingskategori"))
+        assertThat(stillingsinfo.path("stillingsinfoid").asText()).isEqualTo(lagretStillingsinfo.stillingsinfoid.toString())
+        assertThat(stillingsinfo.path("stillingsid").asText()).isEqualTo(lagretStillingsinfo.stillingsid.toString())
+        assertTrue(stillingsinfo.path("stillingskategori").isNull)
+        assertTrue(stillingsinfo.path("eier").isNull)
+        assertTrue(stillingsinfo.path("stillingskategori").isNull)
     }
 
     @Test
