@@ -31,7 +31,7 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         ## Ved fix av prodfeil, sett continue-on-error=true, slik at workflow fortsetter selvom snyk finner sårbarheter
-        continue-on-error: false
+        continue-on-error: true
 
   deploy-to-dev:
     name: Deploy to dev
