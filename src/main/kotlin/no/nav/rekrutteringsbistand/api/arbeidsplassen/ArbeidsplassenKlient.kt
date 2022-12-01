@@ -60,8 +60,15 @@ class ArbeidsplassenKlient(
                     url,
                     e
                 )
-            } catch (e: EOFException) {
-                log.error("SSL-feil mot kall til arbeidsplassen", e)
+            } catch (e: Exception) {
+                fun logErrorIfEofexception(t: Throwable?) {
+                    when (t) {
+                        null -> return
+                        is EOFException -> log.error("SSL-feil mot kall til arbeidsplassen", e)
+                        else -> logErrorIfEofexception(t.cause)
+                    }
+                }
+                logErrorIfEofexception(e)
                 throw e
             }
         }
@@ -86,7 +93,8 @@ class ArbeidsplassenKlient(
     fun hentStillingBasertPåAnnonsenr(annonsenr: String): Option<Stilling> =
         timer("rekrutteringsbistand.stilling.arbeidsplassen.hentStillingBasertPåAnnonsenr.kall.tid") {
             val url =
-                UriComponentsBuilder.fromHttpUrl("${hentBaseUrl()}/b2b/api/v1/ads").query("id=${annonsenr}").build()
+                UriComponentsBuilder.fromHttpUrl("${hentBaseUrl()}/b2b/api/v1/ads").query("id=${annonsenr}")
+                    .build()
                     .toString()
 
             try {
@@ -105,7 +113,8 @@ class ArbeidsplassenKlient(
 
     fun hentStillingBasertPåUUID(uuid: String): Option<Stilling> =
         timer("rekrutteringsbistand.stilling.arbeidsplassen.hentStillingBasertPåUUID.kall.tid") {
-            val url = UriComponentsBuilder.fromHttpUrl("${hentBaseUrl()}/b2b/api/v1/ads").query("uuid=${uuid}").build()
+            val url = UriComponentsBuilder.fromHttpUrl("${hentBaseUrl()}/b2b/api/v1/ads").query("uuid=${uuid}")
+                .build()
                 .toString()
             try {
                 val response: ResponseEntity<Page<Stilling>> = restTemplate.exchange(url,
@@ -115,9 +124,17 @@ class ArbeidsplassenKlient(
                 return@timer response.body?.content?.firstOrNone() ?: throw kunneIkkeTolkeBodyException()
 
             } catch (e: RestClientResponseException) {
-                throw svarMedFeilmelding("Klarte ikke hente stillingen med uuid $uuid fra Arbeidsplassen", url, e)
+                throw svarMedFeilmelding(
+                    "Klarte ikke hente stillingen med uuid $uuid fra Arbeidsplassen",
+                    url,
+                    e
+                )
             } catch (e: UnknownContentTypeException) {
-                throw svarMedFeilmelding("Klarte ikke hente stillingen med uuid $uuid fra Arbeidsplassen", url, e)
+                throw svarMedFeilmelding(
+                    "Klarte ikke hente stillingen med uuid $uuid fra Arbeidsplassen",
+                    url,
+                    e
+                )
             }
         }
 
@@ -195,7 +212,8 @@ class ArbeidsplassenKlient(
     private fun svarMedFeilmelding(
         melding: String, url: String, exception: RestClientResponseException
     ): ResponseStatusException {
-        val logMsg = "$melding. URL: $url, Status: ${exception.rawStatusCode}, Body: ${exception.responseBodyAsString}"
+        val logMsg =
+            "$melding. URL: $url, Status: ${exception.rawStatusCode}, Body: ${exception.responseBodyAsString}"
         when (exception.rawStatusCode) {
             NOT_FOUND.value() -> log.warn(logMsg, exception)
             PRECONDITION_FAILED.value() -> log.info(logMsg, exception)
@@ -212,7 +230,8 @@ class ArbeidsplassenKlient(
     private fun svarMedFeilmelding(
         melding: String, url: String, exception: UnknownContentTypeException
     ): ResponseStatusException {
-        val logMsg = "$melding. URL: $url, Status: ${exception.rawStatusCode}, Body: ${exception.responseBodyAsString}"
+        val logMsg =
+            "$melding. URL: $url, Status: ${exception.rawStatusCode}, Body: ${exception.responseBodyAsString}"
         log.error(logMsg, exception)
         return ResponseStatusException(INTERNAL_SERVER_ERROR, melding)
     }
