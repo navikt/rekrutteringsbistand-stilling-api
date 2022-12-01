@@ -2,6 +2,10 @@ package no.nav.rekrutteringsbistand.api.arbeidsplassen
 
 import arrow.core.Option
 import arrow.core.firstOrNone
+import io.github.resilience4j.core.IntervalFunction
+import io.github.resilience4j.kotlin.retry.executeFunction
+import io.github.resilience4j.retry.Retry
+import io.github.resilience4j.retry.RetryConfig
 import io.micrometer.core.instrument.Metrics
 import io.micrometer.core.instrument.Timer
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
@@ -26,8 +30,10 @@ import org.springframework.web.client.UnknownContentTypeException
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.util.UriComponentsBuilder
 import java.io.EOFException
+import java.io.IOException
 import java.time.Duration
 import java.util.*
+
 
 @Component
 class ArbeidsplassenKlient(
@@ -36,18 +42,42 @@ class ArbeidsplassenKlient(
     val tokenUtils: TokenUtils,
     @Value("\${scope.forarbeidsplassen}") private val scopeMotArbeidsplassen: String
 ) {
+    companion object {
+        private val exponentialBackoff = IntervalFunction.ofExponentialBackoff(Duration.ofMillis(500), 2.0)
+
+        private fun isIOException(t: Throwable?): Boolean =
+            when (t) {
+                null -> false
+                is IOException -> true
+                else -> isIOException(t.cause)
+            }
+
+
+        private val retryConfig = RetryConfig.custom<ResponseEntity<Stilling>>()
+            .maxAttempts(3)
+            .intervalFunction(exponentialBackoff)
+            .retryOnResult { it.statusCode.is5xxServerError }
+            .retryOnException(this::isIOException)
+            .build()
+
+        val retry = Retry.of("aretest", retryConfig)
+    }
+
     fun hentStilling(stillingsId: String, somSystembruker: Boolean = false): Stilling =
+        // TODO Are: Trekk ut restTemplate.exchange og respons.body til egen nestet funksjon for penere  kode/dekorering.
         timer("rekrutteringsbistand.stilling.arbeidsplassen.hentStilling.kall.tid") {
             val url = "${hentBaseUrl()}/b2b/api/v1/ads/$stillingsId"
 
             try {
-                val respons = restTemplate.exchange(
-                    url,
-                    HttpMethod.GET,
-                    HttpEntity(null, if (somSystembruker) httpHeadersSomSystembruker() else httpHeaders()),
-                    Stilling::class.java
-                )
-                return@timer respons.body ?: throw kunneIkkeTolkeBodyException()
+                retry.executeFunction {
+                    val respons: ResponseEntity<Stilling> = restTemplate.exchange(
+                        url,
+                        HttpMethod.GET,
+                        HttpEntity(null, if (somSystembruker) httpHeadersSomSystembruker() else httpHeaders()),
+                        Stilling::class.java
+                    )
+                    respons.body ?: throw kunneIkkeTolkeBodyException()
+                }
             } catch (e: UnknownContentTypeException) {
                 throw svarMedFeilmelding(
                     "Klarte ikke hente stillingen med stillingsId $stillingsId fra Arbeidsplassen",
@@ -257,6 +287,6 @@ class ArbeidsplassenKlient(
 
 fun <T> timer(timerName: String, toBeTimed: () -> T): T =
     Timer.builder(timerName).publishPercentiles(0.5, 0.75, 0.9, 0.99).publishPercentileHistogram()
-        .minimumExpectedValue(Duration.ofMillis(1)).maximumExpectedValue(Duration.ofSeconds(61))
+        .minimumExpectedValue(ofMillis(1)).maximumExpectedValue(Duration.ofSeconds(61))
         .register(Metrics.globalRegistry).record(toBeTimed)!!
 
