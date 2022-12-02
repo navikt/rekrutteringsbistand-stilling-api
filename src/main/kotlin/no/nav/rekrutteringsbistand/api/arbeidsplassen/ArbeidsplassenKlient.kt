@@ -52,32 +52,35 @@ class ArbeidsplassenKlient(
                 else -> isIOException(t.cause)
             }
 
-
         private val retryConfig = RetryConfig.custom<ResponseEntity<Stilling>>()
             .maxAttempts(3)
             .intervalFunction(exponentialBackoff)
             .retryOnResult { it.statusCode.is5xxServerError }
             .retryOnException(this::isIOException)
             .build()
+        // TODO Are: Hvilken exception kastes etter at alle forsøk var mislykkede?
+        // TODO ARE: Tester
+        // TODO Are: Lag en enkleste mulige variant (uten custom RetryConfig) for å se om enkleste variant har best nytte/kostnad rate.
 
         val retry = Retry.of("aretest", retryConfig)
     }
 
-    fun hentStilling(stillingsId: String, somSystembruker: Boolean = false): Stilling =
-        // TODO Are: Trekk ut restTemplate.exchange og respons.body til egen nestet funksjon for penere  kode/dekorering.
-        timer("rekrutteringsbistand.stilling.arbeidsplassen.hentStilling.kall.tid") {
-            val url = "${hentBaseUrl()}/b2b/api/v1/ads/$stillingsId"
+    fun hentStilling(stillingsId: String, somSystembruker: Boolean = false): Stilling {
+        val url = "${hentBaseUrl()}/b2b/api/v1/ads/$stillingsId"
 
+        val hentStilling: () -> Stilling = {
+            val respons: ResponseEntity<Stilling> = restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                HttpEntity(null, if (somSystembruker) httpHeadersSomSystembruker() else httpHeaders()),
+                Stilling::class.java
+            )
+            respons.body ?: throw kunneIkkeTolkeBodyException()
+        }
+
+        val hentStillingMedFeilhåndtering: () -> Stilling = {
             try {
-                retry.executeFunction {
-                    val respons: ResponseEntity<Stilling> = restTemplate.exchange(
-                        url,
-                        HttpMethod.GET,
-                        HttpEntity(null, if (somSystembruker) httpHeadersSomSystembruker() else httpHeaders()),
-                        Stilling::class.java
-                    )
-                    respons.body ?: throw kunneIkkeTolkeBodyException()
-                }
+                retry.executeFunction(hentStilling)
             } catch (e: UnknownContentTypeException) {
                 throw svarMedFeilmelding(
                     "Klarte ikke hente stillingen med stillingsId $stillingsId fra Arbeidsplassen",
@@ -102,6 +105,12 @@ class ArbeidsplassenKlient(
                 throw e
             }
         }
+
+        return timer(
+            "rekrutteringsbistand.stilling.arbeidsplassen.hentStilling.kall.tid",
+            hentStillingMedFeilhåndtering
+        )
+    }
 
     /**
      * Dette er en "hack" for å sørge for at stillingssøket vårt alltid er oppdatert
