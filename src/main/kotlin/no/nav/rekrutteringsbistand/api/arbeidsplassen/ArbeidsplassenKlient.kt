@@ -290,6 +290,7 @@ class ArbeidsplassenKlient(
                 .retryOnResult { it.statusCode.is5xxServerError }
                 .retryOnException(this::isIOException)
                 .retryExceptions(HttpServerErrorException::class.java, ResourceAccessException::class.java)
+                .failAfterMaxAttempts(true) // TODO Area: Har denne noen effekt?
                 .build()
             // TODO Are: Lag en enkleste mulige variant (uten custom RetryConfig) for å se om enkleste variant har best nytte/kostnad rate.
             Retry.of("aretest", retryConfig)
