@@ -2,6 +2,8 @@ package no.nav.rekrutteringsbistand.api.arbeidsplassen
 
 import arrow.core.Option
 import arrow.core.firstOrNone
+import io.github.resilience4j.kotlin.retry.executeFunction
+import io.github.resilience4j.retry.Retry
 import io.micrometer.core.instrument.Metrics
 import io.micrometer.core.instrument.Timer
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
@@ -41,13 +43,15 @@ class ArbeidsplassenKlient(
             val url = "${hentBaseUrl()}/b2b/api/v1/ads/$stillingsId"
 
             try {
-                val respons = restTemplate.exchange(
-                    url,
-                    HttpMethod.GET,
-                    HttpEntity(null, if (somSystembruker) httpHeadersSomSystembruker() else httpHeaders()),
-                    Stilling::class.java
-                )
-                return@timer respons.body ?: throw kunneIkkeTolkeBodyException()
+                val respons = Retry.ofDefaults("aretest").executeFunction {
+                    restTemplate.exchange(
+                        url,
+                        HttpMethod.GET,
+                        HttpEntity(null, if (somSystembruker) httpHeadersSomSystembruker() else httpHeaders()),
+                        Stilling::class.java
+                    )
+                }
+                respons.body ?: throw kunneIkkeTolkeBodyException()
             } catch (e: UnknownContentTypeException) {
                 throw svarMedFeilmelding(
                     "Klarte ikke hente stillingen med stillingsId $stillingsId fra Arbeidsplassen",

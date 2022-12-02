@@ -8,6 +8,8 @@ import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.common.Slf4jNotifier
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.github.tomakehurst.wiremock.extension.responsetemplating.ResponseTemplateTransformer
+import com.github.tomakehurst.wiremock.http.Fault
+import com.github.tomakehurst.wiremock.http.Fault.CONNECTION_RESET_BY_PEER
 import com.github.tomakehurst.wiremock.junit.WireMockRule
 import com.github.tomakehurst.wiremock.matching.UrlPattern
 import no.nav.rekrutteringsbistand.api.OppdaterRekrutteringsbistandStillingDto
@@ -29,6 +31,7 @@ import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoRepository
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingskategori
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.*
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -44,6 +47,7 @@ import org.springframework.http.HttpStatus.OK
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.http.ResponseEntity
 import org.springframework.test.context.junit4.SpringRunner
+import java.util.*
 
 @RunWith(SpringRunner::class)
 @SpringBootTest(
@@ -154,6 +158,52 @@ internal class StillingComponentTest {
     }
 
     @Test
+    fun `GET mot en rekrutteringsbistandstilling skal føre til retries gitt server-error fra Arbeidsplassen`() {
+        val stillingsId = UUID.randomUUID().toString()
+        val urlPath = "/b2b/api/v1/ads/$stillingsId"
+        mockPamAdApiError(urlPath, httpResponseStatus = 500)
+        mockAzureObo(wiremockAzure)
+
+        val responseEntity = restTemplate.getForEntity(
+            "$localBaseUrl/rekrutteringsbistandstilling/$stillingsId", String::class.java
+        )
+
+        assertTrue(responseEntity.statusCode.is5xxServerError)
+        wiremockPamAdApi.verify(3, getRequestedFor(urlPathMatching(urlPath)))
+    }
+
+    @Test
+//    @Ignore("Denne er grønn lokalt men rød på Github")
+    fun `GET mot en rekrutteringsbistandstilling skal føre til retries gitt nettverkshikke ved kall på Arbeidsplassen`() {
+        val stillingsId = UUID.randomUUID().toString()
+        val urlPath = "/b2b/api/v1/ads/$stillingsId"
+        mockPamAdApiCorruptResponse(urlPath)
+        mockAzureObo(wiremockAzure)
+
+        val responseEntity = restTemplate.getForEntity(
+            "$localBaseUrl/rekrutteringsbistandstilling/$stillingsId", String::class.java
+        )
+
+        assertTrue(responseEntity.statusCode.is5xxServerError)
+        wiremockPamAdApi.verify(3, getRequestedFor(urlPathMatching(urlPath)))
+    }
+
+    @Test
+    fun `GET mot en rekrutteringsbistandstilling skal ikke føre til retries gitt client-error ved kall på Arbeidsplassen`() {
+        val stillingsId = UUID.randomUUID().toString()
+        val urlPath = "/b2b/api/v1/ads/$stillingsId"
+        mockPamAdApiError(urlPath, httpResponseStatus = 400)
+        mockAzureObo(wiremockAzure)
+
+        val responseEntity = restTemplate.getForEntity(
+            "$localBaseUrl/rekrutteringsbistandstilling/$stillingsId", String::class.java
+        )
+
+        assertTrue(responseEntity.statusCode.is4xxClientError)
+        wiremockPamAdApi.verify(1, getRequestedFor(urlPathMatching(urlPath)))
+    }
+
+    @Test
     fun `POST mot stillinger skal returnere opprettet stilling`() {
         val rekrutteringsbistandStilling = enOpprettRekrutteringsbistandstillingDto
 
@@ -187,7 +237,7 @@ internal class StillingComponentTest {
         repository.opprett(stillingsinfo)
         mockAzureObo(wiremockAzure)
         mockKandidatlisteOppdatering()
-        mockPamAdApiError(HttpMethod.PUT, "/api/v1/ads/${stilling.uuid}", stilling)
+        mockPamAdApiError("/api/v1/ads/${stilling.uuid}", HttpMethod.PUT, 500)
 
         val dto = OppdaterRekrutteringsbistandStillingDto(
             stillingsinfoid = stillingsinfo.stillingsinfoid.asString(),
@@ -518,13 +568,23 @@ internal class StillingComponentTest {
         )
     }
 
-    private fun mockPamAdApiError(method: HttpMethod, urlPath: String, responseBody: Any) {
+    private fun mockPamAdApiError(
+        urlPath: String, method: HttpMethod = HttpMethod.GET, httpResponseStatus: Int = 418
+    ) {
         wiremockPamAdApi.stubFor(
-            request(method.name, urlPathMatching(urlPath))
-                .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
-                .withHeader(ACCEPT, equalTo(APPLICATION_JSON_VALUE))
-                .withHeader(AUTHORIZATION, matching("Bearer .*"))
-                .willReturn(aResponse().withStatus(500))
+            request(method.name, urlPathMatching(urlPath)).withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
+                .withHeader(ACCEPT, equalTo(APPLICATION_JSON_VALUE)).withHeader(AUTHORIZATION, matching("Bearer .*"))
+                .willReturn(aResponse().withStatus(httpResponseStatus))
+        )
+    }
+
+    private fun mockPamAdApiCorruptResponse(
+        urlPath: String, method: HttpMethod = HttpMethod.GET, fault: Fault = CONNECTION_RESET_BY_PEER
+    ) {
+        wiremockPamAdApi.stubFor(
+            request(method.name, urlPathMatching(urlPath)).withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
+                .withHeader(ACCEPT, equalTo(APPLICATION_JSON_VALUE)).withHeader(AUTHORIZATION, matching("Bearer .*"))
+                .willReturn(aResponse().withFault(fault))
         )
     }
 
