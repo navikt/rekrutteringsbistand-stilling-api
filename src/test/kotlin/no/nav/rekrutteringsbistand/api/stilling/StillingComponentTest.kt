@@ -129,7 +129,6 @@ internal class StillingComponentTest {
 
 
     @Test
-    @Ignore("TODO Are")
     fun `GET mot en rekrutteringsbistandstilling skal føre til retries gitt server-error fra Arbeidsplassen`() {
         val stillingsId = UUID.randomUUID().toString()
         val urlPath = "/b2b/api/v1/ads/$stillingsId"
