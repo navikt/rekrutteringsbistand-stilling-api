@@ -22,7 +22,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-cache-
       - name: Run tests
-        run: mvn test
+        run: mvn verify
       - name: Install Snyk CLI
         uses: snyk/actions/setup@master
       - name: Test dependencies with Snyk

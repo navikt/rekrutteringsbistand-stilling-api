@@ -32,10 +32,8 @@ import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoRepository
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingskategori
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.*
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.fail
-import org.junit.jupiter.api.BeforeEach
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -90,8 +88,8 @@ internal class StillingComponentTest {
     val objectMapper =
         ObjectMapper().registerModule(JavaTimeModule()).disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
-    @BeforeEach
-    fun beforeEach() {
+    @Before
+    fun before() {
         mockLogin.leggAzureVeilederTokenPåAlleRequests(restTemplate)
     }
 
@@ -596,8 +594,8 @@ internal class StillingComponentTest {
     }
 
 
-    @AfterEach
-    fun afterEach() {
+    @After
+    fun after() {
         WireMock.reset()
         testRepository.slettAlt()
     }
