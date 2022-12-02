@@ -46,6 +46,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatus.OK
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.http.ResponseEntity
+import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.junit4.SpringRunner
 import java.util.*
 
@@ -54,6 +55,7 @@ import java.util.*
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
     properties = arrayOf("external.pam-ad-api.url=http://localhost:9935")
 )
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 internal class StillingComponentTest {
 
     @get:Rule
