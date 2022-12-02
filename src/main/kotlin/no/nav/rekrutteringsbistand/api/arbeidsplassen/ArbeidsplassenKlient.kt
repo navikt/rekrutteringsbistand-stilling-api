@@ -23,10 +23,7 @@ import org.springframework.http.HttpStatus.*
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Component
-import org.springframework.web.client.RestClientException
-import org.springframework.web.client.RestClientResponseException
-import org.springframework.web.client.RestTemplate
-import org.springframework.web.client.UnknownContentTypeException
+import org.springframework.web.client.*
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.util.UriComponentsBuilder
 import java.io.EOFException
@@ -55,7 +52,6 @@ class ArbeidsplassenKlient(
             )
         }
 
-
         val hentMedFeilhåndtering: () -> Stilling = {
             try {
                 val respons = retry.executeFunction(hent)
@@ -80,7 +76,7 @@ class ArbeidsplassenKlient(
                         else -> logErrorIfEofexception(t.cause)
                     }
                 }
-                logErrorIfEofexception(e)
+                logErrorIfEofexception(e) // Lagt til for å lett kunne se i apploggen hvor ofte vi får denne feilen på dette endepunktet. November 2022.
                 throw e
             }
         }
@@ -287,15 +283,14 @@ class ArbeidsplassenKlient(
             }
 
         private val retry: Retry by lazy {
-            val exponentialBackoff = IntervalFunction.ofExponentialBackoff(Duration.ofMillis(500), 2.0)
+            val exponentialBackoff = IntervalFunction.ofExponentialBackoff(Duration.ofMillis(500), 3.0)
             val retryConfig = RetryConfig.custom<ResponseEntity<Stilling>>()
                 .maxAttempts(3)
                 .intervalFunction(exponentialBackoff)
                 .retryOnResult { it.statusCode.is5xxServerError }
                 .retryOnException(this::isIOException)
+                .retryExceptions(HttpServerErrorException::class.java, ResourceAccessException::class.java)
                 .build()
-            // TODO Are: Hvilken exception kastes etter at alle forsøk var mislykkede?
-            // TODO ARE: Tester
             // TODO Are: Lag en enkleste mulige variant (uten custom RetryConfig) for å se om enkleste variant har best nytte/kostnad rate.
             Retry.of("aretest", retryConfig)
         }
