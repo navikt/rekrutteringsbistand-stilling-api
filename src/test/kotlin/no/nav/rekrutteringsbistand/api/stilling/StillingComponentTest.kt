@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.github.tomakehurst.wiremock.client.MappingBuilder
-import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.common.Slf4jNotifier
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
@@ -596,7 +595,9 @@ internal class StillingComponentTest {
 
     @After
     fun after() {
-        WireMock.reset()
+        wiremockPamAdApi.resetAll()
+        wiremockAzure.resetAll()
+        wiremockKandidatliste.resetAll()
         testRepository.slettAlt()
     }
 
