@@ -42,28 +42,6 @@ class ArbeidsplassenKlient(
     val tokenUtils: TokenUtils,
     @Value("\${scope.forarbeidsplassen}") private val scopeMotArbeidsplassen: String
 ) {
-    companion object {
-        private val exponentialBackoff = IntervalFunction.ofExponentialBackoff(Duration.ofMillis(500), 2.0)
-
-        private fun isIOException(t: Throwable?): Boolean =
-            when (t) {
-                null -> false
-                is IOException -> true
-                else -> isIOException(t.cause)
-            }
-
-        private val retryConfig = RetryConfig.custom<ResponseEntity<Stilling>>()
-            .maxAttempts(3)
-            .intervalFunction(exponentialBackoff)
-            .retryOnResult { it.statusCode.is5xxServerError }
-            .retryOnException(this::isIOException)
-            .build()
-        // TODO Are: Hvilken exception kastes etter at alle forsøk var mislykkede?
-        // TODO ARE: Tester
-        // TODO Are: Lag en enkleste mulige variant (uten custom RetryConfig) for å se om enkleste variant har best nytte/kostnad rate.
-
-        val retry = Retry.of("aretest", retryConfig)
-    }
 
     fun hentStilling(stillingsId: String, somSystembruker: Boolean = false): Stilling {
         val url = "${hentBaseUrl()}/b2b/api/v1/ads/$stillingsId"
@@ -292,10 +270,34 @@ class ArbeidsplassenKlient(
         ACCEPT to APPLICATION_JSON_VALUE,
         AUTHORIZATION to "Bearer ${tokenUtils.hentSystemToken(scopeMotArbeidsplassen)}"
     ).toMultiValueMap()
+
+
+    companion object {
+        private fun <T> timer(timerName: String, toBeTimed: () -> T): T =
+            Timer.builder(timerName).publishPercentiles(0.5, 0.75, 0.9, 0.99).publishPercentileHistogram()
+                .minimumExpectedValue(Duration.ofMillis(1)).maximumExpectedValue(Duration.ofSeconds(61))
+                .register(Metrics.globalRegistry).record(toBeTimed)!!
+
+        private fun isIOException(t: Throwable?): Boolean =
+            when (t) {
+                null -> false
+                is IOException -> true
+                else -> isIOException(t.cause)
+            }
+
+        private val retry: Retry by lazy {
+            val exponentialBackoff = IntervalFunction.ofExponentialBackoff(Duration.ofMillis(500), 2.0)
+            val retryConfig = RetryConfig.custom<ResponseEntity<Stilling>>()
+                .maxAttempts(3)
+                .intervalFunction(exponentialBackoff)
+                .retryOnResult { it.statusCode.is5xxServerError }
+                .retryOnException(this::isIOException)
+                .build()
+            // TODO Are: Hvilken exception kastes etter at alle forsøk var mislykkede?
+            // TODO ARE: Tester
+            // TODO Are: Lag en enkleste mulige variant (uten custom RetryConfig) for å se om enkleste variant har best nytte/kostnad rate.
+            Retry.of("aretest", retryConfig)
+        }
+    }
+
 }
-
-fun <T> timer(timerName: String, toBeTimed: () -> T): T =
-    Timer.builder(timerName).publishPercentiles(0.5, 0.75, 0.9, 0.99).publishPercentileHistogram()
-        .minimumExpectedValue(Duration.ofMillis(1)).maximumExpectedValue(Duration.ofSeconds(61))
-        .register(Metrics.globalRegistry).record(toBeTimed)!!
-
