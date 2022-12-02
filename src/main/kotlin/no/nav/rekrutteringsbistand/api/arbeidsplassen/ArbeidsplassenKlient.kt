@@ -46,19 +46,20 @@ class ArbeidsplassenKlient(
     fun hentStilling(stillingsId: String, somSystembruker: Boolean = false): Stilling {
         val url = "${hentBaseUrl()}/b2b/api/v1/ads/$stillingsId"
 
-        val hentStilling: () -> Stilling = {
-            val respons: ResponseEntity<Stilling> = restTemplate.exchange(
+        val hent: () -> ResponseEntity<Stilling> = {
+            restTemplate.exchange(
                 url,
                 HttpMethod.GET,
                 HttpEntity(null, if (somSystembruker) httpHeadersSomSystembruker() else httpHeaders()),
                 Stilling::class.java
             )
-            respons.body ?: throw kunneIkkeTolkeBodyException()
         }
 
-        val hentStillingMedFeilhåndtering: () -> Stilling = {
+
+        val hentMedFeilhåndtering: () -> Stilling = {
             try {
-                retry.executeFunction(hentStilling)
+                val respons = retry.executeFunction(hent)
+                respons.body ?: throw kunneIkkeTolkeBodyException()
             } catch (e: UnknownContentTypeException) {
                 throw svarMedFeilmelding(
                     "Klarte ikke hente stillingen med stillingsId $stillingsId fra Arbeidsplassen",
@@ -86,7 +87,7 @@ class ArbeidsplassenKlient(
 
         return timer(
             "rekrutteringsbistand.stilling.arbeidsplassen.hentStilling.kall.tid",
-            hentStillingMedFeilhåndtering
+            hentMedFeilhåndtering
         )
     }
 
