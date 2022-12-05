@@ -2,10 +2,7 @@ package no.nav.rekrutteringsbistand.api.arbeidsplassen
 
 import arrow.core.Option
 import arrow.core.firstOrNone
-import io.github.resilience4j.core.IntervalFunction
 import io.github.resilience4j.kotlin.retry.executeFunction
-import io.github.resilience4j.retry.Retry
-import io.github.resilience4j.retry.RetryConfig
 import io.micrometer.core.instrument.Metrics
 import io.micrometer.core.instrument.Timer
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
@@ -13,6 +10,7 @@ import no.nav.rekrutteringsbistand.api.stilling.Page
 import no.nav.rekrutteringsbistand.api.stilling.Stilling
 import no.nav.rekrutteringsbistand.api.support.config.ExternalConfiguration
 import no.nav.rekrutteringsbistand.api.support.log
+import no.nav.rekrutteringsbistand.api.support.rest.RetrySpringRestTemplate.retry
 import no.nav.rekrutteringsbistand.api.support.toMultiValueMap
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.ParameterizedTypeReference
@@ -27,7 +25,6 @@ import org.springframework.web.client.*
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.util.UriComponentsBuilder
 import java.io.EOFException
-import java.io.IOException
 import java.time.Duration
 import java.util.*
 
@@ -274,25 +271,6 @@ class ArbeidsplassenKlient(
             Timer.builder(timerName).publishPercentiles(0.5, 0.75, 0.9, 0.99).publishPercentileHistogram()
                 .minimumExpectedValue(Duration.ofMillis(1)).maximumExpectedValue(Duration.ofSeconds(61))
                 .register(Metrics.globalRegistry).record(toBeTimed)!!
-
-        private fun isIOException(t: Throwable?): Boolean =
-            when (t) {
-                null -> false
-                is IOException -> true
-                else -> isIOException(t.cause)
-            }
-
-        private val retry: Retry by lazy {
-            val exponentialBackoff = IntervalFunction.ofExponentialBackoff(Duration.ofMillis(500), 3.0)
-            val retryConfig = RetryConfig.custom<ResponseEntity<*>>()
-                .maxAttempts(3)
-                .intervalFunction(exponentialBackoff)
-                .retryOnResult { it.statusCode.is5xxServerError }
-                .retryOnException(this::isIOException)
-                .retryExceptions(HttpServerErrorException::class.java, ResourceAccessException::class.java)
-                .build()
-            Retry.of("ArbeidsplassenKlient", retryConfig)
-        }
     }
 
 }
