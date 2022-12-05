@@ -33,13 +33,17 @@ class AzureKlient(
 
         val response = try {
             restTemplate.exchange(
-                tokenEndpoint,
-                HttpMethod.POST,
-                HttpEntity(form, headers),
-                AzureResponse::class.java
+                tokenEndpoint, HttpMethod.POST, HttpEntity(form, headers), AzureResponse::class.java
             )
-        } catch (e: EOFException) {
-            log.error("SSL-feil mot kall til arbeidsplassen", e)
+        } catch (e: Exception) {
+            fun logErrorIfEofexception(t: Throwable?) {
+                when (t) {
+                    null -> return
+                    is EOFException -> log.error("SSL-feil mot kall Azure Acitve Directory for å hente OBO-token", e)
+                    else -> logErrorIfEofexception(t.cause)
+                }
+            }
+            logErrorIfEofexception(e) // Lagt til for å lett kunne se i apploggen hvor ofte vi får denne feilen på dette endepunktet. November 2022.
             throw e
         }
 
@@ -66,10 +70,7 @@ class AzureKlient(
         val form = lagFormForSystemRequest(scope)
         try {
             val response = restTemplate.exchange(
-                tokenEndpoint,
-                HttpMethod.POST,
-                HttpEntity(form, headers),
-                AzureResponse::class.java
+                tokenEndpoint, HttpMethod.POST, HttpEntity(form, headers), AzureResponse::class.java
             )
 
             val responseBody = response.body!!
