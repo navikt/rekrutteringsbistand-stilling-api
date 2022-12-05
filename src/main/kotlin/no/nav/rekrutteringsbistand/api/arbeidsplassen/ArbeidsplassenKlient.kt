@@ -284,15 +284,14 @@ class ArbeidsplassenKlient(
 
         private val retry: Retry by lazy {
             val exponentialBackoff = IntervalFunction.ofExponentialBackoff(Duration.ofMillis(500), 3.0)
-            val retryConfig = RetryConfig.custom<ResponseEntity<Stilling>>()
+            val retryConfig = RetryConfig.custom<ResponseEntity<*>>()
                 .maxAttempts(3)
                 .intervalFunction(exponentialBackoff)
                 .retryOnResult { it.statusCode.is5xxServerError }
                 .retryOnException(this::isIOException)
                 .retryExceptions(HttpServerErrorException::class.java, ResourceAccessException::class.java)
                 .build()
-            // TODO Are: Lag en enkleste mulige variant (uten custom RetryConfig) for å se om enkleste variant har best nytte/kostnad rate.
-            Retry.of("aretest", retryConfig)
+            Retry.of("ArbeidsplassenKlient", retryConfig)
         }
     }
 
