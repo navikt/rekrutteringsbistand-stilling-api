@@ -2,6 +2,10 @@ package no.nav.rekrutteringsbistand.api.arbeidsplassen
 
 import arrow.core.Option
 import arrow.core.firstOrNone
+import io.github.resilience4j.core.IntervalFunction
+import io.github.resilience4j.kotlin.retry.executeFunction
+import io.github.resilience4j.retry.Retry
+import io.github.resilience4j.retry.RetryConfig
 import io.micrometer.core.instrument.Metrics
 import io.micrometer.core.instrument.Timer
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
@@ -19,15 +23,14 @@ import org.springframework.http.HttpStatus.*
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Component
-import org.springframework.web.client.RestClientException
-import org.springframework.web.client.RestClientResponseException
-import org.springframework.web.client.RestTemplate
-import org.springframework.web.client.UnknownContentTypeException
+import org.springframework.web.client.*
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.util.UriComponentsBuilder
 import java.io.EOFException
+import java.io.IOException
 import java.time.Duration
 import java.util.*
+
 
 @Component
 class ArbeidsplassenKlient(
@@ -36,18 +39,23 @@ class ArbeidsplassenKlient(
     val tokenUtils: TokenUtils,
     @Value("\${scope.forarbeidsplassen}") private val scopeMotArbeidsplassen: String
 ) {
-    fun hentStilling(stillingsId: String, somSystembruker: Boolean = false): Stilling =
-        timer("rekrutteringsbistand.stilling.arbeidsplassen.hentStilling.kall.tid") {
-            val url = "${hentBaseUrl()}/b2b/api/v1/ads/$stillingsId"
 
+    fun hentStilling(stillingsId: String, somSystembruker: Boolean = false): Stilling {
+        val url = "${hentBaseUrl()}/b2b/api/v1/ads/$stillingsId"
+
+        val hent: () -> ResponseEntity<Stilling> = {
+            restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                HttpEntity(null, if (somSystembruker) httpHeadersSomSystembruker() else httpHeaders()),
+                Stilling::class.java
+            )
+        }
+
+        val hentMedFeilhåndtering: () -> Stilling = {
             try {
-                val respons = restTemplate.exchange(
-                    url,
-                    HttpMethod.GET,
-                    HttpEntity(null, if (somSystembruker) httpHeadersSomSystembruker() else httpHeaders()),
-                    Stilling::class.java
-                )
-                return@timer respons.body ?: throw kunneIkkeTolkeBodyException()
+                val respons = retry.executeFunction(hent)
+                respons.body ?: throw kunneIkkeTolkeBodyException()
             } catch (e: UnknownContentTypeException) {
                 throw svarMedFeilmelding(
                     "Klarte ikke hente stillingen med stillingsId $stillingsId fra Arbeidsplassen",
@@ -68,10 +76,16 @@ class ArbeidsplassenKlient(
                         else -> logErrorIfEofexception(t.cause)
                     }
                 }
-                logErrorIfEofexception(e)
+                logErrorIfEofexception(e) // Lagt til for å lett kunne se i apploggen hvor ofte vi får denne feilen på dette endepunktet. November 2022.
                 throw e
             }
         }
+
+        return timer(
+            "rekrutteringsbistand.stilling.arbeidsplassen.hentStilling.kall.tid",
+            hentMedFeilhåndtering
+        )
+    }
 
     /**
      * Dette er en "hack" for å sørge for at stillingssøket vårt alltid er oppdatert
@@ -253,10 +267,32 @@ class ArbeidsplassenKlient(
         ACCEPT to APPLICATION_JSON_VALUE,
         AUTHORIZATION to "Bearer ${tokenUtils.hentSystemToken(scopeMotArbeidsplassen)}"
     ).toMultiValueMap()
+
+
+    companion object {
+        private fun <T> timer(timerName: String, toBeTimed: () -> T): T =
+            Timer.builder(timerName).publishPercentiles(0.5, 0.75, 0.9, 0.99).publishPercentileHistogram()
+                .minimumExpectedValue(Duration.ofMillis(1)).maximumExpectedValue(Duration.ofSeconds(61))
+                .register(Metrics.globalRegistry).record(toBeTimed)!!
+
+        private fun isIOException(t: Throwable?): Boolean =
+            when (t) {
+                null -> false
+                is IOException -> true
+                else -> isIOException(t.cause)
+            }
+
+        private val retry: Retry by lazy {
+            val exponentialBackoff = IntervalFunction.ofExponentialBackoff(Duration.ofMillis(500), 3.0)
+            val retryConfig = RetryConfig.custom<ResponseEntity<*>>()
+                .maxAttempts(3)
+                .intervalFunction(exponentialBackoff)
+                .retryOnResult { it.statusCode.is5xxServerError }
+                .retryOnException(this::isIOException)
+                .retryExceptions(HttpServerErrorException::class.java, ResourceAccessException::class.java)
+                .build()
+            Retry.of("ArbeidsplassenKlient", retryConfig)
+        }
+    }
+
 }
-
-fun <T> timer(timerName: String, toBeTimed: () -> T): T =
-    Timer.builder(timerName).publishPercentiles(0.5, 0.75, 0.9, 0.99).publishPercentileHistogram()
-        .minimumExpectedValue(Duration.ofMillis(1)).maximumExpectedValue(Duration.ofSeconds(61))
-        .register(Metrics.globalRegistry).record(toBeTimed)!!
-

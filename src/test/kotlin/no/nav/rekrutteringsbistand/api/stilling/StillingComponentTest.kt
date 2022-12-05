@@ -8,6 +8,8 @@ import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.common.Slf4jNotifier
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.github.tomakehurst.wiremock.extension.responsetemplating.ResponseTemplateTransformer
+import com.github.tomakehurst.wiremock.http.Fault
+import com.github.tomakehurst.wiremock.http.Fault.CONNECTION_RESET_BY_PEER
 import com.github.tomakehurst.wiremock.junit.WireMockRule
 import com.github.tomakehurst.wiremock.matching.UrlPattern
 import no.nav.rekrutteringsbistand.api.OppdaterRekrutteringsbistandStillingDto
@@ -29,6 +31,7 @@ import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoRepository
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingskategori
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.*
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -44,6 +47,7 @@ import org.springframework.http.HttpStatus.OK
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.http.ResponseEntity
 import org.springframework.test.context.junit4.SpringRunner
+import java.util.*
 
 @RunWith(SpringRunner::class)
 @SpringBootTest(
@@ -54,10 +58,7 @@ internal class StillingComponentTest {
 
     @get:Rule
     val wiremockPamAdApi = WireMockRule(
-        WireMockConfiguration
-            .options()
-            .port(9935)
-            .notifier(Slf4jNotifier(true))
+        WireMockConfiguration.options().port(9935).notifier(Slf4jNotifier(true))
             .extensions(ResponseTemplateTransformer(true))
     )
 
@@ -83,12 +84,11 @@ internal class StillingComponentTest {
 
     private val restTemplate = TestRestTemplate()
 
-    val objectMapper = ObjectMapper()
-        .registerModule(JavaTimeModule())
-        .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+    private val objectMapper: ObjectMapper =
+        ObjectMapper().registerModule(JavaTimeModule()).disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
     @Before
-    fun authenticateClient() {
+    fun before() {
         mockLogin.leggAzureVeilederTokenPåAlleRequests(restTemplate)
     }
 
@@ -99,8 +99,7 @@ internal class StillingComponentTest {
         mockAzureObo(wiremockAzure)
 
         restTemplate.getForObject(
-            "$localBaseUrl/rekrutteringsbistandstilling/${stilling.uuid}",
-            RekrutteringsbistandStilling::class.java
+            "$localBaseUrl/rekrutteringsbistandstilling/${stilling.uuid}", RekrutteringsbistandStilling::class.java
         ).also {
             assertThat(it.stillingsinfo).isNull()
             assertThat(it.stilling).isEqualTo(stilling)
@@ -119,8 +118,7 @@ internal class StillingComponentTest {
         repository.opprett(stillingsinfo)
 
         restTemplate.getForObject(
-            "$localBaseUrl/rekrutteringsbistandstilling/${stilling.uuid}",
-            RekrutteringsbistandStilling::class.java
+            "$localBaseUrl/rekrutteringsbistandstilling/${stilling.uuid}", RekrutteringsbistandStilling::class.java
         ).also {
             assertThat(it.stilling).isEqualTo(stilling)
             assertThat(it.stillingsinfo).isEqualTo(stillingsinfo.asStillingsinfoDto())
@@ -129,13 +127,58 @@ internal class StillingComponentTest {
 
 
     @Test
+    fun `GET mot en rekrutteringsbistandstilling skal føre til retries gitt server-error fra Arbeidsplassen`() {
+        val stillingsId = UUID.randomUUID().toString()
+        val urlPath = "/b2b/api/v1/ads/$stillingsId"
+        mockPamAdApiError(urlPath, httpResponseStatus = 500)
+        mockAzureObo(wiremockAzure)
+
+        val responseEntity = restTemplate.getForEntity(
+            "$localBaseUrl/rekrutteringsbistandstilling/$stillingsId", String::class.java
+        )
+
+        assertTrue(responseEntity.statusCode.is5xxServerError)
+        wiremockPamAdApi.verify(3, getRequestedFor(urlPathMatching(urlPath)))
+    }
+
+    @Test
+    @Ignore("Denne er grønn lokalt men rød på Github")
+    fun `GET mot en rekrutteringsbistandstilling skal føre til retries gitt nettverkshikke ved kall på Arbeidsplassen`() {
+        val stillingsId = UUID.randomUUID().toString()
+        val urlPath = "/b2b/api/v1/ads/$stillingsId"
+        mockPamAdApiCorruptResponse(urlPath)
+        mockAzureObo(wiremockAzure)
+
+        val responseEntity = restTemplate.getForEntity(
+            "$localBaseUrl/rekrutteringsbistandstilling/$stillingsId", String::class.java
+        )
+
+        assertTrue(responseEntity.statusCode.is5xxServerError)
+        wiremockPamAdApi.verify(3, getRequestedFor(urlPathMatching(urlPath)))
+    }
+
+    @Test
+    fun `GET mot en rekrutteringsbistandstilling skal ikke føre til retries gitt client-error ved kall på Arbeidsplassen`() {
+        val stillingsId = UUID.randomUUID().toString()
+        val urlPath = "/b2b/api/v1/ads/$stillingsId"
+        mockPamAdApiError(urlPath, httpResponseStatus = 400)
+        mockAzureObo(wiremockAzure)
+
+        val responseEntity = restTemplate.getForEntity(
+            "$localBaseUrl/rekrutteringsbistandstilling/$stillingsId", String::class.java
+        )
+
+        assertTrue(responseEntity.statusCode.is4xxClientError)
+        wiremockPamAdApi.verify(1, getRequestedFor(urlPathMatching(urlPath)))
+    }
+
+
+    @Test
     fun `GET mot en stilling med annonsenummer skal returnere en stilling beriket med stillingsinfo`() {
 
         val stilling = enStilling
         val page = Page(
-            content = listOf(stilling),
-            totalPages = 1,
-            totalElements = 1
+            content = listOf(stilling), totalPages = 1, totalElements = 1
         )
         val stillingsinfo = enStillingsinfo.copy(stillingsid = Stillingsid(stilling.uuid))
 
@@ -187,19 +230,14 @@ internal class StillingComponentTest {
         repository.opprett(stillingsinfo)
         mockAzureObo(wiremockAzure)
         mockKandidatlisteOppdatering()
-        mockPamAdApiError(HttpMethod.PUT, "/api/v1/ads/${stilling.uuid}", stilling)
+        mockPamAdApiError("/api/v1/ads/${stilling.uuid}", HttpMethod.PUT, 500)
 
         val dto = OppdaterRekrutteringsbistandStillingDto(
-            stillingsinfoid = stillingsinfo.stillingsinfoid.asString(),
-            notat = "oppdatert notat",
-            stilling = stilling
+            stillingsinfoid = stillingsinfo.stillingsinfoid.asString(), notat = "oppdatert notat", stilling = stilling
         )
 
         restTemplate.exchange(
-            "$localBaseUrl/rekrutteringsbistandstilling",
-            HttpMethod.PUT,
-            HttpEntity(dto),
-            String::class.java
+            "$localBaseUrl/rekrutteringsbistandstilling", HttpMethod.PUT, HttpEntity(dto), String::class.java
         ).also {
             assertThat(it.statusCodeValue).isEqualTo(500)
 
@@ -218,16 +256,11 @@ internal class StillingComponentTest {
         mockKandidatlisteOppdateringFeiler()
 
         val dto = OppdaterRekrutteringsbistandStillingDto(
-            stillingsinfoid = stillingsinfo.stillingsinfoid.asString(),
-            notat = "oppdatert notat",
-            stilling = stilling
+            stillingsinfoid = stillingsinfo.stillingsinfoid.asString(), notat = "oppdatert notat", stilling = stilling
         )
 
         restTemplate.exchange(
-            "$localBaseUrl/rekrutteringsbistandstilling",
-            HttpMethod.PUT,
-            HttpEntity(dto),
-            String::class.java
+            "$localBaseUrl/rekrutteringsbistandstilling", HttpMethod.PUT, HttpEntity(dto), String::class.java
         ).also {
             assertThat(it.statusCodeValue).isEqualTo(500)
 
@@ -285,16 +318,13 @@ internal class StillingComponentTest {
         repository.opprett(enStillingsinfoUtenEier.copy(notat = null))
 
         restTemplate.exchange(
-            "$localBaseUrl/rekrutteringsbistandstilling",
-            HttpMethod.PUT,
-            HttpEntity(
+            "$localBaseUrl/rekrutteringsbistandstilling", HttpMethod.PUT, HttpEntity(
                 OppdaterRekrutteringsbistandStillingDto(
                     stillingsinfoid = rekrutteringsbistandStilling.stillingsinfo?.stillingsinfoid,
                     notat = rekrutteringsbistandStilling.stillingsinfo?.notat,
                     stilling = rekrutteringsbistandStilling.stilling
                 )
-            ),
-            OppdaterRekrutteringsbistandStillingDto::class.java
+            ), OppdaterRekrutteringsbistandStillingDto::class.java
         ).body.also {
             assertThat(it!!.stilling.uuid).isNotEmpty
             assertThat(it.stilling).isEqualTo(rekrutteringsbistandStilling.stilling)
@@ -315,16 +345,13 @@ internal class StillingComponentTest {
         mockAzureObo(wiremockAzure)
 
         restTemplate.exchange(
-            "$localBaseUrl/rekrutteringsbistandstilling",
-            HttpMethod.PUT,
-            HttpEntity(
+            "$localBaseUrl/rekrutteringsbistandstilling", HttpMethod.PUT, HttpEntity(
                 OppdaterRekrutteringsbistandStillingDto(
                     stillingsinfoid = rekrutteringsbistandStilling.stillingsinfo?.stillingsinfoid,
                     notat = rekrutteringsbistandStilling.stillingsinfo?.notat,
                     stilling = rekrutteringsbistandStilling.stilling
                 )
-            ),
-            OppdaterRekrutteringsbistandStillingDto::class.java
+            ), OppdaterRekrutteringsbistandStillingDto::class.java
         ).body.also {
             assertThat(it!!.stilling.uuid).isNotEmpty()
             assertThat(it.stilling).isEqualTo(rekrutteringsbistandStilling.stilling)
@@ -338,12 +365,10 @@ internal class StillingComponentTest {
         mockPamAdApi(HttpMethod.GET, "/api/v1/ads/rekrutteringsbistand/minestillinger", enPageMedStilling)
         mockAzureObo(wiremockAzure)
 
-        val respons = restTemplate.exchange(
-            "$localBaseUrl/mine-stillinger",
+        val respons = restTemplate.exchange("$localBaseUrl/mine-stillinger",
             HttpMethod.GET,
             null,
-            object : ParameterizedTypeReference<Page<RekrutteringsbistandStilling>>() {}
-        )
+            object : ParameterizedTypeReference<Page<RekrutteringsbistandStilling>>() {})
 
         assertThat(respons.statusCode).isEqualTo(OK)
         respons.body!!.content.forEachIndexed { index, rekrutteringsbistandStilling ->
@@ -365,19 +390,15 @@ internal class StillingComponentTest {
         repository.opprett(stillingsinfo2)
 
         val page = Page(
-            content = listOf(stilling1, stilling2),
-            totalElements = 2,
-            totalPages = 1
+            content = listOf(stilling1, stilling2), totalElements = 2, totalPages = 1
         )
         mockPamAdApi(HttpMethod.GET, "/api/v1/ads/rekrutteringsbistand/minestillinger", page)
         mockAzureObo(wiremockAzure)
 
-        val respons = restTemplate.exchange(
-            "$localBaseUrl/mine-stillinger",
+        val respons = restTemplate.exchange("$localBaseUrl/mine-stillinger",
             HttpMethod.GET,
             null,
-            object : ParameterizedTypeReference<Page<RekrutteringsbistandStilling>>() {}
-        )
+            object : ParameterizedTypeReference<Page<RekrutteringsbistandStilling>>() {})
 
         assertThat(respons.statusCode).isEqualTo(OK)
         assertThat(respons.body!!.content.first().stillingsinfo).isEqualTo(stillingsinfo1.asStillingsinfoDto())
@@ -396,9 +417,7 @@ internal class StillingComponentTest {
         repository.opprett(stillingsinfo2)
 
         val page = Page(
-            content = listOf(stilling1, stilling2),
-            totalElements = 2,
-            totalPages = 1
+            content = listOf(stilling1, stilling2), totalElements = 2, totalPages = 1
         )
 
         mockPamAdApi(HttpMethod.GET, "/api/v1/ads/rekrutteringsbistand/minestillinger", page)
@@ -502,43 +521,45 @@ internal class StillingComponentTest {
 
     private fun mockPamAdApi(method: HttpMethod, urlPath: String, responseBody: Any) {
         wiremockPamAdApi.stubFor(
-            request(method.name, urlPathMatching(urlPath))
-                .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
-                .withHeader(ACCEPT, equalTo(APPLICATION_JSON_VALUE))
-                .withHeader(AUTHORIZATION, matching("Bearer .*"))
+            request(method.name, urlPathMatching(urlPath)).withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
+                .withHeader(ACCEPT, equalTo(APPLICATION_JSON_VALUE)).withHeader(AUTHORIZATION, matching("Bearer .*"))
                 .willReturn(
-                    aResponse().withStatus(200)
-                        .withHeader(
-                            CONNECTION,
-                            "close"
-                        ) // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
+                    aResponse().withStatus(200).withHeader(
+                        CONNECTION, "close"
+                    ) // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
                         .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
                         .withBody(objectMapper.writeValueAsString(responseBody))
                 )
         )
     }
 
-    private fun mockPamAdApiError(method: HttpMethod, urlPath: String, responseBody: Any) {
+    private fun mockPamAdApiError(
+        urlPath: String, method: HttpMethod = HttpMethod.GET, httpResponseStatus: Int = 418
+    ) {
         wiremockPamAdApi.stubFor(
-            request(method.name, urlPathMatching(urlPath))
-                .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
-                .withHeader(ACCEPT, equalTo(APPLICATION_JSON_VALUE))
-                .withHeader(AUTHORIZATION, matching("Bearer .*"))
-                .willReturn(aResponse().withStatus(500))
+            request(method.name, urlPathMatching(urlPath)).withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
+                .withHeader(ACCEPT, equalTo(APPLICATION_JSON_VALUE)).withHeader(AUTHORIZATION, matching("Bearer .*"))
+                .willReturn(aResponse().withStatus(httpResponseStatus))
+        )
+    }
+
+    private fun mockPamAdApiCorruptResponse(
+        urlPath: String, method: HttpMethod = HttpMethod.GET, fault: Fault = CONNECTION_RESET_BY_PEER
+    ) {
+        wiremockPamAdApi.stubFor(
+            request(method.name, urlPathMatching(urlPath)).withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
+                .withHeader(ACCEPT, equalTo(APPLICATION_JSON_VALUE)).withHeader(AUTHORIZATION, matching("Bearer .*"))
+                .willReturn(aResponse().withFault(fault))
         )
     }
 
     private fun mockUtenAuthorization(urlPath: String, responseBody: Any) {
         wiremockPamAdApi.stubFor(
-            get(urlEqualTo(urlPath))
-                .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
-                .withHeader(ACCEPT, equalTo(APPLICATION_JSON_VALUE))
-                .willReturn(
-                    aResponse().withStatus(200)
-                        .withHeader(
-                            CONNECTION,
-                            "close"
-                        ) // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
+            get(urlEqualTo(urlPath)).withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
+                .withHeader(ACCEPT, equalTo(APPLICATION_JSON_VALUE)).willReturn(
+                    aResponse().withStatus(200).withHeader(
+                        CONNECTION, "close"
+                    ) // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
                         .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
                         .withBody(objectMapper.writeValueAsString(responseBody))
                 )
@@ -547,37 +568,35 @@ internal class StillingComponentTest {
 
     private fun mockKandidatlisteOppdatering(metodeFunksjon: (UrlPattern) -> MappingBuilder = ::put) {
         wiremockKandidatliste.stubFor(
-            metodeFunksjon(urlPathMatching("/rekrutteringsbistand-kandidat-api/rest/veileder/stilling/.*/kandidatliste"))
-                .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
-                .withHeader(ACCEPT, equalTo(APPLICATION_JSON_VALUE))
-                .willReturn(
-                    aResponse().withStatus(HttpStatus.NO_CONTENT.value())
-                        .withHeader(
-                            CONNECTION,
-                            "close"
-                        ) // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
-                        .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-                )
+            metodeFunksjon(urlPathMatching("/rekrutteringsbistand-kandidat-api/rest/veileder/stilling/.*/kandidatliste")).withHeader(
+                CONTENT_TYPE,
+                equalTo(APPLICATION_JSON_VALUE)
+            ).withHeader(ACCEPT, equalTo(APPLICATION_JSON_VALUE)).willReturn(
+                aResponse().withStatus(HttpStatus.NO_CONTENT.value()).withHeader(
+                    CONNECTION, "close"
+                ) // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
+                    .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+            )
         )
     }
 
     private fun mockKandidatlisteOppdateringFeiler() {
         wiremockKandidatliste.stubFor(
-            put(urlPathMatching("/rekrutteringsbistand-kandidat-api/rest/veileder/stilling/.+/kandidatliste"))
-                .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
-                .withHeader(ACCEPT, equalTo(APPLICATION_JSON_VALUE))
-                .willReturn(
-                    aResponse().withStatus(500)
-                        .withHeader(
-                            CONNECTION,
-                            "close"
-                        ) // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
-                )
+            put(urlPathMatching("/rekrutteringsbistand-kandidat-api/rest/veileder/stilling/.+/kandidatliste")).withHeader(
+                CONTENT_TYPE,
+                equalTo(APPLICATION_JSON_VALUE)
+            ).withHeader(ACCEPT, equalTo(APPLICATION_JSON_VALUE)).willReturn(
+                aResponse().withStatus(500).withHeader(
+                    CONNECTION, "close"
+                ) // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
+            )
         )
     }
 
+
     @After
-    fun tearDown() {
+    fun after() {
         testRepository.slettAlt()
     }
+
 }
