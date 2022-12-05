@@ -1,6 +1,8 @@
 package no.nav.rekrutteringsbistand.api.autorisasjon
 
+import io.github.resilience4j.kotlin.retry.executeFunction
 import no.nav.rekrutteringsbistand.api.support.log
+import no.nav.rekrutteringsbistand.api.support.rest.RetrySpringRestTemplate.retry
 import no.nav.rekrutteringsbistand.api.support.toMultiValueMap
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.*
@@ -31,10 +33,12 @@ class AzureKlient(
 
         val form = lagFormForOboRequest(scope, assertionToken)
 
+        val hent: () -> ResponseEntity<AzureResponse> = {
+            restTemplate.exchange(tokenEndpoint, HttpMethod.POST, HttpEntity(form, headers), AzureResponse::class.java)
+        }
+
         val response = try {
-            restTemplate.exchange(
-                tokenEndpoint, HttpMethod.POST, HttpEntity(form, headers), AzureResponse::class.java
-            )
+            retry.executeFunction(hent)
         } catch (e: Exception) {
             fun logErrorIfEofexception(t: Throwable?) {
                 when (t) {
