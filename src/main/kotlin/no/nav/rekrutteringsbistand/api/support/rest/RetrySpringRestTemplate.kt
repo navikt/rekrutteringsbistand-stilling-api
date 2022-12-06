@@ -1,6 +1,7 @@
 package no.nav.rekrutteringsbistand.api.support.rest
 
 import io.github.resilience4j.core.IntervalFunction
+import io.github.resilience4j.kotlin.retry.executeFunction
 import io.github.resilience4j.retry.Retry
 import io.github.resilience4j.retry.RetryConfig
 import org.springframework.http.ResponseEntity
@@ -27,6 +28,8 @@ object RetrySpringRestTemplate {
         .retryExceptions(HttpServerErrorException::class.java, ResourceAccessException::class.java)
         .build()
 
-    val retry: Retry =
+    private val retry: Retry =
         Retry.of("RetrySpringRestTemplate", retryConfig)
+
+    fun <T> retry(block: () -> T): T = retry.executeFunction(block)
 }

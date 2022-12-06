@@ -1,6 +1,5 @@
 package no.nav.rekrutteringsbistand.api.autorisasjon
 
-import io.github.resilience4j.kotlin.retry.executeFunction
 import no.nav.rekrutteringsbistand.api.support.log
 import no.nav.rekrutteringsbistand.api.support.rest.RetrySpringRestTemplate.retry
 import no.nav.rekrutteringsbistand.api.support.toMultiValueMap
@@ -38,7 +37,7 @@ class AzureKlient(
         }
 
         val response = try {
-            retry.executeFunction(hent)
+            retry(hent)
         } catch (e: Exception) {
             fun logErrorIfEofexception(t: Throwable?) {
                 when (t) {

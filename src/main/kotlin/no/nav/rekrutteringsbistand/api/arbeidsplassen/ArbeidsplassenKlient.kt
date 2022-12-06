@@ -2,7 +2,6 @@ package no.nav.rekrutteringsbistand.api.arbeidsplassen
 
 import arrow.core.Option
 import arrow.core.firstOrNone
-import io.github.resilience4j.kotlin.retry.executeFunction
 import io.micrometer.core.instrument.Metrics
 import io.micrometer.core.instrument.Timer
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
@@ -51,7 +50,7 @@ class ArbeidsplassenKlient(
 
         val hentMedFeilhåndtering: () -> Stilling = {
             try {
-                val respons = retry.executeFunction(hent)
+                val respons = retry(hent)
                 respons.body ?: throw kunneIkkeTolkeBodyException()
             } catch (e: UnknownContentTypeException) {
                 throw svarMedFeilmelding(
