@@ -5,12 +5,12 @@
         </encoder>
     </appender>
 
-    <root level="INFO">
+    <root level="WARN">
         <appender-ref ref="STDOUT"/>
     </root>
 
-    <logger name="org.springframework.web" level="INFO"/>
-    <logger name="no.nav.rekrutteringsbistand.api" level="TRACE"/>
-    <logger name="no.nav.security" level="TRACE"/>
-    <logger name="com.github.tomakehurst.wiremock" level="TRACE"/>
+    <logger name="org.springframework.web" level="WARN"/>
+    <logger name="no.nav.rekrutteringsbistand.api" level="WARN"/>
+    <logger name="no.nav.security" level="WARN"/>
+    <logger name="com.github.tomakehurst.wiremock" level="WARN"/>
 </configuration>

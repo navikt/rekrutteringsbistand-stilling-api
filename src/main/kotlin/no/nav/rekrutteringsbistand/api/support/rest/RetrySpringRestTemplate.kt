@@ -11,7 +11,7 @@ import java.io.IOException
 import java.time.Duration
 
 object RetrySpringRestTemplate {
-    private fun isIOException(t: Throwable?): Boolean =
+    private tailrec fun isIOException(t: Throwable?): Boolean =
         when (t) {
             null -> false
             is IOException -> true
