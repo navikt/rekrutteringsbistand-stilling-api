@@ -31,5 +31,8 @@ object RetrySpringRestTemplate {
     private val retry: Retry =
         Retry.of("RetrySpringRestTemplate", retryConfig)
 
+    // Denne funksjonen testes indirekte i src/test/kotlin/no/nav/rekrutteringsbistand/api/stilling/StillingComponentTest.kt
+    // per desember 2022 fordi den ble utviklet som en member av ArbeidsplassenKlient før den ble flyttet hit.
+    // Burde ha skrevet egne enhetstester her, men har ikke tatt meg tid til det ennå. (Are)
     fun <T> retry(block: () -> T): T = retry.executeFunction(block)
 }
