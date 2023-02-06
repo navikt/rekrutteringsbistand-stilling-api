@@ -7,28 +7,26 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import no.nav.rekrutteringsbistand.api.arbeidsplassen.ArbeidsplassenKlient
 import no.nav.rekrutteringsbistand.api.stillingsinfo.*
-import no.nav.rekrutteringsbistand.api.support.log
 import java.util.*
 
-class StillingsinfoPopulator(
+class StillingsinfoPopulatorGammel(
     rapidsConnection: RapidsConnection,
     private val stillingsinfoRepository: StillingsinfoRepository,
     private val arbeidsplassenKlient: ArbeidsplassenKlient
 ) : River.PacketListener {
     init {
         River(rapidsConnection).apply {
-            validate { it.requireKey("stillingsId") }
+            validate { it.requireKey("kandidathendelse.stillingsId") }
             validate { it.rejectKey("stillingsinfo") }
-            validate { it.rejectKey("stilling") }
         }.register(this)
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
-        val stillingsId = Stillingsid(packet["stillingsId"].asText())
+        val stillingsId = Stillingsid(packet["kandidathendelse.stillingsId"].asText())
 
         val stillingsinfo = stillingsinfoRepository.hentForStilling(stillingsId).getOrElse {
             val nyStillingsinfo = Stillingsinfo(
-                stillingsinfoid =  Stillingsinfoid(UUID.randomUUID()),
+                stillingsinfoid = Stillingsinfoid(UUID.randomUUID()),
                 stillingsid = stillingsId,
                 notat = null,
                 eier = null,
@@ -47,18 +45,3 @@ class StillingsinfoPopulator(
         context.publish(message)
     }
 }
-
-fun Stillingsinfo.tilStillingsinfoIHendelse() =
-    StillingsinfoIHendelse(stillingsinfoid.asString(), stillingsid.asString(), eier, notat, stillingskategori)
-
-data class StillingsinfoIHendelse(
-    val stillingsinfoid: String,
-    val stillingsid: String,
-    val eier: Eier?,
-    val notat: String?,
-    val stillingskategori: Stillingskategori?
-)
-
-data class Stilling(
-    val stillingstittel: String
-)

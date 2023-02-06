@@ -23,7 +23,7 @@ import java.util.*
 
 @RunWith(SpringRunner::class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class StillingsinfopopulatorTest {
+class StillingsinfopopulatorGammelTest {
 
 
     @Autowired
@@ -60,16 +60,18 @@ class StillingsinfopopulatorTest {
             """
             {
                 "uinteressant": "felt",
-                "uinteressant2": "felt2",
-                "stillingsId": "${stillingsId.asString()}"
+                "kandidathendelse": {
+                    "uinteressant2": "felt2",
+                    "stillingsId": "${stillingsId.asString()}"
+                }
             }
         """.trimIndent()
         )
         assertEquals(1, testRapid.inspektør.size)
         val message = testRapid.inspektør.message(0)
         assertEquals("felt", message.get("uinteressant").asText())
-        assertEquals("felt2", message.path("uinteressant2").asText())
-        assertEquals(stillingsId.asString(), message.path("stillingsId").asText())
+        assertEquals("felt2", message.path("kandidathendelse").get("uinteressant2").asText())
+        assertEquals(stillingsId.asString(), message.path("kandidathendelse").get("stillingsId").asText())
         assertEquals(stillingsTittel, message.path("stilling").get("stillingstittel").asText())
         val stillingNode = message.path("stillingsinfo")
         assertFalse(stillingNode.isMissingOrNull())
@@ -94,8 +96,10 @@ class StillingsinfopopulatorTest {
             """
             {
                 "uinteressant": "felt",
-                "uinteressant2": "felt2",
-                "stillingsId": "${stillingsId.asString()}"
+                "kandidathendelse": {
+                    "uinteressant2": "felt2",
+                    "stillingsId": "${stillingsId.asString()}"
+                }
             }
         """.trimIndent()
         )
@@ -125,22 +129,9 @@ class StillingsinfopopulatorTest {
             """
             {
                 "uinteressant": "felt",
-                "uinteressant2": "felt2",
-            }
-        """.trimIndent()
-        )
-        assertEquals(0, testRapid.inspektør.size)
-    }
-
-    @Test
-    fun `hendelse med stillingsid og utfyllt stillingsinfo skal ignoreres`() {
-        testRapid.sendTestMessage(
-            """
-            {
-                "uinteressant": "felt",
-                "uinteressant2": "felt2",
-                "stillingsId": "123",
-                "stillingsinfo": {}
+                "kandidathendelse": {
+                    "uinteressant2": "felt2",
+                }
             }
         """.trimIndent()
         )
@@ -153,9 +144,11 @@ class StillingsinfopopulatorTest {
             """
             {
                 "uinteressant": "felt",
-                "uinteressant2": "felt2",
-                "stillingsId": "123",
-                "stilling": {}
+                "kandidathendelse": {
+                    "uinteressant2": "felt2",
+                    "stillingsId": "123",
+                },
+                "stillingsinfo": {}
             }
         """.trimIndent()
         )
