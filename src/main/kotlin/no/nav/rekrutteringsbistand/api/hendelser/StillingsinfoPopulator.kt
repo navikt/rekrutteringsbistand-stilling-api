@@ -17,7 +17,7 @@ class StillingsinfoPopulator(
 ) : River.PacketListener {
     init {
         River(rapidsConnection).apply {
-            validate { it.requireKey("kandidathendelse.stillingsId") }
+            validate { it.requireKey("stillingsId", "kandidathendelse.stillingsId") }
             validate { it.rejectKey("stillingsinfo") }
         }.register(this)
     }
@@ -39,7 +39,7 @@ class StillingsinfoPopulator(
         packet["stillingsinfo"] = stillingsinfo.tilStillingsinfoIHendelse()
 
         arbeidsplassenKlient.hentStillingBasertPåUUID(stillingsId.asString()).map {
-            packet["stilling"] = Stilling(it.title)
+            packet["stilling"] = Stilling(it.title, erDirektemeldt = it.source == "DIR")
         }
 
         val message: String = packet.toJson()
@@ -59,5 +59,6 @@ private data class StillingsinfoIHendelse(
 )
 
 private data class Stilling(
-    val stillingstittel: String
+    val stillingstittel: String,
+    val erDirektemeldt: Boolean
 )
