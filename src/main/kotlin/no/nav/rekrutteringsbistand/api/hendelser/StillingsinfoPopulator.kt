@@ -40,7 +40,7 @@ class StillingsinfoPopulator(
         packet["stillingsinfo"] = stillingsinfo.tilStillingsinfoIHendelse()
 
         arbeidsplassenKlient.hentStillingBasertPåUUID(stillingsId.asString()).map {
-            packet["stilling"] = Stilling(it.title)
+            packet["stilling"] = Stilling(it.title, erDirektemeldt = it.source == "DIR")
         }
 
         val message: String = packet.toJson()
@@ -60,5 +60,6 @@ data class StillingsinfoIHendelse(
 )
 
 data class Stilling(
-    val stillingstittel: String
+    val stillingstittel: String,
+    val erDirektemeldt: Boolean
 )
