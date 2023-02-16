@@ -48,8 +48,10 @@ class StillingsinfopopulatorTest {
     fun `populering av en stilling`() {
         val stillingsId = Stillingsid(UUID.randomUUID())
         val stillingsTittel = "Klovn på sirkus"
+        val eksternStillingskilde = "ASS"
+
         Mockito.`when`(arbeidsplassenKlient.hentStillingBasertPåUUID(stillingsId.toString()))
-            .thenReturn(Some(enStilling.copy(title = stillingsTittel)))
+            .thenReturn(Some(enStilling.copy(title = stillingsTittel, source = eksternStillingskilde)))
         val stillingsinfoid = Stillingsinfoid(UUID.randomUUID())
         val eier = Eier("AB123456", "Navnesen")
         val notat = "Et notat"
@@ -71,6 +73,7 @@ class StillingsinfopopulatorTest {
         assertEquals("felt2", message.path("uinteressant2").asText())
         assertEquals(stillingsId.asString(), message.path("stillingsId").asText())
         assertEquals(stillingsTittel, message.path("stilling").get("stillingstittel").asText())
+        assertFalse(message.path("stilling").get("erDirektemeldt").asBoolean())
         val stillingNode = message.path("stillingsinfo")
         assertFalse(stillingNode.isMissingOrNull())
         assertEquals(stillingsinfo.stillingsinfoid.asString(), stillingNode.path("stillingsinfoid").asText())

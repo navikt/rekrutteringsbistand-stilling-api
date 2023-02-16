@@ -38,7 +38,7 @@ class StillingsinfoPopulatorGammel(
         packet["stillingsinfo"] = stillingsinfo.tilStillingsinfoIHendelse()
 
         arbeidsplassenKlient.hentStillingBasertPåUUID(stillingsId.asString()).map {
-            packet["stilling"] = Stilling(it.title)
+            packet["stilling"] = Stilling(it.title, erDirektemeldt = it.source == "DIR")
         }
 
         val message: String = packet.toJson()
