@@ -10,6 +10,7 @@ import no.nav.rekrutteringsbistand.api.arbeidsplassen.OpprettRekrutteringsbistan
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
 import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteKlient
 import no.nav.rekrutteringsbistand.api.stillingsinfo.*
+import no.nav.rekrutteringsbistand.api.support.log
 import org.springframework.stereotype.Service
 import java.util.*
 
@@ -133,8 +134,10 @@ class StillingService(
     }
 
     fun slettStilling(stillingsId: String): Stilling {
+        // TODO Deprecated?
         val slettetStilling = arbeidsplassenKlient.slettStilling(stillingsId)
         kandidatlisteKlient.sendStillingOppdatert(Stillingsid(stillingsId))
+        log.error("Bruker et endepunkt som vi trodde ikke skulle brukes, og har lyst til å slette, for sletting av stillingsId $stillingsId")
         return slettetStilling
     }
 
