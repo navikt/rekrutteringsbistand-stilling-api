@@ -7,7 +7,10 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import no.nav.rekrutteringsbistand.api.arbeidsplassen.ArbeidsplassenKlient
 import no.nav.rekrutteringsbistand.api.stillingsinfo.*
-import no.nav.rekrutteringsbistand.api.support.log
+import org.apache.commons.lang3.math.NumberUtils
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.ZonedDateTime
 import java.util.*
 
 class StillingsinfoPopulator(
@@ -28,7 +31,7 @@ class StillingsinfoPopulator(
 
         val stillingsinfo = stillingsinfoRepository.hentForStilling(stillingsId).getOrElse {
             val nyStillingsinfo = Stillingsinfo(
-                stillingsinfoid =  Stillingsinfoid(UUID.randomUUID()),
+                stillingsinfoid = Stillingsinfoid(UUID.randomUUID()),
                 stillingsid = stillingsId,
                 notat = null,
                 eier = null,
@@ -40,12 +43,29 @@ class StillingsinfoPopulator(
         packet["stillingsinfo"] = stillingsinfo.tilStillingsinfoIHendelse()
 
         arbeidsplassenKlient.hentStillingBasertPåUUID(stillingsId.asString()).map {
-            packet["stilling"] = Stilling(it.title, erDirektemeldt = it.source == "DIR")
+            packet["stilling"] = Stilling(
+                stillingstittel = it.title,
+                erDirektemeldt = it.source == "DIR",
+                stillingOpprettetTidspunkt = it.publishedByAdmin?.let { tidspunkt -> isoStringTilNorskTidssone(tidspunkt) },
+                antallStillinger = parseAntallStillinger(it),
+                organisasjonsnummer = it.employer?.orgnr,
+                stillingensPubliseringstidspunkt = ZonedDateTime.of(it.published, ZoneId.of("Europe/Oslo"))
+            )
         }
 
         val message: String = packet.toJson()
         context.publish(message)
     }
+}
+
+
+private fun isoStringTilNorskTidssone(isoString: String): ZonedDateTime {
+    return ZonedDateTime.of(LocalDateTime.parse(isoString), ZoneId.of("Europe/Oslo"))
+}
+
+private fun parseAntallStillinger(stilling: no.nav.rekrutteringsbistand.api.stilling.Stilling): Int {
+    val antallStillinger: String = stilling.properties.getOrDefault("positioncount", "0")
+    return if (NumberUtils.isCreatable(antallStillinger)) antallStillinger.toInt() else 0
 }
 
 fun Stillingsinfo.tilStillingsinfoIHendelse() =
@@ -61,5 +81,9 @@ data class StillingsinfoIHendelse(
 
 data class Stilling(
     val stillingstittel: String,
-    val erDirektemeldt: Boolean
+    val erDirektemeldt: Boolean,
+    val stillingOpprettetTidspunkt: ZonedDateTime?,
+    val antallStillinger: Int,
+    val organisasjonsnummer: String?,
+    val stillingensPubliseringstidspunkt: ZonedDateTime
 )
