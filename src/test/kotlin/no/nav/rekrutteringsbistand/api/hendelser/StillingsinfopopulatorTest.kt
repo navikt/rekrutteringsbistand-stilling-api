@@ -6,6 +6,7 @@ import no.nav.helse.rapids_rivers.isMissingOrNull
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.rekrutteringsbistand.api.Testdata.enStilling
 import no.nav.rekrutteringsbistand.api.arbeidsplassen.ArbeidsplassenKlient
+import no.nav.rekrutteringsbistand.api.asZonedDateTime
 import no.nav.rekrutteringsbistand.api.hendelser.RapidApplikasjon.Companion.registrerLyttere
 import no.nav.rekrutteringsbistand.api.stilling.Arbeidsgiver
 import no.nav.rekrutteringsbistand.api.stillingsinfo.*
@@ -53,7 +54,7 @@ class StillingsinfopopulatorTest {
         val stillingsId = Stillingsid(UUID.randomUUID())
         val stillingsTittel = "Klovn på sirkus"
         val eksternStillingskilde = "ASS"
-        val stillingstidspunkt = "tidspunktpublishedByAdmin"
+        val stillingstidspunkt = LocalDateTime.now()
         val antallStillinger = 666
         val organisasjonsnummer = "123"
         val stillingensPubliseringstidspunkt = LocalDateTime.now()
@@ -64,7 +65,7 @@ class StillingsinfopopulatorTest {
                     enStilling.copy(
                         title = stillingsTittel,
                         source = eksternStillingskilde,
-                        publishedByAdmin = stillingstidspunkt,
+                        publishedByAdmin = stillingstidspunkt.toString(),
                         properties = mapOf("positioncount" to "$antallStillinger"),
                         employer = Arbeidsgiver(
                             null, null, null, null, null,
@@ -99,7 +100,10 @@ class StillingsinfopopulatorTest {
         assertEquals(stillingsId.asString(), message.path("stillingsId").asText())
         assertEquals(stillingsTittel, message.path("stilling").get("stillingstittel").asText())
         assertEquals(stillingsTittel=="DIR", message.path("stilling").get("erDirektemeldt").asBoolean())
-        assertEquals(stillingstidspunkt, message.path("stilling").get("stillingOpprettetTidspunkt").asText())
+        assertEquals(
+            ZonedDateTime.of(stillingstidspunkt, ZoneId.of("Europe/Oslo")),
+            message.path("stilling").get("stillingOpprettetTidspunkt").asZonedDateTime()
+        )
         assertEquals(antallStillinger, message.path("stilling").get("antallStillinger").asInt())
         assertEquals(organisasjonsnummer, message.path("stilling").get("organisasjonsnummer").asText())
         assertEquals(
