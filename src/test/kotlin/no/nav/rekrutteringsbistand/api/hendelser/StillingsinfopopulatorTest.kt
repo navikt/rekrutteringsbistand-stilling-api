@@ -21,9 +21,11 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.context.ApplicationContext
 import org.springframework.test.context.junit4.SpringRunner
+import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
+import java.time.temporal.ChronoUnit
 import java.util.*
 
 @RunWith(SpringRunner::class)
@@ -54,7 +56,7 @@ class StillingsinfopopulatorTest {
         val stillingsId = Stillingsid(UUID.randomUUID())
         val stillingsTittel = "Klovn på sirkus"
         val eksternStillingskilde = "ASS"
-        val stillingstidspunkt = LocalDateTime.now()
+        val stillingstidspunkt = LocalDateTime.ofInstant(Instant.now().truncatedTo(ChronoUnit.MILLIS), ZoneId.of("Europe/Oslo"))
         val antallStillinger = 666
         val organisasjonsnummer = "123"
         val stillingensPubliseringstidspunkt = LocalDateTime.now()
@@ -102,13 +104,13 @@ class StillingsinfopopulatorTest {
         assertEquals(stillingsTittel=="DIR", message.path("stilling").get("erDirektemeldt").asBoolean())
         assertEquals(
             ZonedDateTime.of(stillingstidspunkt, ZoneId.of("Europe/Oslo")),
-            message.path("stilling").get("stillingOpprettetTidspunkt").asZonedDateTime()
+            message.path("stilling").get("stillingOpprettetTidspunkt").asZonedDateTime().toInstant().atZone(ZoneId.of("Europe/Oslo"))
         )
         assertEquals(antallStillinger, message.path("stilling").get("antallStillinger").asInt())
         assertEquals(organisasjonsnummer, message.path("stilling").get("organisasjonsnummer").asText())
         assertEquals(
             ZonedDateTime.of(stillingensPubliseringstidspunkt, ZoneId.of("Europe/Oslo")),
-            message.path("stilling").get("stillingensPubliseringstidspunkt").asZonedDateTime()
+            ZonedDateTime.parse(message.path("stilling").get("stillingensPubliseringstidspunkt").asText()).toInstant().atZone(ZoneId.of("Europe/Oslo"))
         )
         assertFalse(message.path("stilling").get("erDirektemeldt").asBoolean())
         val stillingNode = message.path("stillingsinfo")
