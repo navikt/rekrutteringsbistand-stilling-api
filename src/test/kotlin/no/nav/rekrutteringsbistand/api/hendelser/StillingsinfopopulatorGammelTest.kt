@@ -2,11 +2,14 @@ package no.nav.rekrutteringsbistand.api.hendelser
 
 import arrow.core.Some
 import arrow.core.getOrElse
+import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.rapids_rivers.isMissingOrNull
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.rekrutteringsbistand.api.Testdata.enStilling
 import no.nav.rekrutteringsbistand.api.arbeidsplassen.ArbeidsplassenKlient
+import no.nav.rekrutteringsbistand.api.asZonedDateTime
 import no.nav.rekrutteringsbistand.api.hendelser.RapidApplikasjon.Companion.registrerLyttere
+import no.nav.rekrutteringsbistand.api.stilling.Arbeidsgiver
 import no.nav.rekrutteringsbistand.api.stillingsinfo.*
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
@@ -19,6 +22,10 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.context.ApplicationContext
 import org.springframework.test.context.junit4.SpringRunner
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.ZonedDateTime
+import java.time.temporal.ChronoUnit
 import java.util.*
 
 @RunWith(SpringRunner::class)
@@ -48,8 +55,30 @@ class StillingsinfopopulatorGammelTest {
     fun `populering av en stilling`() {
         val stillingsId = Stillingsid(UUID.randomUUID())
         val stillingsTittel = "Klovn på sirkus"
+        val stillingstidspunkt = LocalDateTime.now().truncatedTo(ChronoUnit.MILLIS)
+        val antallStillinger = 666
+        val organisasjonsnummer = "123"
+        val stillingensPubliseringstidspunkt = LocalDateTime.now().truncatedTo(ChronoUnit.MILLIS)
+        val eksternStillingskilde = "ASS"
         Mockito.`when`(arbeidsplassenKlient.hentStillingBasertPåUUID(stillingsId.toString()))
-            .thenReturn(Some(enStilling.copy(title = stillingsTittel)))
+            .thenReturn(
+                Some(
+                    enStilling.copy(
+                        title = stillingsTittel,
+                        source = eksternStillingskilde,
+                        publishedByAdmin = stillingstidspunkt.toString(),
+                        properties = mapOf("positioncount" to "$antallStillinger"),
+                        employer = Arbeidsgiver(
+                            null, null, null, null, null,
+                            null, emptyList(), emptyList(), null, emptyList(),
+                            emptyMap(), null,
+                            organisasjonsnummer,
+                            null, null, null, null, null, null
+                        ),
+                        published = stillingensPubliseringstidspunkt
+                    )
+                )
+            )
         val stillingsinfoid = Stillingsinfoid(UUID.randomUUID())
         val eier = Eier("AB123456", "Navnesen")
         val notat = "Et notat"
@@ -73,6 +102,17 @@ class StillingsinfopopulatorGammelTest {
         assertEquals("felt2", message.path("kandidathendelse").get("uinteressant2").asText())
         assertEquals(stillingsId.asString(), message.path("kandidathendelse").get("stillingsId").asText())
         assertEquals(stillingsTittel, message.path("stilling").get("stillingstittel").asText())
+        assertEquals(stillingsTittel=="DIR", message.path("stilling").get("erDirektemeldt").asBoolean())
+        assertEquals(
+            ZonedDateTime.of(stillingstidspunkt, ZoneId.of("Europe/Oslo")),
+            message.path("stilling").get("stillingOpprettetTidspunkt").asZonedDateTime()
+        )
+        assertEquals(antallStillinger, message.path("stilling").get("antallStillinger").asInt())
+        assertEquals(organisasjonsnummer, message.path("stilling").get("organisasjonsnummer").asText())
+        assertEquals(
+            ZonedDateTime.of(stillingensPubliseringstidspunkt, ZoneId.of("Europe/Oslo")),
+            message.path("stilling").get("stillingensPubliseringstidspunkt").asZonedDateTime()
+        )
         val stillingNode = message.path("stillingsinfo")
         assertFalse(stillingNode.isMissingOrNull())
         assertEquals(stillingsinfo.stillingsinfoid.asString(), stillingNode.path("stillingsinfoid").asText())
