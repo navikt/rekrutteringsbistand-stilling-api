@@ -56,10 +56,10 @@ class StillingsinfopopulatorTest {
         val stillingsId = Stillingsid(UUID.randomUUID())
         val stillingsTittel = "Klovn på sirkus"
         val eksternStillingskilde = "ASS"
-        val stillingstidspunkt = LocalDateTime.ofInstant(Instant.now().truncatedTo(ChronoUnit.MILLIS), ZoneId.of("Europe/Oslo"))
+        val stillingstidspunkt = LocalDateTime.now().truncatedTo(ChronoUnit.MILLIS)
         val antallStillinger = 666
         val organisasjonsnummer = "123"
-        val stillingensPubliseringstidspunkt = LocalDateTime.now()
+        val stillingensPubliseringstidspunkt = LocalDateTime.now().truncatedTo(ChronoUnit.MILLIS)
 
         Mockito.`when`(arbeidsplassenKlient.hentStillingBasertPåUUID(stillingsId.toString()))
             .thenReturn(

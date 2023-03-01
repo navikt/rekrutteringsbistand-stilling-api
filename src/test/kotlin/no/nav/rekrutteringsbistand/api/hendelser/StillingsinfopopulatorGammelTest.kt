@@ -25,6 +25,7 @@ import org.springframework.test.context.junit4.SpringRunner
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
+import java.time.temporal.ChronoUnit
 import java.util.*
 
 @RunWith(SpringRunner::class)
@@ -54,10 +55,10 @@ class StillingsinfopopulatorGammelTest {
     fun `populering av en stilling`() {
         val stillingsId = Stillingsid(UUID.randomUUID())
         val stillingsTittel = "Klovn på sirkus"
-        val stillingstidspunkt = LocalDateTime.now()
+        val stillingstidspunkt = LocalDateTime.now().truncatedTo(ChronoUnit.MILLIS)
         val antallStillinger = 666
         val organisasjonsnummer = "123"
-        val stillingensPubliseringstidspunkt = LocalDateTime.now()
+        val stillingensPubliseringstidspunkt = LocalDateTime.now().truncatedTo(ChronoUnit.MILLIS)
         val eksternStillingskilde = "ASS"
         Mockito.`when`(arbeidsplassenKlient.hentStillingBasertPåUUID(stillingsId.toString()))
             .thenReturn(
