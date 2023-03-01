@@ -108,7 +108,7 @@ class StillingsinfopopulatorTest {
         assertEquals(organisasjonsnummer, message.path("stilling").get("organisasjonsnummer").asText())
         assertEquals(
             ZonedDateTime.of(stillingensPubliseringstidspunkt, ZoneId.of("Europe/Oslo")),
-            ZonedDateTime.parse(message.path("stilling").get("stillingensPubliseringstidspunkt").asText()).toInstant().atZone(ZoneId.of("Europe/Oslo"))
+            message.path("stilling").get("stillingensPubliseringstidspunkt").asZonedDateTime()
         )
         assertFalse(message.path("stilling").get("erDirektemeldt").asBoolean())
         val stillingNode = message.path("stillingsinfo")
