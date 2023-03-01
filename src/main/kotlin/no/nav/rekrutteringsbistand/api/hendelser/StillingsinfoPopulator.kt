@@ -1,6 +1,7 @@
 package no.nav.rekrutteringsbistand.api.hendelser
 
 import arrow.core.getOrElse
+import com.fasterxml.jackson.annotation.JsonFormat
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -82,8 +83,12 @@ data class StillingsinfoIHendelse(
 data class Stilling(
     val stillingstittel: String,
     val erDirektemeldt: Boolean,
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = zonedDateTimeFormat)
     val stillingOpprettetTidspunkt: ZonedDateTime?,
     val antallStillinger: Int,
     val organisasjonsnummer: String?,
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = zonedDateTimeFormat)
     val stillingensPubliseringstidspunkt: ZonedDateTime
 )
+
+const val zonedDateTimeFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSXXX'['VV']'"

@@ -102,7 +102,7 @@ class StillingsinfopopulatorTest {
         assertEquals(stillingsTittel=="DIR", message.path("stilling").get("erDirektemeldt").asBoolean())
         assertEquals(
             ZonedDateTime.of(stillingstidspunkt, ZoneId.of("Europe/Oslo")),
-            message.path("stilling").get("stillingOpprettetTidspunkt").asZonedDateTime().toInstant().atZone(ZoneId.of("Europe/Oslo"))
+            message.path("stilling").get("stillingOpprettetTidspunkt").asZonedDateTime()
         )
         assertEquals(antallStillinger, message.path("stilling").get("antallStillinger").asInt())
         assertEquals(organisasjonsnummer, message.path("stilling").get("organisasjonsnummer").asText())
