@@ -102,13 +102,13 @@ class StillingsinfopopulatorTest {
         assertEquals(stillingsTittel=="DIR", message.path("stilling").get("erDirektemeldt").asBoolean())
         assertEquals(
             ZonedDateTime.of(stillingstidspunkt, ZoneId.of("Europe/Oslo")),
-            message.path("stilling").get("stillingOpprettetTidspunkt").asZonedDateTime()
+            message.path("stilling").get("stillingOpprettetTidspunkt").asZonedDateTime().toInstant().atZone(ZoneId.of("Europe/Oslo"))
         )
         assertEquals(antallStillinger, message.path("stilling").get("antallStillinger").asInt())
         assertEquals(organisasjonsnummer, message.path("stilling").get("organisasjonsnummer").asText())
         assertEquals(
             ZonedDateTime.of(stillingensPubliseringstidspunkt, ZoneId.of("Europe/Oslo")),
-            message.path("stilling").get("stillingensPubliseringstidspunkt").asText()
+            ZonedDateTime.parse(message.path("stilling").get("stillingensPubliseringstidspunkt").asText()).toInstant().atZone(ZoneId.of("Europe/Oslo"))
         )
         assertFalse(message.path("stilling").get("erDirektemeldt").asBoolean())
         val stillingNode = message.path("stillingsinfo")
