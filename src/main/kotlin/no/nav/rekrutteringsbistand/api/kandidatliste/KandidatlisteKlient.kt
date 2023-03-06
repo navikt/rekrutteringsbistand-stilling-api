@@ -1,6 +1,5 @@
 package no.nav.rekrutteringsbistand.api.kandidatliste
 
-import no.nav.rekrutteringsbistand.api.RekrutteringsbistandStilling
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsid
 import no.nav.rekrutteringsbistand.api.support.config.ExternalConfiguration
@@ -22,20 +21,20 @@ class KandidatlisteKlient(
     private val scopeTilKandidatApi: String
 ) {
 
-    fun sendStillingOppdatert(stilling: RekrutteringsbistandStilling): ResponseEntity<Void> {
-        val url = buildNotificationUrlPut()
-        log.info("Oppdaterer kandidatliste, stillingsid: ${stilling.stilling.uuid}")
+    fun sendStillingOppdatert(stillingsid: Stillingsid): ResponseEntity<Void> {
+        val url = buildNotificationUrl(stillingsid)
+        log.info("Oppdaterer kandidatliste, stillingsid: $stillingsid")
         return restTemplate.exchange(
             url,
             HttpMethod.PUT,
-            HttpEntity(stilling, headers()),
+            HttpEntity(null, headers()),
             Void::class.java
         )
             .also {
                 if (it.statusCode != HttpStatus.NO_CONTENT) {
                     log.warn(
                         "Uventet response fra kandidatliste-api for ad {}: {}",
-                        stilling.stilling.uuid,
+                        stillingsid.asString(),
                         it.statusCodeValue
                     )
                 }
@@ -43,7 +42,7 @@ class KandidatlisteKlient(
     }
 
     fun varsleOmSlettetStilling(stillingsid: Stillingsid): ResponseEntity<Void> {
-        val url: URI = buildNotificationUrlDelete(stillingsid)
+        val url: URI = buildNotificationUrl(stillingsid)
         val httpMethod = HttpMethod.DELETE
         log.info("Skal slette kandidatliste med stillingsid $stillingsid ved å sende en HTTP $httpMethod til URL $url")
         return restTemplate.exchange(
@@ -64,16 +63,9 @@ class KandidatlisteKlient(
             }
     }
 
-    private fun buildNotificationUrlDelete(stillingsid: Stillingsid): URI {
+    private fun buildNotificationUrl(stillingsid: Stillingsid): URI {
         return UriComponentsBuilder.fromUriString(externalConfiguration.kandidatlisteApi.url)
             .pathSegment(stillingsid.asString())
-            .pathSegment("kandidatliste")
-            .build(true)
-            .toUri()
-    }
-
-    private fun buildNotificationUrlPut(): URI {
-        return UriComponentsBuilder.fromUriString(externalConfiguration.kandidatlisteApi.url)
             .pathSegment("kandidatliste")
             .build(true)
             .toUri()

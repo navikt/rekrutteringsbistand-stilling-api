@@ -1,11 +1,9 @@
 package no.nav.rekrutteringsbistand.api.stillingsinfo
 
 import arrow.core.Option
-import no.nav.rekrutteringsbistand.api.RekrutteringsbistandStilling
 import no.nav.rekrutteringsbistand.api.arbeidsplassen.ArbeidsplassenKlient
 import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteKlient
 import no.nav.rekrutteringsbistand.api.stilling.Stilling
-import no.nav.rekrutteringsbistand.api.stilling.StillingService
 import org.springframework.stereotype.Service
 import java.util.*
 
@@ -13,7 +11,7 @@ import java.util.*
 class StillingsinfoService(
     private val   repo: StillingsinfoRepository,
     private val kandidatlisteKlient: KandidatlisteKlient,
-    private val arbeidsplassenKlient: ArbeidsplassenKlient
+    private val arbeidsplassenKlient: ArbeidsplassenKlient,
 ) {
 
     /**
@@ -40,12 +38,7 @@ class StillingsinfoService(
 
         endreEier()
         try {
-            val stilling = arbeidsplassenKlient.hentStilling(stillingsId.asString(), false)
-            val rekrutteringsbistandStilling = RekrutteringsbistandStilling(
-                stilling = stilling,
-                stillingsinfo = stillingsinfoMedNyEier.asStillingsinfoDto()
-            )
-            kandidatlisteKlient.sendStillingOppdatert(rekrutteringsbistandStilling)
+            kandidatlisteKlient.sendStillingOppdatert(stillingsId)
         } catch (e: Exception) {
             reverser()
             throw RuntimeException("Varsel til rekbis-kandidat-api om endring av eier for ekstern stilling feilet", e)
@@ -73,6 +66,10 @@ class StillingsinfoService(
 
     fun lagre(stillingsinfo: Stillingsinfo) {
         repo.opprett(stillingsinfo)
+    }
+
+    fun slett(stillingsId: String) {
+        repo.slett(stillingsId)
     }
 
     fun opprettStillingsinfo(stillingsId: Stillingsid, stillingskategori: Stillingskategori) {
