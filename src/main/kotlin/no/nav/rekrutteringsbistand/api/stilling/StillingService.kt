@@ -56,13 +56,14 @@ class StillingService(
             stillingskategori = opprettRekrutteringsbistandstillingDto.kategori
         )
 
-        kandidatlisteKlient.sendStillingOppdatert(stillingsId)
         val stillingsinfo = stillingsinfoService.hentStillingsinfo(opprettetStilling)
 
         return RekrutteringsbistandStilling(
             stilling = opprettetStilling,
             stillingsinfo = stillingsinfo.map { it.asStillingsinfoDto() }.orNull()
-        )
+        ).also {
+            kandidatlisteKlient.sendStillingOppdatert(it)
+        }
     }
 
     private fun lagreNyttNotat(
@@ -110,10 +111,6 @@ class StillingService(
 
         val id = Stillingsid(oppdatertStilling.uuid)
 
-        if (oppdatertStilling.source.equals("DIR", false)) {
-            kandidatlisteKlient.sendStillingOppdatert(id)
-        }
-
         if (dto.notat != null) {
             lagreNyttNotat(dto.notat, id)
         }
@@ -125,20 +122,19 @@ class StillingService(
             stilling = oppdatertStilling,
             stillingsinfoid = eksisterendeStillingsinfo?.stillingsinfoid?.asString(),
             notat = eksisterendeStillingsinfo?.notat
-        )
+        ).also {
+            if (oppdatertStilling.source.equals("DIR", ignoreCase = false)) {
+                kandidatlisteKlient.sendStillingOppdatert(RekrutteringsbistandStilling(
+                    stilling = oppdatertStilling,
+                    stillingsinfo = eksisterendeStillingsinfo?.asStillingsinfoDto()
+                ))
+            }
+        }
     }
 
     fun slettRekrutteringsbistandStilling(stillingsId: String): Stilling {
         kandidatlisteKlient.varsleOmSlettetStilling(Stillingsid(stillingsId))
         return arbeidsplassenKlient.slettStilling(stillingsId)
-    }
-
-    fun slettStilling(stillingsId: String): Stilling {
-        // TODO Deprecated?
-        val slettetStilling = arbeidsplassenKlient.slettStilling(stillingsId)
-        kandidatlisteKlient.sendStillingOppdatert(Stillingsid(stillingsId))
-        log.error("Bruker et endepunkt som vi trodde ikke skulle brukes, og har lyst til å slette, for sletting av stillingsId $stillingsId")
-        return slettetStilling
     }
 
     fun hentMineStillinger(queryString: String?): Page<RekrutteringsbistandStilling> {

@@ -4,6 +4,7 @@ import arrow.core.getOrElse
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.github.tomakehurst.wiremock.junit.WireMockRule
 import no.nav.rekrutteringsbistand.api.TestRepository
+import no.nav.rekrutteringsbistand.api.Testdata.enRekrutteringsbistandStilling
 import no.nav.rekrutteringsbistand.api.Testdata.enStillingsinfoInboundDto
 import no.nav.rekrutteringsbistand.api.Testdata.enStillingsinfo
 import no.nav.rekrutteringsbistand.api.arbeidsplassen.ArbeidsplassenKlient
@@ -127,7 +128,7 @@ class StillingsinfoComponentTest {
     fun `Når vi prøver å opprette eier og kall mot kandidat-api feiler så skal ingenting ha blitt lagret`() {
         val dto = enStillingsinfoInboundDto
         mockAzureObo(wiremockAzure)
-        `when`(kandidatlisteKlient.sendStillingOppdatert(Stillingsid(dto.stillingsid))).thenThrow(RuntimeException::class.java)
+        `when`(kandidatlisteKlient.sendStillingOppdatert(enRekrutteringsbistandStilling)).thenThrow(RuntimeException::class.java)
 
         val respons =
             restTemplate.exchange("$localBaseUrl/stillingsinfo", HttpMethod.PUT, httpEntity(dto), String::class.java)
@@ -147,7 +148,7 @@ class StillingsinfoComponentTest {
             eierNavn = "Helt Annet Navn"
         )
         mockAzureObo(wiremockAzure)
-        `when`(kandidatlisteKlient.sendStillingOppdatert(stillingsinfo.stillingsid)).thenThrow(RuntimeException::class.java)
+        `when`(kandidatlisteKlient.sendStillingOppdatert(enRekrutteringsbistandStilling)).thenThrow(RuntimeException::class.java)
 
         val respons = restTemplate.exchange("$localBaseUrl/stillingsinfo", HttpMethod.PUT, httpEntity(endringDto), String::class.java)
 
@@ -166,7 +167,8 @@ class StillingsinfoComponentTest {
             eierNavident = "X998877",
             eierNavn = "Helt Annet Navn"
         )
-        `when`(kandidatlisteKlient.sendStillingOppdatert(stillingsinfoDerEierErNull.stillingsid)).thenThrow(RuntimeException::class.java)
+        val rekrutteringsbistandStilling = enRekrutteringsbistandStilling.copy(stillingsinfo = stillingsinfoDerEierErNull.asStillingsinfoDto())
+        `when`(kandidatlisteKlient.sendStillingOppdatert(rekrutteringsbistandStilling)).thenThrow(RuntimeException::class.java)
 
         val respons = restTemplate.exchange("$localBaseUrl/stillingsinfo", HttpMethod.PUT, httpEntity(endringDto), String::class.java)
 
