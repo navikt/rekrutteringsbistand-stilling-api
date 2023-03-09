@@ -12,6 +12,7 @@ import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteKlient
 import no.nav.rekrutteringsbistand.api.stillingsinfo.*
 import no.nav.rekrutteringsbistand.api.support.log
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.util.*
 
 
@@ -103,6 +104,7 @@ class StillingService(
     fun kategoriMedDefault(stillingsInfo: StillingsinfoDto?) =
         if (stillingsInfo?.stillingskategori == null) Stillingskategori.STILLING else stillingsInfo.stillingskategori
 
+    @Transactional
     fun oppdaterRekrutteringsbistandStilling(
         dto: OppdaterRekrutteringsbistandStillingDto,
         queryString: String?

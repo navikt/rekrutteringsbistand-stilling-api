@@ -10,6 +10,7 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.github.tomakehurst.wiremock.extension.responsetemplating.ResponseTemplateTransformer
 import com.github.tomakehurst.wiremock.http.Fault
 import com.github.tomakehurst.wiremock.http.Fault.CONNECTION_RESET_BY_PEER
+import com.github.tomakehurst.wiremock.http.RequestMethod
 import com.github.tomakehurst.wiremock.junit.WireMockRule
 import com.github.tomakehurst.wiremock.matching.AnythingPattern
 import com.github.tomakehurst.wiremock.matching.ContentPattern
@@ -534,8 +535,13 @@ internal class StillingComponentTest {
     }
 
     private fun mockKandidatlisteOppdatering(metodeFunksjon: (UrlPattern) -> MappingBuilder = ::put) {
+        val url = if (metodeFunksjon == RequestMethod.DELETE) {
+            "/rekrutteringsbistand-kandidat-api/rest/veileder/stilling/.*/kandidatliste"
+        } else {
+            "/rekrutteringsbistand-kandidat-api/rest/veileder/stilling/kandidatliste"
+        }
         wiremockKandidatliste.stubFor(
-            metodeFunksjon(urlPathMatching("/rekrutteringsbistand-kandidat-api/rest/veileder/stilling/.*/kandidatliste")).withHeader(
+            metodeFunksjon(urlPathMatching(url)).withHeader(
                 CONTENT_TYPE,
                 equalTo(APPLICATION_JSON_VALUE)
             ).withHeader(ACCEPT, equalTo(APPLICATION_JSON_VALUE)).willReturn(
@@ -547,6 +553,7 @@ internal class StillingComponentTest {
         )
     }
 
+    // http://localhost:8766/rekrutteringsbistand-kandidat-api/rest/veileder/stilling/kandidatliste
     private fun mockKandidatlisteOppdateringFeiler() {
         wiremockKandidatliste.stubFor(
             put(urlPathMatching("/rekrutteringsbistand-kandidat-api/rest/veileder/stilling/kandidatliste"))
