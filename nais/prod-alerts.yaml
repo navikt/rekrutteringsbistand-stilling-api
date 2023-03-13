@@ -12,7 +12,7 @@ spec:
   alerts:
     - alert: rekrutteringsbistand-stilling-api
       severity: danger
-      expr: sum(up{app="rekrutteringsbistand-stilling-api", job="kubernetes-pods"}) == 0
+      expr: kube_deployment_status_replicas_available{deployment="rekrutteringsbistand-stilling-api"} == 0
       for: 1s
       description: Appen er nede (ingen Kubernetes-pods er oppe)
       action: "https://logs.adeo.no/goto/204f3faa2281da63e22ad07e1d729933"
