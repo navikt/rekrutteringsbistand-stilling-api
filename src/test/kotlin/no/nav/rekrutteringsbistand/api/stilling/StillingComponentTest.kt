@@ -425,25 +425,7 @@ internal class StillingComponentTest {
     }
 
     @Test
-    fun `DELETE mot stilling skal returnere HTTP 200 med stilling og status DELETED`() {
-        val slettetStilling = enStilling.copy(status = "DELETED")
-        mockPamAdApi(HttpMethod.DELETE, "/api/v1/ads/${slettetStilling.uuid}", slettetStilling)
-        mockKandidatlisteOppdatering()
-        mockAzureObo(wiremockAzure)
-
-        val respons: ResponseEntity<Stilling> = restTemplate.exchange(
-            "$localBaseUrl/rekrutteringsbistand/api/v1/ads/${slettetStilling.uuid}",
-            HttpMethod.DELETE,
-            null,
-            Stilling::class.java
-        )
-
-        assertThat(respons.statusCode).isEqualTo(OK)
-        assertThat(respons.body).isEqualTo(slettetStilling)
-    }
-
-    @Test
-    fun `DELETE mot stillinger skal slette stilling`() {
+    fun `DELETE mot stillinger skal slette stilling og returnere 200`() {
         val slettetStilling = enStilling.copy(status = "DELETED")
         mockPamAdApi(HttpMethod.DELETE, "/api/v1/ads/${slettetStilling.uuid}", slettetStilling)
         mockKandidatlisteOppdatering(::delete)
@@ -465,6 +447,7 @@ internal class StillingComponentTest {
             assertThat(stilling?.source).isEqualTo(slettetStilling.source)
             assertThat(stilling?.privacy).isEqualTo(slettetStilling.privacy)
             assertThat(stilling?.status).isEqualTo("DELETED")
+            assertThat(it.statusCode).isEqualTo(OK)
         }
     }
 
@@ -473,11 +456,11 @@ internal class StillingComponentTest {
         val slettetStilling = enStilling.copy(status = "DELETED")
 
         mockPamAdApi(HttpMethod.DELETE, "/api/v1/ads/${slettetStilling.uuid}", slettetStilling)
-        mockKandidatlisteOppdateringFeiler()
+        mockFeilendeKallTilKandidatApiForSlettingAvStilling()
         mockAzureObo(wiremockAzure)
 
         restTemplate.exchange(
-            "$localBaseUrl/rekrutteringsbistand/api/v1/ads/${enStilling.uuid}",
+            "$localBaseUrl/rekrutteringsbistandstilling/${enStilling.uuid}",
             HttpMethod.DELETE,
             null,
             Stilling::class.java
@@ -593,6 +576,18 @@ internal class StillingComponentTest {
         )
     }
 
+    private fun mockFeilendeKallTilKandidatApiForSlettingAvStilling() {
+        wiremockKandidatliste.stubFor(
+            delete(urlPathMatching("/rekrutteringsbistand-kandidat-api/rest/veileder/stilling/.+/kandidatliste")).withHeader(
+                CONTENT_TYPE,
+                equalTo(APPLICATION_JSON_VALUE)
+            ).withHeader(ACCEPT, equalTo(APPLICATION_JSON_VALUE)).willReturn(
+                aResponse().withStatus(500).withHeader(
+                    CONNECTION, "close"
+                ) // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
+            )
+        )
+    }
 
     @After
     fun after() {

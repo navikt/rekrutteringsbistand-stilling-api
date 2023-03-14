@@ -133,14 +133,6 @@ class StillingService(
         return arbeidsplassenKlient.slettStilling(stillingsId)
     }
 
-    fun slettStilling(stillingsId: String): Stilling {
-        // TODO Deprecated?
-        val slettetStilling = arbeidsplassenKlient.slettStilling(stillingsId)
-        kandidatlisteKlient.sendStillingOppdatert(Stillingsid(stillingsId))
-        log.error("Bruker et endepunkt som vi trodde ikke skulle brukes, og har lyst til å slette, for sletting av stillingsId $stillingsId")
-        return slettetStilling
-    }
-
     fun hentMineStillinger(queryString: String?): Page<RekrutteringsbistandStilling> {
         val stillingerPage = arbeidsplassenKlient.hentMineStillinger(queryString)
 

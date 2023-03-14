@@ -45,12 +45,6 @@ class StillingController(val stillingService: StillingService) {
         return ok(slettetStilling)
     }
 
-    @DeleteMapping("/rekrutteringsbistand/api/v1/ads/{stillingsId}")
-    fun slettStilling(@PathVariable(value = "stillingsId") stillingsId: String): ResponseEntity<Stilling> {
-        val slettetStilling = stillingService.slettStilling(stillingsId)
-        return ok(slettetStilling)
-    }
-
     @GetMapping("/rekrutteringsbistandstilling/{uuid}")
     fun hentRekrutteringsbistandStilling(@PathVariable uuid: String): ResponseEntity<RekrutteringsbistandStilling> {
         return ok(stillingService.hentRekrutteringsbistandStilling(uuid))
