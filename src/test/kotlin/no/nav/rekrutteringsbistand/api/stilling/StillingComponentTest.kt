@@ -428,7 +428,7 @@ internal class StillingComponentTest {
     fun `DELETE mot stillinger skal slette stilling og returnere 200`() {
         val slettetStilling = enStilling.copy(status = "DELETED")
         mockPamAdApi(HttpMethod.DELETE, "/api/v1/ads/${slettetStilling.uuid}", slettetStilling)
-        mockKandidatlisteOppdatering(::delete)
+        mockKandidatlisteSlettet()
         mockAzureObo(wiremockAzure)
 
         restTemplate.exchange(
@@ -478,7 +478,7 @@ internal class StillingComponentTest {
         repository.opprett(stillingsinfo)
         val slettetStilling = stilling.copy(status = "DELETED")
         mockPamAdApi(HttpMethod.DELETE, "/api/v1/ads/${slettetStilling.uuid}", slettetStilling)
-        mockKandidatlisteOppdatering(::delete)
+        mockKandidatlisteSlettet()
         mockAzureObo(wiremockAzure)
         repository.hentForStilling(stillingsId).tapNone {
             fail("Setup")
@@ -551,7 +551,21 @@ internal class StillingComponentTest {
 
     private fun mockKandidatlisteOppdatering(metodeFunksjon: (UrlPattern) -> MappingBuilder = ::put) {
         wiremockKandidatliste.stubFor(
-            metodeFunksjon(urlPathMatching("/rekrutteringsbistand-kandidat-api/rest/veileder/stilling/.*/kandidatliste")).withHeader(
+            metodeFunksjon(urlPathMatching("/rekrutteringsbistand-kandidat-api/rest/veileder/stilling/kandidatliste")).withHeader(
+                CONTENT_TYPE,
+                equalTo(APPLICATION_JSON_VALUE)
+            ).withHeader(ACCEPT, equalTo(APPLICATION_JSON_VALUE)).willReturn(
+                aResponse().withStatus(HttpStatus.NO_CONTENT.value()).withHeader(
+                    CONNECTION, "close"
+                ) // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
+                    .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+            )
+        )
+    }
+
+    private fun mockKandidatlisteSlettet() {
+        wiremockKandidatliste.stubFor(
+            delete(urlPathMatching("/rekrutteringsbistand-kandidat-api/rest/veileder/stilling/.*/kandidatliste")).withHeader(
                 CONTENT_TYPE,
                 equalTo(APPLICATION_JSON_VALUE)
             ).withHeader(ACCEPT, equalTo(APPLICATION_JSON_VALUE)).willReturn(

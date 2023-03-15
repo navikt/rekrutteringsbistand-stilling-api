@@ -47,9 +47,6 @@ class StillingsinfoComponentTest {
     val wiremockKandidatApi = WireMockRule(WireMockConfiguration.options().port(8766))
 
     @get:Rule
-    val wiremockPamAdApi = WireMockRule(WireMockConfiguration.options().port(8765))
-
-    @get:Rule
     val wiremockAzure = WireMockRule(9954)
 
     @LocalServerPort
@@ -73,9 +70,6 @@ class StillingsinfoComponentTest {
 
     @MockBean
     private lateinit var kandidatlisteKlient: KandidatlisteKlient
-
-    private val objectMapper: ObjectMapper =
-        ObjectMapper().registerModule(JavaTimeModule()).disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
     @Before
     fun authenticateClient() {
@@ -102,8 +96,9 @@ class StillingsinfoComponentTest {
     @Test
     fun `Opprettelse av kandidatliste på ekstern stilling skal returnere HTTP 201 med opprettet stillingsinfo, og trigge resending hos Arbeidsplassen`() {
         val dto = enStillingsinfoInboundDto
-
         mockAzureObo(wiremockAzure)
+        val stilling = enStilling
+        `when`(arbeidsplassenKlient.hentStilling(stilling.uuid)).thenReturn(stilling)
 
         val url = "$localBaseUrl/stillingsinfo"
         val stillingsinfoRespons =
@@ -124,10 +119,9 @@ class StillingsinfoComponentTest {
     fun `Oppretting av kandidatliste på ekstern stilling med eksisterende stillingsinfo skal returnere HTTP 200 med oppdatert stillingsinfo`() {
         repository.opprett(enStillingsinfo)
         val tilLagring = enStillingsinfoInboundDto
-        val stilling = enStilling
         mockAzureObo(wiremockAzure)
-        mockPamAdApi(HttpMethod.GET, "/api/v1/ads/${stilling.uuid}", stilling)
-
+        val stilling = enStilling
+        `when`(arbeidsplassenKlient.hentStilling(stilling.uuid)).thenReturn(stilling)
         val url = "$localBaseUrl/stillingsinfo"
         val stillingsinfoRespons =
             restTemplate.exchange(url, HttpMethod.PUT, httpEntity(tilLagring), StillingsinfoDto::class.java)
@@ -202,22 +196,5 @@ class StillingsinfoComponentTest {
             ACCEPT to APPLICATION_JSON_VALUE
         ).toMultiValueMap()
         return HttpEntity(body, headers)
-    }
-
-    private fun mockPamAdApi(method: HttpMethod, urlPath: String, responseBody: Any) {
-        wiremockPamAdApi.stubFor(
-            WireMock.request(method.name, WireMock.urlPathMatching(urlPath))
-                .withHeader(CONTENT_TYPE, WireMock.equalTo(APPLICATION_JSON_VALUE))
-                .withHeader(ACCEPT, WireMock.equalTo(APPLICATION_JSON_VALUE)).withHeader(AUTHORIZATION,
-                    WireMock.matching("Bearer .*")
-                )
-                .willReturn(
-                    WireMock.aResponse().withStatus(200).withHeader(
-                        CONNECTION, "close"
-                    )
-                        .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-                        .withBody(objectMapper.writeValueAsString(responseBody))
-                )
-        )
     }
 }
