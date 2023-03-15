@@ -23,7 +23,7 @@ class KandidatlisteKlient(
 ) {
 
     fun sendStillingOppdatert(stilling: RekrutteringsbistandStilling): ResponseEntity<Void> {
-        val url = buildNotificationUrlPut()
+        val url = byggUrlTilPutEndepunkt()
         log.info("Oppdaterer kandidatliste, stillingsid: ${stilling.stilling.uuid}")
         return restTemplate.exchange(
             url,
@@ -43,7 +43,7 @@ class KandidatlisteKlient(
     }
 
     fun varsleOmSlettetStilling(stillingsid: Stillingsid): ResponseEntity<Void> {
-        val url: URI = buildNotificationUrlDelete(stillingsid)
+        val url: URI = byggUrlTilDeleteEndepunkt(stillingsid)
         val httpMethod = HttpMethod.DELETE
         log.info("Skal slette kandidatliste med stillingsid $stillingsid ved å sende en HTTP $httpMethod til URL $url")
         return restTemplate.exchange(
@@ -64,7 +64,7 @@ class KandidatlisteKlient(
             }
     }
 
-    private fun buildNotificationUrlDelete(stillingsid: Stillingsid): URI {
+    private fun byggUrlTilDeleteEndepunkt(stillingsid: Stillingsid): URI {
         return UriComponentsBuilder.fromUriString(externalConfiguration.kandidatlisteApi.url)
             .pathSegment(stillingsid.asString())
             .pathSegment("kandidatliste")
@@ -72,7 +72,7 @@ class KandidatlisteKlient(
             .toUri()
     }
 
-    private fun buildNotificationUrlPut(): URI {
+    private fun byggUrlTilPutEndepunkt(): URI {
         return UriComponentsBuilder.fromUriString(externalConfiguration.kandidatlisteApi.url)
             .pathSegment("kandidatliste")
             .build(true)
