@@ -7,6 +7,7 @@ import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteKlient
 import no.nav.rekrutteringsbistand.api.stilling.Stilling
 import no.nav.rekrutteringsbistand.api.stilling.StillingService
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.util.*
 
 @Service
@@ -16,14 +17,7 @@ class StillingsinfoService(
     private val arbeidsplassenKlient: ArbeidsplassenKlient
 ) {
 
-    /**
-     * Reversering av databaseendringer kan ikke gjøres med @Transactional på REST-endepunktet. Dette skyldes at endringer i databasen
-     * må være committa til databasen når kall til rekbis-kandidat-api gjøres. Fordi rekbis-kandidat-api vil gjøre et kall
-     * tilbake til rekbis-stilling-api for å hente stillingsinfo, som da altså må være lagra (inkludert committa).
-     *
-     * Dersom løkka mellom kandidat-api og stilling-api fjernes er manuell håndtering av databasereversering unødvendig.
-     * Man kan da putte på en @Transactional på for eksempel endepunktet.
-     */
+    @Transactional
     fun overtaEierskapForEksternStillingOgKandidatliste(stillingsId: Stillingsid, nyEier: Eier): Stillingsinfo {
         val opprinneligStillingsinfo = repo.hentForStilling(stillingsId).orNull()
         val stillingsinfoMedNyEier = opprinneligStillingsinfo?.copy(eier = nyEier) ?: Stillingsinfo(
@@ -31,14 +25,9 @@ class StillingsinfoService(
             stillingsid = stillingsId,
             eier = nyEier
         )
-        fun endreEier() {
-            opprinneligStillingsinfo?.let { repo.oppdaterEier(it.stillingsinfoid, nyEier) } ?: repo.opprett(stillingsinfoMedNyEier)
-        }
-        fun reverser() {
-            opprinneligStillingsinfo?.let { repo.oppdaterEier(it.stillingsinfoid, opprinneligStillingsinfo.eier) } ?: repo.slett(stillingsId)
-        }
 
-        endreEier()
+        opprinneligStillingsinfo?.let { repo.oppdaterEier(it.stillingsinfoid, nyEier) } ?: repo.opprett(stillingsinfoMedNyEier)
+
         try {
             val stilling = arbeidsplassenKlient.hentStilling(stillingsId.asString(), false)
             val rekrutteringsbistandStilling = RekrutteringsbistandStilling(
@@ -47,7 +36,6 @@ class StillingsinfoService(
             )
             kandidatlisteKlient.sendStillingOppdatert(rekrutteringsbistandStilling)
         } catch (e: Exception) {
-            reverser()
             throw RuntimeException("Varsel til rekbis-kandidat-api om endring av eier for ekstern stilling feilet", e)
         }
 
