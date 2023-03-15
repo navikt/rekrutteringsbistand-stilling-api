@@ -10,11 +10,7 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.github.tomakehurst.wiremock.extension.responsetemplating.ResponseTemplateTransformer
 import com.github.tomakehurst.wiremock.http.Fault
 import com.github.tomakehurst.wiremock.http.Fault.CONNECTION_RESET_BY_PEER
-import com.github.tomakehurst.wiremock.http.RequestMethod
 import com.github.tomakehurst.wiremock.junit.WireMockRule
-import com.github.tomakehurst.wiremock.matching.AnythingPattern
-import com.github.tomakehurst.wiremock.matching.ContentPattern
-import com.github.tomakehurst.wiremock.matching.StringValuePattern
 import com.github.tomakehurst.wiremock.matching.UrlPattern
 import no.nav.rekrutteringsbistand.api.OppdaterRekrutteringsbistandStillingDto
 import no.nav.rekrutteringsbistand.api.RekrutteringsbistandStilling
@@ -429,7 +425,7 @@ internal class StillingComponentTest {
     }
 
     @Test
-    fun `DELETE mot stillinger skal slette stilling`() {
+    fun `DELETE mot stillinger skal slette stilling og returnere 200`() {
         val slettetStilling = enStilling.copy(status = "DELETED")
         mockPamAdApi(HttpMethod.DELETE, "/api/v1/ads/${slettetStilling.uuid}", slettetStilling)
         mockKandidatlisteOppdatering(::delete)
@@ -451,6 +447,25 @@ internal class StillingComponentTest {
             assertThat(stilling?.source).isEqualTo(slettetStilling.source)
             assertThat(stilling?.privacy).isEqualTo(slettetStilling.privacy)
             assertThat(stilling?.status).isEqualTo("DELETED")
+            assertThat(it.statusCode).isEqualTo(OK)
+        }
+    }
+
+    @Test
+    fun `DELETE mot stilling med kandidatlistefeil skal returnere status 500`() {
+        val slettetStilling = enStilling.copy(status = "DELETED")
+
+        mockPamAdApi(HttpMethod.DELETE, "/api/v1/ads/${slettetStilling.uuid}", slettetStilling)
+        mockFeilendeKallTilKandidatApiForSlettingAvStilling()
+        mockAzureObo(wiremockAzure)
+
+        restTemplate.exchange(
+            "$localBaseUrl/rekrutteringsbistandstilling/${enStilling.uuid}",
+            HttpMethod.DELETE,
+            null,
+            Stilling::class.java
+        ).also {
+            assertThat(it.statusCode).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
         }
     }
 
@@ -535,13 +550,8 @@ internal class StillingComponentTest {
     }
 
     private fun mockKandidatlisteOppdatering(metodeFunksjon: (UrlPattern) -> MappingBuilder = ::put) {
-        val url = if (metodeFunksjon == RequestMethod.DELETE) {
-            "/rekrutteringsbistand-kandidat-api/rest/veileder/stilling/.*/kandidatliste"
-        } else {
-            "/rekrutteringsbistand-kandidat-api/rest/veileder/stilling/kandidatliste"
-        }
         wiremockKandidatliste.stubFor(
-            metodeFunksjon(urlPathMatching(url)).withHeader(
+            metodeFunksjon(urlPathMatching("/rekrutteringsbistand-kandidat-api/rest/veileder/stilling/.*/kandidatliste")).withHeader(
                 CONTENT_TYPE,
                 equalTo(APPLICATION_JSON_VALUE)
             ).withHeader(ACCEPT, equalTo(APPLICATION_JSON_VALUE)).willReturn(
@@ -553,7 +563,6 @@ internal class StillingComponentTest {
         )
     }
 
-    // http://localhost:8766/rekrutteringsbistand-kandidat-api/rest/veileder/stilling/kandidatliste
     private fun mockKandidatlisteOppdateringFeiler() {
         wiremockKandidatliste.stubFor(
             put(urlPathMatching("/rekrutteringsbistand-kandidat-api/rest/veileder/stilling/kandidatliste"))
@@ -569,6 +578,18 @@ internal class StillingComponentTest {
         )
     }
 
+    private fun mockFeilendeKallTilKandidatApiForSlettingAvStilling() {
+        wiremockKandidatliste.stubFor(
+            delete(urlPathMatching("/rekrutteringsbistand-kandidat-api/rest/veileder/stilling/.+/kandidatliste")).withHeader(
+                CONTENT_TYPE,
+                equalTo(APPLICATION_JSON_VALUE)
+            ).withHeader(ACCEPT, equalTo(APPLICATION_JSON_VALUE)).willReturn(
+                aResponse().withStatus(500).withHeader(
+                    CONNECTION, "close"
+                ) // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
+            )
+        )
+    }
 
     @After
     fun after() {
