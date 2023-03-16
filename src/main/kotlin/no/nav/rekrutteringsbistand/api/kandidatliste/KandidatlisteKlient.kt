@@ -1,5 +1,6 @@
 package no.nav.rekrutteringsbistand.api.kandidatliste
 
+import no.nav.rekrutteringsbistand.api.RekrutteringsbistandStilling
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsid
 import no.nav.rekrutteringsbistand.api.support.config.ExternalConfiguration
@@ -21,20 +22,20 @@ class KandidatlisteKlient(
     private val scopeTilKandidatApi: String
 ) {
 
-    fun sendStillingOppdatert(stillingsid: Stillingsid): ResponseEntity<Void> {
-        val url = buildNotificationUrl(stillingsid)
-        log.info("Oppdaterer kandidatliste, stillingsid: $stillingsid")
+    fun sendStillingOppdatert(stilling: RekrutteringsbistandStilling): ResponseEntity<Void> {
+        val url = byggUrlTilPutEndepunkt()
+        log.info("Oppdaterer kandidatliste, stillingsid: ${stilling.stilling.uuid}")
         return restTemplate.exchange(
             url,
             HttpMethod.PUT,
-            HttpEntity(null, headers()),
+            HttpEntity(stilling, headers()),
             Void::class.java
         )
             .also {
                 if (it.statusCode != HttpStatus.NO_CONTENT) {
                     log.warn(
                         "Uventet response fra kandidatliste-api for ad {}: {}",
-                        stillingsid.asString(),
+                        stilling.stilling.uuid,
                         it.statusCodeValue
                     )
                 }
@@ -42,7 +43,7 @@ class KandidatlisteKlient(
     }
 
     fun varsleOmSlettetStilling(stillingsid: Stillingsid): ResponseEntity<Void> {
-        val url: URI = buildNotificationUrl(stillingsid)
+        val url: URI = byggUrlTilDeleteEndepunkt(stillingsid)
         val httpMethod = HttpMethod.DELETE
         log.info("Skal slette kandidatliste med stillingsid $stillingsid ved å sende en HTTP $httpMethod til URL $url")
         return restTemplate.exchange(
@@ -63,9 +64,16 @@ class KandidatlisteKlient(
             }
     }
 
-    private fun buildNotificationUrl(stillingsid: Stillingsid): URI {
+    private fun byggUrlTilDeleteEndepunkt(stillingsid: Stillingsid): URI {
         return UriComponentsBuilder.fromUriString(externalConfiguration.kandidatlisteApi.url)
             .pathSegment(stillingsid.asString())
+            .pathSegment("kandidatliste")
+            .build(true)
+            .toUri()
+    }
+
+    private fun byggUrlTilPutEndepunkt(): URI {
+        return UriComponentsBuilder.fromUriString(externalConfiguration.kandidatlisteApi.url)
             .pathSegment("kandidatliste")
             .build(true)
             .toUri()

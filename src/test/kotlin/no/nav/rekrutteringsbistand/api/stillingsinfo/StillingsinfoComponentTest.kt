@@ -1,9 +1,16 @@
 package no.nav.rekrutteringsbistand.api.stillingsinfo
 
 import arrow.core.getOrElse
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.github.tomakehurst.wiremock.junit.WireMockRule
 import no.nav.rekrutteringsbistand.api.TestRepository
+import no.nav.rekrutteringsbistand.api.Testdata
+import no.nav.rekrutteringsbistand.api.Testdata.enRekrutteringsbistandStilling
+import no.nav.rekrutteringsbistand.api.Testdata.enStilling
 import no.nav.rekrutteringsbistand.api.Testdata.enStillingsinfoInboundDto
 import no.nav.rekrutteringsbistand.api.Testdata.enStillingsinfo
 import no.nav.rekrutteringsbistand.api.arbeidsplassen.ArbeidsplassenKlient
@@ -89,8 +96,9 @@ class StillingsinfoComponentTest {
     @Test
     fun `Opprettelse av kandidatliste på ekstern stilling skal returnere HTTP 201 med opprettet stillingsinfo, og trigge resending hos Arbeidsplassen`() {
         val dto = enStillingsinfoInboundDto
-
         mockAzureObo(wiremockAzure)
+        val stilling = enStilling
+        `when`(arbeidsplassenKlient.hentStilling(stilling.uuid)).thenReturn(stilling)
 
         val url = "$localBaseUrl/stillingsinfo"
         val stillingsinfoRespons =
@@ -112,7 +120,8 @@ class StillingsinfoComponentTest {
         repository.opprett(enStillingsinfo)
         val tilLagring = enStillingsinfoInboundDto
         mockAzureObo(wiremockAzure)
-
+        val stilling = enStilling
+        `when`(arbeidsplassenKlient.hentStilling(stilling.uuid)).thenReturn(stilling)
         val url = "$localBaseUrl/stillingsinfo"
         val stillingsinfoRespons =
             restTemplate.exchange(url, HttpMethod.PUT, httpEntity(tilLagring), StillingsinfoDto::class.java)
@@ -127,7 +136,7 @@ class StillingsinfoComponentTest {
     fun `Når vi prøver å opprette eier og kall mot kandidat-api feiler så skal ingenting ha blitt lagret`() {
         val dto = enStillingsinfoInboundDto
         mockAzureObo(wiremockAzure)
-        `when`(kandidatlisteKlient.sendStillingOppdatert(Stillingsid(dto.stillingsid))).thenThrow(RuntimeException::class.java)
+        `when`(kandidatlisteKlient.sendStillingOppdatert(enRekrutteringsbistandStilling)).thenThrow(RuntimeException::class.java)
 
         val respons =
             restTemplate.exchange("$localBaseUrl/stillingsinfo", HttpMethod.PUT, httpEntity(dto), String::class.java)
@@ -147,7 +156,7 @@ class StillingsinfoComponentTest {
             eierNavn = "Helt Annet Navn"
         )
         mockAzureObo(wiremockAzure)
-        `when`(kandidatlisteKlient.sendStillingOppdatert(stillingsinfo.stillingsid)).thenThrow(RuntimeException::class.java)
+        `when`(kandidatlisteKlient.sendStillingOppdatert(enRekrutteringsbistandStilling)).thenThrow(RuntimeException::class.java)
 
         val respons = restTemplate.exchange("$localBaseUrl/stillingsinfo", HttpMethod.PUT, httpEntity(endringDto), String::class.java)
 
@@ -166,7 +175,8 @@ class StillingsinfoComponentTest {
             eierNavident = "X998877",
             eierNavn = "Helt Annet Navn"
         )
-        `when`(kandidatlisteKlient.sendStillingOppdatert(stillingsinfoDerEierErNull.stillingsid)).thenThrow(RuntimeException::class.java)
+        val rekrutteringsbistandStilling = enRekrutteringsbistandStilling.copy(stillingsinfo = stillingsinfoDerEierErNull.asStillingsinfoDto())
+        `when`(kandidatlisteKlient.sendStillingOppdatert(rekrutteringsbistandStilling)).thenThrow(RuntimeException::class.java)
 
         val respons = restTemplate.exchange("$localBaseUrl/stillingsinfo", HttpMethod.PUT, httpEntity(endringDto), String::class.java)
 
@@ -187,6 +197,4 @@ class StillingsinfoComponentTest {
         ).toMultiValueMap()
         return HttpEntity(body, headers)
     }
-
-
 }

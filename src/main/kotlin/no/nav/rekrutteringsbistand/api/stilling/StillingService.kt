@@ -12,6 +12,7 @@ import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteKlient
 import no.nav.rekrutteringsbistand.api.stillingsinfo.*
 import no.nav.rekrutteringsbistand.api.support.log
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.util.*
 
 
@@ -56,13 +57,14 @@ class StillingService(
             stillingskategori = opprettRekrutteringsbistandstillingDto.kategori
         )
 
-        kandidatlisteKlient.sendStillingOppdatert(stillingsId)
         val stillingsinfo = stillingsinfoService.hentStillingsinfo(opprettetStilling)
 
         return RekrutteringsbistandStilling(
             stilling = opprettetStilling,
             stillingsinfo = stillingsinfo.map { it.asStillingsinfoDto() }.orNull()
-        )
+        ).also {
+            kandidatlisteKlient.sendStillingOppdatert(it)
+        }
     }
 
     private fun lagreNyttNotat(
@@ -102,6 +104,7 @@ class StillingService(
     fun kategoriMedDefault(stillingsInfo: StillingsinfoDto?) =
         if (stillingsInfo?.stillingskategori == null) Stillingskategori.STILLING else stillingsInfo.stillingskategori
 
+    @Transactional
     fun oppdaterRekrutteringsbistandStilling(
         dto: OppdaterRekrutteringsbistandStillingDto,
         queryString: String?
@@ -109,10 +112,6 @@ class StillingService(
         val oppdatertStilling = arbeidsplassenKlient.oppdaterStilling(dto.stilling, queryString)
 
         val id = Stillingsid(oppdatertStilling.uuid)
-
-        if (oppdatertStilling.source.equals("DIR", false)) {
-            kandidatlisteKlient.sendStillingOppdatert(id)
-        }
 
         if (dto.notat != null) {
             lagreNyttNotat(dto.notat, id)
@@ -125,7 +124,14 @@ class StillingService(
             stilling = oppdatertStilling,
             stillingsinfoid = eksisterendeStillingsinfo?.stillingsinfoid?.asString(),
             notat = eksisterendeStillingsinfo?.notat
-        )
+        ).also {
+            if (oppdatertStilling.source.equals("DIR", ignoreCase = false)) {
+                kandidatlisteKlient.sendStillingOppdatert(RekrutteringsbistandStilling(
+                    stilling = oppdatertStilling,
+                    stillingsinfo = eksisterendeStillingsinfo?.asStillingsinfoDto()
+                ))
+            }
+        }
     }
 
     fun slettRekrutteringsbistandStilling(stillingsId: String): Stilling {
