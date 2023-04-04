@@ -53,7 +53,9 @@ spec:
           namespace: toi
           cluster: dev-fss
         - application: rekrutteringsbistand-stillingssok
+          namespace: toi
         - application: rekrutteringsbistand-stilling
+          namespace: toi
     outbound:
       rules:
         - application: pam-ad-api
