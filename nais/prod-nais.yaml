@@ -52,13 +52,9 @@ spec:
           namespace: toi
           cluster: prod-fss
     outbound:
-      rules:
-        - application: pam-ad-api
-          cluster: prod-gcp
-          namespace: teampam
-        - application: rekrutteringsbistand-kandidat-api
-          cluster: prod-fss
-          namespace: toi
+      external:
+        - host: https://pam-ad-api.dev.intern.nav.no
+        - host: https://rekrutteringsbistand-kandidat-api.prod-fss-pub.nais.io
   env:
     - name: SPRING_PROFILES_ACTIVE
       value: prod
