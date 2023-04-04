@@ -54,12 +54,11 @@ spec:
           cluster: dev-fss
     outbound:
       rules:
-        - application: pam-ad-api
-          cluster: dev-gcp
-          namespace: teampam
         - application: rekrutteringsbistand-kandidat-api
           cluster: dev-fss
           namespace: toi
+      external:
+        - host: https://pam-ad-api.dev.intern.nav.no
   env:
     - name: SPRING_PROFILES_ACTIVE
       value: dev
