@@ -9,7 +9,7 @@ spec:
   image: {{version}}
   port: 9501
   ingresses:
-    - https://rekrutteringsbistand-stilling-api.dev.intern.nav.no
+    - https://rekrutteringsbistand-stilling-api.intern.dev.nav.no
   liveness:
     path: /internal/actuator/health
     initialDelay: 30
