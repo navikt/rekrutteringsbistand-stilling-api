@@ -27,9 +27,9 @@
         <logstash-logback-encoder.version>7.2</logstash-logback-encoder.version>
         <logback-syslog4j.version>1.0.0</logback-syslog4j.version>
         <micrometer-registry-prometheus.version>1.9.5</micrometer-registry-prometheus.version>
-        <wiremock.version>2.34.0</wiremock.version>
+        <wiremock.version>2.35.0</wiremock.version>
         <jackson-module-kotlin.version>2.13.4</jackson-module-kotlin.version>
-        <token-validation.version>2.1.6</token-validation.version>
+        <token-validation.version>3.0.10</token-validation.version>
         <resilience4j.version>2.0.0</resilience4j.version>
     </properties>
 
@@ -142,7 +142,7 @@
 
         <dependency>
             <groupId>com.github.tomakehurst</groupId>
-            <artifactId>wiremock-jre8</artifactId>
+            <artifactId>wiremock-jre8-standalone</artifactId>
             <version>${wiremock.version}</version>
             <scope>test</scope>
         </dependency>
