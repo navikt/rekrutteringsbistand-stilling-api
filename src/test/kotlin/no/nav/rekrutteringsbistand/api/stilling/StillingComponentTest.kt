@@ -504,7 +504,7 @@ internal class StillingComponentTest {
 
     private fun mockPamAdApi(method: HttpMethod, urlPath: String, responseBody: Any) {
         wiremockPamAdApi.stubFor(
-            request(method.name, urlPathMatching(urlPath)).withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
+            request(method.name(), urlPathMatching(urlPath)).withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
                 .withHeader(ACCEPT, equalTo(APPLICATION_JSON_VALUE)).withHeader(AUTHORIZATION, matching("Bearer .*"))
                 .willReturn(
                     aResponse().withStatus(200).withHeader(
@@ -520,7 +520,7 @@ internal class StillingComponentTest {
         urlPath: String, method: HttpMethod = HttpMethod.GET, httpResponseStatus: Int = 418
     ) {
         wiremockPamAdApi.stubFor(
-            request(method.name, urlPathMatching(urlPath)).withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
+            request(method.name(), urlPathMatching(urlPath)).withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
                 .withHeader(ACCEPT, equalTo(APPLICATION_JSON_VALUE)).withHeader(AUTHORIZATION, matching("Bearer .*"))
                 .willReturn(aResponse().withStatus(httpResponseStatus))
         )
@@ -530,7 +530,7 @@ internal class StillingComponentTest {
         urlPath: String, method: HttpMethod = HttpMethod.GET, fault: Fault = CONNECTION_RESET_BY_PEER
     ) {
         wiremockPamAdApi.stubFor(
-            request(method.name, urlPathMatching(urlPath)).withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
+            request(method.name(), urlPathMatching(urlPath)).withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
                 .withHeader(ACCEPT, equalTo(APPLICATION_JSON_VALUE)).withHeader(AUTHORIZATION, matching("Bearer .*"))
                 .willReturn(aResponse().withFault(fault))
         )
