@@ -31,7 +31,7 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         ## Ved fix av prodfeil, sett continue-on-error=true, slik at workflow fortsetter selvom snyk finner sårbarheter
-        continue-on-error: true
+        continue-on-error: false
 
   deploy-to-dev:
     name: Deploy to dev
@@ -39,7 +39,7 @@ jobs:
     #########################
     ### DEVELOPERS: Insert your feature branch name below (in addition to master) if you want to deploy it to dev
     #########################
-    if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/access-policy'
+    if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/oppgrader-spring'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
