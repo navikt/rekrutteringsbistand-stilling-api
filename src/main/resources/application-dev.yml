@@ -14,3 +14,9 @@ spring:
     driver: org.postgresql.Driver
     hikari:
       maximum-pool-size: 5
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: *
