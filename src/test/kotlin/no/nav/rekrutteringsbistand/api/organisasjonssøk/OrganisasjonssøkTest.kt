@@ -77,7 +77,7 @@ internal class OrganisasjonssøkTest {
 
     private fun mock(method: HttpMethod, urlPath: String, responseBody: String) {
         wiremockPamAdApi.stubFor(
-                WireMock.request(method.name, WireMock.urlPathMatching(urlPath))
+                WireMock.request(method.name(), WireMock.urlPathMatching(urlPath))
                         .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
                         .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
                         .withHeader(HttpHeaders.AUTHORIZATION, WireMock.matching("Bearer .*"))
@@ -90,7 +90,7 @@ internal class OrganisasjonssøkTest {
 
     private fun mockRegex(method: HttpMethod, urlPath: String, responseBody: String) {
         wiremockPamAdApi.stubFor(
-            WireMock.request(method.name, WireMock.urlMatching(urlPath))
+            WireMock.request(method.name(), WireMock.urlMatching(urlPath))
                 .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
                 .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
                 .withHeader(HttpHeaders.AUTHORIZATION, WireMock.matching("Bearer .*"))

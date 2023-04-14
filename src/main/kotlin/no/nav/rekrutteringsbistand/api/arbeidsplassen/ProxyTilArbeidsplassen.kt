@@ -1,5 +1,6 @@
 package no.nav.rekrutteringsbistand.api.arbeidsplassen
 
+import jakarta.servlet.http.HttpServletRequest
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
 import no.nav.rekrutteringsbistand.api.support.log
 import no.nav.rekrutteringsbistand.api.support.config.ExternalConfiguration
@@ -16,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
-import javax.servlet.http.HttpServletRequest
 
 @RestController
 @RequiredIssuers(
