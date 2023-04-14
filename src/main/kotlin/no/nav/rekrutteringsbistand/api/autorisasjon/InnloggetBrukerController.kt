@@ -1,6 +1,7 @@
 package no.nav.rekrutteringsbistand.api.autorisasjon
 
 import no.nav.security.token.support.core.api.Protected
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
@@ -11,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController
 class InnloggetBrukerController(private val tokenUtils: TokenUtils) {
 
     @GetMapping
-    fun hentInnloggetVeileder(): InnloggetVeileder {
-        return tokenUtils.hentInnloggetVeileder()
+    fun hentInnloggetVeileder(): ResponseEntity<InnloggetVeileder> {
+        return ResponseEntity.ok(tokenUtils.hentInnloggetVeileder())
     }
 }
