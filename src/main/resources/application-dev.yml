@@ -3,7 +3,7 @@ scope:
   kandidat-api: api://dev-fss.toi.rekrutteringsbistand-kandidat-api/.default
 
 external:
-  pam-ad-api.url: https://pam-ad-api.dev.intern.nav.no/adapi
+  pam-ad-api.url: https://pam-ad-api.intern.dev.nav.no/adapi
   kandidatliste-api.url: https://rekrutteringsbistand-kandidat-api.dev-fss-pub.nais.io/rekrutteringsbistand-kandidat-api/rest/veileder/stilling
 
 spring:
