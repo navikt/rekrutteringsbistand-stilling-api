@@ -54,7 +54,7 @@ spec:
           cluster: dev-fss
     outbound:
       external:
-        - host: https://pam-ad-api.dev.intern.nav.no
+        - host: https://pam-ad-api.intern.dev.nav.no
         - host: https://rekrutteringsbistand-kandidat-api.dev-fss-pub.nais.io
   env:
     - name: SPRING_PROFILES_ACTIVE
