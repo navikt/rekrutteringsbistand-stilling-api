@@ -194,9 +194,9 @@
         </dependency>
         <!-- Slutt, dependencies relatert til login -->
         <dependency>
-            <groupId>no.nav.arbeidsgiver.toi</groupId>
-            <artifactId>toi-rapids-and-rivers-fork</artifactId>
-            <version>1.1</version>
+            <groupId>com.github.navikt</groupId>
+            <artifactId>rapids-and-rivers</artifactId>
+            <version>2023041310341681374880.67ced5ad4dda</version>
         </dependency>
 
     </dependencies>
