@@ -13,20 +13,20 @@ import org.springframework.stereotype.Component
 @Component
 class MockLogin(private val mockOauth2Server: MockOAuth2Server) {
 
-    fun hentAzureAdVeilederToken(): String {
+    fun hentAzureAdVeilederToken(navIdent: String): String {
         return mockOauth2Server.issueToken(
             issuerId = azureAdIssuer,
             subject = "brukes-ikke",
             claims = mapOf(
                 "unique_name" to "Clark.Kent@nav.no",
-                "NAVident" to "C12345",
+                "NAVident" to "$navIdent",
                 "name" to "Clark Kent"
             )
         ).serialize()
     }
 
-    fun leggAzureVeilederTokenPåAlleRequests(testRestTemplate: TestRestTemplate) {
-        val token = hentAzureAdVeilederToken()
+    fun leggAzureVeilederTokenPåAlleRequests(testRestTemplate: TestRestTemplate, navIdent: String = "C12345") {
+        val token = hentAzureAdVeilederToken(navIdent)
 
         testRestTemplate.restTemplate.interceptors.add(ClientHttpRequestInterceptor { request, body, execution ->
             request.headers.set("Authorization", "Bearer $token")

@@ -94,7 +94,7 @@ class StandardsøkTest {
     @Test
     fun `GET til standardsøk med azuread-token skal hente lagret standardsøk for navIdent`() {
         val restTemplateUtenCookie = TestRestTemplate()
-        val token = mockLogin.hentAzureAdVeilederToken()
+        val token = mockLogin.hentAzureAdVeilederToken("C12345")
 
         val standardsøkTilLagring = LagreStandardsøkDto("?fritekst=jalla&publisert=intern")
         standardsøkRepository.oppdaterStandardsøk(standardsøkTilLagring, "C12345")
