@@ -6,9 +6,11 @@ import no.nav.rekrutteringsbistand.api.arbeidsplassen.ArbeidsplassenKlient
 import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteKlient
 import no.nav.rekrutteringsbistand.api.stilling.Stilling
 import no.nav.rekrutteringsbistand.api.stilling.StillingService
+import no.nav.rekrutteringsbistand.api.support.log
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 @Service
 class StillingsinfoService(
@@ -49,8 +51,13 @@ class StillingsinfoService(
     fun hentForStilling(stillingId: Stillingsid): Option<Stillingsinfo> =
         repo.hentForStilling(stillingId)
 
-    fun hentForStillinger(stillingIder: List<Stillingsid>): List<Stillingsinfo> =
-        repo.hentForStillinger(stillingIder)
+    fun hentForStillinger(stillingIder: List<Stillingsid>): List<Stillingsinfo> {
+        val start = System.nanoTime()
+        val stillingsinfoListe =  repo.hentForStillinger(stillingIder)
+        val tidBruktMillis = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start)
+        log.info("Brukte $tidBruktMillis på å hente stillingsinfo for ${stillingIder.size} stillinger")
+        return stillingsinfoListe
+    }
 
     fun hentForIdent(navIdent: String): List<Stillingsinfo> =
         repo.hentForIdent(navIdent)

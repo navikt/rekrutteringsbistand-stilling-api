@@ -14,6 +14,7 @@ import no.nav.rekrutteringsbistand.api.support.log
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 
 @Service
@@ -148,12 +149,15 @@ class StillingService(
             .hentForStillinger(stillingsIder)
             .associateBy { it.stillingsid.asString() }
 
+        val start = System.nanoTime()
         val rekrutteringsbistandStillinger = stillingerPage.content.map {
             RekrutteringsbistandStilling(
                 stillingsinfo = stillingsinfoer[it.uuid]?.asStillingsinfoDto(),
                 stilling = it
             )
         }
+        val tidBruktMillis = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start)
+        log.info("Brukte $tidBruktMillis millisekunder på å slå sammen stillingsinfo med stilling for ${stillingsIder.size} stillinger")
 
         return Page(
             totalPages = stillingerPage.totalPages,
