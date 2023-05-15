@@ -1,5 +1,6 @@
 package no.nav.rekrutteringsbistand.api.stillingsinfo
 
+import no.nav.rekrutteringsbistand.api.RekrutteringsbistandStilling
 import no.nav.security.token.support.core.api.Protected
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -16,8 +17,9 @@ class StillingsinfoController(
         @RequestBody dto: StillingsinfoInboundDto
     ): ResponseEntity<StillingsinfoDto> {
         val nyEier = Eier(dto.eierNavident, dto.eierNavn)
-        val oppdatertStillingsinfo = service.overtaEierskapForEksternStillingOgKandidatliste(Stillingsid(dto.stillingsid), nyEier)
-        return ResponseEntity.status(HttpStatus.OK).body(oppdatertStillingsinfo.asStillingsinfoDto())
+        val rekrutteringsbistandStilling: RekrutteringsbistandStilling = service.overtaEierskapForEksternStillingOgKandidatliste(Stillingsid(dto.stillingsid), nyEier)
+//        mineStillingerService.overtaEierskap(oppdatertStillingsinfo)
+        return ResponseEntity.status(HttpStatus.OK).body(rekrutteringsbistandStilling.stillingsinfo)
     }
 
     @GetMapping("/ident/{navident}")

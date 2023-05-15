@@ -14,13 +14,13 @@ import java.util.concurrent.TimeUnit
 
 @Service
 class StillingsinfoService(
-    private val   repo: StillingsinfoRepository,
+    private val repo: StillingsinfoRepository,
     private val kandidatlisteKlient: KandidatlisteKlient,
     private val arbeidsplassenKlient: ArbeidsplassenKlient
 ) {
 
     @Transactional
-    fun overtaEierskapForEksternStillingOgKandidatliste(stillingsId: Stillingsid, nyEier: Eier): Stillingsinfo {
+    fun overtaEierskapForEksternStillingOgKandidatliste(stillingsId: Stillingsid, nyEier: Eier): RekrutteringsbistandStilling {
         val opprinneligStillingsinfo = repo.hentForStilling(stillingsId).orNull()
         val stillingsinfoMedNyEier = opprinneligStillingsinfo?.copy(eier = nyEier) ?: Stillingsinfo(
             stillingsinfoid = Stillingsinfoid(UUID.randomUUID()),
@@ -28,21 +28,23 @@ class StillingsinfoService(
             eier = nyEier
         )
 
-        opprinneligStillingsinfo?.let { repo.oppdaterEier(it.stillingsinfoid, nyEier) } ?: repo.opprett(stillingsinfoMedNyEier)
+        opprinneligStillingsinfo?.let { repo.oppdaterEier(it.stillingsinfoid, nyEier) } ?: repo.opprett(
+            stillingsinfoMedNyEier
+        )
 
+        val stilling = arbeidsplassenKlient.hentStilling(stillingsId.asString(), false)
+        val rekrutteringsbistandStilling = RekrutteringsbistandStilling(
+            stilling = stilling,
+            stillingsinfo = stillingsinfoMedNyEier.asStillingsinfoDto()
+        )
         try {
-            val stilling = arbeidsplassenKlient.hentStilling(stillingsId.asString(), false)
-            val rekrutteringsbistandStilling = RekrutteringsbistandStilling(
-                stilling = stilling,
-                stillingsinfo = stillingsinfoMedNyEier.asStillingsinfoDto()
-            )
             kandidatlisteKlient.sendStillingOppdatert(rekrutteringsbistandStilling)
         } catch (e: Exception) {
             throw RuntimeException("Varsel til rekbis-kandidat-api om endring av eier for ekstern stilling feilet", e)
         }
 
         arbeidsplassenKlient.triggResendingAvStillingsmeldingFraArbeidsplassen(stillingsId.asString())
-        return stillingsinfoMedNyEier
+        return rekrutteringsbistandStilling
     }
 
     fun hentStillingsinfo(stilling: Stilling): Option<Stillingsinfo> =
@@ -53,7 +55,7 @@ class StillingsinfoService(
 
     fun hentForStillinger(stillingIder: List<Stillingsid>): List<Stillingsinfo> {
         val start = System.nanoTime()
-        val stillingsinfoListe =  repo.hentForStillinger(stillingIder)
+        val stillingsinfoListe = repo.hentForStillinger(stillingIder)
         val tidBruktMillis = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start)
         log.info("Brukte $tidBruktMillis på å hente stillingsinfo for ${stillingIder.size} stillinger")
         return stillingsinfoListe
