@@ -1,6 +1,5 @@
 package no.nav.rekrutteringsbistand.api.minestillinger
 
-import no.nav.rekrutteringsbistand.api.stilling.Stilling
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsid
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
@@ -66,7 +65,7 @@ class MineStillingerRepository(
 
     fun hentForStillingsId(stillingsId: Stillingsid): MinStilling? {
         val sql = "select * from min_stilling where stillingsid = :stillingsid"
-        val params = MapSqlParameterSource("stillingsid", stillingsId)
+        val params = MapSqlParameterSource("stillingsid", stillingsId.verdi)
 
         val stillinger = namedJdbcTemplate.query(sql, params) { rs: ResultSet, _: Int ->
             MinStilling.fromDB(rs)

@@ -153,6 +153,8 @@ class MineStillingerTest {
         val stillingsinfoDto = Testdata.enStillingsinfoInboundDto.copy(eierNavident = navIdent)
         val pamAdStilling = Testdata.enOpprettetStilling.copy(uuid = stillingsinfoDto.stillingsid)
         mockPamAdApi(HttpMethod.GET, "/b2b/api/v1/ads/${pamAdStilling.uuid}", pamAdStilling)
+        mockPamAdApi(HttpMethod.PUT, "/api/v1/ads/${pamAdStilling.uuid}", pamAdStilling)
+        mockKandidatlisteOppdatering()
 
         restTemplate.put(
             "$localBaseUrl/stillingsinfo",
@@ -204,6 +206,7 @@ class MineStillingerTest {
             )
         )
     }
+
 
 
     /*
