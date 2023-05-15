@@ -12,9 +12,7 @@ import com.github.tomakehurst.wiremock.http.Fault
 import com.github.tomakehurst.wiremock.http.Fault.CONNECTION_RESET_BY_PEER
 import com.github.tomakehurst.wiremock.junit.WireMockRule
 import com.github.tomakehurst.wiremock.matching.UrlPattern
-import no.nav.rekrutteringsbistand.api.OppdaterRekrutteringsbistandStillingDto
-import no.nav.rekrutteringsbistand.api.RekrutteringsbistandStilling
-import no.nav.rekrutteringsbistand.api.TestRepository
+import no.nav.rekrutteringsbistand.api.*
 import no.nav.rekrutteringsbistand.api.Testdata.enAnnenStillingsinfo
 import no.nav.rekrutteringsbistand.api.Testdata.enOpprettRekrutteringsbistandstillingDto
 import no.nav.rekrutteringsbistand.api.Testdata.enOpprettetStilling
@@ -25,7 +23,6 @@ import no.nav.rekrutteringsbistand.api.Testdata.enStilling
 import no.nav.rekrutteringsbistand.api.Testdata.enStillingsinfo
 import no.nav.rekrutteringsbistand.api.Testdata.enStillingsinfoUtenEier
 import no.nav.rekrutteringsbistand.api.config.MockLogin
-import no.nav.rekrutteringsbistand.api.mockAzureObo
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsid
 import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoRepository
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingskategori
@@ -45,7 +42,6 @@ import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatus.OK
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
-import org.springframework.http.ResponseEntity
 import org.springframework.test.context.junit4.SpringRunner
 import java.util.*
 
@@ -90,6 +86,7 @@ internal class StillingComponentTest {
     @Before
     fun before() {
         mockLogin.leggAzureVeilederTokenPåAlleRequests(restTemplate)
+        testRepository.slettAlt()
     }
 
     @Test

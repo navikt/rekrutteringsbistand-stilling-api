@@ -37,13 +37,13 @@ import java.util.*
 @RunWith(SpringRunner::class)
 @SpringBootTest(
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-    properties = arrayOf("external.pam-ad-api.url=http://localhost:9935")
+    properties = arrayOf("external.pam-ad-api.url=http://localhost:9934")
 )
 class MineStillingerTest {
 
     @get:Rule
     val wiremockPamAdApi = WireMockRule(
-        WireMockConfiguration.options().port(9935).notifier(Slf4jNotifier(true))
+        WireMockConfiguration.options().port(9934).notifier(Slf4jNotifier(true))
             .extensions(ResponseTemplateTransformer(true))
     )
 
@@ -206,7 +206,6 @@ class MineStillingerTest {
             )
         )
     }
-
 
 
     /*
