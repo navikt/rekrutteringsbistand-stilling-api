@@ -124,7 +124,7 @@ class MineStillingerTest {
             stillingsinfoid = "dummy",
             notat = "dummy"
         )
-        mockPamAdApi(HttpMethod.PUT, "/api/v1/ads", oppdatertPamAdStilling)
+        mockPamAdApi(HttpMethod.PUT, "/api/v1/ads/${pamAdStilling.uuid}", oppdatertPamAdStilling)
 
         restTemplate.put(
             "$localBaseUrl/rekrutteringsbistandstilling",
