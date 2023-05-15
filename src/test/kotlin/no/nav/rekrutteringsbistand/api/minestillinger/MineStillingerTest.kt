@@ -10,10 +10,12 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.github.tomakehurst.wiremock.extension.responsetemplating.ResponseTemplateTransformer
 import com.github.tomakehurst.wiremock.junit.WireMockRule
 import com.github.tomakehurst.wiremock.matching.UrlPattern
+import no.nav.rekrutteringsbistand.api.OppdaterRekrutteringsbistandStillingDto
 import no.nav.rekrutteringsbistand.api.RekrutteringsbistandStilling
 import no.nav.rekrutteringsbistand.api.Testdata
 import no.nav.rekrutteringsbistand.api.config.MockLogin
 import no.nav.rekrutteringsbistand.api.mockAzureObo
+import no.nav.rekrutteringsbistand.api.stilling.Stilling
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Rule
@@ -27,6 +29,7 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
+import org.springframework.http.RequestEntity
 import org.springframework.test.context.junit4.SpringRunner
 import java.util.*
 
@@ -101,10 +104,42 @@ class MineStillingerTest {
 
     @Test
     fun `Når veileder oppdaterer en direktemelding stilling så skal vi lagre de oppdaterte verdiene`() {
-        val eksisterende = MinStilling.fromStilling(Testdata.enOpprettetStilling, navIdent)
-        repository.lagre(eksisterende)
+        val pamAdStilling: Stilling = Testdata.enOpprettetStilling
+        val eksisterendeMinStilling: MinStilling = MinStilling.fromStilling(pamAdStilling, navIdent)
+        repository.lagre(eksisterendeMinStilling)
+        mockKandidatlisteOppdatering()
+        mockAzureObo(wiremockAzure)
+        val oppdatertPamAdStilling = pamAdStilling.copy(
+            uuid = UUID.randomUUID().toString(),
+            title = pamAdStilling.title + "dummy",
+            expires = pamAdStilling.expires!!.plusMonths(1),
+            id = pamAdStilling.id + 1,
+            businessName = pamAdStilling.businessName + "dummy",
+            status = pamAdStilling.status + "dummy"
+        )
+        val oppdatertStillingDto = OppdaterRekrutteringsbistandStillingDto(
+            stilling = oppdatertPamAdStilling,
+            stillingsinfoid = "dummy",
+            notat = "dummy"
+        )
+        mockPamAdApi(HttpMethod.PUT, "/api/v1/ads", oppdatertStillingDto)
 
+        restTemplate.put(
+            "$localBaseUrl/rekrutteringsbistandstilling",
+            oppdatertPamAdStilling,
+            RekrutteringsbistandStilling::class.java
+        )
 
+        val stilingerFraDb = repository.hent(navIdent)
+        assertThat(stilingerFraDb.size).isEqualTo(1)
+        val stillingFraDb = stilingerFraDb.first()
+        assertThat(stillingFraDb.stillingsId.asString()).isEqualTo(oppdatertPamAdStilling.uuid)
+        assertThat(stillingFraDb.annonsenr).isEqualTo(oppdatertPamAdStilling.id)
+        assertThat(stillingFraDb.status).isEqualTo(oppdatertPamAdStilling.status)
+        assertThat(stillingFraDb.arbeidsgiverNavn).isEqualTo(oppdatertPamAdStilling.businessName)
+        assertThat(stillingFraDb.sistEndret.toLocalDateTime()).isEqualToIgnoringNanos(oppdatertPamAdStilling.updated) // TODO: Blir vel ikke riktig?
+        assertThat(stillingFraDb.utløpsdato.toLocalDateTime()).isEqualToIgnoringNanos(oppdatertPamAdStilling.expires)
+        assertThat(stillingFraDb.tittel).isEqualTo(oppdatertPamAdStilling.title)
     }
 
     private fun mockPamAdApi(method: HttpMethod, urlPath: String, responseBody: Any) {
