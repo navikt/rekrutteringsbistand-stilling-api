@@ -150,7 +150,7 @@ class MineStillingerTest {
     @Test
     fun `Når veileder oppretter kandidatliste for ekstern stilling skal vi opprette stillingen i db-tabellen`() {
         mockAzureObo(wiremockAzure)
-        val stillingsinfoDto = Testdata.enStillingsinfoInboundDto
+        val stillingsinfoDto = Testdata.enStillingsinfoInboundDto.copy(eierNavident = navIdent)
         val pamAdStilling = Testdata.enOpprettetStilling.copy(uuid = stillingsinfoDto.stillingsid)
         mockPamAdApi(HttpMethod.GET, "/b2b/api/v1/ads/${pamAdStilling.uuid}", pamAdStilling)
 
