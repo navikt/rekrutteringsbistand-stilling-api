@@ -13,7 +13,6 @@ import com.github.tomakehurst.wiremock.matching.UrlPattern
 import no.nav.rekrutteringsbistand.api.OppdaterRekrutteringsbistandStillingDto
 import no.nav.rekrutteringsbistand.api.RekrutteringsbistandStilling
 import no.nav.rekrutteringsbistand.api.Testdata
-import no.nav.rekrutteringsbistand.api.arbeidsplassen.ArbeidsplassenKlient
 import no.nav.rekrutteringsbistand.api.config.MockLogin
 import no.nav.rekrutteringsbistand.api.mockAzureObo
 import no.nav.rekrutteringsbistand.api.stilling.Stilling
@@ -23,11 +22,8 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mockito
-import org.mockito.Mockito.`when`
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.http.HttpHeaders
@@ -99,7 +95,7 @@ class MineStillingerTest {
         )
 
         val stillingFraRespons = respons.stilling
-        val stilingerFraDb = repository.hent(navIdent)
+        val stilingerFraDb = repository.hentForNavIdent(navIdent)
         assertThat(stilingerFraDb.size).isEqualTo(1)
         val stillingFraDb = stilingerFraDb.first()
         assertThat(stillingFraDb.stillingsId.asString()).isEqualTo(stillingFraRespons.uuid)
@@ -138,7 +134,7 @@ class MineStillingerTest {
             RekrutteringsbistandStilling::class.java
         )
 
-        val stilingerFraDb = repository.hent(navIdent)
+        val stilingerFraDb = repository.hentForNavIdent(navIdent)
         assertThat(stilingerFraDb.size).isEqualTo(1)
         val stillingFraDb = stilingerFraDb.first()
         assertThat(stillingFraDb.stillingsId.asString()).isEqualTo(oppdatertPamAdStilling.uuid)
@@ -164,7 +160,7 @@ class MineStillingerTest {
             StillingsinfoDto::class.java
         )
 
-        val stilingerFraDb = repository.hent(navIdent)
+        val stilingerFraDb = repository.hentForNavIdent(navIdent)
         assertThat(stilingerFraDb.size).isEqualTo(1)
         val stillingFraDb = stilingerFraDb.first()
         assertThat(stillingFraDb.stillingsId.asString()).isEqualTo(pamAdStilling.uuid)

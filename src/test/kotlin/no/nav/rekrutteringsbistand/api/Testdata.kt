@@ -37,7 +37,7 @@ object Testdata {
         administration = null,
         location = null,
         publishedByAdmin = null,
-        businessName = null,
+        businessName = "En Arbeidsgiver AS",
         firstPublished = null,
         deactivatedByExpiry = null,
         activationOnPublishingDate = null

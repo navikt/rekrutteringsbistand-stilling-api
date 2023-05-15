@@ -1,5 +1,7 @@
 package no.nav.rekrutteringsbistand.api.minestillinger
 
+import no.nav.rekrutteringsbistand.api.stilling.Stilling
+import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsid
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert
@@ -14,6 +16,7 @@ class MineStillingerRepository(
         SimpleJdbcInsert(namedJdbcTemplate.jdbcTemplate).withTableName("min_stilling").usingGeneratedKeyColumns("id")
 
     fun opprett(minStilling: MinStilling) {
+
         simpleJdbcInsert.execute(
             mapOf(
                 "stillingsid" to minStilling.stillingsId.verdi,
@@ -52,12 +55,26 @@ class MineStillingerRepository(
         )
     }
 
-    fun hent(navIdent: String): List<MinStilling> {
+    fun hentForNavIdent(navIdent: String): List<MinStilling> {
         val sql = "select * from min_stilling where eier_nav_ident = :ident order by sist_endret"
         val params = MapSqlParameterSource("ident", navIdent)
 
         return namedJdbcTemplate.query(sql, params) { rs: ResultSet, _: Int ->
             MinStilling.fromDB(rs)
         }
+    }
+
+    fun hentForStillingsId(stillingsId: Stillingsid): MinStilling? {
+        val sql = "select * from min_stilling where stillingsid = :stillingsid"
+        val params = MapSqlParameterSource("stillingsid", stillingsId)
+
+        val stillinger = namedJdbcTemplate.query(sql, params) { rs: ResultSet, _: Int ->
+            MinStilling.fromDB(rs)
+        }
+
+        if (stillinger.size > 1) {
+            throw Exception("Mer enn én stilling med UUID $stillingsId")
+        }
+        return stillinger.firstOrNull()
     }
 }
