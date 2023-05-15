@@ -93,8 +93,8 @@ class MineStillingerTest {
         assertThat(stillingFraDb.annonsenr).isEqualTo(stillingFraRespons.id)
         assertThat(stillingFraDb.status).isEqualTo(stillingFraRespons.status)
         assertThat(stillingFraDb.arbeidsgiverNavn).isEqualTo(stillingFraRespons.businessName)
-        assertThat(stillingFraDb.sistEndret.toLocalDateTime()).isEqualTo(stillingFraRespons.updated)
-        assertThat(stillingFraDb.utløpsdato.toLocalDateTime()).isEqualTo(stillingFraRespons.expires)
+        assertThat(stillingFraDb.sistEndret.toLocalDateTime()).isEqualToIgnoringNanos(stillingFraRespons.updated)
+        assertThat(stillingFraDb.utløpsdato.toLocalDateTime()).isEqualToIgnoringNanos(stillingFraRespons.expires)
         assertThat(stillingFraDb.tittel).isEqualTo(stillingFraRespons.title)
     }
 
@@ -130,11 +130,8 @@ class MineStillingerTest {
         )
     }
 
-
     /*
     Test cases:
-    - Når veileder oppretter en direktemeldt stilling, så skal vi lagre det vi trenger for å vise den fram i Mine stillinger
-    - Når veileder oppretter en direktemeldt stilling, så skal vi lagre annonsenummeret fra pam-ad-api
     - Når veileder lager kandidatliste for en ekstern stilling, så skal vi lagre det vi trenger for å vise den fram i Mine stillinger
     - Når veileder oppdaterer en direktemelding stilling, så skal vi lagre de oppdaterte verdiene
     - Når stilling-api konsumerer en melding som gjelder en ekstern stilling vi allerede har lagret data på, så skal vi oppdatere verdiene
