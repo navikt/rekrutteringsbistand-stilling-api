@@ -70,6 +70,7 @@ class MineStillingerTest {
     @Before
     fun before() {
         mockLogin.leggAzureVeilederTokenPåAlleRequests(restTemplate, navIdent)
+        // TODO tøm db
     }
 
     @Test
@@ -96,6 +97,14 @@ class MineStillingerTest {
         assertThat(stillingFraDb.sistEndret.toLocalDateTime()).isEqualToIgnoringNanos(stillingFraRespons.updated)
         assertThat(stillingFraDb.utløpsdato.toLocalDateTime()).isEqualToIgnoringNanos(stillingFraRespons.expires)
         assertThat(stillingFraDb.tittel).isEqualTo(stillingFraRespons.title)
+    }
+
+    @Test
+    fun `Når veileder oppdaterer en direktemelding stilling så skal vi lagre de oppdaterte verdiene`() {
+        val eksisterende = MinStilling.fromStilling(Testdata.enOpprettetStilling, navIdent)
+        repository.lagre(eksisterende)
+
+
     }
 
     private fun mockPamAdApi(method: HttpMethod, urlPath: String, responseBody: Any) {
@@ -129,6 +138,7 @@ class MineStillingerTest {
             )
         )
     }
+
 
     /*
     Test cases:

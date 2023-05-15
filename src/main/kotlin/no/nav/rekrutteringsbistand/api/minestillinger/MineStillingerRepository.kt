@@ -8,7 +8,7 @@ import java.sql.ResultSet
 
 @Repository
 class MineStillingerRepository(
-    val namedJdbcTemplate: NamedParameterJdbcTemplate,
+    private val namedJdbcTemplate: NamedParameterJdbcTemplate,
 ) {
     val simpleJdbcInsert = SimpleJdbcInsert(namedJdbcTemplate.jdbcTemplate).withTableName("min_stilling").usingGeneratedKeyColumns("id")
 
