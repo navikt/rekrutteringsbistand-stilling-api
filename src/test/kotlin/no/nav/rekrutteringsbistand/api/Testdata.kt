@@ -54,6 +54,7 @@ object Testdata {
             reportee = enVeileder.displayName,
             navIdent = enVeileder.navIdent,
         ),
+        businessName = "En Ansvarlig Arbeidsgiver AS"
     )
 
     val enOpprettRekrutteringsbistandstillingDto = OpprettRekrutteringsbistandstillingDto(
@@ -87,7 +88,7 @@ object Testdata {
         mediaList = emptyList(),
         locationList = emptyList(),
         contactList = emptyList(),
-        businessName = null,
+        businessName = "En Ansvarlig Arbeidsgiver AS",
         deactivatedByExpiry = null,
         firstPublished = null,
         publishedByAdmin = null,

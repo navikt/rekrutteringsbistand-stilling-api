@@ -28,6 +28,7 @@ import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.test.context.junit4.SpringRunner
+import java.util.*
 
 @RunWith(SpringRunner::class)
 @SpringBootTest(
@@ -88,12 +89,12 @@ class MineStillingerTest {
         val stilingerFraDb = repository.hent(navIdent)
         assertThat(stilingerFraDb.size).isEqualTo(1)
         val stillingFraDb = stilingerFraDb.first()
-        assertThat(stillingFraDb.stillingsId).isEqualTo(stillingFraRespons.uuid)
+        assertThat(stillingFraDb.stillingsId.asString()).isEqualTo(stillingFraRespons.uuid)
         assertThat(stillingFraDb.annonsenr).isEqualTo(stillingFraRespons.id)
         assertThat(stillingFraDb.status).isEqualTo(stillingFraRespons.status)
         assertThat(stillingFraDb.arbeidsgiverNavn).isEqualTo(stillingFraRespons.businessName)
-        assertThat(stillingFraDb.sistEndret.toLocalDate()).isEqualTo(stillingFraRespons.updated)
-        assertThat(stillingFraDb.utløpsdato).isEqualTo(stillingFraRespons.expires)
+        assertThat(stillingFraDb.sistEndret.toLocalDateTime()).isEqualTo(stillingFraRespons.updated)
+        assertThat(stillingFraDb.utløpsdato.toLocalDateTime()).isEqualTo(stillingFraRespons.expires)
         assertThat(stillingFraDb.tittel).isEqualTo(stillingFraRespons.title)
     }
 
@@ -108,7 +109,7 @@ class MineStillingerTest {
                 .willReturn(
                     WireMock.aResponse().withStatus(200).withHeader(
                         HttpHeaders.CONNECTION, "close"
-                    ) // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
+                    )
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                         .withBody(objectMapper.writeValueAsString(responseBody))
                 )

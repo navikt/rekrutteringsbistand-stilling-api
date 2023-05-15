@@ -1,13 +1,10 @@
 package no.nav.rekrutteringsbistand.api.stilling
 
 import arrow.core.getOrElse
-import arrow.core.orElse
 import no.nav.rekrutteringsbistand.api.RekrutteringsbistandStilling
 import no.nav.rekrutteringsbistand.api.OppdaterRekrutteringsbistandStillingDto
 import no.nav.rekrutteringsbistand.api.arbeidsplassen.OpprettRekrutteringsbistandstillingDto
 import no.nav.security.token.support.core.api.Protected
-import no.nav.security.token.support.core.api.ProtectedWithClaims
-import no.nav.security.token.support.core.api.RequiredIssuers
 import org.springframework.http.ResponseEntity
 import org.springframework.http.ResponseEntity.notFound
 import org.springframework.http.ResponseEntity.ok
@@ -15,15 +12,18 @@ import org.springframework.web.bind.annotation.*
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 import jakarta.servlet.http.HttpServletRequest
+import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
+import no.nav.rekrutteringsbistand.api.minestillinger.MineStillingerService
 
 
 @RestController
 @Protected
-class StillingController(val stillingService: StillingService) {
+class StillingController(val stillingService: StillingService, val mineStillingerService: MineStillingerService, val tokenUtils: TokenUtils) {
 
     @PostMapping("/rekrutteringsbistandstilling")
     fun opprettStilling(@RequestBody stilling: OpprettRekrutteringsbistandstillingDto): ResponseEntity<RekrutteringsbistandStilling> {
         val opprettetStilling = stillingService.opprettStilling(stilling)
+        mineStillingerService.lagre(opprettetStilling, tokenUtils.hentNavIdent())
         return ok(opprettetStilling)
     }
 
