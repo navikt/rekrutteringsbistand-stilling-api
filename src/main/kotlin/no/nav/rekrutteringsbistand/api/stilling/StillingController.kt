@@ -18,12 +18,16 @@ import no.nav.rekrutteringsbistand.api.minestillinger.MineStillingerService
 
 @RestController
 @Protected
-class StillingController(val stillingService: StillingService, val mineStillingerService: MineStillingerService, val tokenUtils: TokenUtils) {
+class StillingController(
+    val stillingService: StillingService,
+    val mineStillingerService: MineStillingerService,
+    val tokenUtils: TokenUtils
+) {
 
     @PostMapping("/rekrutteringsbistandstilling")
     fun opprettStilling(@RequestBody stilling: OpprettRekrutteringsbistandstillingDto): ResponseEntity<RekrutteringsbistandStilling> {
         val opprettetStilling = stillingService.opprettStilling(stilling)
-        mineStillingerService.lagre(opprettetStilling.stilling, tokenUtils.hentNavIdent())
+        mineStillingerService.opprett(opprettetStilling.stilling, tokenUtils.hentNavIdent())
         return ok(opprettetStilling)
     }
 
@@ -34,8 +38,13 @@ class StillingController(val stillingService: StillingService, val mineStillinge
     }
 
     @PutMapping("/rekrutteringsbistandstilling")
-    fun oppdaterStilling(request: HttpServletRequest, @RequestBody rekrutteringsbistandStillingDto: OppdaterRekrutteringsbistandStillingDto): ResponseEntity<OppdaterRekrutteringsbistandStillingDto> {
-        val oppdatertStilling = stillingService.oppdaterRekrutteringsbistandStilling(rekrutteringsbistandStillingDto, request.queryString)
+    fun oppdaterStilling(
+        request: HttpServletRequest,
+        @RequestBody rekrutteringsbistandStillingDto: OppdaterRekrutteringsbistandStillingDto
+    ): ResponseEntity<OppdaterRekrutteringsbistandStillingDto> {
+        val oppdatertStilling =
+            stillingService.oppdaterRekrutteringsbistandStilling(rekrutteringsbistandStillingDto, request.queryString)
+        mineStillingerService.oppdater(oppdatertStilling.stilling, tokenUtils.hentNavIdent())
         return ok(oppdatertStilling)
     }
 

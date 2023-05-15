@@ -10,9 +10,10 @@ import java.sql.ResultSet
 class MineStillingerRepository(
     private val namedJdbcTemplate: NamedParameterJdbcTemplate,
 ) {
-    val simpleJdbcInsert = SimpleJdbcInsert(namedJdbcTemplate.jdbcTemplate).withTableName("min_stilling").usingGeneratedKeyColumns("id")
+    val simpleJdbcInsert =
+        SimpleJdbcInsert(namedJdbcTemplate.jdbcTemplate).withTableName("min_stilling").usingGeneratedKeyColumns("id")
 
-    fun lagre(minStilling: MinStilling) {
+    fun opprett(minStilling: MinStilling) {
         simpleJdbcInsert.execute(
             mapOf(
                 "stillingsid" to minStilling.stillingsId.verdi,
@@ -27,12 +28,35 @@ class MineStillingerRepository(
         )
     }
 
+    fun oppdater(minStilling: MinStilling) {
+        val params = mapOf(
+            "tittel" to minStilling.tittel,
+            "sistEndret" to minStilling.sistEndret,
+            "arbeidsgiverNavn" to minStilling.arbeidsgiverNavn,
+            "utløpsdato" to minStilling.utløpsdato,
+            "status" to minStilling.status,
+            "eierNavIdent" to minStilling.eierNavIdent,
+        )
+
+        namedJdbcTemplate.update(
+            """
+        update min_stilling set
+        tittel = :tittel,
+        sist_endret = :sistEndret,
+        arbeidsgiver_navn = :arbeidsgiverNavn,
+        utløpsdato = :utløpsdato,
+        status = :status,
+        eier_nav_ident = :eierNavIdent
+            """.trimIndent(),
+            params
+        )
+    }
+
     fun hent(navIdent: String): List<MinStilling> {
         val sql = "select * from min_stilling where eier_nav_ident = :ident order by sist_endret"
         val params = MapSqlParameterSource("ident", navIdent)
 
-        return namedJdbcTemplate.query(sql, params) {
-            rs: ResultSet, _: Int ->
+        return namedJdbcTemplate.query(sql, params) { rs: ResultSet, _: Int ->
             MinStilling.fromDB(rs)
         }
     }
@@ -40,8 +64,7 @@ class MineStillingerRepository(
     fun hentAlle(): List<MinStilling> {
         val sql = "select * from min_stilling"
 
-        return namedJdbcTemplate.query(sql) {
-                rs: ResultSet, _: Int ->
+        return namedJdbcTemplate.query(sql) { rs: ResultSet, _: Int ->
             MinStilling.fromDB(rs)
         }
     }

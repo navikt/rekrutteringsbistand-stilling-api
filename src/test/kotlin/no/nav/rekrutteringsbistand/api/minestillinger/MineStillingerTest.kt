@@ -29,7 +29,7 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
-import org.springframework.http.RequestEntity
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.test.context.junit4.SpringRunner
 import java.util.*
 
@@ -48,6 +48,9 @@ class MineStillingerTest {
 
     @Autowired
     lateinit var mockLogin: MockLogin
+
+    @Autowired
+    lateinit var jdbcTemplate: NamedParameterJdbcTemplate
 
     @Autowired
     lateinit var repository: MineStillingerRepository
@@ -70,10 +73,11 @@ class MineStillingerTest {
 
     private val navIdent = "dummy"
 
+
     @Before
     fun before() {
         mockLogin.leggAzureVeilederTokenPåAlleRequests(restTemplate, navIdent)
-        // TODO tøm db
+        jdbcTemplate.jdbcOperations.execute("truncate table min_stilling")
     }
 
     @Test
@@ -106,27 +110,25 @@ class MineStillingerTest {
     fun `Når veileder oppdaterer en direktemelding stilling så skal vi lagre de oppdaterte verdiene`() {
         val pamAdStilling: Stilling = Testdata.enOpprettetStilling
         val eksisterendeMinStilling: MinStilling = MinStilling.fromStilling(pamAdStilling, navIdent)
-        repository.lagre(eksisterendeMinStilling)
+        repository.opprett(eksisterendeMinStilling)
         mockKandidatlisteOppdatering()
         mockAzureObo(wiremockAzure)
         val oppdatertPamAdStilling = pamAdStilling.copy(
-            uuid = UUID.randomUUID().toString(),
             title = pamAdStilling.title + "dummy",
             expires = pamAdStilling.expires!!.plusMonths(1),
-            id = pamAdStilling.id + 1,
             businessName = pamAdStilling.businessName + "dummy",
-            status = pamAdStilling.status + "dummy"
+            status = pamAdStilling.status + "dummy",
         )
         val oppdatertStillingDto = OppdaterRekrutteringsbistandStillingDto(
             stilling = oppdatertPamAdStilling,
             stillingsinfoid = "dummy",
             notat = "dummy"
         )
-        mockPamAdApi(HttpMethod.PUT, "/api/v1/ads", oppdatertStillingDto)
+        mockPamAdApi(HttpMethod.PUT, "/api/v1/ads", oppdatertPamAdStilling)
 
         restTemplate.put(
             "$localBaseUrl/rekrutteringsbistandstilling",
-            oppdatertPamAdStilling,
+            oppdatertStillingDto,
             RekrutteringsbistandStilling::class.java
         )
 
