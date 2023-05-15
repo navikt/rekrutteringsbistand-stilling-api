@@ -15,7 +15,6 @@ import no.nav.rekrutteringsbistand.api.OppdaterRekrutteringsbistandStillingDto
 import no.nav.rekrutteringsbistand.api.RekrutteringsbistandStilling
 import no.nav.rekrutteringsbistand.api.Testdata
 import no.nav.rekrutteringsbistand.api.config.MockLogin
-import no.nav.rekrutteringsbistand.api.hendelser.RapidApplikasjon.Companion.registrerBerikingslyttere
 import no.nav.rekrutteringsbistand.api.hendelser.RapidApplikasjon.Companion.registrerMineStillingerLytter
 import no.nav.rekrutteringsbistand.api.mockAzureObo
 import no.nav.rekrutteringsbistand.api.stilling.Stilling
@@ -35,6 +34,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.test.context.junit4.SpringRunner
+import java.sql.ResultSet
 import java.time.LocalDateTime
 import java.util.*
 
@@ -194,7 +194,7 @@ class MineStillingerTest {
         val oppdatertArbeidsgiverNavn = pamAdStilling.businessName + "dummy"
         val oppdatertSistEndret = pamAdStilling.updated.plusDays(1)
         val oppdatertUtløpsdato = pamAdStilling.expires!!.plusDays(1)
-        val melding = meldingEksternStilling(
+        val melding = stillingsmelding(
             stillingsId = pamAdStilling.uuid,
             annonsenr = pamAdStilling.id,
             tittel = oppdatertTittel,
@@ -216,6 +216,13 @@ class MineStillingerTest {
         assertThat(stillingFraDb.utløpsdato.toLocalDateTime()).isEqualToIgnoringNanos(oppdatertUtløpsdato)
         assertThat(stillingFraDb.tittel).isEqualTo(oppdatertTittel)
         assertThat(stillingFraDb.eierNavIdent).isEqualTo(navIdent)
+    }
+
+    @Test
+    fun `Skal ignorere meldinger for stillinger som ikke er lagret`() {
+        val melding = stillingsmelding()
+        testRapid.sendTestMessage(melding)
+        assertThat(hentAlleMineStillinger()).isEmpty()
     }
 
     private fun mockPamAdApi(method: HttpMethod, urlPath: String, responseBody: Any) {
@@ -250,14 +257,15 @@ class MineStillingerTest {
         )
     }
 
-    private fun meldingEksternStilling(
-        stillingsId: String,
-        annonsenr: Long,
-        tittel: String,
-        status: String,
-        arbeidsgiverNavn: String,
-        sistEndret: LocalDateTime,
-        utløpsdato: LocalDateTime
+    private fun stillingsmelding(
+        stillingsId: String = UUID.randomUUID().toString(),
+        annonsenr: Long = 1,
+        tittel: String = "dummyTittel",
+        status: String = "dummyStatus",
+        arbeidsgiverNavn: String = "dummyArbeidsgiversNavn",
+        sistEndret: LocalDateTime = LocalDateTime.now(),
+        utløpsdato: LocalDateTime = LocalDateTime.now(),
+        kilde: String = "IMPORTAPI"
     ) = """
         {
           "uuid": "$stillingsId",
@@ -272,7 +280,7 @@ class MineStillingerTest {
           "updated": "$sistEndret",
           "employer": "",
           "categories": "[]",
-          "source": "IMPORTAPI",
+          "source": "$kilde",
           "medium": "talentech",
           "reference": "9f83702add0f494ba544eb88751b7a42",
           "publishedByAdmin": "2023-05-15T17:04:15.677549",
@@ -283,10 +291,16 @@ class MineStillingerTest {
         }
     """.trimIndent()
 
+    private fun hentAlleMineStillinger(): List<MinStilling> {
+        val sql = "select * from min_stilling"
+
+        return jdbcTemplate.query(sql) { rs: ResultSet, _: Int ->
+            MinStilling.fromDB(rs)
+        }
+    }
 
     /*
     Test cases:
-    - Når stilling-api konsumerer en melding som gjelder en ekstern stilling vi allerede har lagret data på, så skal vi oppdatere verdiene
     - Når veileder sletter en direktemeldt stilling, så skal vi slette den fra tabellen
     - Når stilling-api konsumerer en melding om en slettet stilling, så skal vi slette stillingen
     - Når veileder overtar en direktemeldt stilling, skal vi oppdatere eier i tabellen
