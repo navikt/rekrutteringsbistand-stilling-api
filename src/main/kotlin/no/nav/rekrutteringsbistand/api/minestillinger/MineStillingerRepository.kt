@@ -60,12 +60,4 @@ class MineStillingerRepository(
             MinStilling.fromDB(rs)
         }
     }
-
-    fun hentAlle(): List<MinStilling> {
-        val sql = "select * from min_stilling"
-
-        return namedJdbcTemplate.query(sql) { rs: ResultSet, _: Int ->
-            MinStilling.fromDB(rs)
-        }
-    }
 }

@@ -13,16 +13,21 @@ import com.github.tomakehurst.wiremock.matching.UrlPattern
 import no.nav.rekrutteringsbistand.api.OppdaterRekrutteringsbistandStillingDto
 import no.nav.rekrutteringsbistand.api.RekrutteringsbistandStilling
 import no.nav.rekrutteringsbistand.api.Testdata
+import no.nav.rekrutteringsbistand.api.arbeidsplassen.ArbeidsplassenKlient
 import no.nav.rekrutteringsbistand.api.config.MockLogin
 import no.nav.rekrutteringsbistand.api.mockAzureObo
 import no.nav.rekrutteringsbistand.api.stilling.Stilling
+import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoDto
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mockito
+import org.mockito.Mockito.`when`
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.http.HttpHeaders
@@ -104,6 +109,7 @@ class MineStillingerTest {
         assertThat(stillingFraDb.sistEndret.toLocalDateTime()).isEqualToIgnoringNanos(stillingFraRespons.updated)
         assertThat(stillingFraDb.utløpsdato.toLocalDateTime()).isEqualToIgnoringNanos(stillingFraRespons.expires)
         assertThat(stillingFraDb.tittel).isEqualTo(stillingFraRespons.title)
+        assertThat(stillingFraDb.eierNavIdent).isEqualTo(navIdent)
     }
 
     @Test
@@ -139,9 +145,36 @@ class MineStillingerTest {
         assertThat(stillingFraDb.annonsenr).isEqualTo(oppdatertPamAdStilling.id)
         assertThat(stillingFraDb.status).isEqualTo(oppdatertPamAdStilling.status)
         assertThat(stillingFraDb.arbeidsgiverNavn).isEqualTo(oppdatertPamAdStilling.businessName)
-        assertThat(stillingFraDb.sistEndret.toLocalDateTime()).isEqualToIgnoringNanos(oppdatertPamAdStilling.updated) // TODO: Blir vel ikke riktig?
+        assertThat(stillingFraDb.sistEndret.toLocalDateTime()).isEqualToIgnoringNanos(oppdatertPamAdStilling.updated)
         assertThat(stillingFraDb.utløpsdato.toLocalDateTime()).isEqualToIgnoringNanos(oppdatertPamAdStilling.expires)
         assertThat(stillingFraDb.tittel).isEqualTo(oppdatertPamAdStilling.title)
+        assertThat(stillingFraDb.eierNavIdent).isEqualTo(navIdent)
+    }
+
+    @Test
+    fun `Når veileder oppretter kandidatliste for ekstern stilling skal vi opprette stillingen i db-tabellen`() {
+        mockAzureObo(wiremockAzure)
+        val stillingsinfoDto = Testdata.enStillingsinfoInboundDto
+        val pamAdStilling = Testdata.enOpprettetStilling.copy(uuid = stillingsinfoDto.stillingsid)
+        mockPamAdApi(HttpMethod.GET, "/b2b/api/v1/ads/${pamAdStilling.uuid}", pamAdStilling)
+
+        restTemplate.put(
+            "$localBaseUrl/stillingsinfo",
+            stillingsinfoDto,
+            StillingsinfoDto::class.java
+        )
+
+        val stilingerFraDb = repository.hent(navIdent)
+        assertThat(stilingerFraDb.size).isEqualTo(1)
+        val stillingFraDb = stilingerFraDb.first()
+        assertThat(stillingFraDb.stillingsId.asString()).isEqualTo(pamAdStilling.uuid)
+        assertThat(stillingFraDb.annonsenr).isEqualTo(pamAdStilling.id)
+        assertThat(stillingFraDb.status).isEqualTo(pamAdStilling.status)
+        assertThat(stillingFraDb.arbeidsgiverNavn).isEqualTo(pamAdStilling.businessName)
+        assertThat(stillingFraDb.sistEndret.toLocalDateTime()).isEqualToIgnoringNanos(pamAdStilling.updated)
+        assertThat(stillingFraDb.utløpsdato.toLocalDateTime()).isEqualToIgnoringNanos(pamAdStilling.expires)
+        assertThat(stillingFraDb.tittel).isEqualTo(pamAdStilling.title)
+        assertThat(stillingFraDb.eierNavIdent).isEqualTo(navIdent)
     }
 
     private fun mockPamAdApi(method: HttpMethod, urlPath: String, responseBody: Any) {
@@ -179,7 +212,6 @@ class MineStillingerTest {
 
     /*
     Test cases:
-    - Når veileder oppdaterer en direktemelding stilling, så skal vi lagre de oppdaterte verdiene
     - Når veileder lager kandidatliste for en ekstern stilling, så skal vi lagre det vi trenger for å vise den fram i Mine stillinger
     - Når stilling-api konsumerer en melding som gjelder en ekstern stilling vi allerede har lagret data på, så skal vi oppdatere verdiene
     - Når veileder sletter en direktemeldt stilling, så skal vi slette den fra tabellen
