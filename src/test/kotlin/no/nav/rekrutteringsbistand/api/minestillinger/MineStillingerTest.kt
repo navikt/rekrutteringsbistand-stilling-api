@@ -10,10 +10,13 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.github.tomakehurst.wiremock.extension.responsetemplating.ResponseTemplateTransformer
 import com.github.tomakehurst.wiremock.junit.WireMockRule
 import com.github.tomakehurst.wiremock.matching.UrlPattern
+import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.rekrutteringsbistand.api.OppdaterRekrutteringsbistandStillingDto
 import no.nav.rekrutteringsbistand.api.RekrutteringsbistandStilling
 import no.nav.rekrutteringsbistand.api.Testdata
 import no.nav.rekrutteringsbistand.api.config.MockLogin
+import no.nav.rekrutteringsbistand.api.hendelser.RapidApplikasjon.Companion.registrerBerikingslyttere
+import no.nav.rekrutteringsbistand.api.hendelser.RapidApplikasjon.Companion.registrerMineStillingerLytter
 import no.nav.rekrutteringsbistand.api.mockAzureObo
 import no.nav.rekrutteringsbistand.api.stilling.Stilling
 import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoDto
@@ -32,6 +35,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.test.context.junit4.SpringRunner
+import java.time.LocalDateTime
 import java.util.*
 
 @RunWith(SpringRunner::class)
@@ -48,13 +52,13 @@ class MineStillingerTest {
     )
 
     @Autowired
-    lateinit var mockLogin: MockLogin
+    private lateinit var mockLogin: MockLogin
 
     @Autowired
-    lateinit var jdbcTemplate: NamedParameterJdbcTemplate
+    private lateinit var jdbcTemplate: NamedParameterJdbcTemplate
 
     @Autowired
-    lateinit var repository: MineStillingerRepository
+    private lateinit var repository: MineStillingerRepository
 
     @LocalServerPort
     private var port = 0
@@ -74,11 +78,15 @@ class MineStillingerTest {
 
     private val navIdent = "dummy"
 
+    private lateinit var testRapid: TestRapid
 
     @Before
     fun before() {
         mockLogin.leggAzureVeilederTokenPåAlleRequests(restTemplate, navIdent)
         jdbcTemplate.jdbcOperations.execute("truncate table min_stilling")
+        if (!this::testRapid.isInitialized) testRapid =
+            TestRapid().registrerMineStillingerLytter(MineStillingerService(repository))
+        testRapid.reset()
     }
 
     @Test
@@ -175,6 +183,41 @@ class MineStillingerTest {
         assertThat(stillingFraDb.eierNavIdent).isEqualTo(navIdent)
     }
 
+    @Test
+    fun `Når en melding for ekstern stilling som vi har lagret konsumeres skal vi lagre oppdaterte verdier`() {
+        val pamAdStilling: Stilling = Testdata.enOpprettetStilling
+        val eksisterendeMinStilling: MinStilling = MinStilling.fromStilling(pamAdStilling, navIdent)
+        repository.opprett(eksisterendeMinStilling)
+
+        val oppdatertTittel = pamAdStilling.title + "dummy"
+        val oppdatertStatus = pamAdStilling.status + "dummy"
+        val oppdatertArbeidsgiverNavn = pamAdStilling.businessName + "dummy"
+        val oppdatertSistEndret = pamAdStilling.updated.plusDays(1)
+        val oppdatertUtløpsdato = pamAdStilling.expires!!.plusDays(1)
+        val melding = meldingEksternStilling(
+            stillingsId = pamAdStilling.uuid,
+            annonsenr = pamAdStilling.id,
+            tittel = oppdatertTittel,
+            status = oppdatertStatus,
+            arbeidsgiverNavn = oppdatertArbeidsgiverNavn,
+            sistEndret = oppdatertSistEndret,
+            utløpsdato = oppdatertUtløpsdato
+        )
+        testRapid.sendTestMessage(melding)
+
+        val stilingerFraDb = repository.hentForNavIdent(navIdent)
+        assertThat(stilingerFraDb.size).isEqualTo(1)
+        val stillingFraDb = stilingerFraDb.first()
+        assertThat(stillingFraDb.stillingsId.asString()).isEqualTo(pamAdStilling.uuid)
+        assertThat(stillingFraDb.annonsenr).isEqualTo(pamAdStilling.id)
+        assertThat(stillingFraDb.status).isEqualTo(oppdatertStatus)
+        assertThat(stillingFraDb.arbeidsgiverNavn).isEqualTo(oppdatertArbeidsgiverNavn)
+        assertThat(stillingFraDb.sistEndret.toLocalDateTime()).isEqualToIgnoringNanos(oppdatertSistEndret)
+        assertThat(stillingFraDb.utløpsdato.toLocalDateTime()).isEqualToIgnoringNanos(oppdatertUtløpsdato)
+        assertThat(stillingFraDb.tittel).isEqualTo(oppdatertTittel)
+        assertThat(stillingFraDb.eierNavIdent).isEqualTo(navIdent)
+    }
+
     private fun mockPamAdApi(method: HttpMethod, urlPath: String, responseBody: Any) {
         wiremockPamAdApi.stubFor(
             WireMock.request(method.name(), WireMock.urlPathMatching(urlPath))
@@ -206,6 +249,39 @@ class MineStillingerTest {
             )
         )
     }
+
+    private fun meldingEksternStilling(
+        stillingsId: String,
+        annonsenr: Long,
+        tittel: String,
+        status: String,
+        arbeidsgiverNavn: String,
+        sistEndret: LocalDateTime,
+        utløpsdato: LocalDateTime
+    ) = """
+        {
+          "uuid": "$stillingsId",
+          "adnr": "$annonsenr",
+          "title": "$tittel",
+          "status": "$status",
+          "privacy": "SHOW_ALL",
+          "administration": "{\"status\": \"DONE\", \"remarks\": [], \"comments\": \"Auto approved - 2023-05-15T17:04:15.677443528\\n\", \"reportee\": \"AUTO\", \"navIdent\": \"\"}",
+          "published": "2023-05-08T00:00:00",
+          "expires": "$utløpsdato",
+          "created": "2023-05-15T17:04:15.745674",
+          "updated": "$sistEndret",
+          "employer": "",
+          "categories": "[]",
+          "source": "IMPORTAPI",
+          "medium": "talentech",
+          "reference": "9f83702add0f494ba544eb88751b7a42",
+          "publishedByAdmin": "2023-05-15T17:04:15.677549",
+          "businessName": "$arbeidsgiverNavn",
+          "locations": "[{\"address\": null, \"postalCode\": null, \"county\": null, \"municipal\": null, \"city\": null, \"country\": \"NORGE\", \"latitude\": null, \"longitude\": null, \"municipal_code\": null, \"county_code\": null}]",
+          "properties": "[{\"key\": \"applicationdue\", \"value\": \"2023-05-21T00:00:00\"}, {\"key\": \"_providerid\", \"value\": \"15002\"}, {\"key\": \"jobtitle\", \"value\": \"test job\"}, {\"key\": \"positioncount\", \"value\": \"1\"}, {\"key\": \"_versionid\", \"value\": \"16700\"}, {\"key\": \"applicationurl\", \"value\": \"https://dummy.talentech.io/?utm_medium=talentech_publishing&utm_source=nav\"}, {\"key\": \"_approvedby\", \"value\": \"AUTO\"}, {\"key\": \"classification_esco_code\", \"value\": \"http://data.europa.eu/esco/occupation/6d03eaef-1ce5-4a1e-bb41-0908e1af1b65\"}, {\"key\": \"arbeidsplassenoccupation\", \"value\": \"Uoppgitt/ ikke identifiserbare/Ikke identifiserbare\"}, {\"key\": \"_score\", \"value\": \"[{\\\"name\\\":\\\"location\\\",\\\"value\\\":-10},{\\\"name\\\":\\\"employer\\\",\\\"value\\\":-50},{\\\"name\\\":\\\"sector\\\",\\\"value\\\":-10},{\\\"name\\\":\\\"engagementtype\\\",\\\"value\\\":-10},{\\\"name\\\":\\\"extent\\\",\\\"value\\\":-10},{\\\"name\\\":\\\"jobarrangement\\\",\\\"value\\\":-10},{\\\"name\\\":\\\"jobpercentage\\\",\\\"value\\\":-10},{\\\"name\\\":\\\"keywords\\\",\\\"value\\\":-10},{\\\"name\\\":\\\"employerdescription\\\",\\\"value\\\":-10}]\"}, {\"key\": \"_scoretotal\", \"value\": \"-130\"}, {\"key\": \"adtext\", \"value\": \"<h3>i18n mock translation</h3><br />\\n <br />\\n<h3>i18n mock translation:</h3>i18n mock translation: Unit_Test_Teant_21b2177e-587f-4d11-9500-45ad17cacfa1<br />\\ni18n mock translation: 29.05.2023<br />\\n<br />\\n\"}]",
+          "contacts": "[]"
+        }
+    """.trimIndent()
 
 
     /*

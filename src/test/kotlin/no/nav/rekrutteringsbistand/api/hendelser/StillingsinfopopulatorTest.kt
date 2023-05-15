@@ -7,7 +7,7 @@ import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.rekrutteringsbistand.api.Testdata.enStilling
 import no.nav.rekrutteringsbistand.api.arbeidsplassen.ArbeidsplassenKlient
 import no.nav.rekrutteringsbistand.api.asZonedDateTime
-import no.nav.rekrutteringsbistand.api.hendelser.RapidApplikasjon.Companion.registrerLyttere
+import no.nav.rekrutteringsbistand.api.hendelser.RapidApplikasjon.Companion.registrerBerikingslyttere
 import no.nav.rekrutteringsbistand.api.stilling.Arbeidsgiver
 import no.nav.rekrutteringsbistand.api.stillingsinfo.*
 import org.assertj.core.api.Assertions.assertThat
@@ -21,7 +21,6 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.context.ApplicationContext
 import org.springframework.test.context.junit4.SpringRunner
-import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
@@ -47,7 +46,7 @@ class StillingsinfopopulatorTest {
     @Before
     fun setUp() {
         if (!this::testRapid.isInitialized) testRapid =
-            TestRapid().registrerLyttere(stillingsinfoRepository, context, arbeidsplassenKlient)
+            TestRapid().registrerBerikingslyttere(stillingsinfoRepository, context, arbeidsplassenKlient)
         testRapid.reset()
     }
 

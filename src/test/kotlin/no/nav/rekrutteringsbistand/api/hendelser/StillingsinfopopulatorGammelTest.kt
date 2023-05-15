@@ -2,13 +2,12 @@ package no.nav.rekrutteringsbistand.api.hendelser
 
 import arrow.core.Some
 import arrow.core.getOrElse
-import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.rapids_rivers.isMissingOrNull
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.rekrutteringsbistand.api.Testdata.enStilling
 import no.nav.rekrutteringsbistand.api.arbeidsplassen.ArbeidsplassenKlient
 import no.nav.rekrutteringsbistand.api.asZonedDateTime
-import no.nav.rekrutteringsbistand.api.hendelser.RapidApplikasjon.Companion.registrerLyttere
+import no.nav.rekrutteringsbistand.api.hendelser.RapidApplikasjon.Companion.registrerBerikingslyttere
 import no.nav.rekrutteringsbistand.api.stilling.Arbeidsgiver
 import no.nav.rekrutteringsbistand.api.stillingsinfo.*
 import org.assertj.core.api.Assertions.assertThat
@@ -47,7 +46,7 @@ class StillingsinfopopulatorGammelTest {
     @Before
     fun setUp() {
         if (!this::testRapid.isInitialized) testRapid =
-            TestRapid().registrerLyttere(stillingsinfoRepository, context, arbeidsplassenKlient)
+            TestRapid().registrerBerikingslyttere(stillingsinfoRepository, context, arbeidsplassenKlient)
         testRapid.reset()
     }
 

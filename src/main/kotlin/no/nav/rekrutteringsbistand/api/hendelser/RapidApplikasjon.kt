@@ -3,6 +3,10 @@ package no.nav.rekrutteringsbistand.api.hendelser
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.rekrutteringsbistand.api.arbeidsplassen.ArbeidsplassenKlient
+import no.nav.rekrutteringsbistand.api.hendelser.RapidApplikasjon.Companion.registrerMineStillingerLytter
+import no.nav.rekrutteringsbistand.api.minestillinger.MineStillingerLytter
+import no.nav.rekrutteringsbistand.api.minestillinger.MineStillingerRepository
+import no.nav.rekrutteringsbistand.api.minestillinger.MineStillingerService
 import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.context.event.ApplicationReadyEvent
@@ -20,11 +24,12 @@ class RapidApplikasjon(
     @Autowired private val context: ApplicationContext,
     @Autowired private val stillingsinfoRepository: StillingsinfoRepository,
     @Autowired private val environment: Environment,
-    @Autowired private val arbeidsplassenKlient: ArbeidsplassenKlient
+    @Autowired private val arbeidsplassenKlient: ArbeidsplassenKlient,
+    @Autowired private val mineStillingerService: MineStillingerService
     ): Runnable {
 
     companion object {
-        fun <T: RapidsConnection> T.registrerLyttere(
+        fun <T: RapidsConnection> T.registrerBerikingslyttere(
             stillingsinfoRepository: StillingsinfoRepository,
             context: ApplicationContext,
             arbeidsplassenKlient: ArbeidsplassenKlient
@@ -33,6 +38,11 @@ class RapidApplikasjon(
             StillingsinfoPopulatorGammel(this, stillingsinfoRepository, arbeidsplassenKlient)
             Appkiller(this, context)
         }
+
+        fun <T: RapidsConnection> T.registrerMineStillingerLytter(mineStillingerService: MineStillingerService) =
+            apply {
+                MineStillingerLytter(this, mineStillingerService)
+            }
     }
 
     @EventListener(ApplicationReadyEvent::class)
@@ -42,7 +52,9 @@ class RapidApplikasjon(
 
     override fun run() {
         RapidApplication.create(environment.toMap())
-            .registrerLyttere(stillingsinfoRepository, context, arbeidsplassenKlient).start()
+            .registrerBerikingslyttere(stillingsinfoRepository, context, arbeidsplassenKlient)
+            .registrerMineStillingerLytter(mineStillingerService)
+            .start()
     }
 }
 
