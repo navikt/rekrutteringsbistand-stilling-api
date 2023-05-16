@@ -32,6 +32,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.http.*
+import org.springframework.http.HttpMethod.*
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.test.context.junit4.SpringRunner
 import java.net.URI
@@ -93,7 +94,7 @@ class MineStillingerTest {
     @Test
     fun `Når veileder oppretter en direktemeldt stilling skal vi lagre den i db-tabellen`() {
         val rekrutteringsbistandStilling = Testdata.enOpprettRekrutteringsbistandstillingDto
-        mockPamAdApi(HttpMethod.POST, "/api/v1/ads", enOpprettetStilling)
+        mockPamAdApi(POST, "/api/v1/ads", enOpprettetStilling)
         mockKandidatlisteOppdatering()
         mockAzureObo(wiremockAzure)
 
@@ -162,15 +163,15 @@ class MineStillingerTest {
         val eksisterendePamAdStilling = eksisterendeRekrutteringsbistandStilling.stilling
         val eksisterendeMinStilling: MinStilling = MinStilling.fromStilling(eksisterendePamAdStilling, navIdent)
         repository.opprett(eksisterendeMinStilling)
-        mockPamAdApi(HttpMethod.GET, "/b2b/api/v1/ads/${eksisterendePamAdStilling.uuid}", eksisterendePamAdStilling)
+        mockPamAdApi(GET, "/b2b/api/v1/ads/${eksisterendePamAdStilling.uuid}", eksisterendePamAdStilling)
         val nyKopiAvStilling = enOpprettetStilling.copy(eksisterendePamAdStilling.id + 1, uuid = UUID.randomUUID().toString())
-        mockPamAdApi(HttpMethod.POST, "/api/v1/ads", nyKopiAvStilling)
+        mockPamAdApi(POST, "/api/v1/ads", nyKopiAvStilling)
         mockKandidatlisteOppdatering()
         mockAzureObo(wiremockAzure)
 
         val respons = restTemplate.exchange(
             URI("$localBaseUrl/rekrutteringsbistandstilling/kopier/${eksisterendePamAdStilling.uuid}"),
-            HttpMethod.POST,
+            POST,
             HttpEntity(
                 null,
                 mapOf(
@@ -194,12 +195,29 @@ class MineStillingerTest {
         assertThat(stillingFraDb.eierNavIdent).isEqualTo(navIdent)
     }
 
+
+    @Test
+    fun `Når veileder sletter en direktemeldt stilling skal minStilling også slettes`() {
+        val rekrutteringsbistandStilling = enRekrutteringsbistandStilling
+        val pamAdStilling = rekrutteringsbistandStilling.stilling
+        val eksisterendeMinStilling: MinStilling = MinStilling.fromStilling(pamAdStilling, navIdent)
+        repository.opprett(eksisterendeMinStilling)
+        mockKandidatlisteOppdatering()
+        mockPamAdApi(DELETE, "/api/v1/ads/${pamAdStilling.uuid}", pamAdStilling)
+        mockAzureObo(wiremockAzure)
+
+        restTemplate.delete("$localBaseUrl/${pamAdStilling.uuid}")
+
+        val mineStillinger = repository.hentForNavIdent(navIdent)
+        assertThat(mineStillinger).isEmpty()
+    }
+
     @Test
     fun `Når veileder oppretter kandidatliste for ekstern stilling skal vi opprette stillingen i db-tabellen`() {
         mockAzureObo(wiremockAzure)
         val stillingsinfoDto = Testdata.enStillingsinfoInboundDto.copy(eierNavident = navIdent)
         val pamAdStilling = enOpprettetStilling.copy(uuid = stillingsinfoDto.stillingsid)
-        mockPamAdApi(HttpMethod.GET, "/b2b/api/v1/ads/${pamAdStilling.uuid}", pamAdStilling)
+        mockPamAdApi(GET, "/b2b/api/v1/ads/${pamAdStilling.uuid}", pamAdStilling)
         mockPamAdApi(HttpMethod.PUT, "/api/v1/ads/${pamAdStilling.uuid}", pamAdStilling)
         mockKandidatlisteOppdatering()
 
