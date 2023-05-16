@@ -105,7 +105,7 @@ class MineStillingerTest {
         )
 
         val stillingFraRespons = respons.stilling
-        val stilingerFraDb = repository.hentForNavIdent(navIdent)
+        val stilingerFraDb = hentAlle()
         assertThat(stilingerFraDb.size).isEqualTo(1)
         val stillingFraDb = stilingerFraDb.first()
         assertThat(stillingFraDb.stillingsId.asString()).isEqualTo(stillingFraRespons.uuid)
@@ -144,7 +144,7 @@ class MineStillingerTest {
             RekrutteringsbistandStilling::class.java
         )
 
-        val stilingerFraDb = repository.hentForNavIdent(navIdent)
+        val stilingerFraDb = hentAlle()
         assertThat(stilingerFraDb.size).isEqualTo(1)
         val stillingFraDb = stilingerFraDb.first()
         assertThat(stillingFraDb.stillingsId.asString()).isEqualTo(oppdatertPamAdStilling.uuid)
@@ -183,7 +183,7 @@ class MineStillingerTest {
         )
 
         val stillingFraRespons = respons.body!!.stilling
-        val stilingerFraDb = repository.hentForNavIdent(navIdent)
+        val stilingerFraDb = hentAlle()
         assertThat(stilingerFraDb.size).isEqualTo(2)
         val stillingFraDb = stilingerFraDb.first { it.stillingsId.asString() == stillingFraRespons!!.uuid}
         assertThat(stillingFraDb.annonsenr).isEqualTo(stillingFraRespons.id)
@@ -213,7 +213,7 @@ class MineStillingerTest {
 
         restTemplate.delete("$localBaseUrl/rekrutteringsbistandstilling/${pamAdStilling.uuid}")
 
-        val mineStillinger = repository.hentForNavIdent(navIdent)
+        val mineStillinger = hentAlle()
         assertThat(mineStillinger.size).isOne
         assertThat(mineStillinger.first().stillingsId).isEqualTo(minStillingSomIkkeSkalSlettes.stillingsId)
     }
@@ -233,7 +233,7 @@ class MineStillingerTest {
             StillingsinfoDto::class.java
         )
 
-        val stilingerFraDb = repository.hentForNavIdent(navIdent)
+        val stilingerFraDb = hentAlle()
         assertThat(stilingerFraDb.size).isEqualTo(1)
         val stillingFraDb = stilingerFraDb.first()
         assertThat(stillingFraDb.stillingsId.asString()).isEqualTo(pamAdStilling.uuid)
@@ -268,7 +268,7 @@ class MineStillingerTest {
         )
         testRapid.sendTestMessage(melding)
 
-        val stilingerFraDb = repository.hentForNavIdent(navIdent)
+        val stilingerFraDb = hentAlle()
         assertThat(stilingerFraDb.size).isEqualTo(1)
         val stillingFraDb = stilingerFraDb.first()
         assertThat(stillingFraDb.stillingsId.asString()).isEqualTo(pamAdStilling.uuid)
@@ -285,7 +285,7 @@ class MineStillingerTest {
     fun `Skal ignorere meldinger for stillinger som ikke er lagret`() {
         val melding = stillingsmelding()
         testRapid.sendTestMessage(melding)
-        assertThat(hentAlleMineStillinger()).isEmpty()
+        assertThat(hentAlle()).isEmpty()
     }
 
     private fun mockPamAdApi(method: HttpMethod, urlPath: String, responseBody: Any) {
@@ -367,7 +367,7 @@ class MineStillingerTest {
         }
     """.trimIndent()
 
-    private fun hentAlleMineStillinger(): List<MinStilling> {
+    private fun hentAlle(): List<MinStilling> {
         val sql = "select * from min_stilling"
 
         return jdbcTemplate.query(sql) { rs: ResultSet, _: Int ->
