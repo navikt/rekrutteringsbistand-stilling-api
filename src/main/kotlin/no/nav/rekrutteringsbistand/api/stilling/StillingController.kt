@@ -34,6 +34,7 @@ class StillingController(
     @PostMapping("/rekrutteringsbistandstilling/kopier/{stillingsId}")
     fun kopierStilling(@PathVariable stillingsId: String): ResponseEntity<RekrutteringsbistandStilling> {
         val kopiertStilling = stillingService.kopierStilling(stillingsId)
+        mineStillingerService.opprett(kopiertStilling.stilling, tokenUtils.hentNavIdent())
         return ok(kopiertStilling)
     }
 

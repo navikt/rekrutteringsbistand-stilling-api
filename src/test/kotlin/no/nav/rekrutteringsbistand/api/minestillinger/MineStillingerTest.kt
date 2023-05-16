@@ -163,7 +163,7 @@ class MineStillingerTest {
         val eksisterendeMinStilling: MinStilling = MinStilling.fromStilling(eksisterendePamAdStilling, navIdent)
         repository.opprett(eksisterendeMinStilling)
         mockPamAdApi(HttpMethod.GET, "/b2b/api/v1/ads/${eksisterendePamAdStilling.uuid}", eksisterendePamAdStilling)
-        val nyKopiAvStilling = enOpprettetStilling
+        val nyKopiAvStilling = enOpprettetStilling.copy(eksisterendePamAdStilling.id + 1, uuid = UUID.randomUUID().toString())
         mockPamAdApi(HttpMethod.POST, "/api/v1/ads", nyKopiAvStilling)
         mockKandidatlisteOppdatering()
         mockAzureObo(wiremockAzure)
