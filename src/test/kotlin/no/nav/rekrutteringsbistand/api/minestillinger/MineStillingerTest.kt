@@ -10,18 +10,19 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.github.tomakehurst.wiremock.extension.responsetemplating.ResponseTemplateTransformer
 import com.github.tomakehurst.wiremock.junit.WireMockRule
 import com.github.tomakehurst.wiremock.matching.UrlPattern
-import no.nav.helse.rapids_rivers.testsupport.TestRapid
+import no.nav.pam.stilling.ext.avro.Ad
+import no.nav.pam.stilling.ext.avro.AdStatus
 import no.nav.rekrutteringsbistand.api.OppdaterRekrutteringsbistandStillingDto
 import no.nav.rekrutteringsbistand.api.RekrutteringsbistandStilling
 import no.nav.rekrutteringsbistand.api.Testdata
 import no.nav.rekrutteringsbistand.api.Testdata.enOpprettetStilling
 import no.nav.rekrutteringsbistand.api.Testdata.enRekrutteringsbistandStilling
 import no.nav.rekrutteringsbistand.api.config.MockLogin
-import no.nav.rekrutteringsbistand.api.hendelser.RapidApplikasjon.Companion.registrerMineStillingerLytter
 import no.nav.rekrutteringsbistand.api.mockAzureObo
 import no.nav.rekrutteringsbistand.api.stilling.Stilling
 import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoDto
 import no.nav.rekrutteringsbistand.api.support.toMultiValueMap
+import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Rule
@@ -80,15 +81,15 @@ class MineStillingerTest {
 
     private val navIdent = "dummy"
 
-    private lateinit var testRapid: TestRapid
+    private lateinit var stillingConsumer: StillingConsumer
 
     @Before
     fun before() {
         mockLogin.leggAzureVeilederTokenPåAlleRequests(restTemplate, navIdent)
         jdbcTemplate.jdbcOperations.execute("truncate table min_stilling")
-        if (!this::testRapid.isInitialized) testRapid =
-            TestRapid().registrerMineStillingerLytter(MineStillingerService(repository))
-        testRapid.reset()
+        if (!this::stillingConsumer.isInitialized) {
+            stillingConsumer = StillingConsumer(MineStillingerService(repository))
+        }
     }
 
     @Test
@@ -195,7 +196,6 @@ class MineStillingerTest {
         assertThat(stillingFraDb.eierNavIdent).isEqualTo(navIdent)
     }
 
-
     @Test
     fun `Når veileder sletter en direktemeldt stilling skal minStilling også slettes`() {
         val rekrutteringsbistandStilling = enRekrutteringsbistandStilling
@@ -253,7 +253,7 @@ class MineStillingerTest {
         repository.opprett(eksisterendeMinStilling)
 
         val oppdatertTittel = pamAdStilling.title + "dummy"
-        val oppdatertStatus = pamAdStilling.status + "dummy"
+        val oppdatertStatus = AdStatus.REJECTED
         val oppdatertArbeidsgiverNavn = pamAdStilling.businessName + "dummy"
         val oppdatertSistEndret = pamAdStilling.updated.plusDays(1)
         val oppdatertUtløpsdato = pamAdStilling.expires!!.plusDays(1)
@@ -266,14 +266,15 @@ class MineStillingerTest {
             sistEndret = oppdatertSistEndret,
             utløpsdato = oppdatertUtløpsdato
         )
-        testRapid.sendTestMessage(melding)
+
+        stillingConsumer.konsumerMelding(melding)
 
         val stilingerFraDb = hentAlle()
         assertThat(stilingerFraDb.size).isEqualTo(1)
         val stillingFraDb = stilingerFraDb.first()
         assertThat(stillingFraDb.stillingsId.asString()).isEqualTo(pamAdStilling.uuid)
         assertThat(stillingFraDb.annonsenr).isEqualTo(pamAdStilling.id)
-        assertThat(stillingFraDb.status).isEqualTo(oppdatertStatus)
+        assertThat(stillingFraDb.status).isEqualTo(oppdatertStatus.toString())
         assertThat(stillingFraDb.arbeidsgiverNavn).isEqualTo(oppdatertArbeidsgiverNavn)
         assertThat(stillingFraDb.sistEndret.toLocalDateTime()).isEqualToIgnoringNanos(oppdatertSistEndret)
         assertThat(stillingFraDb.utløpsdato.toLocalDateTime()).isEqualToIgnoringNanos(oppdatertUtløpsdato)
@@ -284,7 +285,7 @@ class MineStillingerTest {
     @Test
     fun `Skal ignorere meldinger for stillinger som ikke er lagret`() {
         val melding = stillingsmelding()
-        testRapid.sendTestMessage(melding)
+        stillingConsumer.konsumerMelding(melding)
         assertThat(hentAlle()).isEmpty()
     }
 
@@ -337,35 +338,24 @@ class MineStillingerTest {
         stillingsId: String = UUID.randomUUID().toString(),
         annonsenr: Long = 1,
         tittel: String = "dummyTittel",
-        status: String = "dummyStatus",
+        status: AdStatus = AdStatus.INACTIVE,
         arbeidsgiverNavn: String = "dummyArbeidsgiversNavn",
         sistEndret: LocalDateTime = LocalDateTime.now(),
         utløpsdato: LocalDateTime = LocalDateTime.now(),
         kilde: String = "IMPORTAPI"
-    ) = """
-        {
-          "uuid": "$stillingsId",
-          "adnr": "$annonsenr",
-          "title": "$tittel",
-          "status": "$status",
-          "privacy": "SHOW_ALL",
-          "administration": "{\"status\": \"DONE\", \"remarks\": [], \"comments\": \"Auto approved - 2023-05-15T17:04:15.677443528\\n\", \"reportee\": \"AUTO\", \"navIdent\": \"\"}",
-          "published": "2023-05-08T00:00:00",
-          "expires": "$utløpsdato",
-          "created": "2023-05-15T17:04:15.745674",
-          "updated": "$sistEndret",
-          "employer": "",
-          "categories": "[]",
-          "source": "$kilde",
-          "medium": "talentech",
-          "reference": "9f83702add0f494ba544eb88751b7a42",
-          "publishedByAdmin": "2023-05-15T17:04:15.677549",
-          "businessName": "$arbeidsgiverNavn",
-          "locations": "[{\"address\": null, \"postalCode\": null, \"county\": null, \"municipal\": null, \"city\": null, \"country\": \"NORGE\", \"latitude\": null, \"longitude\": null, \"municipal_code\": null, \"county_code\": null}]",
-          "properties": "[{\"key\": \"applicationdue\", \"value\": \"2023-05-21T00:00:00\"}, {\"key\": \"_providerid\", \"value\": \"15002\"}, {\"key\": \"jobtitle\", \"value\": \"test job\"}, {\"key\": \"positioncount\", \"value\": \"1\"}, {\"key\": \"_versionid\", \"value\": \"16700\"}, {\"key\": \"applicationurl\", \"value\": \"https://dummy.talentech.io/?utm_medium=talentech_publishing&utm_source=nav\"}, {\"key\": \"_approvedby\", \"value\": \"AUTO\"}, {\"key\": \"classification_esco_code\", \"value\": \"http://data.europa.eu/esco/occupation/6d03eaef-1ce5-4a1e-bb41-0908e1af1b65\"}, {\"key\": \"arbeidsplassenoccupation\", \"value\": \"Uoppgitt/ ikke identifiserbare/Ikke identifiserbare\"}, {\"key\": \"_score\", \"value\": \"[{\\\"name\\\":\\\"location\\\",\\\"value\\\":-10},{\\\"name\\\":\\\"employer\\\",\\\"value\\\":-50},{\\\"name\\\":\\\"sector\\\",\\\"value\\\":-10},{\\\"name\\\":\\\"engagementtype\\\",\\\"value\\\":-10},{\\\"name\\\":\\\"extent\\\",\\\"value\\\":-10},{\\\"name\\\":\\\"jobarrangement\\\",\\\"value\\\":-10},{\\\"name\\\":\\\"jobpercentage\\\",\\\"value\\\":-10},{\\\"name\\\":\\\"keywords\\\",\\\"value\\\":-10},{\\\"name\\\":\\\"employerdescription\\\",\\\"value\\\":-10}]\"}, {\"key\": \"_scoretotal\", \"value\": \"-130\"}, {\"key\": \"adtext\", \"value\": \"<h3>i18n mock translation</h3><br />\\n <br />\\n<h3>i18n mock translation:</h3>i18n mock translation: Unit_Test_Teant_21b2177e-587f-4d11-9500-45ad17cacfa1<br />\\ni18n mock translation: 29.05.2023<br />\\n<br />\\n\"}]",
-          "contacts": "[]"
+    ): ConsumerRecord<String, Ad> {
+        val ad = Ad().apply {
+            this.setUuid(stillingsId)
+            this.setAdnr(annonsenr.toString())
+            this.setTitle(tittel)
+            this.setStatus(status)
+            this.setBusinessName(arbeidsgiverNavn)
+            this.setUpdated(sistEndret.toString())
+            this.setExpires(utløpsdato.toString())
+            this.setSource(kilde)
         }
-    """.trimIndent()
+        return ConsumerRecord<String, Ad>("dummy", 0, 0L, stillingsId, ad)
+    }
 
     private fun hentAlle(): List<MinStilling> {
         val sql = "select * from min_stilling"
