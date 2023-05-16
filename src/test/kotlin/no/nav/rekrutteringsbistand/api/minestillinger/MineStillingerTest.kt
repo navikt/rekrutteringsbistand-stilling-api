@@ -377,7 +377,6 @@ class MineStillingerTest {
 
     /*
     Test cases:
-    - Når veileder sletter en direktemeldt stilling, så skal vi slette den fra tabellen
     - Når stilling-api konsumerer en melding om en slettet stilling, så skal vi slette stillingen
     - Når veileder overtar en direktemeldt stilling, skal vi oppdatere eier i tabellen
     - Når veileder overtar en ekstern stilling, skal vi oppdatere eier i tabellen
