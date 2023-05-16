@@ -14,6 +14,7 @@ import java.nio.charset.StandardCharsets
 import jakarta.servlet.http.HttpServletRequest
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
 import no.nav.rekrutteringsbistand.api.minestillinger.MineStillingerService
+import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsid
 
 
 @RestController
@@ -52,6 +53,7 @@ class StillingController(
     @DeleteMapping("/rekrutteringsbistandstilling/{stillingsId}")
     fun slettRekrutteringsbistandStilling(@PathVariable(value = "stillingsId") stillingsId: String): ResponseEntity<Stilling> {
         val slettetStilling = stillingService.slettRekrutteringsbistandStilling(stillingsId)
+        mineStillingerService.slett(Stillingsid(slettetStilling.uuid))
         return ok(slettetStilling)
     }
 

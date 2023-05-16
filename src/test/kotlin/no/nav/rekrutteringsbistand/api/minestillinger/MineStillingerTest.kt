@@ -202,14 +202,20 @@ class MineStillingerTest {
         val pamAdStilling = rekrutteringsbistandStilling.stilling
         val eksisterendeMinStilling: MinStilling = MinStilling.fromStilling(pamAdStilling, navIdent)
         repository.opprett(eksisterendeMinStilling)
-        mockKandidatlisteOppdatering()
+        mockKandidatlisteSlettet()
         mockPamAdApi(DELETE, "/api/v1/ads/${pamAdStilling.uuid}", pamAdStilling)
         mockAzureObo(wiremockAzure)
+        val annenPamAdStilling = rekrutteringsbistandStilling.stilling.copy(
+            id = pamAdStilling.id + 1,
+            uuid = UUID.randomUUID().toString())
+        val minStillingSomIkkeSkalSlettes = MinStilling.fromStilling(annenPamAdStilling, navIdent)
+        repository.opprett(minStillingSomIkkeSkalSlettes)
 
-        restTemplate.delete("$localBaseUrl/${pamAdStilling.uuid}")
+        restTemplate.delete("$localBaseUrl/rekrutteringsbistandstilling/${pamAdStilling.uuid}")
 
         val mineStillinger = repository.hentForNavIdent(navIdent)
-        assertThat(mineStillinger).isEmpty()
+        assertThat(mineStillinger.size).isOne
+        assertThat(mineStillinger.first().stillingsId).isEqualTo(minStillingSomIkkeSkalSlettes.stillingsId)
     }
 
     @Test
@@ -308,8 +314,21 @@ class MineStillingerTest {
             ).withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE)).willReturn(
                 WireMock.aResponse().withStatus(HttpStatus.NO_CONTENT.value()).withHeader(
                     HttpHeaders.CONNECTION, "close"
-                ) // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
-                    .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                ).withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+            )
+        )
+    }
+
+    private fun mockKandidatlisteSlettet() {
+        wiremockKandidatliste.stubFor(
+            WireMock.delete(WireMock.urlPathMatching("/rekrutteringsbistand-kandidat-api/rest/veileder/stilling/.*/kandidatliste"))
+                .withHeader(
+                    HttpHeaders.CONTENT_TYPE,
+                    WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE)
+            ).withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE)).willReturn(
+                WireMock.aResponse().withStatus(HttpStatus.NO_CONTENT.value()).withHeader(
+                    HttpHeaders.CONNECTION, "close"
+                ).withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
             )
         )
     }

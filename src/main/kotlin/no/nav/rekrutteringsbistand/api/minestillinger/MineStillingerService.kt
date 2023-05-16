@@ -49,4 +49,8 @@ class MineStillingerService(private val mineStillingerRepository: MineStillinger
             )
         }
     }
+
+    fun slett(stillingsId: Stillingsid) {
+        mineStillingerRepository.slett(stillingsId)
+    }
 }

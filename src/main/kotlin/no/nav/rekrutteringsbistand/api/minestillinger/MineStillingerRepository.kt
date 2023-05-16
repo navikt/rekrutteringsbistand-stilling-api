@@ -15,7 +15,6 @@ class MineStillingerRepository(
         SimpleJdbcInsert(namedJdbcTemplate.jdbcTemplate).withTableName("min_stilling").usingGeneratedKeyColumns("id")
 
     fun opprett(minStilling: MinStilling) {
-
         simpleJdbcInsert.execute(
             mapOf(
                 "stillingsid" to minStilling.stillingsId.verdi,
@@ -75,5 +74,11 @@ class MineStillingerRepository(
             throw Exception("Mer enn én stilling med UUID $stillingsId")
         }
         return stillinger.firstOrNull()
+    }
+
+    fun slett(stillingsId: Stillingsid) {
+        val sql = "delete from min_stilling where stillingsid = :stillingsid"
+        val params = mapOf("stillingsid" to stillingsId.verdi)
+        namedJdbcTemplate.update(sql, params)
     }
 }
