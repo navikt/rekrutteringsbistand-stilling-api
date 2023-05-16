@@ -14,11 +14,14 @@ import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.rekrutteringsbistand.api.OppdaterRekrutteringsbistandStillingDto
 import no.nav.rekrutteringsbistand.api.RekrutteringsbistandStilling
 import no.nav.rekrutteringsbistand.api.Testdata
+import no.nav.rekrutteringsbistand.api.Testdata.enOpprettetStilling
+import no.nav.rekrutteringsbistand.api.Testdata.enRekrutteringsbistandStilling
 import no.nav.rekrutteringsbistand.api.config.MockLogin
 import no.nav.rekrutteringsbistand.api.hendelser.RapidApplikasjon.Companion.registrerMineStillingerLytter
 import no.nav.rekrutteringsbistand.api.mockAzureObo
 import no.nav.rekrutteringsbistand.api.stilling.Stilling
 import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoDto
+import no.nav.rekrutteringsbistand.api.support.toMultiValueMap
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Rule
@@ -28,12 +31,10 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.boot.test.web.server.LocalServerPort
-import org.springframework.http.HttpHeaders
-import org.springframework.http.HttpMethod
-import org.springframework.http.HttpStatus
-import org.springframework.http.MediaType
+import org.springframework.http.*
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.test.context.junit4.SpringRunner
+import java.net.URI
 import java.sql.ResultSet
 import java.time.LocalDateTime
 import java.util.*
@@ -92,7 +93,7 @@ class MineStillingerTest {
     @Test
     fun `Når veileder oppretter en direktemeldt stilling skal vi lagre den i db-tabellen`() {
         val rekrutteringsbistandStilling = Testdata.enOpprettRekrutteringsbistandstillingDto
-        mockPamAdApi(HttpMethod.POST, "/api/v1/ads", Testdata.enOpprettetStilling)
+        mockPamAdApi(HttpMethod.POST, "/api/v1/ads", enOpprettetStilling)
         mockKandidatlisteOppdatering()
         mockAzureObo(wiremockAzure)
 
@@ -117,8 +118,8 @@ class MineStillingerTest {
     }
 
     @Test
-    fun `Når veileder oppdaterer en direktemelding stilling så skal vi lagre de oppdaterte verdiene`() {
-        val pamAdStilling: Stilling = Testdata.enOpprettetStilling
+    fun `Når veileder oppdaterer en direktemeldt stilling så skal vi lagre de oppdaterte verdiene`() {
+        val pamAdStilling: Stilling = enOpprettetStilling
         val eksisterendeMinStilling: MinStilling = MinStilling.fromStilling(pamAdStilling, navIdent)
         repository.opprett(eksisterendeMinStilling)
         mockKandidatlisteOppdatering()
@@ -156,10 +157,48 @@ class MineStillingerTest {
     }
 
     @Test
+    fun `Når veileder kopierer en direktemeldt stilling skal vi lagre den nye i db-tabellen`() {
+        val eksisterendeRekrutteringsbistandStilling = enRekrutteringsbistandStilling
+        val eksisterendePamAdStilling = eksisterendeRekrutteringsbistandStilling.stilling
+        val eksisterendeMinStilling: MinStilling = MinStilling.fromStilling(eksisterendePamAdStilling, navIdent)
+        repository.opprett(eksisterendeMinStilling)
+        mockPamAdApi(HttpMethod.GET, "/b2b/api/v1/ads/${eksisterendePamAdStilling.uuid}", eksisterendePamAdStilling)
+        val nyKopiAvStilling = enOpprettetStilling
+        mockPamAdApi(HttpMethod.POST, "/api/v1/ads", nyKopiAvStilling)
+        mockKandidatlisteOppdatering()
+        mockAzureObo(wiremockAzure)
+
+        val respons = restTemplate.exchange(
+            URI("$localBaseUrl/rekrutteringsbistandstilling/kopier/${eksisterendePamAdStilling.uuid}"),
+            HttpMethod.POST,
+            HttpEntity(
+                null,
+                mapOf(
+                    HttpHeaders.CONTENT_TYPE to MediaType.APPLICATION_JSON_VALUE,
+                    HttpHeaders.ACCEPT to MediaType.APPLICATION_JSON_VALUE
+                ).toMultiValueMap()
+            ),
+            RekrutteringsbistandStilling::class.java
+        )
+
+        val stillingFraRespons = respons.body!!.stilling
+        val stilingerFraDb = repository.hentForNavIdent(navIdent)
+        assertThat(stilingerFraDb.size).isEqualTo(2)
+        val stillingFraDb = stilingerFraDb.first { it.stillingsId.asString() == stillingFraRespons!!.uuid}
+        assertThat(stillingFraDb.annonsenr).isEqualTo(stillingFraRespons.id)
+        assertThat(stillingFraDb.status).isEqualTo(stillingFraRespons.status)
+        assertThat(stillingFraDb.arbeidsgiverNavn).isEqualTo(stillingFraRespons.businessName)
+        assertThat(stillingFraDb.sistEndret.toLocalDateTime()).isEqualToIgnoringNanos(stillingFraRespons.updated)
+        assertThat(stillingFraDb.utløpsdato.toLocalDateTime()).isEqualToIgnoringNanos(stillingFraRespons.expires)
+        assertThat(stillingFraDb.tittel).isEqualTo(stillingFraRespons.title)
+        assertThat(stillingFraDb.eierNavIdent).isEqualTo(navIdent)
+    }
+
+    @Test
     fun `Når veileder oppretter kandidatliste for ekstern stilling skal vi opprette stillingen i db-tabellen`() {
         mockAzureObo(wiremockAzure)
         val stillingsinfoDto = Testdata.enStillingsinfoInboundDto.copy(eierNavident = navIdent)
-        val pamAdStilling = Testdata.enOpprettetStilling.copy(uuid = stillingsinfoDto.stillingsid)
+        val pamAdStilling = enOpprettetStilling.copy(uuid = stillingsinfoDto.stillingsid)
         mockPamAdApi(HttpMethod.GET, "/b2b/api/v1/ads/${pamAdStilling.uuid}", pamAdStilling)
         mockPamAdApi(HttpMethod.PUT, "/api/v1/ads/${pamAdStilling.uuid}", pamAdStilling)
         mockKandidatlisteOppdatering()
@@ -185,7 +224,7 @@ class MineStillingerTest {
 
     @Test
     fun `Når en melding for ekstern stilling som vi har lagret konsumeres skal vi lagre oppdaterte verdier`() {
-        val pamAdStilling: Stilling = Testdata.enOpprettetStilling
+        val pamAdStilling: Stilling = enOpprettetStilling
         val eksisterendeMinStilling: MinStilling = MinStilling.fromStilling(pamAdStilling, navIdent)
         repository.opprett(eksisterendeMinStilling)
 
