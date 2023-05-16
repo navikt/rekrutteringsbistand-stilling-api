@@ -64,8 +64,6 @@ spec:
       value: "prod-gcp:toi:rekrutteringsbistand-stilling-indekser"
     - name: KAFKA_RAPID_TOPIC
       value: toi.rapid-1
-    - name: KAFKA_EXTRA_TOPIC
-      value: toi.rekrutteringsbistand-stilling-1
     - name: KAFKA_CONSUMER_GROUP_ID
       value: rekrutteringsbistand-stilling-rapidconsumer-2
     - name: KAFKA_RESET_POLICY

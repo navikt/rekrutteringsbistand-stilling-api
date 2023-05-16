@@ -31,6 +31,7 @@
         <jackson-module-kotlin.version>2.13.4</jackson-module-kotlin.version>
         <token-validation.version>3.0.10</token-validation.version>
         <resilience4j.version>2.0.0</resilience4j.version>
+        <kafka-avro-serializer.version>7.2.2</kafka-avro-serializer.version>
     </properties>
 
     <dependencies>
@@ -80,6 +81,21 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.confluent</groupId>
+            <artifactId>kafka-avro-serializer</artifactId>
+            <version>${kafka-avro-serializer.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>io.github.resilience4j</groupId>
