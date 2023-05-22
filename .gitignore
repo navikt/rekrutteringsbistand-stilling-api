@@ -1,6 +1,6 @@
 /target/
 !.mvn/wrapper/maven-wrapper.jar
-
+/src/main/kotlin/no/nav/pam/stilling/ext/avro/
 
 ### IntelliJ IDEA ###
 .idea
