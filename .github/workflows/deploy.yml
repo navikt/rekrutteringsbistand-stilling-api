@@ -21,6 +21,8 @@ jobs:
           key: ${{ runner.os }}-maven-cache-${{ hashFiles('pom.xml') }}
           restore-keys: |
             ${{ runner.os }}-maven-cache-
+      - name: Print folder
+        run: ls -a -R
       - name: Run tests
         run: mvn verify
 
