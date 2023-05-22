@@ -23,6 +23,8 @@ jobs:
             ${{ runner.os }}-maven-cache-
       - name: Compile
         run: mvn compile
+      - name: Print
+        run: ls -a R
       - name: Run tests
         run: mvn verify
 
