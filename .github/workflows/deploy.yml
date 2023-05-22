@@ -24,7 +24,7 @@ jobs:
       - name: Compile
         run: mvn compile
       - name: Print
-        run: ls -a R
+        run: ls -a -R
       - name: Run tests
         run: mvn verify
 
