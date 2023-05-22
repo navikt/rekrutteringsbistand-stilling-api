@@ -21,12 +21,8 @@ jobs:
           key: ${{ runner.os }}-maven-cache-${{ hashFiles('pom.xml') }}
           restore-keys: |
             ${{ runner.os }}-maven-cache-
-      - name: Compile
-        run: mvn compile
-      - name: Print
-        run: ls -a -R
       - name: Run tests
-        run: mvn verify
+        run: mvn compile && mvn verify
 
   deploy-to-dev:
     name: Deploy to dev
