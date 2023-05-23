@@ -4,6 +4,7 @@ import io.confluent.kafka.schemaregistry.client.SchemaRegistryClientConfig;
 import io.confluent.kafka.serializers.KafkaAvroDeserializer;
 import io.confluent.kafka.serializers.KafkaAvroDeserializerConfig;
 import io.confluent.kafka.serializers.KafkaAvroSerializerConfig;
+import no.nav.pam.stilling.ext.avro.Ad;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.clients.CommonClientConfigs;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -51,10 +52,10 @@ public class AivenKafkaAvroConsumerConfig {
     private String schemaRegistryPassword;
 
     @Bean
-    public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, String>> avroAivenKafkaListenerContainerFactory(
-            @Qualifier("avroAivenConsumerFactory") ConsumerFactory<String, String> consumerFactory
+    public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, Ad>> avroAivenKafkaListenerContainerFactory(
+            @Qualifier("avroAivenConsumerFactory") ConsumerFactory<String, Ad> consumerFactory
     ) {
-        ConcurrentKafkaListenerContainerFactory<String, String> factory = new ConcurrentKafkaListenerContainerFactory<>();
+        ConcurrentKafkaListenerContainerFactory<String, Ad> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory);
         factory.setConcurrency(1);
 
@@ -64,7 +65,7 @@ public class AivenKafkaAvroConsumerConfig {
     }
 
     @Bean
-    public ConsumerFactory<String, String> avroAivenConsumerFactory(KafkaProperties properties) {
+    public ConsumerFactory<String, Ad> avroAivenConsumerFactory(KafkaProperties properties) {
         Map<String, Object> consumerProperties = properties.buildConsumerProperties();
 
         consumerProperties.put(KafkaAvroSerializerConfig.SCHEMA_REGISTRY_URL_CONFIG, schemaRegistryUrl);
