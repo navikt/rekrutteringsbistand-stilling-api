@@ -19,7 +19,7 @@ class StillingConsumer(
         topics = ["toi.rekrutteringsbistand-stilling-1"],
         groupId = "rekrutteringsbistand-stilling-api-1",
 //        clientIdPrefix = "vedtak-replikert",
-        containerFactory = "avroAivenKafkaListenerContainerFactory"
+        containerFactory = "kafkaListenerContainerFactory"
     )
     fun konsumerMelding(melding: ConsumerRecord<String, Ad>) {
         val stilling = melding.value()

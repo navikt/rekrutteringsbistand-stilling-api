@@ -12,6 +12,7 @@ import org.apache.kafka.common.config.SslConfigs;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -52,7 +53,8 @@ public class AivenKafkaAvroConsumerConfig {
     private String schemaRegistryPassword;
 
     @Bean
-    public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, Ad>> avroAivenKafkaListenerContainerFactory(
+    @ConditionalOnMissingBean(name = "kafkaListenerContainerFactory")
+    public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, Ad>> kafkaListenerContainerFactory(
             @Qualifier("avroAivenConsumerFactory") ConsumerFactory<String, Ad> consumerFactory
     ) {
         ConcurrentKafkaListenerContainerFactory<String, Ad> factory = new ConcurrentKafkaListenerContainerFactory<>();
