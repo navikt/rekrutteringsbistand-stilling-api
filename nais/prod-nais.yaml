@@ -53,8 +53,8 @@ spec:
           cluster: prod-fss
     outbound:
       external:
-        - host: https://pam-ad-api.intern.nav.no
-        - host: https://rekrutteringsbistand-kandidat-api.prod-fss-pub.nais.io
+        - host: pam-ad-api.intern.nav.no
+        - host: rekrutteringsbistand-kandidat-api.prod-fss-pub.nais.io
   env:
     - name: SPRING_PROFILES_ACTIVE
       value: prod
