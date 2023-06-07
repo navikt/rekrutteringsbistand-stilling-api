@@ -77,23 +77,6 @@ class StillingsinfoComponentTest {
     }
 
     @Test
-    fun `Henting av stillingsinfo basert på bruker skal returnere HTTP 200 med lagret stillingsinfo`() {
-        repository.opprett(enStillingsinfo)
-
-        val url = "$localBaseUrl/stillingsinfo/ident/${enStillingsinfo.eier?.navident}"
-        val stillingsinfoRespons = restTemplate.exchange(
-            url,
-            HttpMethod.GET,
-            httpEntity(null),
-            object : ParameterizedTypeReference<List<StillingsinfoDto>>() {})
-
-        assertThat(stillingsinfoRespons.statusCode).isEqualTo(HttpStatus.OK)
-        stillingsinfoRespons.body.apply {
-            assertThat(this!!).contains(enStillingsinfo.asStillingsinfoDto())
-        }
-    }
-
-    @Test
     fun `Opprettelse av kandidatliste på ekstern stilling skal returnere HTTP 201 med opprettet stillingsinfo, og trigge resending hos Arbeidsplassen`() {
         val dto = enStillingsinfoInboundDto
         mockAzureObo(wiremockAzure)
