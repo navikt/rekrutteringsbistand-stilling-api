@@ -80,15 +80,6 @@ class StillingsinfoRepository(
         }
     }
 
-    fun hentForIdent(ident: String): List<Stillingsinfo> =
-        namedJdbcTemplate.query(
-            "SELECT * FROM $STILLINGSINFO WHERE $EIER_NAVIDENT = :eier_navident",
-            MapSqlParameterSource("eier_navident", ident)
-        )
-        { rs: ResultSet, _: Int ->
-            Stillingsinfo.fromDB(rs)
-        }
-
     companion object {
         const val STILLINGSINFO = "Stillingsinfo"
         const val STILLINGSINFOID = "stillingsinfoid"
