@@ -139,36 +139,4 @@ class StillingService(
         kandidatlisteKlient.varsleOmSlettetStilling(Stillingsid(stillingsId))
         return arbeidsplassenKlient.slettStilling(stillingsId)
     }
-
-    fun hentMineStillinger(queryString: String?): Page<RekrutteringsbistandStilling> {
-        val startHenteFraPam = System.nanoTime()
-        val stillingerPage = arbeidsplassenKlient.hentMineStillinger(queryString)
-        log.info("Brukte ${TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startHenteFraPam)} millisekunder på å hente stillinger fra PAM")
-
-        val startMappeTilStillingsIder = System.nanoTime()
-        val stillingsIder = stillingerPage.content.map { Stillingsid(it.uuid) }
-        log.info("Brukte ${TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startMappeTilStillingsIder)} millisekunder på å mappe til stillingsIder)")
-
-        val startHenteStillingsinfoOgLageMap = System.nanoTime()
-        val stillingsinfoer: Map<String, Stillingsinfo> = stillingsinfoService
-            .hentForStillinger(stillingsIder)
-            .associateBy { it.stillingsid.asString() }
-        log.info("Brukte ${TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startHenteStillingsinfoOgLageMap)} millisekunder på å hente stillingsinfo og lage map med stillingId som key)")
-
-        val startSlåSammenStillingOgStillingsinfo = System.nanoTime()
-        val rekrutteringsbistandStillinger = stillingerPage.content.map {
-            RekrutteringsbistandStilling(
-                stillingsinfo = stillingsinfoer[it.uuid]?.asStillingsinfoDto(),
-                stilling = it
-            )
-        }
-        val tidBruktMillis = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startSlåSammenStillingOgStillingsinfo)
-        log.info("Brukte $tidBruktMillis millisekunder på å slå sammen stillingsinfo med stilling for ${stillingsIder.size} stillinger")
-
-        return Page(
-            totalPages = stillingerPage.totalPages,
-            totalElements = stillingerPage.totalElements,
-            content = rekrutteringsbistandStillinger
-        )
-    }
 }
