@@ -55,18 +55,4 @@ class StillingController(val stillingService: StillingService) {
         val stilling = stillingService.hentRekrutteringsbistandStillingBasertPåAnnonsenr(annonsenr)
         return stilling.map { ok(it) }.getOrElse { notFound().build() }
     }
-
-    @GetMapping("/mine-stillinger")
-    fun hentMineStillinger(request: HttpServletRequest): ResponseEntity<Page<RekrutteringsbistandStilling>> {
-
-        val queryString = if (request.queryString != null) {
-            URLDecoder.decode(request.queryString, StandardCharsets.UTF_8)
-        } else {
-            null
-        }
-
-        val stillinger: Page<RekrutteringsbistandStilling> = stillingService.hentMineStillinger(queryString)
-
-        return ok(stillinger)
-    }
 }

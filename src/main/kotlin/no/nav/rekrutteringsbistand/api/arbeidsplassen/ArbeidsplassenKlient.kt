@@ -148,28 +148,6 @@ class ArbeidsplassenKlient(
             }
         }
 
-    fun hentMineStillinger(queryString: String?): Page<Stilling> =
-        timer("rekrutteringsbistand.stilling.arbeidsplassen.hentMineStillinger.kall.tid") {
-            val url =
-                UriComponentsBuilder.fromHttpUrl("${hentBaseUrl()}/api/v1/ads/rekrutteringsbistand/minestillinger")
-                    .query(queryString).build().toString()
-
-            try {
-                val response = restTemplate.exchange(url,
-                    HttpMethod.GET,
-                    HttpEntity(null, httpHeaders()),
-                    object : ParameterizedTypeReference<Page<Stilling>>() {})
-                return@timer response.body ?: throw kunneIkkeTolkeBodyException()
-
-            } catch (e: RestClientResponseException) {
-                throw svarMedFeilmelding("Klarte ikke hente mine stillinger fra Arbeidsplassen", url, e)
-            } catch (e: RestClientException) {
-                throw ResponseStatusException(
-                    INTERNAL_SERVER_ERROR, "Klarte ikke hente mine stillinger fra Arbeidsplassen", e
-                )
-            }
-        }
-
     fun opprettStilling(stilling: OpprettStillingDto): Stilling =
         timer("rekrutteringsbistand.stilling.arbeidsplassen.opprettStilling.kall.tid") {
             val url = "${hentBaseUrl()}/api/v1/ads?classify=true"
