@@ -59,9 +59,6 @@ class StillingsinfoService(
         return stillingsinfoListe
     }
 
-    fun hentForIdent(navIdent: String): List<Stillingsinfo> =
-        repo.hentForIdent(navIdent)
-
     fun oppdaterNotat(stillingId: Stillingsid, oppdaterNotat: OppdaterNotat) {
         repo.oppdaterNotat(oppdaterNotat)
     }

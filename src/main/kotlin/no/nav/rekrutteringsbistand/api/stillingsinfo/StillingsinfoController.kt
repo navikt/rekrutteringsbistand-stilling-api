@@ -19,10 +19,6 @@ class StillingsinfoController(
         val oppdatertStillingsinfo = service.overtaEierskapForEksternStillingOgKandidatliste(Stillingsid(dto.stillingsid), nyEier)
         return ResponseEntity.status(HttpStatus.OK).body(oppdatertStillingsinfo.asStillingsinfoDto())
     }
-
-    @GetMapping("/ident/{navident}")
-    fun hentForIdent(@PathVariable navident: String): Collection<StillingsinfoDto> =
-        service.hentForIdent(navident).map { it.asStillingsinfoDto() }
 }
 
 data class StillingsinfoInboundDto(
