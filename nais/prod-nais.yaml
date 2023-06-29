@@ -44,12 +44,11 @@ spec:
           cluster: prod-gcp
         - application: rekrutteringsbistand-stilling-indekser
           cluster: prod-gcp
-          namespace: toi
         - application: rekrutteringsbistand-container
-          namespace: toi
+          cluster: prod-gcp
+        - application: rekrutteringsbistand
           cluster: prod-gcp
         - application: rekrutteringsbistand-kandidat-api
-          namespace: toi
           cluster: prod-fss
     outbound:
       external:

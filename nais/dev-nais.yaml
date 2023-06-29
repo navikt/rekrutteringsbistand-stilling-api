@@ -45,12 +45,11 @@ spec:
           cluster: dev-gcp
         - application: rekrutteringsbistand-stilling-indekser
           cluster: dev-gcp
-          namespace: toi
         - application: rekrutteringsbistand-container
-          namespace: toi
+          cluster: dev-gcp
+        - application: rekrutteringsbistand
           cluster: dev-gcp
         - application: rekrutteringsbistand-kandidat-api
-          namespace: toi
           cluster: dev-fss
     outbound:
       external:
