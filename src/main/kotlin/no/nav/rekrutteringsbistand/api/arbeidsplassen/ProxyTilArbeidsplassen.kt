@@ -60,9 +60,17 @@ class ProxyTilArbeidsplassen(
         return ResponseEntity(respons.body, respons.statusCode)
     }
 
-    @GetMapping("/rekrutteringsbistand/api/v1/postdata")
+    @GetMapping("/rekrutteringsbistand/api/v1/geography/postdata")
     fun proxyGetPostdata(request: HttpServletRequest): ResponseEntity<String> {
         log.debug("Mottok ${request.method} til ${request.requestURI}")
+        val respons = proxyJsonRequest(HttpMethod.GET, request, replaceRekrutteringsbistandInUrl, null, hentBaseUrl())
+        return ResponseEntity(respons.body, respons.statusCode)
+    }
+
+    @GetMapping("/rekrutteringsbistand/api/v1/postdata")
+    @Deprecated("byttes ut med geography/postdata")
+    fun deprekertproxyGetPostdata(request: HttpServletRequest): ResponseEntity<String> {
+        log.info("Mottok ${request.method} til ${request.requestURI} deprekert endepunkt")
         val respons = proxyJsonRequest(HttpMethod.GET, request, replaceRekrutteringsbistandInUrl, null, hentBaseUrl())
         return ResponseEntity(respons.body, respons.statusCode)
     }
