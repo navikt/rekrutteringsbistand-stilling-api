@@ -84,16 +84,6 @@ internal class GeografiKomponentTest {
     }
 
     @Test
-    @Deprecated("byttes ut med geography/postdata")
-    fun `GET mot deprekert postdata skal returnere HTTP 200 med informasjon om postnumre`() {
-        mockString("/api/v1/postdata", postnumreJson)
-        restTemplate.getForEntity("$localBaseUrl/rekrutteringsbistand/api/v1/postdata", String::class.java).also {
-            assertThat(it.statusCode).isEqualTo(HttpStatus.OK)
-            assertThat(it.body).isEqualTo(postnumreJson)
-        }
-    }
-
-    @Test
     fun `GET mot postdata skal returnere HTTP 200 med informasjon om postnumre`() {
         mockString("/api/v1/geography/postdata", postnumreJson)
         restTemplate.getForEntity("$localBaseUrl/rekrutteringsbistand/api/v1/geography/postdata", String::class.java).also {

@@ -67,14 +67,6 @@ class ProxyTilArbeidsplassen(
         return ResponseEntity(respons.body, respons.statusCode)
     }
 
-    @GetMapping("/rekrutteringsbistand/api/v1/postdata")
-    @Deprecated("byttes ut med geography/postdata")
-    fun deprekertproxyGetPostdata(request: HttpServletRequest): ResponseEntity<String> {
-        log.warn("Mottok ${request.method} til ${request.requestURI} deprekert endepunkt. Burde ikke kalles lenger")
-        val respons = proxyJsonRequest(HttpMethod.GET, request, replaceRekrutteringsbistandInUrl, null, hentBaseUrl())
-        return ResponseEntity(respons.body, respons.statusCode)
-    }
-
     @GetMapping("/search-api/underenhet/_search")
     private fun getSokTilPamAdApi(request: HttpServletRequest): ResponseEntity<String> {
         log.debug("Mottok ${request.method} til ${request.requestURI}")
