@@ -7,13 +7,11 @@ data class Stillingsinfo(
     val stillingsinfoid: Stillingsinfoid,
     val stillingsid: Stillingsid,
     val eier: Eier?,
-    val notat: String? = null,
     val stillingskategori: Stillingskategori? = Stillingskategori.STILLING
 ) {
     fun asStillingsinfoDto() = StillingsinfoDto(
         stillingsid = this.stillingsid.asString(),
         stillingsinfoid = this.stillingsinfoid.toString(),
-        notat = this.notat,
         eierNavident = this.eier?.navident,
         eierNavn = this.eier?.navn,
         stillingskategori = this.stillingskategori
@@ -28,15 +26,12 @@ data class Stillingsinfo(
                     navident = rs.getString("eier_navident"),
                     navn = rs.getString("eier_navn")
                 ),
-                notat = rs.getString("notat"),
                 stillingskategori = Stillingskategori.fraDatabase(rs.getString("stillingskategori"))
             )
     }
 }
 
 data class OppdaterEier(val stillingsinfoid: Stillingsinfoid, val eier: Eier)
-
-data class OppdaterNotat(val stillingsinfoid: Stillingsinfoid, val notat: String)
 
 data class Stillingsinfoid(val verdi: UUID) {
     constructor(verdi: String) : this(UUID.fromString(verdi))
@@ -62,7 +57,6 @@ data class Eier(val navident: String?, val navn: String?)
 data class StillingsinfoDto(
     val stillingsid: String,
     val stillingsinfoid: String,
-    val notat: String?,
     val eierNavident: String?,
     val eierNavn: String?,
     val stillingskategori: Stillingskategori?
