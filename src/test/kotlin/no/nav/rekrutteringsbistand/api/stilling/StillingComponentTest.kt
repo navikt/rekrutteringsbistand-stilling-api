@@ -15,10 +15,8 @@ import com.github.tomakehurst.wiremock.matching.UrlPattern
 import no.nav.rekrutteringsbistand.api.OppdaterRekrutteringsbistandStillingDto
 import no.nav.rekrutteringsbistand.api.RekrutteringsbistandStilling
 import no.nav.rekrutteringsbistand.api.TestRepository
-import no.nav.rekrutteringsbistand.api.Testdata.enAnnenStillingsinfo
 import no.nav.rekrutteringsbistand.api.Testdata.enOpprettRekrutteringsbistandstillingDto
 import no.nav.rekrutteringsbistand.api.Testdata.enOpprettetStilling
-import no.nav.rekrutteringsbistand.api.Testdata.enPageMedStilling
 import no.nav.rekrutteringsbistand.api.Testdata.enRekrutteringsbistandStilling
 import no.nav.rekrutteringsbistand.api.Testdata.enRekrutteringsbistandStillingUtenEier
 import no.nav.rekrutteringsbistand.api.Testdata.enStilling
@@ -38,14 +36,12 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.boot.test.web.server.LocalServerPort
-import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders.*
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatus.OK
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
-import org.springframework.http.ResponseEntity
 import org.springframework.test.context.junit4.SpringRunner
 import java.util.*
 
@@ -233,16 +229,13 @@ internal class StillingComponentTest {
         mockPamAdApiError("/api/v1/ads/${stilling.uuid}", HttpMethod.PUT, 500)
 
         val dto = OppdaterRekrutteringsbistandStillingDto(
-            stillingsinfoid = stillingsinfo.stillingsinfoid.asString(), notat = "oppdatert notat", stilling = stilling
+            stillingsinfoid = stillingsinfo.stillingsinfoid.asString(), stilling = stilling
         )
 
         restTemplate.exchange(
             "$localBaseUrl/rekrutteringsbistandstilling", HttpMethod.PUT, HttpEntity(dto), String::class.java
         ).also {
             assertThat(it.statusCodeValue).isEqualTo(500)
-
-            val lagretStillingsinfo = repository.hentForStilling(Stillingsid(stilling.uuid)).orNull()!!
-            assertThat(lagretStillingsinfo.notat).isEqualTo(stillingsinfo.notat)
         }
     }
 
@@ -256,16 +249,13 @@ internal class StillingComponentTest {
         mockKandidatlisteOppdateringFeiler()
 
         val dto = OppdaterRekrutteringsbistandStillingDto(
-            stillingsinfoid = stillingsinfo.stillingsinfoid.asString(), notat = "oppdatert notat", stilling = stilling
+            stillingsinfoid = stillingsinfo.stillingsinfoid.asString(), stilling = stilling
         )
 
         restTemplate.exchange(
             "$localBaseUrl/rekrutteringsbistandstilling", HttpMethod.PUT, HttpEntity(dto), String::class.java
         ).also {
             assertThat(it.statusCodeValue).isEqualTo(500)
-
-            val lagretStillingsinfo = repository.hentForStilling(Stillingsid(stilling.uuid)).orNull()!!
-            assertThat(lagretStillingsinfo.notat).isEqualTo(stillingsinfo.notat)
         }
     }
 
@@ -273,7 +263,7 @@ internal class StillingComponentTest {
     fun `PUT mot stilling med notat skal returnere endret stilling når stillingsinfo finnes`() {
 
         val rekrutteringsbistandStilling = enRekrutteringsbistandStilling
-        val stillingsinfo = enStillingsinfo.copy(notat = "gammelt notat")
+        val stillingsinfo = enStillingsinfo
 
         mockPamAdApi(
             HttpMethod.PUT,
@@ -287,7 +277,6 @@ internal class StillingComponentTest {
 
         val dto = OppdaterRekrutteringsbistandStillingDto(
             stillingsinfoid = stillingsinfo.stillingsinfoid.asString(),
-            notat = stillingsinfo.notat,
             stilling = rekrutteringsbistandStilling.stilling
         )
 
@@ -298,7 +287,6 @@ internal class StillingComponentTest {
             OppdaterRekrutteringsbistandStillingDto::class.java
         ).body!!.also {
             assertThat(it.stilling).isEqualTo(rekrutteringsbistandStilling.stilling)
-            assertThat(it.notat).isEqualTo(stillingsinfo.notat)
             assertThat(it.stillingsinfoid).isEqualTo(stillingsinfo.stillingsinfoid.asString())
         }
     }
@@ -315,48 +303,19 @@ internal class StillingComponentTest {
         mockAzureObo(wiremockAzure)
 
         mockKandidatlisteOppdatering()
-        repository.opprett(enStillingsinfoUtenEier.copy(notat = null))
+        repository.opprett(enStillingsinfoUtenEier)
 
         restTemplate.exchange(
             "$localBaseUrl/rekrutteringsbistandstilling", HttpMethod.PUT, HttpEntity(
                 OppdaterRekrutteringsbistandStillingDto(
                     stillingsinfoid = rekrutteringsbistandStilling.stillingsinfo?.stillingsinfoid,
-                    notat = rekrutteringsbistandStilling.stillingsinfo?.notat,
                     stilling = rekrutteringsbistandStilling.stilling
                 )
             ), OppdaterRekrutteringsbistandStillingDto::class.java
         ).body.also {
             assertThat(it!!.stilling.uuid).isNotEmpty
             assertThat(it.stilling).isEqualTo(rekrutteringsbistandStilling.stilling)
-            assertThat(it.notat).isEqualTo(rekrutteringsbistandStilling.stillingsinfo?.notat)
             assertThat(it.stillingsinfoid).isEqualTo(rekrutteringsbistandStilling.stillingsinfo?.stillingsinfoid)
-        }
-    }
-
-    @Test
-    fun `PUT mot stilling med notat skal returnere endret stilling når stillingsinfo ikke finnes`() {
-        val rekrutteringsbistandStilling = enRekrutteringsbistandStillingUtenEier
-        mockPamAdApi(
-            HttpMethod.PUT,
-            "/api/v1/ads/${rekrutteringsbistandStilling.stilling.uuid}",
-            rekrutteringsbistandStilling.stilling
-        )
-        mockKandidatlisteOppdatering()
-        mockAzureObo(wiremockAzure)
-
-        restTemplate.exchange(
-            "$localBaseUrl/rekrutteringsbistandstilling", HttpMethod.PUT, HttpEntity(
-                OppdaterRekrutteringsbistandStillingDto(
-                    stillingsinfoid = rekrutteringsbistandStilling.stillingsinfo?.stillingsinfoid,
-                    notat = rekrutteringsbistandStilling.stillingsinfo?.notat,
-                    stilling = rekrutteringsbistandStilling.stilling
-                )
-            ), OppdaterRekrutteringsbistandStillingDto::class.java
-        ).body.also {
-            assertThat(it!!.stilling.uuid).isNotEmpty()
-            assertThat(it.stilling).isEqualTo(rekrutteringsbistandStilling.stilling)
-            assertThat(it.notat).isEqualTo(rekrutteringsbistandStilling.stillingsinfo?.notat)
-            assertThat(it.stillingsinfoid).isNotEmpty()
         }
     }
 
