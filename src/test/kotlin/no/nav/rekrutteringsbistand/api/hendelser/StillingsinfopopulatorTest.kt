@@ -82,9 +82,8 @@ class StillingsinfopopulatorTest {
             )
         val stillingsinfoid = Stillingsinfoid(UUID.randomUUID())
         val eier = Eier("AB123456", "Navnesen")
-        val notat = "Et notat"
         val stillingskategori = Stillingskategori.ARBEIDSTRENING
-        val stillingsinfo = Stillingsinfo(stillingsinfoid, stillingsId, eier, notat, stillingskategori)
+        val stillingsinfo = Stillingsinfo(stillingsinfoid, stillingsId, eier, stillingskategori)
         stillingsinfoRepository.opprett(stillingsinfo)
         testRapid.sendTestMessage(
             """
@@ -120,7 +119,6 @@ class StillingsinfopopulatorTest {
         assertEquals(stillingsinfo.stillingskategori?.name, stillingNode.path("stillingskategori").asText())
         assertEquals(stillingsinfo.eier!!.navident, stillingNode.path("eier").path("navident").asText())
         assertEquals(stillingsinfo.eier!!.navn, stillingNode.path("eier").path("navn").asText())
-        assertEquals(stillingsinfo.notat, stillingNode.path("notat").asText())
     }
 
     @Test
@@ -146,7 +144,6 @@ class StillingsinfopopulatorTest {
             fail("Stillingsinfo ikke lagret")
         }
         assertNull(lagretStillingsinfo.eier)
-        assertNull(lagretStillingsinfo.notat)
         assertNull(lagretStillingsinfo.stillingskategori)
         assertThat(lagretStillingsinfo.stillingsid).isEqualTo(stillingsId)
         assertNotNull(lagretStillingsinfo.stillingsinfoid)

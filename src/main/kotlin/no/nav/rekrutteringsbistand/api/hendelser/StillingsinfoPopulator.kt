@@ -35,7 +35,6 @@ class StillingsinfoPopulator(
             val nyStillingsinfo = Stillingsinfo(
                 stillingsinfoid = Stillingsinfoid(UUID.randomUUID()),
                 stillingsid = stillingsId,
-                notat = null,
                 eier = null,
                 stillingskategori = null
             )
@@ -71,7 +70,7 @@ private fun parseAntallStillinger(stilling: no.nav.rekrutteringsbistand.api.stil
 }
 
 fun Stillingsinfo.tilStillingsinfoIHendelse() =
-    StillingsinfoIHendelse(stillingsinfoid.asString(), stillingsid.asString(), eier, notat, stillingskategori)
+    StillingsinfoIHendelse(stillingsinfoid.asString(), stillingsid.asString(), eier, null, stillingskategori)
 
 data class StillingsinfoIHendelse(
     val stillingsinfoid: String,

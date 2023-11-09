@@ -68,27 +68,6 @@ class StillingService(
         }
     }
 
-    private fun lagreNyttNotat(
-        nyttNotat: String,
-        stillingsId: Stillingsid,
-    ) {
-        val eksisterendeStillingsinfoId = stillingsinfoService.hentForStilling(stillingsId).map { it.stillingsinfoid }
-
-        if (eksisterendeStillingsinfoId is Some) {
-            val nyOppdaterNotat = OppdaterNotat(eksisterendeStillingsinfoId.value, nyttNotat)
-            stillingsinfoService.oppdaterNotat(stillingsId, nyOppdaterNotat)
-        } else {
-            val nyStillingsinfo = Stillingsinfo(
-                stillingsinfoid = Stillingsinfoid(UUID.randomUUID()),
-                stillingsid = stillingsId,
-                notat = nyttNotat,
-                eier = null,
-                stillingskategori = null
-            )
-            stillingsinfoService.lagre(nyStillingsinfo)
-        }
-    }
-
     fun kopierStilling(stillingsId: String): RekrutteringsbistandStilling {
         val eksisterendeRekrutteringsbistandStilling = hentRekrutteringsbistandStilling(stillingsId)
         val eksisterendeStilling = eksisterendeRekrutteringsbistandStilling.stilling
@@ -114,17 +93,12 @@ class StillingService(
 
         val id = Stillingsid(oppdatertStilling.uuid)
 
-        if (dto.notat != null) {
-            lagreNyttNotat(dto.notat, id)
-        }
-
         val eksisterendeStillingsinfo: Stillingsinfo? =
             stillingsinfoService.hentForStilling(id).orNull()
 
         return OppdaterRekrutteringsbistandStillingDto(
             stilling = oppdatertStilling,
-            stillingsinfoid = eksisterendeStillingsinfo?.stillingsinfoid?.asString(),
-            notat = eksisterendeStillingsinfo?.notat
+            stillingsinfoid = eksisterendeStillingsinfo?.stillingsinfoid?.asString()
         ).also {
             if (oppdatertStilling.source.equals("DIR", ignoreCase = false)) {
                 kandidatlisteKlient.sendStillingOppdatert(RekrutteringsbistandStilling(

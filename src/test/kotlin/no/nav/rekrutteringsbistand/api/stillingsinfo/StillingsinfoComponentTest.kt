@@ -94,7 +94,6 @@ class StillingsinfoComponentTest {
             assertThat(this.stillingsid).isNotNull
             assertThat(this.eierNavn).isEqualTo(dto.eierNavn)
             assertThat(this.eierNavident).isEqualTo(dto.eierNavident)
-            assertThat(this.notat).isNull()
         }
     }
 

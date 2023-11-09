@@ -35,7 +35,6 @@ class StillingsinfoPopulatorGammel(
             val nyStillingsinfo = Stillingsinfo(
                 stillingsinfoid = Stillingsinfoid(UUID.randomUUID()),
                 stillingsid = stillingsId,
-                notat = null,
                 eier = null,
                 stillingskategori = null
             )

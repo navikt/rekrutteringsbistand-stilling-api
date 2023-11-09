@@ -114,7 +114,6 @@ object Testdata {
         stillingsinfoid = Stillingsinfoid(UUID.randomUUID()),
         eier = Eier(navident = enVeileder.navIdent, navn = enVeileder.displayName),
         stillingsid = Stillingsid(enStilling.uuid),
-        notat = etNotat,
         stillingskategori = null
     )
 
@@ -128,7 +127,6 @@ object Testdata {
         stillingsinfoid = Stillingsinfoid(UUID.randomUUID()),
         eier = null,
         stillingsid = Stillingsid(enStilling.uuid),
-        notat = etNotat,
         stillingskategori = null
     )
 
@@ -136,7 +134,6 @@ object Testdata {
         stillingsinfoid = Stillingsinfoid(UUID.randomUUID()),
         eier = Eier(navident = enVeileder.navIdent, navn = enVeileder.displayName),
         stillingsid = Stillingsid(enAnnenStilling.uuid),
-        notat = etNotat,
         stillingskategori = null
     )
 

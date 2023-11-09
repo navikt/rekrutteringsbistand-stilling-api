@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit
 
 @Service
 class StillingsinfoService(
-    private val   repo: StillingsinfoRepository,
+    private val repo: StillingsinfoRepository,
     private val kandidatlisteKlient: KandidatlisteKlient,
     private val arbeidsplassenKlient: ArbeidsplassenKlient
 ) {
@@ -59,10 +59,6 @@ class StillingsinfoService(
         return stillingsinfoListe
     }
 
-    fun oppdaterNotat(stillingId: Stillingsid, oppdaterNotat: OppdaterNotat) {
-        repo.oppdaterNotat(oppdaterNotat)
-    }
-
     fun lagre(stillingsinfo: Stillingsinfo) {
         repo.opprett(stillingsinfo)
     }
@@ -73,7 +69,6 @@ class StillingsinfoService(
                 stillingsinfoid = Stillingsinfoid.ny(),
                 stillingsid = stillingsId,
                 eier = null,
-                notat = null,
                 stillingskategori = stillingskategori
             )
         )

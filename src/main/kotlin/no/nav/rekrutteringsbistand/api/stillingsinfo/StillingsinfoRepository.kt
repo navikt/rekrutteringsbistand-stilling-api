@@ -22,7 +22,7 @@ class StillingsinfoRepository(
                 STILLINGSID to stillingsinfo.stillingsid.asString(),
                 EIER_NAVIDENT to stillingsinfo.eier?.navident,
                 EIER_NAVN to stillingsinfo.eier?.navn,
-                NOTAT to stillingsinfo.notat,
+                NOTAT to null,
                 STILLINGSKATEGORI to stillingsinfo.stillingskategori?.name
             )
         )
@@ -48,17 +48,6 @@ class StillingsinfoRepository(
                 "eier_navn" to nyEier?.navn
             )
         )
-
-    fun oppdaterNotat(oppdatering: OppdaterNotat) {
-        namedJdbcTemplate.update(
-            "update $STILLINGSINFO set $NOTAT=:notat where $STILLINGSINFOID=:stillingsinfoid",
-            mapOf(
-                "stillingsinfoid" to oppdatering.stillingsinfoid.asString(),
-                "notat" to oppdatering.notat
-            )
-
-        )
-    }
 
     fun hentForStilling(stillingId: Stillingsid): Option<Stillingsinfo> {
         val list = hentForStillinger(listOf(stillingId))
