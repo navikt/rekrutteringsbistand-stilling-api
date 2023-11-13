@@ -17,7 +17,7 @@ class StillingsinfoController(
     fun overtaEierskapForEksternStillingOgKandidatliste(
         @RequestBody dto: StillingsinfoInboundDto
     ): ResponseEntity<StillingsinfoDto> {
-        secureLog.info("Verifiser securelog")
+        secureLog.info("Overtar ekstern stilling og kandidatliste ident ${dto.eierNavident} stillingsid ${dto.stillingsid}")
         val nyEier = Eier(dto.eierNavident, dto.eierNavn)
         val oppdatertStillingsinfo = service.overtaEierskapForEksternStillingOgKandidatliste(Stillingsid(dto.stillingsid), nyEier)
 
