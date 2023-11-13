@@ -24,7 +24,7 @@ class StillingsinfoController(
         val forrigeStillingsinfo = service.hentForStilling(stillingId = stillingsid)
         val forrigeEier = forrigeStillingsinfo.orNull()?.eier?.navident
 
-        secureLog.info("Overtar ekstern stilling og kandidatliste gammel eier $forrigeEier ny eier ${dto.eierNavident} stillingsid ${dto.stillingsid} (under utvikling)")
+        secureLog.info("Overtar ekstern stilling og kandidatliste gammel eier $forrigeEier ny eier ${dto.eierNavident} stillingsid ${dto.stillingsid}")
         val nyEier = Eier(dto.eierNavident, dto.eierNavn)
         val oppdatertStillingsinfo =
             service.overtaEierskapForEksternStillingOgKandidatliste(stillingsId = stillingsid, nyEier = nyEier)
