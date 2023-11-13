@@ -7,6 +7,7 @@ import org.springframework.util.MultiValueMap
 
 val Any.log: Logger
     get() = LoggerFactory.getLogger(this::class.java)
+val secureLog = LoggerFactory.getLogger("secureLog")
 
 fun Map<String, String>.toMultiValueMap(): MultiValueMap<String, String> =
     CollectionUtils.toMultiValueMap(this.mapValues { listOf(it.value) })

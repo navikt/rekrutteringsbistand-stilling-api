@@ -37,6 +37,8 @@ spec:
           - azp_name
   kafka:
     pool: nav-dev
+  secureLogs:
+    enabled: true
   accessPolicy:
     inbound:
       rules:

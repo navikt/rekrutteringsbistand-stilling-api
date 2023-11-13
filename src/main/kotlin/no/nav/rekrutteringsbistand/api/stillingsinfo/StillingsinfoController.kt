@@ -1,5 +1,7 @@
 package no.nav.rekrutteringsbistand.api.stillingsinfo
 
+import no.nav.rekrutteringsbistand.api.support.log
+import no.nav.rekrutteringsbistand.api.support.secureLog
 import no.nav.security.token.support.core.api.Protected
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -15,6 +17,7 @@ class StillingsinfoController(
     fun overtaEierskapForEksternStillingOgKandidatliste(
         @RequestBody dto: StillingsinfoInboundDto
     ): ResponseEntity<StillingsinfoDto> {
+        secureLog.info("Verifiser securelog")
         val nyEier = Eier(dto.eierNavident, dto.eierNavn)
         val oppdatertStillingsinfo = service.overtaEierskapForEksternStillingOgKandidatliste(Stillingsid(dto.stillingsid), nyEier)
 
