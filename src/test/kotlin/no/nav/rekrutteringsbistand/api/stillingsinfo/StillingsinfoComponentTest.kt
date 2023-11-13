@@ -169,7 +169,9 @@ class StillingsinfoComponentTest {
 
     @Test
     fun `Når vi prøver å endre eier på en formidlingsstilling skal vi returnere 403 Forbidden`() {
-        val stillingsinfoForFormidlingsstilling = enStillingsinfo.copy(stillingskategori = Stillingskategori.FORMIDLING)
+        val stillingsinfoForFormidlingsstilling = enStillingsinfo.copy(
+            eier = Eier(navident = "A123456", navn = "En veileder"),
+            stillingskategori = Stillingskategori.FORMIDLING)
 
         repository.opprett(stillingsinfoForFormidlingsstilling)
 
