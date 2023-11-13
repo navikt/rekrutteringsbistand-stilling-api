@@ -10,7 +10,11 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.github.tomakehurst.wiremock.extension.responsetemplating.ResponseTemplateTransformer
 import com.github.tomakehurst.wiremock.http.Fault
 import com.github.tomakehurst.wiremock.http.Fault.CONNECTION_RESET_BY_PEER
+import com.github.tomakehurst.wiremock.http.RequestMethod
 import com.github.tomakehurst.wiremock.junit.WireMockRule
+import com.github.tomakehurst.wiremock.matching.ContainsPattern
+import com.github.tomakehurst.wiremock.matching.RequestPatternBuilder
+import com.github.tomakehurst.wiremock.matching.StringValuePattern
 import com.github.tomakehurst.wiremock.matching.UrlPattern
 import no.nav.rekrutteringsbistand.api.OppdaterRekrutteringsbistandStillingDto
 import no.nav.rekrutteringsbistand.api.RekrutteringsbistandStilling
@@ -220,12 +224,38 @@ internal class StillingComponentTest {
     }
 
     @Test
+    fun `PUT oppdaterer arbeidsplassen sin stilling`() {
+        val stilling = enStilling.copy(administration = Administration(null,null,null,null, emptyList(), "ny eier"))
+        val stillingsinfo = enStillingsinfo
+        repository.opprett(stillingsinfo)
+        mockAzureObo(wiremockAzure)
+        mockKandidatlisteOppdatering()
+        mockPamAdApi(HttpMethod.GET, "/b2b/api/v1/ads/${stilling.uuid}", enStilling.copy(administration = Administration(null, null,null,null, navIdent = "Gammel")))
+        mockPamAdApi(HttpMethod.PUT, "/api/v1/ads/${stilling.uuid}", stilling)
+
+        val dto = OppdaterRekrutteringsbistandStillingDto(
+            stillingsinfoid = stillingsinfo.stillingsinfoid.asString(), stilling = stilling
+        )
+
+        restTemplate.exchange(
+            "$localBaseUrl/rekrutteringsbistandstilling", HttpMethod.PUT, HttpEntity(dto), String::class.java
+        )
+
+        wiremockPamAdApi.verify(
+            1, RequestPatternBuilder
+                .newRequestPattern(RequestMethod.PUT, urlPathMatching("/api/v1/ads/${stilling.uuid}"))
+                .withRequestBody(ContainsPattern("ny eier"))
+        )
+    }
+
+    @Test
     fun `PUT mot stilling skal returnere 500 og ikke gjøre endringer i databasen når kall mot Arbeidsplassen feiler`() {
         val stilling = enStilling
         val stillingsinfo = enStillingsinfo
         repository.opprett(stillingsinfo)
         mockAzureObo(wiremockAzure)
         mockKandidatlisteOppdatering()
+        mockPamAdApi(HttpMethod.GET, "/b2b/api/v1/ads/${stilling.uuid}", enStilling.copy(administration = Administration(null, null,null,null, navIdent = "Gammel")))
         mockPamAdApiError("/api/v1/ads/${stilling.uuid}", HttpMethod.PUT, 500)
 
         val dto = OppdaterRekrutteringsbistandStillingDto(
@@ -246,6 +276,7 @@ internal class StillingComponentTest {
         repository.opprett(stillingsinfo)
         mockAzureObo(wiremockAzure)
         mockPamAdApi(HttpMethod.PUT, "/api/v1/ads/${stilling.uuid}", stilling)
+        mockPamAdApi(HttpMethod.GET, "/b2b/api/v1/ads/${stilling.uuid}", enStilling)
         mockKandidatlisteOppdateringFeiler()
 
         val dto = OppdaterRekrutteringsbistandStillingDto(
@@ -270,6 +301,7 @@ internal class StillingComponentTest {
             "/api/v1/ads/${rekrutteringsbistandStilling.stilling.uuid}",
             rekrutteringsbistandStilling.stilling
         )
+        mockPamAdApi(HttpMethod.GET, "/b2b/api/v1/ads/${rekrutteringsbistandStilling.stilling.uuid}", enStilling)
         mockKandidatlisteOppdatering()
         mockAzureObo(wiremockAzure)
 
@@ -300,6 +332,7 @@ internal class StillingComponentTest {
             "/api/v1/ads/${rekrutteringsbistandStilling.stilling.uuid}",
             rekrutteringsbistandStilling.stilling
         )
+        mockPamAdApi(HttpMethod.GET, "/b2b/api/v1/ads/${rekrutteringsbistandStilling.stilling.uuid}", enStilling)
         mockAzureObo(wiremockAzure)
 
         mockKandidatlisteOppdatering()

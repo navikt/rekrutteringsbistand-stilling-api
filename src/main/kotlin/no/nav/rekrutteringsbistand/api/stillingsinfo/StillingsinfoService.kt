@@ -65,7 +65,7 @@ class StillingsinfoService(
         val start = System.nanoTime()
         val stillingsinfoListe =  repo.hentForStillinger(stillingIder)
         val tidBruktMillis = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start)
-        log.info("Brukte $tidBruktMillis på å hente stillingsinfo for ${stillingIder.size} stillinger")
+        log.info("Brukte $tidBruktMillis ms på å hente stillingsinfo for ${stillingIder.size} stillinger")
         return stillingsinfoListe
     }
 
