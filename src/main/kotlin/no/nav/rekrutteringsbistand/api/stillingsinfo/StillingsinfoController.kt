@@ -17,6 +17,7 @@ class StillingsinfoController(
     ): ResponseEntity<StillingsinfoDto> {
         val nyEier = Eier(dto.eierNavident, dto.eierNavn)
         val oppdatertStillingsinfo = service.overtaEierskapForEksternStillingOgKandidatliste(Stillingsid(dto.stillingsid), nyEier)
+
         return ResponseEntity.status(HttpStatus.OK).body(oppdatertStillingsinfo.asStillingsinfoDto())
     }
 }

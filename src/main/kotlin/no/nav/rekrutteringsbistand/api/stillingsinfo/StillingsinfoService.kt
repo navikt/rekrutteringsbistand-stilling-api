@@ -7,8 +7,10 @@ import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteKlient
 import no.nav.rekrutteringsbistand.api.stilling.Stilling
 import no.nav.rekrutteringsbistand.api.stilling.StillingService
 import no.nav.rekrutteringsbistand.api.support.log
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.web.server.ResponseStatusException
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -22,6 +24,12 @@ class StillingsinfoService(
     @Transactional
     fun overtaEierskapForEksternStillingOgKandidatliste(stillingsId: Stillingsid, nyEier: Eier): Stillingsinfo {
         val opprinneligStillingsinfo = repo.hentForStilling(stillingsId).orNull()
+
+
+        if (opprinneligStillingsinfo?.stillingskategori == Stillingskategori.FORMIDLING) {
+            throw ResponseStatusException(HttpStatus.FORBIDDEN, "Kan ikke endre eier på formidlingsstillinger")
+        }
+
         val stillingsinfoMedNyEier = opprinneligStillingsinfo?.copy(eier = nyEier) ?: Stillingsinfo(
             stillingsinfoid = Stillingsinfoid(UUID.randomUUID()),
             stillingsid = stillingsId,
@@ -32,10 +40,12 @@ class StillingsinfoService(
 
         try {
             val stilling = arbeidsplassenKlient.hentStilling(stillingsId.asString(), false)
+
             val rekrutteringsbistandStilling = RekrutteringsbistandStilling(
                 stilling = stilling,
                 stillingsinfo = stillingsinfoMedNyEier.asStillingsinfoDto()
             )
+
             kandidatlisteKlient.sendStillingOppdatert(rekrutteringsbistandStilling)
         } catch (e: Exception) {
             throw RuntimeException("Varsel til rekbis-kandidat-api om endring av eier for ekstern stilling feilet", e)

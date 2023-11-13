@@ -167,6 +167,25 @@ class StillingsinfoComponentTest {
         assertThat(lagretStillingsinfo!!.eier).isNull()
     }
 
+    @Test
+    fun `Når vi prøver å endre eier på en formidlingsstilling skal vi returnere 403 Forbidden`() {
+        val stillingsinfoForFormidlingsstilling = enStillingsinfo.copy(
+            eier = Eier(navident = "A123456", navn = "En veileder"),
+            stillingskategori = Stillingskategori.FORMIDLING)
+
+        repository.opprett(stillingsinfoForFormidlingsstilling)
+
+        val endringDto = StillingsinfoInboundDto(
+            stillingsid = stillingsinfoForFormidlingsstilling.stillingsid.asString(),
+            eierNavident = "X998877",
+            eierNavn = "Helt Annet Navn"
+        )
+
+        val respons = restTemplate.exchange("$localBaseUrl/stillingsinfo", HttpMethod.PUT, httpEntity(endringDto), String::class.java)
+
+        assertThat(respons.statusCodeValue).isEqualTo(403)
+    }
+
     @After
     fun tearDown() {
         testRepository.slettAlt()
