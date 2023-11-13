@@ -113,7 +113,7 @@ class StillingService(
         val gammelEier = gammelStilling.administration?.navIdent
         val nyEier = dto.stilling.administration?.navIdent
         if (!nyEier.equals(gammelEier)) {
-            secureLog.info("Overtar intern stilling og kandidatliste ny-ident $nyEier gammel-ident $gammelEier stillingsid ${dto.stillingsinfoid} (under utvikling)")
+            secureLog.info("Overtar intern stilling og kandidatliste ny-ident $nyEier gammel-ident $gammelEier stillingsid ${dto.stilling.uuid} (under utvikling)")
         }
     }
 
