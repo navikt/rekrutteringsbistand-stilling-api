@@ -2,6 +2,7 @@ package no.nav.rekrutteringsbistand.api.stilling.ekstern
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import no.nav.rekrutteringsbistand.api.stilling.Geografi
+import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingskategori
 import java.time.LocalDateTime
 import java.util.*
 import kotlin.collections.ArrayList
@@ -19,7 +20,8 @@ data class StillingForPersonbruker(
         val status: String?,
         val location: Geografi?,
         val properties: Map<String, String> = HashMap(),
-        val source: String?
+        val source: String?,
+        val stillingskategori: Stillingskategori?
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)

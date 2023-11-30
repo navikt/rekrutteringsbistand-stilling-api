@@ -163,6 +163,7 @@ object Testdata {
         businessName = enStilling.businessName,
         status = enStilling.status,
         uuid = enStilling.uuid,
-        source = enStilling.source
+        source = enStilling.source,
+        stillingskategori = enStillingsinfo.stillingskategori
     )
 }
