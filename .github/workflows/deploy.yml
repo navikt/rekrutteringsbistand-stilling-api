@@ -30,7 +30,7 @@ jobs:
   deploy-to-dev:
     name: Deploy to dev
     needs: test
-    if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/begrens-tilganger'
+    if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/vis-jobbmesse-som-tittel'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
