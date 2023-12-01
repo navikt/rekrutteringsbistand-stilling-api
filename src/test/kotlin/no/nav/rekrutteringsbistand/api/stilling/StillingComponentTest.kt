@@ -12,9 +12,9 @@ import com.github.tomakehurst.wiremock.http.Fault
 import com.github.tomakehurst.wiremock.http.Fault.CONNECTION_RESET_BY_PEER
 import com.github.tomakehurst.wiremock.http.RequestMethod
 import com.github.tomakehurst.wiremock.junit.WireMockRule
-import com.github.tomakehurst.wiremock.matching.ContainsPattern
+import com.github.tomakehurst.wiremock.matching.EqualToPattern
+import com.github.tomakehurst.wiremock.matching.MatchesJsonPathPattern
 import com.github.tomakehurst.wiremock.matching.RequestPatternBuilder
-import com.github.tomakehurst.wiremock.matching.StringValuePattern
 import com.github.tomakehurst.wiremock.matching.UrlPattern
 import no.nav.rekrutteringsbistand.api.OppdaterRekrutteringsbistandStillingDto
 import no.nav.rekrutteringsbistand.api.RekrutteringsbistandStilling
@@ -224,8 +224,9 @@ internal class StillingComponentTest {
     }
 
     @Test
-    fun `PUT oppdaterer arbeidsplassen sin stilling`() {
-        val stilling = enStilling.copy(administration = Administration(null,null,null,null, emptyList(), "ny eier"))
+    fun `PUT oppdaterer arbeidsplassen sin stilling med ny eier`() {
+        val nyEier = "ny eier"
+        val stilling = enStilling.copy(administration = Administration(null,null,null,null, emptyList(), nyEier))
         val stillingsinfo = enStillingsinfo
         repository.opprett(stillingsinfo)
         mockAzureObo(wiremockAzure)
@@ -244,7 +245,71 @@ internal class StillingComponentTest {
         wiremockPamAdApi.verify(
             1, RequestPatternBuilder
                 .newRequestPattern(RequestMethod.PUT, urlPathMatching("/api/v1/ads/${stilling.uuid}"))
-                .withRequestBody(ContainsPattern("ny eier"))
+                .withRequestBody(MatchesJsonPathPattern("administration.navIdent",EqualToPattern(nyEier)))
+        )
+    }
+
+    @Test
+    fun `PUT oppdaterer arbeidsplassen sin stilling med uforandret tittel`() {
+        val tittel = "Arbeidsplassen sin tittel"
+        val source = "IKKEINTERN"
+        val styrkCode = "3112.12"
+        val styrkTittel = "Byggeleder"
+        val styrkCodeList = listOf(Kategori(2148934,styrkCode, "STYRK08NAV", styrkTittel, null, null))
+        val stilling = enStilling.copy(title = tittel, source = source, categoryList = styrkCodeList)
+        val stillingsinfo = enStillingsinfo
+        repository.opprett(stillingsinfo)
+        mockAzureObo(wiremockAzure)
+        mockKandidatlisteOppdatering()
+        mockPamAdApi(HttpMethod.GET, "/b2b/api/v1/ads/${stilling.uuid}", stilling)
+        mockPamAdApi(HttpMethod.PUT, "/api/v1/ads/${stilling.uuid}", stilling)
+
+        val dto = OppdaterRekrutteringsbistandStillingDto(
+            stillingsinfoid = stillingsinfo.stillingsinfoid.asString(), stilling = stilling
+        )
+
+        restTemplate.exchange(
+            "$localBaseUrl/rekrutteringsbistandstilling", HttpMethod.PUT, HttpEntity(dto), String::class.java
+        )
+
+        wiremockPamAdApi.verify(
+            1, RequestPatternBuilder
+                .newRequestPattern(RequestMethod.PUT, urlPathMatching("/api/v1/ads/${stilling.uuid}"))
+                .withRequestBody(MatchesJsonPathPattern("title",EqualToPattern(tittel)))
+                .withRequestBody(MatchesJsonPathPattern("categoryList[0].code",EqualToPattern(styrkCode)))
+                .withRequestBody(MatchesJsonPathPattern("categoryList[0].name",EqualToPattern(styrkTittel)))
+        )
+    }
+
+    @Test
+    fun `PUT oppdaterer direktemeldt stilling med styrk som tittel`() {
+        val tittel = "Arbeidsplassen sin tittel"
+        val source = "DIR"
+        val styrkCode = "3112.12"
+        val styrkTittel = "Byggeleder"
+        val styrkCodeList = listOf(Kategori(2148934,styrkCode, "STYRK08NAV", styrkTittel, null, null))
+        val stilling = enStilling.copy(title = tittel, source = source, categoryList = styrkCodeList)
+        val stillingsinfo = enStillingsinfo
+        repository.opprett(stillingsinfo)
+        mockAzureObo(wiremockAzure)
+        mockKandidatlisteOppdatering()
+        mockPamAdApi(HttpMethod.GET, "/b2b/api/v1/ads/${stilling.uuid}", stilling)
+        mockPamAdApi(HttpMethod.PUT, "/api/v1/ads/${stilling.uuid}", stilling)
+
+        val dto = OppdaterRekrutteringsbistandStillingDto(
+            stillingsinfoid = stillingsinfo.stillingsinfoid.asString(), stilling = stilling
+        )
+
+        restTemplate.exchange(
+            "$localBaseUrl/rekrutteringsbistandstilling", HttpMethod.PUT, HttpEntity(dto), String::class.java
+        )
+
+        wiremockPamAdApi.verify(
+            1, RequestPatternBuilder
+                .newRequestPattern(RequestMethod.PUT, urlPathMatching("/api/v1/ads/${stilling.uuid}"))
+                .withRequestBody(MatchesJsonPathPattern("title",EqualToPattern(styrkTittel)))
+                .withRequestBody(MatchesJsonPathPattern("categoryList[0].code",EqualToPattern(styrkCode)))
+                .withRequestBody(MatchesJsonPathPattern("categoryList[0].name",EqualToPattern(styrkTittel)))
         )
     }
 

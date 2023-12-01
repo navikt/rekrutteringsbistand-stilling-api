@@ -90,8 +90,11 @@ class StillingService(
     ): OppdaterRekrutteringsbistandStillingDto {
         loggEventuellOvertagelse(dto)
 
-        // TODO styrk: tittel skal være styrk mot arbeidsplassen.
-        val oppdatertStilling = arbeidsplassenKlient.oppdaterStilling(dto.stilling, queryString)
+        // TODO styrk: tittel skal være styrk mot arbeidsplassen. for interne stillinger
+
+        val stilling = dto.stilling
+
+        val oppdatertStilling = arbeidsplassenKlient.oppdaterStilling(stilling, queryString)
 
 
 
