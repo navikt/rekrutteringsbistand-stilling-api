@@ -16,10 +16,9 @@ import com.github.tomakehurst.wiremock.matching.EqualToPattern
 import com.github.tomakehurst.wiremock.matching.MatchesJsonPathPattern
 import com.github.tomakehurst.wiremock.matching.RequestPatternBuilder
 import com.github.tomakehurst.wiremock.matching.UrlPattern
-import no.nav.rekrutteringsbistand.api.OppdaterRekrutteringsbistandStillingDto
-import no.nav.rekrutteringsbistand.api.RekrutteringsbistandStilling
-import no.nav.rekrutteringsbistand.api.TestRepository
+import no.nav.rekrutteringsbistand.api.*
 import no.nav.rekrutteringsbistand.api.Testdata.enOpprettRekrutteringsbistandstillingDto
+import no.nav.rekrutteringsbistand.api.Testdata.enOpprettStillingDto
 import no.nav.rekrutteringsbistand.api.Testdata.enOpprettetStilling
 import no.nav.rekrutteringsbistand.api.Testdata.enRekrutteringsbistandStilling
 import no.nav.rekrutteringsbistand.api.Testdata.enRekrutteringsbistandStillingUtenEier
@@ -27,7 +26,6 @@ import no.nav.rekrutteringsbistand.api.Testdata.enStilling
 import no.nav.rekrutteringsbistand.api.Testdata.enStillingsinfo
 import no.nav.rekrutteringsbistand.api.Testdata.enStillingsinfoUtenEier
 import no.nav.rekrutteringsbistand.api.config.MockLogin
-import no.nav.rekrutteringsbistand.api.mockAzureObo
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsid
 import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoRepository
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingskategori
@@ -198,7 +196,9 @@ internal class StillingComponentTest {
 
     @Test
     fun `POST mot stillinger skal returnere opprettet stilling`() {
-        val rekrutteringsbistandStilling = enOpprettRekrutteringsbistandstillingDto
+        val rekrutteringsbistandStilling = enOpprettRekrutteringsbistandstillingDto.copy(
+            stilling = enOpprettStillingDto.copy(title = null, categoryList = emptyList())
+        )
 
         mockPamAdApi(HttpMethod.POST, "/api/v1/ads", enOpprettetStilling)
         mockKandidatlisteOppdatering()
@@ -210,7 +210,7 @@ internal class StillingComponentTest {
             RekrutteringsbistandStilling::class.java
         ).also {
             val stilling = rekrutteringsbistandStilling.stilling
-            assertThat(it!!.stilling.title).isEqualTo(stilling.title)
+            assertThat(it!!.stilling.title).isEqualTo("Ny stilling")
             assertThat(it.stilling.administration?.navIdent).isEqualTo(stilling.administration.navIdent)
             assertThat(it.stilling.administration?.reportee).isEqualTo(stilling.administration.reportee)
             assertThat(it.stilling.administration?.status).isEqualTo(stilling.administration.status)
@@ -220,6 +220,30 @@ internal class StillingComponentTest {
             assertThat(it.stilling.privacy).isEqualTo(stilling.privacy)
 
             assertThat(it.stillingsinfo?.stillingskategori).isEqualTo(Stillingskategori.ARBEIDSTRENING)
+        }
+    }
+
+    @Test
+    fun `kopiert stilling skal inneholde styrk som tittel om styrk finnes i original stilling`() {
+        val styrkCode = "3112.12"
+        val styrkTittel = "Byggeleder"
+        val styrkCodeList = listOf(Kategori(2148934,styrkCode, "STYRK08NAV", styrkTittel, null, null))
+        val eksisterendeStilling = enStilling.copy(
+            title = "Eksisterende stilling", categoryList = styrkCodeList
+        )
+        val eksisterendeStillingsId = UUID.randomUUID()
+
+        mockPamAdApi(HttpMethod.GET, "/b2b/api/v1/ads/$eksisterendeStillingsId", eksisterendeStilling)
+        mockPamAdApi(HttpMethod.POST, "/api/v1/ads", enOpprettetStilling)
+        mockKandidatlisteOppdatering()
+        mockAzureObo(wiremockAzure)
+
+        restTemplate.postForObject(
+            "$localBaseUrl/rekrutteringsbistandstilling/kopier/$eksisterendeStillingsId",
+            null,
+            RekrutteringsbistandStilling::class.java
+        ).also {
+            assertThat(it!!.stilling.title).isEqualTo(styrkTittel)
         }
     }
 

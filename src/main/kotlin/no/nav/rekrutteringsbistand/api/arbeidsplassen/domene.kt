@@ -10,7 +10,7 @@ data class OpprettRekrutteringsbistandstillingDto(
 )
 
 data class OpprettStillingDto(
-    val title: String,
+    val title: String?,
     val createdBy: String,
     val updatedBy: String,
     val privacy: String?,
