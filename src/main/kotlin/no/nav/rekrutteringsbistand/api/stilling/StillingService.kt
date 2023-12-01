@@ -48,6 +48,7 @@ class StillingService(
     }
 
     fun opprettStilling(opprettRekrutteringsbistandstillingDto: OpprettRekrutteringsbistandstillingDto): RekrutteringsbistandStilling {
+        // TODO styrk: Ny (interne) stilling skal ha tittel "Ny stilling" hos arbeidsplassen. Den har på dette tidspunktet ikke styrk (antar vi)
         val opprettetStilling = arbeidsplassenKlient.opprettStilling(opprettRekrutteringsbistandstillingDto.stilling)
         val stillingsId = Stillingsid(opprettetStilling.uuid)
 
@@ -88,7 +89,11 @@ class StillingService(
         queryString: String?
     ): OppdaterRekrutteringsbistandStillingDto {
         loggEventuellOvertagelse(dto)
+
+        // TODO styrk: tittel skal være styrk mot arbeidsplassen.
         val oppdatertStilling = arbeidsplassenKlient.oppdaterStilling(dto.stilling, queryString)
+
+
 
         val id = Stillingsid(oppdatertStilling.uuid)
 
