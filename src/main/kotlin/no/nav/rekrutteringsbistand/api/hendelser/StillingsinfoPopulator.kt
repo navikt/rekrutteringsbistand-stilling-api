@@ -7,9 +7,7 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import no.nav.rekrutteringsbistand.api.arbeidsplassen.ArbeidsplassenKlient
-import no.nav.rekrutteringsbistand.api.stilling.Kategori
 import no.nav.rekrutteringsbistand.api.stillingsinfo.*
-import no.nav.rekrutteringsbistand.api.support.log
 import org.apache.commons.lang3.math.NumberUtils
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -47,7 +45,7 @@ class StillingsinfoPopulator(
 
         arbeidsplassenKlient.hentStillingBasertPåUUID(stillingsId.asString()).map {
             packet["stilling"] = Stilling(
-                stillingstittel = it.beregnStillingstittel(),
+                stillingstittel = it.styrkEllerTitle(),
                 erDirektemeldt = it.source == "DIR",
                 stillingOpprettetTidspunkt = it.publishedByAdmin?.let { tidspunkt -> isoStringTilNorskTidssone(tidspunkt) },
                 antallStillinger = parseAntallStillinger(it),
@@ -61,42 +59,6 @@ class StillingsinfoPopulator(
     }
 }
 
-private fun no.nav.rekrutteringsbistand.api.stilling.Stilling.beregnStillingstittel(): String =
-    if (erDirektemeldt())
-        tittelFraStyrk()
-    else
-        title
-
-private fun no.nav.rekrutteringsbistand.api.stilling.Stilling.erDirektemeldt(): Boolean = source == "DIR"
-
-private fun no.nav.rekrutteringsbistand.api.stilling.Stilling.tittelFraStyrk(): String {
-    val passendeStyrkkkoder = categoryList.mapNotNull { it.beholdHvisPassendeKategori() }
-
-    return when (val antall = passendeStyrkkkoder.size) {
-        1 -> passendeStyrkkkoder[0].name
-        0 -> {
-            log.info("Fant ikke styrk8 for stilling $uuid med opprettet dato $created ")
-            "Stilling uten valgt jobbtittel"
-        }
-        else -> {
-            log.info("Forventer en 6-sifret styrk08-kode, fant $antall stykker for stilling $uuid styrkkoder:" + categoryList.joinToString { "${it.code}-${it.name}" })
-            passendeStyrkkkoder.map { it.name }.sorted().joinToString("/")
-        }
-    }
-}
-
-private data class PassendeKategori(
-    val code: String,
-    val name: String,
-)
-
-private val styrk08SeksSiffer = Regex("""^[0-9]{4}\.[0-9]{2}$""")
-
-private fun Kategori.beholdHvisPassendeKategori(): PassendeKategori? =
-    if (code != null && name != null && code.matches(styrk08SeksSiffer))
-        PassendeKategori(code = code, name = name)
-    else
-        null
 
 private fun isoStringTilNorskTidssone(isoString: String): ZonedDateTime {
     return ZonedDateTime.of(LocalDateTime.parse(isoString), ZoneId.of("Europe/Oslo"))

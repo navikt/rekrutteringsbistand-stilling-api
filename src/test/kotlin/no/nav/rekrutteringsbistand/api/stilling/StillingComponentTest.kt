@@ -283,7 +283,7 @@ internal class StillingComponentTest {
 
     @Test
     fun `PUT oppdaterer direktemeldt stilling med styrk som tittel`() {
-        val tittel = "Arbeidsplassen sin tittel"
+        val tittel = "Uønsket tittel"
         val source = "DIR"
         val styrkCode = "3112.12"
         val styrkTittel = "Byggeleder"

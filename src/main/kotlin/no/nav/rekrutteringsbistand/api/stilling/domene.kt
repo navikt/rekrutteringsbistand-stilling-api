@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import no.nav.rekrutteringsbistand.api.arbeidsplassen.OpprettStillingAdministrationDto
 import no.nav.rekrutteringsbistand.api.arbeidsplassen.OpprettStillingDto
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
+import no.nav.rekrutteringsbistand.api.support.log
 import java.time.LocalDateTime
 import java.util.*
 import kotlin.collections.ArrayList
@@ -59,6 +60,38 @@ data class Stilling(
         )
     }
 
+
+    fun copyMedStyrkEllerTitle(): Stilling = this.copy(title = styrkEllerTitle())
+
+    fun styrkEllerTitle(): String =
+        if (erDirektemeldt())
+            styrkkodenavn()
+        else
+            title
+
+    private fun erDirektemeldt(): Boolean = source == "DIR"
+
+    private fun styrkkodenavn(): String {
+        val passendeStyrkkkoder = categoryList
+            .mapNotNull { it.toNonNullKategori() }
+            .filter { it.code.matches(styrk08SeksSiffer) }
+
+        return when (val antall = passendeStyrkkkoder.size) {
+            1 -> passendeStyrkkkoder[0].name
+            0 -> {
+                log.info("Fant ikke styrk8 for stilling $uuid med opprettet dato $created ")
+                "Stilling uten valgt jobbtittel"
+            }
+            else -> {
+                log.info("Forventer en 6-sifret styrk08-kode, fant $antall stykker for stilling $uuid styrkkoder:" + categoryList.joinToString { "${it.code}-${it.name}" })
+                passendeStyrkkkoder.map { it.name }.sorted().joinToString("/")
+            }
+        }
+    }
+
+    companion object {
+        private val styrk08SeksSiffer = Regex("""^[0-9]{4}\.[0-9]{2}$""")
+    }
 }
 
 fun lagNyStilling(tittel: String = "Ny stilling", tokenUtils: TokenUtils): OpprettStillingDto {
@@ -130,6 +163,17 @@ data class Kategori(
     val name: String?,
     val description: String?,
     val parentId: Int?
+) {
+    fun toNonNullKategori() =
+        if (code != null && name != null)
+            NonNullKategori(code = code, name = name)
+        else
+            null
+}
+
+data class NonNullKategori(
+    val code: String,
+    val name: String,
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)

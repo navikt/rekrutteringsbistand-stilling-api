@@ -12,7 +12,6 @@ import no.nav.rekrutteringsbistand.api.stillingsinfo.*
 import no.nav.rekrutteringsbistand.api.support.secureLog
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.util.*
 
 
 @Service
@@ -90,9 +89,7 @@ class StillingService(
     ): OppdaterRekrutteringsbistandStillingDto {
         loggEventuellOvertagelse(dto)
 
-        // TODO styrk: tittel skal være styrk mot arbeidsplassen. for interne stillinger
-
-        val stilling = dto.stilling
+        val stilling = dto.stilling.copyMedStyrkEllerTitle()
 
         val oppdatertStilling = arbeidsplassenKlient.oppdaterStilling(stilling, queryString)
 
