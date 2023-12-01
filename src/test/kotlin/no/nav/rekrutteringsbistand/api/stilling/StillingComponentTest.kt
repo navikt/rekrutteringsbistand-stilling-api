@@ -200,7 +200,7 @@ internal class StillingComponentTest {
             stilling = enOpprettStillingDto.copy(title = null, categoryList = emptyList())
         )
 
-        mockPamAdApi(HttpMethod.POST, "/api/v1/ads", enOpprettetStilling)
+        mockPamAdApi(HttpMethod.POST, "/api/v1/ads", enOpprettetStilling.copy(title = "Ny stilling"))
         mockKandidatlisteOppdatering()
         mockAzureObo(wiremockAzure)
 
@@ -210,7 +210,6 @@ internal class StillingComponentTest {
             RekrutteringsbistandStilling::class.java
         ).also {
             val stilling = rekrutteringsbistandStilling.stilling
-            assertThat(it!!.stilling.title).isEqualTo("Ny stilling")
             assertThat(it.stilling.administration?.navIdent).isEqualTo(stilling.administration.navIdent)
             assertThat(it.stilling.administration?.reportee).isEqualTo(stilling.administration.reportee)
             assertThat(it.stilling.administration?.status).isEqualTo(stilling.administration.status)
@@ -221,6 +220,13 @@ internal class StillingComponentTest {
 
             assertThat(it.stillingsinfo?.stillingskategori).isEqualTo(Stillingskategori.ARBEIDSTRENING)
         }
+
+        wiremockPamAdApi.verify(
+            1,
+            RequestPatternBuilder
+                .newRequestPattern(RequestMethod.POST, urlPathMatching("/api/v1/ads"))
+                .withRequestBody(MatchesJsonPathPattern("title", EqualToPattern("Ny stilling")))
+        )
     }
 
     @Test
