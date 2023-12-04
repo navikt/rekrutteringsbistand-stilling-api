@@ -11,7 +11,6 @@ data class OpprettRekrutteringsbistandstillingDto(
 )
 
 data class OpprettStillingDto(
-    @JsonIgnoreProperties
     val title: String?,
     val createdBy: String,
     val updatedBy: String,
