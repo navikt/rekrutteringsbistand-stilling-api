@@ -195,8 +195,8 @@ internal class StillingComponentTest {
     }
 
     @Test
-    fun `POST mot stillinger skal returnere opprettet stilling`() {
-        val rekrutteringsbistandStilling = enOpprettRekrutteringsbistandstillingDto.copy(
+    fun `Ved opprettelse av stilling skal stillingstittel i arbeidsplassen være "Ny stilling" selv om frontend ikke sender noen stillingstittel`() {
+        val requestUtenStillingstittel = enOpprettRekrutteringsbistandstillingDto.copy(
             stilling = enOpprettStillingDto.copy(title = null, categoryList = emptyList())
         )
 
@@ -206,10 +206,10 @@ internal class StillingComponentTest {
 
         restTemplate.postForObject(
             "$localBaseUrl/rekrutteringsbistandstilling",
-            rekrutteringsbistandStilling,
+            requestUtenStillingstittel,
             RekrutteringsbistandStilling::class.java
         ).also {
-            val stilling = rekrutteringsbistandStilling.stilling
+            val stilling = requestUtenStillingstittel.stilling
             assertThat(it.stilling.administration?.navIdent).isEqualTo(stilling.administration.navIdent)
             assertThat(it.stilling.administration?.reportee).isEqualTo(stilling.administration.reportee)
             assertThat(it.stilling.administration?.status).isEqualTo(stilling.administration.status)

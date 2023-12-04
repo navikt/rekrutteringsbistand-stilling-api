@@ -47,8 +47,8 @@ class StillingService(
     }
 
     fun opprettStilling(opprettRekrutteringsbistandstillingDto: OpprettRekrutteringsbistandstillingDto): RekrutteringsbistandStilling {
-        // TODO styrk: Ny (interne) stilling skal ha tittel "Ny stilling" hos arbeidsplassen. Den har på dette tidspunktet ikke styrk (antar vi)
-        val opprettetStilling = arbeidsplassenKlient.opprettStilling(opprettRekrutteringsbistandstillingDto.stilling)
+        val stillingMedDefaultTittel = opprettRekrutteringsbistandstillingDto.stilling.copy(title = "Ny stilling")
+        val opprettetStilling = arbeidsplassenKlient.opprettStilling(stillingMedDefaultTittel)
         val stillingsId = Stillingsid(opprettetStilling.uuid)
 
         stillingsinfoService.opprettStillingsinfo(
@@ -94,7 +94,6 @@ class StillingService(
         val oppdatertStilling = arbeidsplassenKlient.oppdaterStilling(stilling, queryString)
 
 
-
         val id = Stillingsid(oppdatertStilling.uuid)
 
         val eksisterendeStillingsinfo: Stillingsinfo? =
@@ -105,10 +104,12 @@ class StillingService(
             stillingsinfoid = eksisterendeStillingsinfo?.stillingsinfoid?.asString()
         ).also {
             if (oppdatertStilling.source.equals("DIR", ignoreCase = false)) {
-                kandidatlisteKlient.sendStillingOppdatert(RekrutteringsbistandStilling(
-                    stilling = oppdatertStilling,
-                    stillingsinfo = eksisterendeStillingsinfo?.asStillingsinfoDto()
-                ))
+                kandidatlisteKlient.sendStillingOppdatert(
+                    RekrutteringsbistandStilling(
+                        stilling = oppdatertStilling,
+                        stillingsinfo = eksisterendeStillingsinfo?.asStillingsinfoDto()
+                    )
+                )
             }
         }
     }
