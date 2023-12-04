@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import no.nav.rekrutteringsbistand.api.arbeidsplassen.OpprettStillingAdministrationDto
 import no.nav.rekrutteringsbistand.api.arbeidsplassen.OpprettStillingDto
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
+import no.nav.rekrutteringsbistand.api.stilling.Kategori.Companion.styrkkodenavn
 import no.nav.rekrutteringsbistand.api.support.log
 import java.time.LocalDateTime
 import java.util.*
@@ -41,8 +42,10 @@ data class Stilling(
     val activationOnPublishingDate: Boolean?
 ) {
     fun toKopiertStilling(tokenUtils: TokenUtils): OpprettStillingDto {
+        val nyTittel = categoryList.styrkkodenavn("kopi av stillingsId $uuid som ble opprettet $created")
+
         return lagNyStilling(
-            tittel = "Kopi - $title",
+            tittel = nyTittel,
             tokenUtils
         ).copy(
             mediaList = mediaList,
@@ -65,33 +68,11 @@ data class Stilling(
 
     fun styrkEllerTitle(): String =
         if (erDirektemeldt())
-            styrkkodenavn()
+            categoryList.styrkkodenavn(kontekstForLoggmelding = "stillingsId $uuid opprettet $created")
         else
             title
 
     private fun erDirektemeldt(): Boolean = source == "DIR"
-
-    private fun styrkkodenavn(): String {
-        val passendeStyrkkkoder = categoryList
-            .mapNotNull { it.toNonNullKategori() }
-            .filter { it.code.matches(styrk08SeksSiffer) }
-
-        return when (val antall = passendeStyrkkkoder.size) {
-            1 -> passendeStyrkkkoder[0].name
-            0 -> {
-                log.info("Fant ikke styrk8 for stilling $uuid med opprettet dato $created ")
-                "Stilling uten valgt jobbtittel"
-            }
-            else -> {
-                log.info("Forventer en 6-sifret styrk08-kode, fant $antall stykker for stilling $uuid styrkkoder:" + categoryList.joinToString { "${it.code}-${it.name}" })
-                passendeStyrkkkoder.map { it.name }.sorted().joinToString("/")
-            }
-        }
-    }
-
-    companion object {
-        private val styrk08SeksSiffer = Regex("""^[0-9]{4}\.[0-9]{2}$""")
-    }
 }
 
 fun lagNyStilling(tittel: String = "Ny stilling", tokenUtils: TokenUtils): OpprettStillingDto {
@@ -169,6 +150,30 @@ data class Kategori(
             NonNullKategori(code = code, name = name)
         else
             null
+
+    companion object {
+        fun List<Kategori>.styrkkodenavn(
+            kontekstForLoggmelding: String,
+        ): String {
+            val passendeStyrkkkoder = this
+                .mapNotNull { it.toNonNullKategori() }
+                .filter { it.code.matches(styrk08SeksSiffer) }
+
+            return when (val antall = passendeStyrkkkoder.size) {
+                1 -> passendeStyrkkkoder[0].name
+                0 -> {
+                    log.info("Fant ikke styrk8 for {}", kontekstForLoggmelding)
+                    "Stilling uten valgt jobbtittel"
+                }
+                else -> {
+                    log.info("Forventer en 6-sifret styrk08-kode, fant $antall stykker for {}: {}", kontekstForLoggmelding, this.joinToString { "${it.code}-${it.name}" })
+                    passendeStyrkkkoder.map { it.name }.sorted().joinToString("/")
+                }
+            }
+        }
+
+        private val styrk08SeksSiffer = Regex("""^[0-9]{4}\.[0-9]{2}$""")
+    }
 }
 
 data class NonNullKategori(

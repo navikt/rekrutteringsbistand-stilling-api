@@ -23,7 +23,7 @@ class StillingController(val stillingService: StillingService) {
 
     @PostMapping("/rekrutteringsbistandstilling")
     fun opprettStilling(@RequestBody stilling: OpprettRekrutteringsbistandstillingDto): ResponseEntity<RekrutteringsbistandStilling> {
-        val opprettetStilling = stillingService.opprettStilling(stilling)
+        val opprettetStilling = stillingService.opprettNyStilling(stilling)
         return ok(opprettetStilling)
     }
 
