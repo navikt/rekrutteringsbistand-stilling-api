@@ -16,7 +16,9 @@ import com.github.tomakehurst.wiremock.matching.EqualToPattern
 import com.github.tomakehurst.wiremock.matching.MatchesJsonPathPattern
 import com.github.tomakehurst.wiremock.matching.RequestPatternBuilder
 import com.github.tomakehurst.wiremock.matching.UrlPattern
-import no.nav.rekrutteringsbistand.api.*
+import no.nav.rekrutteringsbistand.api.OppdaterRekrutteringsbistandStillingDto
+import no.nav.rekrutteringsbistand.api.RekrutteringsbistandStilling
+import no.nav.rekrutteringsbistand.api.TestRepository
 import no.nav.rekrutteringsbistand.api.Testdata.enOpprettRekrutteringsbistandstillingDto
 import no.nav.rekrutteringsbistand.api.Testdata.enOpprettStillingDto
 import no.nav.rekrutteringsbistand.api.Testdata.enOpprettetStilling
@@ -26,6 +28,7 @@ import no.nav.rekrutteringsbistand.api.Testdata.enStilling
 import no.nav.rekrutteringsbistand.api.Testdata.enStillingsinfo
 import no.nav.rekrutteringsbistand.api.Testdata.enStillingsinfoUtenEier
 import no.nav.rekrutteringsbistand.api.config.MockLogin
+import no.nav.rekrutteringsbistand.api.mockAzureObo
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsid
 import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoRepository
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingskategori
@@ -230,16 +233,16 @@ internal class StillingComponentTest {
     }
 
     @Test
-    fun `kopiert stilling skal inneholde styrk som tittel om styrk finnes i original stilling`() {
+    fun `kopiert stilling skal inneholde styrk som tittel gitt at styrk finnes i original stilling`() {
         val styrkCode = "3112.12"
         val styrkTittel = "Byggeleder"
-        val styrkCodeList = listOf(Kategori(2148934,styrkCode, "STYRK08NAV", styrkTittel, null, null))
-        val eksisterendeStilling = enStilling.copy(
+        val styrkCodeList = listOf(Kategori(2148934, styrkCode, "STYRK08NAV", styrkTittel, null, null))
+        val eksisterendeStillingMedStyrk = enStilling.copy(
             title = "Eksisterende stilling", categoryList = styrkCodeList
         )
         val eksisterendeStillingsId = UUID.randomUUID()
 
-        mockPamAdApi(HttpMethod.GET, "/b2b/api/v1/ads/$eksisterendeStillingsId", eksisterendeStilling)
+        mockPamAdApi(HttpMethod.GET, "/b2b/api/v1/ads/$eksisterendeStillingsId", eksisterendeStillingMedStyrk)
         mockPamAdApi(HttpMethod.POST, "/api/v1/ads", enOpprettetStilling)
         mockKandidatlisteOppdatering()
         mockAzureObo(wiremockAzure)
@@ -248,20 +251,29 @@ internal class StillingComponentTest {
             "$localBaseUrl/rekrutteringsbistandstilling/kopier/$eksisterendeStillingsId",
             null,
             RekrutteringsbistandStilling::class.java
-        ).also {
-            assertThat(it!!.stilling.title).isEqualTo(styrkTittel)
-        }
+        )
+
+        wiremockPamAdApi.verify(
+            1,
+            RequestPatternBuilder
+                .newRequestPattern(RequestMethod.POST, urlPathMatching("/api/v1/ads"))
+                .withRequestBody(MatchesJsonPathPattern("title", EqualToPattern(styrkTittel)))
+        )
     }
 
     @Test
     fun `PUT oppdaterer arbeidsplassen sin stilling med ny eier`() {
         val nyEier = "ny eier"
-        val stilling = enStilling.copy(administration = Administration(null,null,null,null, emptyList(), nyEier))
+        val stilling = enStilling.copy(administration = Administration(null, null, null, null, emptyList(), nyEier))
         val stillingsinfo = enStillingsinfo
         repository.opprett(stillingsinfo)
         mockAzureObo(wiremockAzure)
         mockKandidatlisteOppdatering()
-        mockPamAdApi(HttpMethod.GET, "/b2b/api/v1/ads/${stilling.uuid}", enStilling.copy(administration = Administration(null, null,null,null, navIdent = "Gammel")))
+        mockPamAdApi(
+            HttpMethod.GET,
+            "/b2b/api/v1/ads/${stilling.uuid}",
+            enStilling.copy(administration = Administration(null, null, null, null, navIdent = "Gammel"))
+        )
         mockPamAdApi(HttpMethod.PUT, "/api/v1/ads/${stilling.uuid}", stilling)
 
         val dto = OppdaterRekrutteringsbistandStillingDto(
@@ -275,7 +287,7 @@ internal class StillingComponentTest {
         wiremockPamAdApi.verify(
             1, RequestPatternBuilder
                 .newRequestPattern(RequestMethod.PUT, urlPathMatching("/api/v1/ads/${stilling.uuid}"))
-                .withRequestBody(MatchesJsonPathPattern("administration.navIdent",EqualToPattern(nyEier)))
+                .withRequestBody(MatchesJsonPathPattern("administration.navIdent", EqualToPattern(nyEier)))
         )
     }
 
@@ -285,7 +297,7 @@ internal class StillingComponentTest {
         val source = "IKKEINTERN"
         val styrkCode = "3112.12"
         val styrkTittel = "Byggeleder"
-        val styrkCodeList = listOf(Kategori(2148934,styrkCode, "STYRK08NAV", styrkTittel, null, null))
+        val styrkCodeList = listOf(Kategori(2148934, styrkCode, "STYRK08NAV", styrkTittel, null, null))
         val stilling = enStilling.copy(title = tittel, source = source, categoryList = styrkCodeList)
         val stillingsinfo = enStillingsinfo
         repository.opprett(stillingsinfo)
@@ -305,9 +317,9 @@ internal class StillingComponentTest {
         wiremockPamAdApi.verify(
             1, RequestPatternBuilder
                 .newRequestPattern(RequestMethod.PUT, urlPathMatching("/api/v1/ads/${stilling.uuid}"))
-                .withRequestBody(MatchesJsonPathPattern("title",EqualToPattern(tittel)))
-                .withRequestBody(MatchesJsonPathPattern("categoryList[0].code",EqualToPattern(styrkCode)))
-                .withRequestBody(MatchesJsonPathPattern("categoryList[0].name",EqualToPattern(styrkTittel)))
+                .withRequestBody(MatchesJsonPathPattern("title", EqualToPattern(tittel)))
+                .withRequestBody(MatchesJsonPathPattern("categoryList[0].code", EqualToPattern(styrkCode)))
+                .withRequestBody(MatchesJsonPathPattern("categoryList[0].name", EqualToPattern(styrkTittel)))
         )
     }
 
@@ -317,7 +329,7 @@ internal class StillingComponentTest {
         val source = "DIR"
         val styrkCode = "3112.12"
         val styrkTittel = "Byggeleder"
-        val styrkCodeList = listOf(Kategori(2148934,styrkCode, "STYRK08NAV", styrkTittel, null, null))
+        val styrkCodeList = listOf(Kategori(2148934, styrkCode, "STYRK08NAV", styrkTittel, null, null))
         val stilling = enStilling.copy(title = tittel, source = source, categoryList = styrkCodeList)
         val stillingsinfo = enStillingsinfo
         repository.opprett(stillingsinfo)
@@ -337,9 +349,9 @@ internal class StillingComponentTest {
         wiremockPamAdApi.verify(
             1, RequestPatternBuilder
                 .newRequestPattern(RequestMethod.PUT, urlPathMatching("/api/v1/ads/${stilling.uuid}"))
-                .withRequestBody(MatchesJsonPathPattern("title",EqualToPattern(styrkTittel)))
-                .withRequestBody(MatchesJsonPathPattern("categoryList[0].code",EqualToPattern(styrkCode)))
-                .withRequestBody(MatchesJsonPathPattern("categoryList[0].name",EqualToPattern(styrkTittel)))
+                .withRequestBody(MatchesJsonPathPattern("title", EqualToPattern(styrkTittel)))
+                .withRequestBody(MatchesJsonPathPattern("categoryList[0].code", EqualToPattern(styrkCode)))
+                .withRequestBody(MatchesJsonPathPattern("categoryList[0].name", EqualToPattern(styrkTittel)))
         )
     }
 
@@ -350,7 +362,11 @@ internal class StillingComponentTest {
         repository.opprett(stillingsinfo)
         mockAzureObo(wiremockAzure)
         mockKandidatlisteOppdatering()
-        mockPamAdApi(HttpMethod.GET, "/b2b/api/v1/ads/${stilling.uuid}", enStilling.copy(administration = Administration(null, null,null,null, navIdent = "Gammel")))
+        mockPamAdApi(
+            HttpMethod.GET,
+            "/b2b/api/v1/ads/${stilling.uuid}",
+            enStilling.copy(administration = Administration(null, null, null, null, navIdent = "Gammel"))
+        )
         mockPamAdApiError("/api/v1/ads/${stilling.uuid}", HttpMethod.PUT, 500)
 
         val dto = OppdaterRekrutteringsbistandStillingDto(
@@ -605,7 +621,8 @@ internal class StillingComponentTest {
             put(urlPathMatching("/rekrutteringsbistand-kandidat-api/rest/veileder/stilling/kandidatliste"))
                 .withHeader(
                     CONTENT_TYPE,
-                    equalTo(APPLICATION_JSON_VALUE))
+                    equalTo(APPLICATION_JSON_VALUE)
+                )
                 .withHeader(ACCEPT, equalTo(APPLICATION_JSON_VALUE))
                 .willReturn(
                     aResponse().withStatus(500).withHeader(

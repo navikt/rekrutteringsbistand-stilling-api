@@ -46,8 +46,20 @@ class StillingService(
         }
     }
 
-    fun opprettStilling(opprettRekrutteringsbistandstillingDto: OpprettRekrutteringsbistandstillingDto): RekrutteringsbistandStilling {
-        val stillingMedDefaultTittel = opprettRekrutteringsbistandstillingDto.stilling.copy(title = "Ny stilling")
+
+    fun opprettKopi(opprettDto: OpprettRekrutteringsbistandstillingDto): RekrutteringsbistandStilling {
+        opprettDto.stilling.categoryList.
+
+
+    }
+
+    fun opprettNy(opprettDto: OpprettRekrutteringsbistandstillingDto): RekrutteringsbistandStilling {
+        val medDefaultTittel = opprettDto.copy(stilling = opprettDto.stilling.copy(title = "Ny stilling"))
+        return opprettStilling(medDefaultTittel)
+    }
+
+    private fun opprettStilling(opprettRekrutteringsbistandstillingDto: OpprettRekrutteringsbistandstillingDto): RekrutteringsbistandStilling {
+        val stillingMedDefaultTittel = opprettRekrutteringsbistandstillingDto.stilling.copy(title = "Ny stilling") // todo
         val opprettetStilling = arbeidsplassenKlient.opprettStilling(stillingMedDefaultTittel)
         val stillingsId = Stillingsid(opprettetStilling.uuid)
 
