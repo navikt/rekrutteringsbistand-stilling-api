@@ -23,7 +23,7 @@ class StillingTest {
         val stilling = enStilling
         val kopiertStilling = stilling.toKopiertStilling(tokenUtils)
 
-        assertThat(kopiertStilling.title).isEqualTo("Kopi - ${stilling.title}")
+        assertThat(kopiertStilling.title).isEqualTo("Stilling uten valgt jobbtittel")
         assertThat(kopiertStilling.createdBy).isEqualTo("pam-rekrutteringsbistand")
         assertThat(kopiertStilling.updatedBy).isEqualTo("pam-rekrutteringsbistand")
         assertThat(kopiertStilling.source).isEqualTo("DIR")
