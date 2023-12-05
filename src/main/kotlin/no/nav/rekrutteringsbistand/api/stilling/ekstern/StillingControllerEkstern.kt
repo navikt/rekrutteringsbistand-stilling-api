@@ -23,10 +23,11 @@ class StillingControllerEkstern(
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
         }
 
-        val stilling = stillingService.hentRekrutteringsbistandStilling(
+        val rekrutteringsbistandStilling = stillingService.hentRekrutteringsbistandStilling(
             stillingsId = uuid,
             somSystembruker = true
-        ).stilling
+        )
+        val stilling = rekrutteringsbistandStilling.stilling
 
         fun copyProps(vararg keys: String): Map<String, String> =
                 hashMapOf(*(keys.filter { stilling.properties[it] != null }.map {
@@ -63,7 +64,8 @@ class StillingControllerEkstern(
                         status = stilling.status,
                         id = stilling.id,
                         uuid = stilling.uuid,
-                        source = stilling.source
+                        source = stilling.source,
+                        stillingskategori = rekrutteringsbistandStilling.stillingsinfo?.stillingskategori
                 )
         )
     }

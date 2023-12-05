@@ -3,7 +3,6 @@ package no.nav.rekrutteringsbistand.api
 import no.nav.rekrutteringsbistand.api.arbeidsplassen.OpprettStillingAdministrationDto
 import no.nav.rekrutteringsbistand.api.autorisasjon.InnloggetVeileder
 import no.nav.rekrutteringsbistand.api.stilling.*
-import no.nav.rekrutteringsbistand.api.stilling.ekstern.StillingForPersonbruker
 import no.nav.rekrutteringsbistand.api.stillingsinfo.*
 import java.time.LocalDateTime
 import java.util.*
@@ -43,7 +42,7 @@ object Testdata {
         activationOnPublishingDate = null
     )
 
-    val enOpprettStillingDto = no.nav.rekrutteringsbistand.api.stilling.OpprettStillingDto(
+    val enOpprettStillingDto = OpprettStillingDto(
         createdBy = "pam-rekrutteringsbistand",
         updatedBy = "pam-rekrutteringsbistand",
         source = "DIR",
@@ -150,5 +149,4 @@ object Testdata {
         stillingsinfo = enStillingsinfoUtenEier.asStillingsinfoDto(),
         stilling = enStilling
     )
-
 }
