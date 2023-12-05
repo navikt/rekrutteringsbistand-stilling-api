@@ -200,7 +200,7 @@ internal class StillingComponentTest {
     @Test
     fun `Ved opprettelse av stilling skal stillingstittel i arbeidsplassen være "Ny stilling" selv om frontend ikke sender noen stillingstittel`() {
         val requestUtenStillingstittel = enOpprettRekrutteringsbistandstillingDto.copy(
-            stilling = enOpprettStillingDto.copy(title = null, categoryList = emptyList())
+            stilling = enOpprettStillingDto.copy(categoryList = emptyList())
         )
 
         mockPamAdApi(HttpMethod.POST, "/api/v1/ads", enOpprettetStilling.copy(title = "Ny stilling"))

@@ -5,7 +5,6 @@ import arrow.core.getOrElse
 import no.nav.rekrutteringsbistand.api.OppdaterRekrutteringsbistandStillingDto
 import no.nav.rekrutteringsbistand.api.RekrutteringsbistandStilling
 import no.nav.rekrutteringsbistand.api.arbeidsplassen.ArbeidsplassenKlient
-import no.nav.rekrutteringsbistand.api.arbeidsplassen.OpprettRekrutteringsbistandstillingDto
 import no.nav.rekrutteringsbistand.api.arbeidsplassen.OpprettStillingDto
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
 import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteKlient
@@ -51,7 +50,7 @@ class StillingService(
 
     fun opprettNyStilling(opprettDto: OpprettRekrutteringsbistandstillingDto): RekrutteringsbistandStilling {
         return opprettStilling(
-            opprettStilling = opprettDto.stilling.copy(title = "Ny stilling"),
+            opprettStilling = opprettDto.stilling.toArbeidsplassenDto(title = "Ny stilling"),
             stillingskategori = opprettDto.kategori,
         )
     }

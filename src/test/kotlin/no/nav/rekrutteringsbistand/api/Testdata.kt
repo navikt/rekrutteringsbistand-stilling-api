@@ -1,10 +1,9 @@
 package no.nav.rekrutteringsbistand.api
 
-import no.nav.rekrutteringsbistand.api.arbeidsplassen.OpprettRekrutteringsbistandstillingDto
 import no.nav.rekrutteringsbistand.api.arbeidsplassen.OpprettStillingAdministrationDto
-import no.nav.rekrutteringsbistand.api.arbeidsplassen.OpprettStillingDto
 import no.nav.rekrutteringsbistand.api.autorisasjon.InnloggetVeileder
 import no.nav.rekrutteringsbistand.api.stilling.Administration
+import no.nav.rekrutteringsbistand.api.stilling.OpprettRekrutteringsbistandstillingDto
 import no.nav.rekrutteringsbistand.api.stilling.Page
 import no.nav.rekrutteringsbistand.api.stilling.Stilling
 import no.nav.rekrutteringsbistand.api.stilling.ekstern.StillingForPersonbruker
@@ -43,8 +42,7 @@ object Testdata {
         activationOnPublishingDate = null
     )
 
-    val enOpprettStillingDto = OpprettStillingDto(
-        title = "Ny stilling",
+    val enOpprettStillingDto = no.nav.rekrutteringsbistand.api.stilling.OpprettStillingDto(
         createdBy = "pam-rekrutteringsbistand",
         updatedBy = "pam-rekrutteringsbistand",
         source = "DIR",
