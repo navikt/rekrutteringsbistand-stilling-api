@@ -89,7 +89,7 @@ internal class StillingEksternComponentTest {
             ),
             StillingForPersonbruker::class.java
         ).also {
-            assertThat(it.body).isEqualTo(forventetStillingForPersonbruker(stilling))
+            assertThat(it.body).isEqualTo(forventetStillingForPersonbruker(stilling, null))
         }
     }
 
@@ -155,7 +155,7 @@ internal class StillingEksternComponentTest {
             ),
             StillingForPersonbruker::class.java
         ).also {
-            assertThat(it.body).isEqualTo(forventetStillingForPersonbruker(stilling).copy(title = forventetTittel))
+            assertThat(it.body).isEqualTo(forventetStillingForPersonbruker(stilling, stillingskategori).copy(title = forventetTittel))
         }
     }
 
@@ -177,7 +177,7 @@ internal class StillingEksternComponentTest {
         )
     }
 
-    private fun forventetStillingForPersonbruker(stilling: Stilling): StillingForPersonbruker {
+    private fun forventetStillingForPersonbruker(stilling: Stilling, stillingskategori: Stillingskategori?): StillingForPersonbruker {
         require(stilling.employer == null) { "Testkode er ikke tilpasset at employer er noe annet enn null" }
         return StillingForPersonbruker(
             id = stilling.id,
@@ -190,8 +190,8 @@ internal class StillingEksternComponentTest {
             businessName = stilling.businessName,
             status = stilling.status,
             uuid = stilling.uuid,
-            source = stilling.source
+            source = stilling.source,
+            stillingskategori = stillingskategori,
         )
     }
-
 }

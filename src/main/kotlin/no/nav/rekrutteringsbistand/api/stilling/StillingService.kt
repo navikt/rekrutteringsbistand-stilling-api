@@ -26,11 +26,14 @@ class StillingService(
         somSystembruker: Boolean = false
     ): RekrutteringsbistandStilling {
         val stilling = arbeidsplassenKlient.hentStilling(stillingsId, somSystembruker)
-        val stillingsinfo: Option<Stillingsinfo> = stillingsinfoService.hentStillingsinfo(stilling)
+        val stillingsinfo = stillingsinfoService
+            .hentStillingsinfo(stilling)
+            .map { it.asStillingsinfoDto() }
+            .getOrElse { null }
 
         return RekrutteringsbistandStilling(
-            stillingsinfo = stillingsinfo.map { it.asStillingsinfoDto() }.getOrElse { null },
-            stilling = stilling
+            stillingsinfo = stillingsinfo,
+            stilling = stilling.copyMedBeregnetTitle(stillingsinfo?.stillingskategori)
         )
     }
 
@@ -96,15 +99,15 @@ class StillingService(
     ): OppdaterRekrutteringsbistandStillingDto {
         loggEventuellOvertagelse(dto)
 
-        val stilling = dto.stilling.copyMedStyrkEllerTitle()
-
-        val oppdatertStilling = arbeidsplassenKlient.oppdaterStilling(stilling, queryString)
-
-
-        val id = Stillingsid(oppdatertStilling.uuid)
-
+        val id = Stillingsid(dto.stilling.uuid)
         val eksisterendeStillingsinfo: Stillingsinfo? =
             stillingsinfoService.hentForStilling(id).orNull()
+
+        val stilling = dto.stilling.copyMedBeregnetTitle(
+            stillingskategori = eksisterendeStillingsinfo?.stillingskategori
+        )
+
+        val oppdatertStilling = arbeidsplassenKlient.oppdaterStilling(stilling, queryString)
 
         return OppdaterRekrutteringsbistandStillingDto(
             stilling = oppdatertStilling,

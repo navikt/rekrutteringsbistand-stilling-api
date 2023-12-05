@@ -64,7 +64,17 @@ data class Stilling(
     }
 
 
-    fun copyMedStyrkEllerTitle(): Stilling = this.copy(title = styrkEllerTitle())
+    fun copyMedBeregnetTitle(stillingskategori: Stillingskategori?): Stilling =
+        when (stillingskategori) {
+            Stillingskategori.JOBBMESSE ->
+                this.copy(title = "Invitasjon til jobbmesse")
+
+            null,
+            Stillingskategori.STILLING,
+            Stillingskategori.FORMIDLING,
+            Stillingskategori.ARBEIDSTRENING ->
+                this.copy(title = styrkEllerTitle())
+        }
 
     fun styrkEllerTitle(): String =
         if (erDirektemeldt())
