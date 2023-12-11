@@ -1,13 +1,10 @@
 package no.nav.rekrutteringsbistand.api.arbeidsplassen
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
 import no.nav.rekrutteringsbistand.api.stilling.*
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingskategori
 import java.util.HashMap
-
-data class OpprettRekrutteringsbistandstillingDto(
-    val stilling: OpprettStillingDto,
-    val kategori: Stillingskategori
-)
 
 data class OpprettStillingDto(
     val title: String,
@@ -29,7 +26,21 @@ data class OpprettStillingDto(
     val firstPublished: Boolean? = null,
     val deactivatedByExpiry: Boolean? = null,
     val activationOnPublishingDate: Boolean? = null
-)
+) {
+    constructor(tittel: String = "Ny stilling", tokenUtils: TokenUtils): this(
+        title = tittel,
+        createdBy = "pam-rekrutteringsbistand",
+        updatedBy = "pam-rekrutteringsbistand",
+        source = "DIR",
+        privacy = "INTERNAL_NOT_SHOWN",
+        administration = OpprettStillingAdministrationDto(
+            status = "PENDING",
+            reportee = tokenUtils.hentInnloggetVeileder().displayName,
+            navIdent = tokenUtils.hentInnloggetVeileder().navIdent,
+        ),
+    )
+}
+
 
 data class OpprettStillingAdministrationDto(
     val status: String,

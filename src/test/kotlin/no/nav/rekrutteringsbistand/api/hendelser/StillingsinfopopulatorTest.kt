@@ -9,6 +9,7 @@ import no.nav.rekrutteringsbistand.api.arbeidsplassen.ArbeidsplassenKlient
 import no.nav.rekrutteringsbistand.api.asZonedDateTime
 import no.nav.rekrutteringsbistand.api.hendelser.RapidApplikasjon.Companion.registrerLyttere
 import no.nav.rekrutteringsbistand.api.stilling.Arbeidsgiver
+import no.nav.rekrutteringsbistand.api.stilling.Kategori
 import no.nav.rekrutteringsbistand.api.stillingsinfo.*
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
@@ -119,6 +120,101 @@ class StillingsinfopopulatorTest {
         assertEquals(stillingsinfo.stillingskategori?.name, stillingNode.path("stillingskategori").asText())
         assertEquals(stillingsinfo.eier!!.navident, stillingNode.path("eier").path("navident").asText())
         assertEquals(stillingsinfo.eier!!.navn, stillingNode.path("eier").path("navn").asText())
+    }
+
+    fun enStillingMed(
+        tittel: String,
+        source: String,
+        categoryList: List<Kategori>
+    ) =
+        enStilling.copy(
+            title = tittel,
+            source = source,
+            publishedByAdmin = LocalDateTime.now().truncatedTo(ChronoUnit.MILLIS).toString(),
+            properties = mapOf("positioncount" to "1"),
+            employer = Arbeidsgiver(
+                null, null, null, null, null,
+                null, emptyList(), emptyList(), null, emptyList(),
+                emptyMap(), null,
+                "123",
+                null, null, null, null, null, null
+            ),
+            published = LocalDateTime.now().truncatedTo(ChronoUnit.MILLIS),
+            categoryList = categoryList,
+        )
+
+    @Test
+    fun `populering av en direktemeldt stilling bruker styrk i stillingstittel`() {
+        val stillingsId = Stillingsid(UUID.randomUUID())
+
+        Mockito.`when`(arbeidsplassenKlient.hentStillingBasertPåUUID(stillingsId.toString()))
+            .thenReturn(
+                Some(
+                    enStillingMed(
+                        tittel = "Tittel fra arbeidsplassen",
+                        source = "DIR",
+                        categoryList = listOf(Kategori(
+                            name = "Kokk",
+                            code = "0000.00",
+                            id = null,
+                            categoryType = null,
+                            description = null,
+                            parentId = null,
+                        ))
+                    )
+                )
+            )
+
+        testRapid.sendTestMessage(
+            """
+            {
+                "uinteressant": "felt",
+                "uinteressant2": "felt2",
+                "stillingsId": "${stillingsId.asString()}"
+            }
+        """.trimIndent()
+        )
+        assertEquals(1, testRapid.inspektør.size)
+        val message = testRapid.inspektør.message(0)
+
+        assertEquals("Kokk", message.path("stilling").get("stillingstittel").asText())
+    }
+
+    @Test
+    fun `populering av en ekstern stilling bruker tittel fra arbeidsplassen`() {
+        val stillingsId = Stillingsid(UUID.randomUUID())
+
+        Mockito.`when`(arbeidsplassenKlient.hentStillingBasertPåUUID(stillingsId.toString()))
+            .thenReturn(
+                Some(
+                    enStillingMed(
+                        tittel = "Tittel fra arbeidsplassen",
+                        source = "AMEDIA",
+                        categoryList = listOf(Kategori(
+                            name = "Kokk",
+                            code = "0000.00",
+                            id = null,
+                            categoryType = null,
+                            description = null,
+                            parentId = null,
+                        ))
+                    )
+                )
+            )
+
+        testRapid.sendTestMessage(
+            """
+            {
+                "uinteressant": "felt",
+                "uinteressant2": "felt2",
+                "stillingsId": "${stillingsId.asString()}"
+            }
+        """.trimIndent()
+        )
+        assertEquals(1, testRapid.inspektør.size)
+        val message = testRapid.inspektør.message(0)
+
+        assertEquals("Tittel fra arbeidsplassen", message.path("stilling").get("stillingstittel").asText())
     }
 
     @Test

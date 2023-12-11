@@ -1,13 +1,8 @@
 package no.nav.rekrutteringsbistand.api
 
-import no.nav.rekrutteringsbistand.api.arbeidsplassen.OpprettRekrutteringsbistandstillingDto
 import no.nav.rekrutteringsbistand.api.arbeidsplassen.OpprettStillingAdministrationDto
-import no.nav.rekrutteringsbistand.api.arbeidsplassen.OpprettStillingDto
 import no.nav.rekrutteringsbistand.api.autorisasjon.InnloggetVeileder
-import no.nav.rekrutteringsbistand.api.stilling.Administration
-import no.nav.rekrutteringsbistand.api.stilling.Page
-import no.nav.rekrutteringsbistand.api.stilling.Stilling
-import no.nav.rekrutteringsbistand.api.stilling.ekstern.StillingForPersonbruker
+import no.nav.rekrutteringsbistand.api.stilling.*
 import no.nav.rekrutteringsbistand.api.stillingsinfo.*
 import java.time.LocalDateTime
 import java.util.*
@@ -17,6 +12,10 @@ object Testdata {
     val enVeileder = InnloggetVeileder("Clark Kent", "C12345")
 
     const val etNotat = "notatet"
+
+    private  val styrkCode = "3112.12"
+    private val styrkTittel = "Byggeleder"
+    val styrk = Kategori(2148934, styrkCode, "STYRK08NAV", styrkTittel, null, null)
 
     val enStilling = Stilling(
         id = 1000,
@@ -44,7 +43,6 @@ object Testdata {
     )
 
     val enOpprettStillingDto = OpprettStillingDto(
-        title = "Ny stilling",
         createdBy = "pam-rekrutteringsbistand",
         updatedBy = "pam-rekrutteringsbistand",
         source = "DIR",
@@ -150,19 +148,5 @@ object Testdata {
     val enRekrutteringsbistandStillingUtenEier = RekrutteringsbistandStilling(
         stillingsinfo = enStillingsinfoUtenEier.asStillingsinfoDto(),
         stilling = enStilling
-    )
-
-    val enStillingForPersonbruker = StillingForPersonbruker(
-        id = enStilling.id,
-        updated = enStilling.updated,
-        title = enStilling.title,
-        medium = enStilling.medium,
-        employer = null,
-        location = enStilling.location,
-        properties = enStilling.properties,
-        businessName = enStilling.businessName,
-        status = enStilling.status,
-        uuid = enStilling.uuid,
-        source = enStilling.source
     )
 }
