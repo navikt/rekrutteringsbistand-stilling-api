@@ -10,6 +10,15 @@ import java.time.LocalDateTime
 import java.util.*
 import kotlin.collections.ArrayList
 
+/** UUID-en som sendes fra arbdidsplassen stilling.uuid.
+ *
+ * TODO: bruk denne flere steder, f.eks. i data klassen under.
+ */
+data class StillingReferanse(
+    val uuid: String
+)
+
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Stilling(
     val id: Long,
