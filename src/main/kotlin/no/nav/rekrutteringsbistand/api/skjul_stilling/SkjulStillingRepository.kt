@@ -7,7 +7,7 @@ import java.time.ZoneId
 import java.time.ZonedDateTime
 
 class SkjulStillingRepository(
-    private val  namedJdbcTemplate: NamedParameterJdbcTemplate,
+    private val namedJdbcTemplate: NamedParameterJdbcTemplate,
 ) {
 
     data class Skjulestatus(
@@ -17,7 +17,6 @@ class SkjulStillingRepository(
         val utførtSletteElasticsearch: ZonedDateTime?,
         val utførtSkjuleKandidatliste: ZonedDateTime?,
     )
-
 
 
     fun lookupSkjulestatus(stillingReferanse: StillingReferanse): Skjulestatus? {
@@ -41,6 +40,37 @@ class SkjulStillingRepository(
         }
             .firstOrNull()
     }
+
+    fun upsertSkjulestatus(skjulestatus: Skjulestatus) =
+        namedJdbcTemplate.update(
+            """
+        insert into skjulestatus (
+            stilling_referanse,
+            stilling_stanset_tidspunkt,
+            utført_markert_for_skjuling,
+            utført_slette_elasticsearch,
+            utført_skjule_kandidatliste
+        ) values (
+            :stilling_referanse,
+            :stilling_stanset_tidspunkt,
+            :utført_markert_for_skjuling,
+            :utført_slette_elasticsearch,
+            :utført_skjule_kandidatliste
+        )
+        on conflict (stilling_referanse) do update set
+            stilling_stanset_tidspunkt = excluded.stilling_stanset_tidspunkt,
+            utført_markert_for_skjuling = excluded.utført_markert_for_skjuling,
+            utført_slette_elasticsearch = excluded.utført_slette_elasticsearch,
+            utført_skjule_kandidatliste = excluded.utført_skjule_kandidatliste
+    """.trimIndent(),
+            mapOf(
+                "stilling_referanse" to skjulestatus.stillingReferanse.uuid,
+                "stilling_stanset_tidspunkt" to skjulestatus.stillingStansetTidspunkt,
+                "utført_markert_for_skjuling" to skjulestatus.utførtMarkertForSkjuling,
+                "utført_slette_elasticsearch" to skjulestatus.utførtSletteElasticsearch,
+                "utført_skjule_kandidatliste" to skjulestatus.utførtSkjuleKandidatliste,
+            )
+        )
 }
 
 
