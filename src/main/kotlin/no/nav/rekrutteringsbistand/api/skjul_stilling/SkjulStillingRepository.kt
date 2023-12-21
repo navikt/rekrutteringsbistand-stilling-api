@@ -19,7 +19,7 @@ class SkjulStillingRepository(
     )
 
 
-    fun lookupSkjulestatus(stillingReferanse: StillingReferanse): Skjulestatus? {
+    fun hentSkjulestatus(stillingReferanse: StillingReferanse): Skjulestatus? {
         return namedJdbcTemplate.query(
             """
                 select *
