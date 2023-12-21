@@ -1,6 +1,7 @@
 package no.nav.rekrutteringsbistand.api.indekser
 
 import no.nav.rekrutteringsbistand.api.autorisasjon.AuthorizedPartyUtils
+import no.nav.rekrutteringsbistand.api.skjul_stilling.SkjulStillingRepository
 import no.nav.rekrutteringsbistand.api.stillingsinfo.*
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.HttpStatus
@@ -13,7 +14,8 @@ import java.time.LocalDate
 @ProtectedWithClaims(issuer = "azuread")
 class IndekserController(
         val stillingsinfoService: StillingsinfoService,
-        val authorizedPartyUtils: AuthorizedPartyUtils
+        val authorizedPartyUtils: AuthorizedPartyUtils,
+        val skjulStillingRepository: SkjulStillingRepository
 ) {
 
     @PostMapping("/stillingsinfo/bulk")
@@ -36,14 +38,27 @@ class IndekserController(
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
         }
 
-//        val stillingsIder = inboundDto.uuider.map { Stillingsid(it) }
-//        val stillingsinfo: List<StillingsinfoDto> = stillingsinfoService
-//            .hentForStillinger(stillingsIder)
-//            .map { it.asStillingsinfoDto() }
-//
-//
+        val stillingsIder = inboundDto.stillinger.map { Stillingsid(it.uuid)  }
+
+        val a = stillingsIder.associateBy { hentSkjult(it) }
+
+
+
+        val stillingsInfoDtoer = stillingsinfoService
+           .hentForStillinger(stillingsIder)
+           .map { it.asStillingsinfoDto() }
+
 
         return ResponseEntity.ok(listOf())
+
+
+
+
+    }
+
+    private fun hentSkjult(stillingsid: Stillingsid): Boolean  {
+        val status = skjulStillingRepository.hentSkjulestatus(stillingsid)
+        return status?.utførtMarkereForSkjuling != null
     }
 }
 

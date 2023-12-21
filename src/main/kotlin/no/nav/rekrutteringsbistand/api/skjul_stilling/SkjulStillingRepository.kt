@@ -1,6 +1,7 @@
 package no.nav.rekrutteringsbistand.api.skjul_stilling
 
 import no.nav.rekrutteringsbistand.api.stilling.StillingReferanse
+import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsid
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import java.sql.ResultSet
 import java.time.LocalDate
@@ -20,7 +21,7 @@ class SkjulStillingRepository(
     )
 
 
-    fun hentSkjulestatus(stillingReferanse: StillingReferanse): Skjulestatus? {
+    fun hentSkjulestatus(stillingsid: Stillingsid): Skjulestatus? {
         return namedJdbcTemplate.query(
             """
                 select *
@@ -28,7 +29,7 @@ class SkjulStillingRepository(
                 where stilling_referanse = :stilling_referanse
             """.trimIndent(),
             mapOf(
-                "stillingsid" to stillingReferanse.uuid
+                "stillingsid" to stillingsid.asString()
             )
         ) { it, _ ->
             Skjulestatus(
