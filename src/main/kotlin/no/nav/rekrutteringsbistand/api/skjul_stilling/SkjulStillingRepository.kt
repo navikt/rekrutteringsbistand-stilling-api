@@ -12,8 +12,8 @@ class SkjulStillingRepository(
 
     data class Skjulestatus(
         val stillingReferanse: StillingReferanse,
-        val stillingStansetTidspunkt: ZonedDateTime?,
-        val utførtMarkertForSkjuling: ZonedDateTime?,
+        val grunnlagForSkjuling: ZonedDateTime?,
+        val utførtMarkereForSkjuling: ZonedDateTime?,
         val utførtSletteElasticsearch: ZonedDateTime?,
         val utførtSkjuleKandidatliste: ZonedDateTime?,
     )
@@ -32,8 +32,8 @@ class SkjulStillingRepository(
         ) { it, _ ->
             Skjulestatus(
                 stillingReferanse = StillingReferanse(it.getString("stilling_referanse")),
-                stillingStansetTidspunkt = it.getTimestampAsZonedDateTime("stilling_stanset_tidspunkt"),
-                utførtMarkertForSkjuling = it.getTimestampAsZonedDateTime("utført_markert_for_skjuling"),
+                grunnlagForSkjuling = it.getTimestampAsZonedDateTime("grunnlag_for_skjuling"),
+                utførtMarkereForSkjuling = it.getTimestampAsZonedDateTime("utført_markere_for_skjuling"),
                 utførtSletteElasticsearch = it.getTimestampAsZonedDateTime("utført_slette_elasticsearch"),
                 utførtSkjuleKandidatliste = it.getTimestampAsZonedDateTime("utført_skjule_kandidatliste"),
             )
@@ -46,27 +46,27 @@ class SkjulStillingRepository(
             """
         insert into skjulestatus (
             stilling_referanse,
-            stilling_stanset_tidspunkt,
-            utført_markert_for_skjuling,
+            grunnlag_for_skjuling,
+            utført_markere_for_skjuling,
             utført_slette_elasticsearch,
             utført_skjule_kandidatliste
         ) values (
             :stilling_referanse,
-            :stilling_stanset_tidspunkt,
-            :utført_markert_for_skjuling,
+            :grunnlag_for_skjuling,
+            :utført_markere_for_skjuling,
             :utført_slette_elasticsearch,
             :utført_skjule_kandidatliste
         )
         on conflict (stilling_referanse) do update set
-            stilling_stanset_tidspunkt = excluded.stilling_stanset_tidspunkt,
-            utført_markert_for_skjuling = excluded.utført_markert_for_skjuling,
+            grunnlag_for_skjuling = excluded.grunnlag_for_skjuling,
+            utført_markere_for_skjuling = excluded.utført_markere_for_skjuling,
             utført_slette_elasticsearch = excluded.utført_slette_elasticsearch,
             utført_skjule_kandidatliste = excluded.utført_skjule_kandidatliste
     """.trimIndent(),
             mapOf(
                 "stilling_referanse" to skjulestatus.stillingReferanse.uuid,
-                "stilling_stanset_tidspunkt" to skjulestatus.stillingStansetTidspunkt,
-                "utført_markert_for_skjuling" to skjulestatus.utførtMarkertForSkjuling,
+                "grunnlag_for_skjuling" to skjulestatus.grunnlagForSkjuling,
+                "utført_markere_for_skjuling" to skjulestatus.utførtMarkereForSkjuling,
                 "utført_slette_elasticsearch" to skjulestatus.utførtSletteElasticsearch,
                 "utført_skjule_kandidatliste" to skjulestatus.utførtSkjuleKandidatliste,
             )
