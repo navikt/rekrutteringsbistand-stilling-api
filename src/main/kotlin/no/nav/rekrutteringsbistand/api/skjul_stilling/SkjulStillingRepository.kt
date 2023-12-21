@@ -13,7 +13,7 @@ class SkjulStillingRepository(
 ) {
 
     data class Skjulestatus(
-        val stillingReferanse: StillingReferanse,
+        val stillingReferanse: Stillingsid,
         val grunnlagForSkjuling: LocalDate?,
         val utførtMarkereForSkjuling: ZonedDateTime?,
         val utførtSletteElasticsearch: ZonedDateTime?,
@@ -33,7 +33,7 @@ class SkjulStillingRepository(
             )
         ) { it, _ ->
             Skjulestatus(
-                stillingReferanse = StillingReferanse(it.getString("stilling_referanse")),
+                stillingReferanse = Stillingsid(it.getString("stilling_referanse")),
                 grunnlagForSkjuling = it.getDate("grunnlag_for_skjuling").toLocalDate(),
                 utførtMarkereForSkjuling = it.getTimestampAsZonedDateTime("utført_markere_for_skjuling"),
                 utførtSletteElasticsearch = it.getTimestampAsZonedDateTime("utført_slette_elasticsearch"),
@@ -66,7 +66,7 @@ class SkjulStillingRepository(
             utført_skjule_kandidatliste = excluded.utført_skjule_kandidatliste
     """.trimIndent(),
             mapOf(
-                "stilling_referanse" to skjulestatus.stillingReferanse.uuid,
+                "stilling_referanse" to skjulestatus.stillingReferanse.asString(),
                 "grunnlag_for_skjuling" to java.sql.Date.valueOf(skjulestatus.grunnlagForSkjuling),
                 "utført_markere_for_skjuling" to skjulestatus.utførtMarkereForSkjuling,
                 "utført_slette_elasticsearch" to skjulestatus.utførtSletteElasticsearch,

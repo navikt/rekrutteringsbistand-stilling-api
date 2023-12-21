@@ -5,6 +5,8 @@ import no.nav.rekrutteringsbistand.api.skjul_stilling.SkjulStillingRepository
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsid
 import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoDto
 import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoService
+import no.nav.rekrutteringsbistand.api.support.log
+import no.nav.rekrutteringsbistand.api.support.secureLog
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -43,6 +45,11 @@ class IndekserController(
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
         }
 
+        inboundDto.stillinger.forEach {
+            berik(it)
+        }
+
+
         val stillingsIder = inboundDto.stillinger.map { Stillingsid(it.uuid) }
 
         val skjulingsliste: Map<Stillingsid, Boolean> = stillingsIder.associateWith { hentSkjult(it) }
@@ -57,6 +64,21 @@ class IndekserController(
         }
 
         return ResponseEntity.ok(berikStillingerResponseDtoer)
+    }
+
+    private fun berik(it: BerikStillingDto) {
+        val insert = skjulStillingRepository.upsertSkjulestatus(
+            skjulestatus = SkjulStillingRepository.Skjulestatus(
+                stillingReferanse = Stillingsid(it.uuid),
+                grunnlagForSkjuling = it.expires,
+                utførtMarkereForSkjuling = null,
+                utførtSletteElasticsearch = null,
+                utførtSkjuleKandidatliste = null,
+            )
+        )
+        if (insert != 0) {
+            log.info("Berik stilling ikke utført for stilling ${it.uuid}")
+        }
     }
 
     private fun hentSkjult(stillingsid: Stillingsid): Boolean {
