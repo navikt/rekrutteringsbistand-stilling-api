@@ -4,5 +4,5 @@ CREATE TABLE SKJULESTATUS (
     grunnlag_for_skjuling timestamp with time zone,
     utført_markere_for_skjuling timestamp with time zone,
     utført_slette_elasticsearch timestamp with time zone,
-    utført_skjule_kandidatliste timestamp with time zone,
+    utført_skjule_kandidatliste timestamp with time zone
 )
