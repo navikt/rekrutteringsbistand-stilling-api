@@ -3,6 +3,7 @@ package no.nav.rekrutteringsbistand.api.skjul_stilling
 import no.nav.rekrutteringsbistand.api.stilling.StillingReferanse
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import java.sql.ResultSet
+import java.time.LocalDate
 import java.time.ZoneId
 import java.time.ZonedDateTime
 
@@ -12,7 +13,7 @@ class SkjulStillingRepository(
 
     data class Skjulestatus(
         val stillingReferanse: StillingReferanse,
-        val grunnlagForSkjuling: ZonedDateTime?,
+        val grunnlagForSkjuling: LocalDate?,
         val utførtMarkereForSkjuling: ZonedDateTime?,
         val utførtSletteElasticsearch: ZonedDateTime?,
         val utførtSkjuleKandidatliste: ZonedDateTime?,
@@ -32,7 +33,7 @@ class SkjulStillingRepository(
         ) { it, _ ->
             Skjulestatus(
                 stillingReferanse = StillingReferanse(it.getString("stilling_referanse")),
-                grunnlagForSkjuling = it.getTimestampAsZonedDateTime("grunnlag_for_skjuling"),
+                grunnlagForSkjuling = it.getDate("grunnlag_for_skjuling").toLocalDate(),
                 utførtMarkereForSkjuling = it.getTimestampAsZonedDateTime("utført_markere_for_skjuling"),
                 utførtSletteElasticsearch = it.getTimestampAsZonedDateTime("utført_slette_elasticsearch"),
                 utførtSkjuleKandidatliste = it.getTimestampAsZonedDateTime("utført_skjule_kandidatliste"),
@@ -65,7 +66,7 @@ class SkjulStillingRepository(
     """.trimIndent(),
             mapOf(
                 "stilling_referanse" to skjulestatus.stillingReferanse.uuid,
-                "grunnlag_for_skjuling" to skjulestatus.grunnlagForSkjuling,
+                "grunnlag_for_skjuling" to java.sql.Date.valueOf(skjulestatus.grunnlagForSkjuling),
                 "utført_markere_for_skjuling" to skjulestatus.utførtMarkereForSkjuling,
                 "utført_slette_elasticsearch" to skjulestatus.utførtSletteElasticsearch,
                 "utført_skjule_kandidatliste" to skjulestatus.utførtSkjuleKandidatliste,
