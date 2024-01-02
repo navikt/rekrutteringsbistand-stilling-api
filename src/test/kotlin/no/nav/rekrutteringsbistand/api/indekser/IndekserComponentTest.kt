@@ -1,6 +1,7 @@
 package no.nav.rekrutteringsbistand.api.indekser
 
 import no.nav.rekrutteringsbistand.api.Testdata
+import no.nav.rekrutteringsbistand.api.config.MockLogin
 import no.nav.rekrutteringsbistand.api.skjul_stilling.SkjulStillingRepository
 import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoDto
 import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoInboundDto
@@ -8,6 +9,7 @@ import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoRepository
 import no.nav.rekrutteringsbistand.api.support.toMultiValueMap
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.*
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -37,6 +39,13 @@ class IndekserComponentTest {
     private var port = 0
 
     val localBaseUrl by lazy { "http://localhost:$port" }
+
+    @Autowired
+    lateinit var mockLogin: MockLogin
+    @Before
+    fun authenticateClient() {
+        mockLogin.leggAzureVeilederTokenPåAlleRequests(restTemplate)
+    }
 
 
     @Test
