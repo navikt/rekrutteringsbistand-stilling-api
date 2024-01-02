@@ -56,7 +56,7 @@ class IndekserComponentTest {
 
         val url = "$localBaseUrl/indekser/berik_stillinger"
         val stillingsinfoRespons =
-            restTemplate.exchange(url, HttpMethod.POST, httpEntity(berikStillingerRequestBodyDto), BerikStillingerRequestBodyDto::class.java)
+            restTemplate.exchange(url, HttpMethod.POST, httpEntity(berikStillingerRequestBodyDto), String::class.java)
         assertThat(stillingsinfoRespons.statusCode).isEqualTo(200)
     }
 
