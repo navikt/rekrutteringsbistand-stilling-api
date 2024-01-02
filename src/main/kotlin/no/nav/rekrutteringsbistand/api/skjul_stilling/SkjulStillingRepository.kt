@@ -3,11 +3,13 @@ package no.nav.rekrutteringsbistand.api.skjul_stilling
 import no.nav.rekrutteringsbistand.api.stilling.StillingReferanse
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsid
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
+import org.springframework.stereotype.Repository
 import java.sql.ResultSet
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.ZonedDateTime
 
+@Repository
 class SkjulStillingRepository(
     private val namedJdbcTemplate: NamedParameterJdbcTemplate,
 ) {
