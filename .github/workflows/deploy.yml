@@ -1,6 +1,6 @@
 name: Build & deploy
 
-on: [push]
+on: [push, workflow_dispatch]
 
 permissions:
   packages: write
@@ -29,7 +29,7 @@ jobs:
   deploy-to-dev:
     name: Deploy to dev
     needs: test
-    if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/styrk-stillingstittel'
+    if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/styrk-stillingstittel'
     runs-on: ubuntu-latest
     outputs:
       image: ${{ steps.docker-build-push.outputs.image }}
