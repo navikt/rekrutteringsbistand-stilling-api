@@ -12,39 +12,28 @@
             </throwableConverter>
         </encoder>
     </appender>
+    <if condition='isDefined("NAIS_CLUSTER_NAME")'>
+        <then>
+            <include resource="no/nav/common/audit_log/logback-naudit.xml"/>
 
-    <appender name="sporbarhetsloggAppender" class="com.papertrailapp.logback.Syslog4jAppender">
-        <layout class="ch.qos.logback.classic.PatternLayout">
-            <pattern>%m%n%xEx</pattern>
-        </layout>
+            <appender name="secureLog" class="ch.qos.logback.core.rolling.RollingFileAppender">
+                <file>/secure-logs/secure.log</file>
+                <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+                    <fileNamePattern>/secure-logs/secure.log.%i</fileNamePattern>
+                    <minIndex>1</minIndex>
+                    <maxIndex>1</maxIndex>
+                </rollingPolicy>
+                <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+                    <maxFileSize>50MB</maxFileSize>
+                </triggeringPolicy>
+                <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
+            </appender>
 
-        <syslogConfig class="org.productivity.java.syslog4j.impl.net.tcp.TCPNetSyslogConfig">
-            <host>audit.nais</host>
-            <port>6514</port>
-            <ident>rekrutteringsbistand-stilling-api</ident>
-            <maxMessageLength>128000</maxMessageLength>
-        </syslogConfig>
-    </appender>
-
-    <appender name="secureLog" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>/secure-logs/secure.log</file>
-        <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
-            <fileNamePattern>/secure-logs/secure.log.%i</fileNamePattern>
-            <minIndex>1</minIndex>
-            <maxIndex>1</maxIndex>
-        </rollingPolicy>
-        <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
-            <maxFileSize>50MB</maxFileSize>
-        </triggeringPolicy>
-        <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
-    </appender>
-
-    <logger name="secureLog" level="TRACE" additivity="false">
-        <appender-ref ref="secureLog"/>
-    </logger>
-    <logger level="INFO" name="sporbarhetslogger" additivity="false">
-        <appender-ref ref="sporbarhetsloggAppender"/>
-    </logger>
+            <logger name="secureLog" level="TRACE" additivity="false">
+                <appender-ref ref="secureLog"/>
+            </logger>
+        </then>
+    </if>
 
     <root level="INFO">
         <appender-ref ref="consoleJsonAppender"/>

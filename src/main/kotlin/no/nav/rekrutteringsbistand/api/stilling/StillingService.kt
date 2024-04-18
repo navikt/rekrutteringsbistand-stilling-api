@@ -2,6 +2,7 @@ package no.nav.rekrutteringsbistand.api.stilling
 
 import arrow.core.Option
 import arrow.core.getOrElse
+import no.nav.rekrutteringsbistand.AuditLogg
 import no.nav.rekrutteringsbistand.api.OppdaterRekrutteringsbistandStillingDto
 import no.nav.rekrutteringsbistand.api.RekrutteringsbistandStilling
 import no.nav.rekrutteringsbistand.api.arbeidsplassen.ArbeidsplassenKlient
@@ -129,7 +130,8 @@ class StillingService(
         val gammelEier = gammelStilling.administration?.navIdent
         val nyEier = dto.stilling.administration?.navIdent
         if (!nyEier.equals(gammelEier)) {
-            secureLog.info("Overtar intern stilling og kandidatliste ny-ident $nyEier gammel-ident $gammelEier stillingsid ${dto.stilling.uuid}")
+            AuditLogg.loggOvertattStilling(navIdent = nyEier ?: "", forrigeEier=gammelEier ?: "", stillingsid=gammelStilling.uuid)
+
         }
     }
 
