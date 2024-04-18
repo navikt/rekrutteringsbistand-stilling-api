@@ -13,7 +13,9 @@ object AuditLogg {
     private val auditLogger: AuditLogger = AuditLoggerImpl()
 
     fun loggOvertattStilling(navIdent: String, forrigeEier: String, stillingsid: String) {
-        logCefMessage(navIdent = navIdent, userid = "", msg = "Innlogget NAV-ansatt har overtatt stilling og kandidatliste med stillingsid $stillingsid fra $forrigeEier")
+        logCefMessage(navIdent = navIdent, userid = "",
+            msg = "Innlogget NAV-ansatt har overtatt stilling og kandidatliste med stillingsid $stillingsid"
+                    + if(forrigeEier!=null) " fra $forrigeEier" else "")
     }
 
     private fun logCefMessage(
