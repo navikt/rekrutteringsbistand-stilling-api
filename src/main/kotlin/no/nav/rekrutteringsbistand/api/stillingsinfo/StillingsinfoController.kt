@@ -25,7 +25,7 @@ class StillingsinfoController(
         val forrigeStillingsinfo = service.hentForStilling(stillingId = stillingsid)
         val forrigeEier = forrigeStillingsinfo.orNull()?.eier?.navident
 
-        AuditLogg.loggOvertattStilling(navIdent = dto.eierNavident, forrigeEier=forrigeEier ?: "", stillingsid=dto.stillingsid)
+        AuditLogg.loggOvertattStilling(navIdent = dto.eierNavident, forrigeEier=forrigeEier, stillingsid=dto.stillingsid)
         val nyEier = Eier(dto.eierNavident, dto.eierNavn)
         val oppdatertStillingsinfo =
             service.overtaEierskapForEksternStillingOgKandidatliste(stillingsId = stillingsid, nyEier = nyEier)

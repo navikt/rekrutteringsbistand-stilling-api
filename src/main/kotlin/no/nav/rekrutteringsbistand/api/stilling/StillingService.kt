@@ -130,7 +130,7 @@ class StillingService(
         val gammelEier = gammelStilling.administration?.navIdent
         val nyEier = dto.stilling.administration?.navIdent
         if (!nyEier.equals(gammelEier)) {
-            AuditLogg.loggOvertattStilling(navIdent = nyEier ?: "", forrigeEier=gammelEier ?: "", stillingsid=gammelStilling.uuid)
+            AuditLogg.loggOvertattStilling(navIdent = nyEier ?: "", forrigeEier=gammelEier, stillingsid=gammelStilling.uuid)
 
         }
     }

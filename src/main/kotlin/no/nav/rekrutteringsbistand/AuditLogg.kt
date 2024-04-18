@@ -12,7 +12,7 @@ object AuditLogg {
     private val secureLog = LoggerFactory.getLogger("secureLog")!!
     private val auditLogger: AuditLogger = AuditLoggerImpl()
 
-    fun loggOvertattStilling(navIdent: String, forrigeEier: String, stillingsid: String) {
+    fun loggOvertattStilling(navIdent: String, forrigeEier: String?, stillingsid: String) {
         logCefMessage(navIdent = navIdent, userid = "",
             msg = "Innlogget NAV-ansatt har overtatt stilling og kandidatliste med stillingsid $stillingsid"
                     + if(forrigeEier!=null) " fra $forrigeEier" else "")
