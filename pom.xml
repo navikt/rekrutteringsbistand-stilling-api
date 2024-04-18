@@ -128,9 +128,9 @@
 
         <!-- Audit logging -->
         <dependency>
-            <groupId>com.papertrailapp</groupId>
-            <artifactId>logback-syslog4j</artifactId>
-            <version>${logback-syslog4j.version}</version>
+            <groupId>no.nav.common</groupId>
+            <artifactId>audit-log</artifactId>
+            <version>3.2024.04.10_12.03-fddb587e3a68</version>
         </dependency>
 
         <!-- Prometheus -->
