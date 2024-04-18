@@ -130,7 +130,7 @@
         <dependency>
             <groupId>no.nav.common</groupId>
             <artifactId>audit-log</artifactId>
-            <version></version>
+            <version>3.2024.04.10_12.03-fddb587e3a68</version>
         </dependency>
 
         <dependency>
