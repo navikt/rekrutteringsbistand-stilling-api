@@ -29,7 +29,7 @@ jobs:
   deploy-to-dev:
     name: Deploy to dev
     needs: test
-    if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dependabot/maven/com.nimbusds-nimbus-jose-jwt-9.37.2'
+    if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/auditlogging-endre-eier-paa-stilling'
     runs-on: ubuntu-latest
     outputs:
       image: ${{ steps.docker-build-push.outputs.image }}

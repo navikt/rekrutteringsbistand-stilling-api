@@ -1,5 +1,6 @@
 package no.nav.rekrutteringsbistand.api.stillingsinfo
 
+import no.nav.rekrutteringsbistand.AuditLogg
 import no.nav.rekrutteringsbistand.api.support.secureLog
 import no.nav.security.token.support.core.api.Protected
 import org.springframework.http.HttpStatus
@@ -24,7 +25,7 @@ class StillingsinfoController(
         val forrigeStillingsinfo = service.hentForStilling(stillingId = stillingsid)
         val forrigeEier = forrigeStillingsinfo.orNull()?.eier?.navident
 
-        secureLog.info("Overtar ekstern stilling og kandidatliste gammel eier $forrigeEier ny eier ${dto.eierNavident} stillingsid ${dto.stillingsid}")
+        AuditLogg.loggOvertattStilling(navIdent = dto.eierNavident, forrigeEier=forrigeEier, stillingsid=dto.stillingsid)
         val nyEier = Eier(dto.eierNavident, dto.eierNavn)
         val oppdatertStillingsinfo =
             service.overtaEierskapForEksternStillingOgKandidatliste(stillingsId = stillingsid, nyEier = nyEier)
