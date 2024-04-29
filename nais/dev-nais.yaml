@@ -53,6 +53,7 @@ spec:
           cluster: dev-gcp
         - application: rekrutteringsbistand-kandidat-api
           cluster: dev-fss
+        - application: rekrutteringsbistand-kandidatvarsel-api
     outbound:
       external:
         - host: pam-ad-api.intern.dev.nav.no
