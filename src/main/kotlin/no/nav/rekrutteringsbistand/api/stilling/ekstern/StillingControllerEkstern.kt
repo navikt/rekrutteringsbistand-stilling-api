@@ -19,7 +19,7 @@ class StillingControllerEkstern(
     @GetMapping("/rekrutteringsbistand/ekstern/api/v1/stilling/{uuid}")
     fun hentStillingTilPersonbruker(@PathVariable uuid: String): ResponseEntity<StillingForPersonbruker> {
 
-        if (!authorizedPartyUtils.kallKommerFraVisStilling()) {
+        if (!authorizedPartyUtils.kallKommerFraVisStilling() && !authorizedPartyUtils.kallKommerFraKandidatvarsel()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
         }
 

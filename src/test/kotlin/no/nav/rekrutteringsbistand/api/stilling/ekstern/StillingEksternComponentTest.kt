@@ -35,7 +35,7 @@ import java.util.*
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 internal class StillingEksternComponentTest {
 
-    @Value("\${vis-stilling.uri}")
+    @Value("\${vis-stilling.azp-name}")
     private val uriTilVisStilling: String = "uriTilVisStilling"
 
     @get:Rule

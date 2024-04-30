@@ -29,5 +29,6 @@ external:
   pam-ad-api.url: http://localhost:9934
   kandidatliste-api.url: http://localhost:8766/rekrutteringsbistand-kandidat-api/rest/veileder/stilling
 
-rekrutteringsbistand.stilling.indekser.uri: uriTilStillingIndekser
-vis-stilling.uri: uriTilVisStilling
+rekrutteringsbistand.stilling.indekser.azp-name: local:toi:stilling-indekser
+vis-stilling.azp-name: local:toi:vis-stilling
+kandidatvarsel.azp-name: local:toi:kandidatvarsel

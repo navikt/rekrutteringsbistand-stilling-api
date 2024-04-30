@@ -60,9 +60,11 @@ spec:
   env:
     - name: SPRING_PROFILES_ACTIVE
       value: prod
-    - name: VIS_STILLING_URI
+    - name: VIS_STILLING_AZP_NAME
       value: "prod-gcp:arbeidsgiver:vis-stilling"
-    - name: REKRUTTERINGSBISTAND_STILLING_INDEKSER_URI
+    - name: KANDIDATVARSEL_AZP_NAME
+      value: "prod-gcp:toi:rekrutteringsbistand-kandidatvarsel-api"
+    - name: REKRUTTERINGSBISTAND_STILLING_INDEKSER_AZP_NAME
       value: "prod-gcp:toi:rekrutteringsbistand-stilling-indekser"
     - name: KAFKA_RAPID_TOPIC
       value: toi.rapid-1

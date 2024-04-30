@@ -8,25 +8,32 @@ const val azureAdIssuer = "azuread"
 
 @Component
 class AuthorizedPartyUtils(
-        private val contextHolder: TokenValidationContextHolder,
+    private val contextHolder: TokenValidationContextHolder,
 ) {
-    private val authorizedPartyUriClaim = "azp_name"
+    private val authorizedPartyNameClaim = "azp_name"
 
-    @Value("\${rekrutteringsbistand.stilling.indekser.uri}")
-    private val stillingIndekserUri: String = ""
+    @Value("\${rekrutteringsbistand.stilling.indekser.azp-name}")
+    private val stillingIndekserAzpName: String = ""
 
-    @Value("\${vis-stilling.uri}")
-    private val visStillingUri: String = ""
+    @Value("\${vis-stilling.azp-name}")
+    private val visStillingAzpName: String = ""
+
+    @Value("\${kandidatvarsel.azp-name}")
+    private val kandidatvarselAzpName: String = ""
 
     fun kallKommerFraStillingIndekser(): Boolean {
-        return uriTilKallendeApp() == stillingIndekserUri
+        return authorizedPartyName() == stillingIndekserAzpName
     }
 
     fun kallKommerFraVisStilling(): Boolean {
-        return uriTilKallendeApp() == visStillingUri
+        return authorizedPartyName() == visStillingAzpName
     }
 
-    private fun uriTilKallendeApp(): String {
-        return contextHolder.tokenValidationContext.getClaims(azureAdIssuer).getStringClaim(authorizedPartyUriClaim)
+    fun kallKommerFraKandidatvarsel(): Boolean {
+        return authorizedPartyName() == kandidatvarselAzpName
+    }
+
+    private fun authorizedPartyName(): String {
+        return contextHolder.tokenValidationContext.getClaims(azureAdIssuer).getStringClaim(authorizedPartyNameClaim)
     }
 }
