@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component
 @Component
 class MockLogin(private val mockOauth2Server: MockOAuth2Server) {
 
-    fun hentAzureAdVeilederToken(): String {
+    fun hentAzureAdVeilederToken(expiry: Long = 3600, audience: String = "default"): String {
         return mockOauth2Server.issueToken(
             issuerId = azureAdIssuer,
             subject = "brukes-ikke",
@@ -21,7 +21,9 @@ class MockLogin(private val mockOauth2Server: MockOAuth2Server) {
                 "unique_name" to "Clark.Kent@nav.no",
                 "NAVident" to "C12345",
                 "name" to "Clark Kent"
-            )
+            ),
+            expiry = expiry,
+            audience = audience
         ).serialize()
     }
 
