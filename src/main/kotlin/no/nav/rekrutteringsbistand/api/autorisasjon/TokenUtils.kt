@@ -1,12 +1,20 @@
 package no.nav.rekrutteringsbistand.api.autorisasjon
 
+import no.nav.rekrutteringsbistand.api.support.secureLog
 import no.nav.security.token.support.core.context.TokenValidationContextHolder
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
+import org.springframework.web.client.HttpClientErrorException
 
 @Component
 class TokenUtils(
     private val contextHolder: TokenValidationContextHolder,
     private val azureKlient: AzureKlient,
+    @Value("\${ad.groups.jobbsøkerrettet}") private val adGroupJobbsøkerrettet: String,
+    @Value("\${ad.groups.arbeidsgiverrettet}") private val adGroupArbeidsgiverrettet: String,
+    @Value("\${ad.groups.utvikler}") private val adGroupUtvikler: String,
 ) {
     companion object {
         const val ISSUER_AZUREAD = "azuread"
@@ -18,9 +26,17 @@ class TokenUtils(
         return claims.run {
             InnloggetVeileder(
                 displayName = getStringClaim("name"),
-                navIdent = getStringClaim("NAVident")
+                navIdent = getStringClaim("NAVident"),
+                roller = getAsList("groups").mapNotNull { it.tilRolle() }
             )
         }
+    }
+
+    private fun String.tilRolle() = when(this) {
+        adGroupJobbsøkerrettet -> Rolle.JOBBSØKERRETTET
+        adGroupArbeidsgiverrettet -> Rolle.ARBEIDSGIVERRETTET
+        adGroupUtvikler -> Rolle.UTVIKLER
+        else -> null
     }
 
     fun hentNavIdent(): String {
@@ -37,7 +53,22 @@ class TokenUtils(
     fun hentSystemToken(scope: String): String = azureKlient.hentSystemToken(scope)
 }
 
+enum class Rolle {
+    JOBBSØKERRETTET,
+    ARBEIDSGIVERRETTET,
+    UTVIKLER
+}
+
 data class InnloggetVeileder(
-        val displayName: String,
-        val navIdent: String
-)
+    val displayName: String,
+    val navIdent: String,
+    val roller: List<Rolle>
+) {
+    fun validerMinstEnAvRollene(vararg potensielleRoller: Rolle) {
+        if (Rolle.UTVIKLER in roller || potensielleRoller.any { it in roller }) {
+            return
+        }
+        secureLog.info("403 $navIdent med roller $roller har ikke tilgang til funksjon som krever $potensielleRoller")
+        throw HttpClientErrorException.create("Har roller $roller, trenger minst en av ${potensielleRoller.toList()}", HttpStatus.FORBIDDEN, "Forbidden", HttpHeaders(),byteArrayOf(),null)
+    }
+}
