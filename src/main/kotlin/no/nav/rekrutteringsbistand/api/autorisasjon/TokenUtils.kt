@@ -65,10 +65,18 @@ data class InnloggetVeileder(
     val roller: List<Rolle>
 ) {
     fun validerMinstEnAvRollene(vararg potensielleRoller: Rolle) {
-        if (Rolle.UTVIKLER in roller || potensielleRoller.any { it in roller }) {
+        if ((potensielleRoller.toList() + Rolle.UTVIKLER).any { it in roller }) {
             return
         }
-        secureLog.info("403 $navIdent med roller $roller har ikke tilgang til funksjon som krever $potensielleRoller")
+        secureLog.info("403 $navIdent med roller $roller har ikke tilgang til funksjon som krever $potensielleRoller ${hentStackTrace()}")
         throw HttpClientErrorException.create("Har roller $roller, trenger minst en av ${potensielleRoller.toList()}", HttpStatus.FORBIDDEN, "Forbidden", HttpHeaders(),byteArrayOf(),null)
     }
 }
+
+private fun hentStackTrace() = Thread.currentThread()
+    .stackTrace
+    .drop(2)
+    .filter { it.className.startsWith("no.nav") }
+    .joinToString("\n") { element ->
+        "${element.className}.${element.methodName}(${element.fileName}:${element.lineNumber})"
+    }

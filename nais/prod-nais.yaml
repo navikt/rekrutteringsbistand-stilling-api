@@ -77,3 +77,9 @@ spec:
       value: rekrutteringsbistand-stilling-rapidconsumer-2
     - name: KAFKA_RESET_POLICY
       value: "earliest"
+    - name: AD_GRUPPE_JOBBSOKERRETTET
+      value: "66b70a6a-3d05-47b3-8b5a-47c681dcd1d5"
+    - name: AD_GRUPPE_ARBEIDSGIVERRETTET
+      value: "46c8e3b2-0469-4740-983f-d8cd2b6e4fee"
+    - name: AD_GRUPPE_UTVIKLER
+      value: "41080368-439f-4128-858a-afbef876431e"
