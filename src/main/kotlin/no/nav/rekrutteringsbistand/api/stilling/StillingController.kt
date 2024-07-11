@@ -9,14 +9,22 @@ import org.springframework.http.ResponseEntity.notFound
 import org.springframework.http.ResponseEntity.ok
 import org.springframework.web.bind.annotation.*
 import jakarta.servlet.http.HttpServletRequest
+import no.nav.rekrutteringsbistand.api.autorisasjon.Rolle
+import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
+import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingskategori
 
 
 @RestController
 @Protected
-class StillingController(val stillingService: StillingService) {
+class StillingController(private val stillingService: StillingService, private val tokenUtils: TokenUtils) {
 
     @PostMapping("/rekrutteringsbistandstilling")
     fun opprettStilling(@RequestBody stilling: OpprettRekrutteringsbistandstillingDto): ResponseEntity<RekrutteringsbistandStilling> {
+        if(stilling.kategori==Stillingskategori.FORMIDLING) {
+            tokenUtils.hentInnloggetVeileder().validerMinstEnAvRollene(Rolle.JOBBSØKERRETTET, Rolle.ARBEIDSGIVERRETTET)
+        } else {
+            tokenUtils.hentInnloggetVeileder().validerMinstEnAvRollene(Rolle.ARBEIDSGIVERRETTET)
+        }
         val opprettetStilling = stillingService.opprettNyStilling(stilling)
         return ok(opprettetStilling)
     }

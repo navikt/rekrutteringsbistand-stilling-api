@@ -2,6 +2,8 @@ package no.nav.rekrutteringsbistand.api
 
 import no.nav.rekrutteringsbistand.api.arbeidsplassen.OpprettStillingAdministrationDto
 import no.nav.rekrutteringsbistand.api.autorisasjon.InnloggetVeileder
+import no.nav.rekrutteringsbistand.api.autorisasjon.Rolle
+import no.nav.rekrutteringsbistand.api.autorisasjon.TestRolle
 import no.nav.rekrutteringsbistand.api.stilling.*
 import no.nav.rekrutteringsbistand.api.stillingsinfo.*
 import java.time.LocalDateTime
@@ -9,7 +11,7 @@ import java.util.*
 
 object Testdata {
 
-    val enVeileder = InnloggetVeileder("Clark Kent", "C12345")
+    val enVeileder = InnloggetVeileder("Clark Kent", "C12345", listOf(Rolle.ARBEIDSGIVERRETTET))
 
     const val etNotat = "notatet"
 
@@ -54,9 +56,12 @@ object Testdata {
         ),
     )
 
-    val enOpprettRekrutteringsbistandstillingDto = OpprettRekrutteringsbistandstillingDto(
+    val enOpprettRekrutteringsbistandstillingDto =
+        enOpprettRekrutteringsbistandstillingDtoMedKategori(Stillingskategori.ARBEIDSTRENING)
+
+    fun enOpprettRekrutteringsbistandstillingDtoMedKategori(kategori: Stillingskategori) = OpprettRekrutteringsbistandstillingDto(
         stilling = enOpprettStillingDto,
-        kategori = Stillingskategori.ARBEIDSTRENING
+        kategori = kategori
     )
 
     val enOpprettetStilling = Stilling(

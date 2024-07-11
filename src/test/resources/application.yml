@@ -1,1 +1,6 @@
 spring.profiles.include: test,default
+ad:
+  groups:
+    jobbsøkerrettet: 0dba8374-bf36-4d89-bbba-662447d57b94
+    arbeidsgiverrettet: 52bc2af7-38d1-468b-b68d-0f3a4de45af2
+    utvikler: a1749d9a-52e0-4116-bb9f-935c38f6c74a

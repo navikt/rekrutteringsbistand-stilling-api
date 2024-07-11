@@ -15,3 +15,8 @@ no.nav.security.jwt:
   issuer.azuread:
     discoveryurl: ${AZURE_APP_WELL_KNOWN_URL}
     accepted_audience: ${AZURE_APP_CLIENT_ID}
+ad:
+  groups:
+    jobbsøkerrettet: ${AD_GRUPPE_JOBBSOKERRETTET}
+    arbeidsgiverrettet: ${AD_GRUPPE_ARBEIDSGIVERRETTET}
+    utvikler: ${AD_GRUPPE_UTVIKLER}
