@@ -1,27 +1,28 @@
 package no.nav.rekrutteringsbistand.api.autorisasjon
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.github.tomakehurst.wiremock.WireMockServer
+import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.options
-import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.whenever
 import io.ktor.http.*
 import io.ktor.utils.io.core.*
 import no.nav.rekrutteringsbistand.api.OppdaterRekrutteringsbistandStillingDto
-import no.nav.rekrutteringsbistand.api.RekrutteringsbistandStilling
+import no.nav.rekrutteringsbistand.api.TestRepository
 import no.nav.rekrutteringsbistand.api.Testdata
-import no.nav.rekrutteringsbistand.api.arbeidsplassen.ArbeidsplassenKlient
-import no.nav.rekrutteringsbistand.api.arbeidsplassen.OpprettStillingDto
-import no.nav.rekrutteringsbistand.api.arbeidsplassen.ProxyTilArbeidsplassen
 import no.nav.rekrutteringsbistand.api.autorisasjon.StatusType.*
 import no.nav.rekrutteringsbistand.api.config.MockLogin
 import no.nav.rekrutteringsbistand.api.config.arbeidsgiverrettet
 import no.nav.rekrutteringsbistand.api.config.jobbsøkerrettet
 import no.nav.rekrutteringsbistand.api.config.utvikler
 import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteKlient
+import no.nav.rekrutteringsbistand.api.standardsøk.LagreStandardsøkDto
+import no.nav.rekrutteringsbistand.api.standardsøk.StandardsøkRepository
+import no.nav.rekrutteringsbistand.api.stilling.Page
 import no.nav.rekrutteringsbistand.api.stilling.Stilling
-import no.nav.rekrutteringsbistand.api.stilling.StillingService
 import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoInboundDto
-import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoRepository
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingskategori
 import no.nav.rekrutteringsbistand.api.stillingsinfo.indekser.BulkStillingsinfoInboundDto
 import no.nav.rekrutteringsbistand.api.support.toMultiValueMap
@@ -30,25 +31,32 @@ import org.assertj.core.api.Assertions
 import org.junit.Test
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import org.junit.runner.RunWith
-import org.mockito.ArgumentMatchers.*
+import org.mockito.ArgumentMatchers.anyString
+import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.boot.test.web.server.LocalServerPort
-import org.springframework.http.HttpEntity
+import org.springframework.http.*
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.HttpMethod
-import org.springframework.http.ResponseEntity
 import org.springframework.test.context.junit4.SpringRunner
 import org.springframework.test.web.reactive.server.StatusAssertions
 import org.springframework.test.web.reactive.server.WebTestClient
 import java.util.*
+
+private val objectMapper: ObjectMapper =
+    ObjectMapper().registerModule(JavaTimeModule()).disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+
+private const val navIdent = "C12345"
 
 @RunWith(SpringRunner::class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -66,16 +74,16 @@ class TilgangTest {
     private lateinit var webClient: WebTestClient
 
     @MockBean
-    private lateinit var arbeidsplassenKlient: ArbeidsplassenKlient
-
-    @MockBean
     private lateinit var kandidatlisteKlient: KandidatlisteKlient
 
     @MockBean
     private lateinit var azureKlient: AzureKlient
 
-    @MockBean
-    private lateinit var stillingService: StillingService
+    @Autowired
+    private lateinit var repository: TestRepository
+
+    @Autowired
+    private lateinit var standardsøkRepository: StandardsøkRepository
 
     private lateinit var stubber: Stubber
 
@@ -85,7 +93,14 @@ class TilgangTest {
 
     @BeforeAll
     fun setup() {
-        stubber = Stubber(arbeidsplassenKlient, kandidatlisteKlient, azureKlient)
+        stubber = Stubber(kandidatlisteKlient, azureKlient, standardsøkRepository)
+    }
+
+    @BeforeEach
+    fun preTest() {
+        stubber.resetAll()
+        Mockito.reset(kandidatlisteKlient, azureKlient)
+        repository.slettAlt()
     }
 
     @AfterAll
@@ -141,7 +156,7 @@ class TilgangTest {
                 subject = "brukes-ikke",
                 claims = mapOf(
                     "unique_name" to "Clark.Kent@nav.no",
-                    "NAVident" to "C12345",
+                    "NAVident" to navIdent,
                     "name" to "Clark Kent"
                 ),
                 audience = "default"
@@ -160,23 +175,23 @@ class TilgangTest {
             stilling::opprettJobbmesse to Varianter(forbidden, ok, ok, forbidden),
             stilling::opprettFormidling to Varianter(ok, ok, ok, forbidden),
             stilling::oppdaterStilling to Varianter(forbidden, ok, ok, forbidden),
-            stilling::kopierStilling to Uimplementert,
-            stilling::slettStilling to Uimplementert,
-            stilling::hentStillingMedUuid to Uimplementert,
-            stilling::hentStillingMedAnnonsenr to Uimplementert,
-            stilling::hentStillingForPersonBruker to Uimplementert,
-            stillingsInfo::overtaEierskapForEksternStillingOgKandidatliste to Uimplementert,
-            indekser::hentStillingsinfoBulk to Uimplementert,
-            innloggetVeileder::hentInnloggetVeileder to Uimplementert,
-            arbeidsplassenProxy::kategorier to Uimplementert,
-            arbeidsplassenProxy::geografiPostnr to Uimplementert,
-            arbeidsplassenProxy::geografiKommuner to Uimplementert,
-            arbeidsplassenProxy::geografiFylker to Uimplementert,
-            arbeidsplassenProxy::geografiLand to Uimplementert,
-            arbeidsplassenProxy::getSøk to Uimplementert,
-            arbeidsplassenProxy::postSøk to Uimplementert,
-            standardSøk::hentStandardsøk to Uimplementert,
-            standardSøk::upsertStandardsøk to Uimplementert
+            stilling::kopierStilling to Varianter(forbidden, ok, ok, forbidden),
+            stilling::slettStilling to Varianter(forbidden, ok, ok, forbidden),
+            stilling::hentStillingMedUuid to Varianter(ok, ok, ok, forbidden),
+            stilling::hentStillingMedAnnonsenr to Varianter(ok, ok, ok, forbidden),
+            stilling::hentStillingForPersonBruker to Varianter(forbidden, forbidden, forbidden, forbidden),
+            stillingsInfo::overtaEierskapForEksternStillingOgKandidatliste to Varianter(forbidden, ok, forbidden, forbidden),
+            indekser::hentStillingsinfoBulk to Varianter(forbidden, forbidden, forbidden, forbidden),
+            innloggetVeileder::hentInnloggetVeileder to Varianter(ok, ok, ok, ok),
+            arbeidsplassenProxy::kategorier to Varianter(ok, ok, ok, forbidden),
+            arbeidsplassenProxy::geografiPostnr to Varianter(ok, ok, ok, forbidden),
+            arbeidsplassenProxy::geografiKommuner to Varianter(ok, ok, ok, forbidden),
+            arbeidsplassenProxy::geografiFylker to Varianter(ok, ok, ok, forbidden),
+            arbeidsplassenProxy::geografiLand to Varianter(ok, ok, ok, forbidden),
+            arbeidsplassenProxy::getSøk to Varianter(ok, ok, ok, forbidden),
+            arbeidsplassenProxy::postSøk to Varianter(ok, ok, ok, forbidden),
+            standardSøk::hentStandardsøk to Varianter(ok, ok, ok, forbidden),
+            standardSøk::upsertStandardsøk to Varianter(ok, ok, ok, forbidden)
         ).flatMap { (kall, svar) ->
             listOf(
                 Arguments.of(kall.name, TestRolle.Jobbsøkerrettet, svar.jobbsøkerrettet, kall()),
@@ -215,7 +230,6 @@ enum class StatusType(val assertion: StatusAssertions.() -> Unit) {
     forbidden(StatusAssertions::isForbidden),
     no_content(StatusAssertions::isNoContent),
     created(StatusAssertions::isCreated),
-    todo({TODO()})
 }
 
 class Varianter(
@@ -225,7 +239,6 @@ class Varianter(
     val ingen: StatusType
 )
 
-val Uimplementert = Varianter(todo,todo,todo,todo)
 
 private class Kall(private val webClient: WebTestClient, private val mockLogin: MockLogin, stubber: Stubber) {
 
@@ -262,6 +275,8 @@ private class Kall(private val webClient: WebTestClient, private val mockLogin: 
         val oppdaterStilling: EndepunktHandler = { rolle ->
             val stilling = Testdata.enStilling
             val stillingsInfo = Testdata.enStillingsinfo
+            stubber.mockOppdaterStilling(stilling)
+            stubber.mockHentStilling(stilling)
             put(
                 stillingPath,
                 rolle,
@@ -270,6 +285,8 @@ private class Kall(private val webClient: WebTestClient, private val mockLogin: 
         }
         val kopierStilling: EndepunktHandler = { rolle ->
             val stilling = Testdata.enStilling
+            stubber.mockHentStilling(stilling)
+            stubber.mockArbeidsplassenKlientOpprettStilling()
             post(
                 "$stillingPath/kopier/${stilling.uuid}",
                 rolle
@@ -277,6 +294,7 @@ private class Kall(private val webClient: WebTestClient, private val mockLogin: 
         }
         val slettStilling: EndepunktHandler = { rolle ->
             val stilling = Testdata.enStilling
+            stubber.mockSlettStilling(stilling)
             delete(
                 "$stillingPath/${stilling.uuid}",
                 rolle
@@ -284,21 +302,23 @@ private class Kall(private val webClient: WebTestClient, private val mockLogin: 
         }
         val hentStillingMedUuid: EndepunktHandler = { rolle ->
             val stilling = Testdata.enStilling
+            stubber.mockHentStilling(stilling)
             get(
                 "$stillingPath/${stilling.uuid}",
                 rolle
             )
         }
         val hentStillingMedAnnonsenr: EndepunktHandler = { rolle ->
+            stubber.mockHentStillingMedAnnonseNr()
             get(
-                "$stillingPath/annonsenr/PAM012345",
+                "$stillingPath/annonsenr/123456",
                 rolle
             )
         }
         val hentStillingForPersonBruker: EndepunktHandler = { rolle ->
             val stilling = Testdata.enStilling
             get(
-                "$stillingPath/ekstern/api/v1/stilling/${stilling.uuid}",
+                "rekrutteringsbistand/ekstern/api/v1/stilling/${stilling.uuid}",
                 rolle
             )
         }
@@ -317,7 +337,8 @@ private class Kall(private val webClient: WebTestClient, private val mockLogin: 
 
         val overtaEierskapForEksternStillingOgKandidatliste: EndepunktHandler = { rolle ->
             val stilling = Testdata.enStilling
-            stubber.mockStilling(stilling)
+            stubber.mockHentStilling(stilling)
+            stubber.mockOppdaterStilling(stilling)
             put(
                 stillingInfoPath,
                 rolle,
@@ -354,6 +375,7 @@ private class Kall(private val webClient: WebTestClient, private val mockLogin: 
 
         val kategorier: EndepunktHandler = { rolle ->
             stubber.mockOboToken(mockLogin.hentAzureAdVeilederToken(roller = rolle.somListe()))
+            stubber.mockPAMAdGet("categories-with-altnames")
             get(
                 "$proxyPath/categories-with-altnames",
                 rolle
@@ -361,6 +383,7 @@ private class Kall(private val webClient: WebTestClient, private val mockLogin: 
         }
         val geografiPostnr: EndepunktHandler = { rolle ->
             stubber.mockOboToken(mockLogin.hentAzureAdVeilederToken(roller = rolle.somListe()))
+            stubber.mockPAMAdGet("geography/postdata")
             get(
                 "$geografiPath/postdata",
                 rolle
@@ -368,6 +391,7 @@ private class Kall(private val webClient: WebTestClient, private val mockLogin: 
         }
         val geografiKommuner: EndepunktHandler = { rolle ->
             stubber.mockOboToken(mockLogin.hentAzureAdVeilederToken(roller = rolle.somListe()))
+            stubber.mockPAMAdGet("geography/municipals")
             get(
                 "$geografiPath/municipals",
                 rolle
@@ -375,6 +399,7 @@ private class Kall(private val webClient: WebTestClient, private val mockLogin: 
         }
         val geografiFylker: EndepunktHandler = { rolle ->
             stubber.mockOboToken(mockLogin.hentAzureAdVeilederToken(roller = rolle.somListe()))
+            stubber.mockPAMAdGet("geography/counties")
             get(
                 "$geografiPath/counties",
                 rolle
@@ -382,6 +407,7 @@ private class Kall(private val webClient: WebTestClient, private val mockLogin: 
         }
         val geografiLand: EndepunktHandler = { rolle ->
             stubber.mockOboToken(mockLogin.hentAzureAdVeilederToken(roller = rolle.somListe()))
+            stubber.mockPAMAdGet("geography/countries")
             get(
                 "$geografiPath/countries",
                 rolle
@@ -389,16 +415,18 @@ private class Kall(private val webClient: WebTestClient, private val mockLogin: 
         }
         val getSøk: EndepunktHandler = { rolle ->
             stubber.mockOboToken(mockLogin.hentAzureAdVeilederToken(roller = rolle.somListe()))
+            stubber.mockArbeidsplassenGetSearch()
             get(
                 searchPath,
                 rolle
             )
         }
         val postSøk: EndepunktHandler = { rolle ->
+            stubber.mockArbeidsplassenPostSearch()
             post(
                 searchPath,
                 rolle,
-                ""
+                "body"
             )
         }
     }
@@ -407,12 +435,14 @@ private class Kall(private val webClient: WebTestClient, private val mockLogin: 
         private val standardsokPath = "/standardsok"
 
         val hentStandardsøk: EndepunktHandler = { rolle ->
+            stubber.lagreStandardSøk()
             get(
                 standardsokPath,
                 rolle
             )
         }
         val upsertStandardsøk: EndepunktHandler = { rolle ->
+            stubber.mockPAMAdGet("def")
             put(
                 standardsokPath,
                 rolle,
@@ -430,42 +460,131 @@ private class Kall(private val webClient: WebTestClient, private val mockLogin: 
 }
 
 private class Stubber(
-    private val arbeidsplassenKlient: ArbeidsplassenKlient,
     private val kandidatlisteKlient: KandidatlisteKlient,
-    private val azureKlient: AzureKlient
+    private val azureKlient: AzureKlient,
+    private val standardsøkRepository: StandardsøkRepository
 ) {
 
-    private val wireMock: WireMockServer = WireMockServer(options().port(9089))
-    private val kandidatSokWireMock: WireMockServer = WireMockServer(options().port(9090))
+    private val wireMock: WireMockServer = WireMockServer(options().port(9934))
 
     init {
         wireMock.start()
-        kandidatSokWireMock.start()
     }
 
     fun close() {
         wireMock.stop()
-        kandidatSokWireMock.stop()
     }
 
     fun resetAll() {
         wireMock.resetAll()
-        kandidatSokWireMock.resetAll()
     }
 
     fun mockArbeidsplassenKlientOpprettStilling() {
-        whenever(arbeidsplassenKlient.opprettStilling(any<OpprettStillingDto>())).thenReturn(Testdata.enStilling)
+        wireMock.stubFor(
+            WireMock.post(WireMock.urlPathMatching("/api/v1/ads*"))
+                .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
+                .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE)).withHeader(AUTHORIZATION, WireMock.matching("Bearer .*"))
+                .willReturn(
+                    WireMock.aResponse().withStatus(200).withHeader(HttpHeaders.CONNECTION, "close") // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBody(objectMapper.writeValueAsString(Testdata.enOpprettetStilling))
+                )
+        )
     }
 
-    fun mockKandidatlisteKlientSendStillingOppdatert() {
-        whenever(kandidatlisteKlient.sendStillingOppdatert(any<RekrutteringsbistandStilling>())).thenReturn(ResponseEntity.of(Optional.empty()))
+    fun mockHentStilling(stilling: Stilling) {
+        wireMock.stubFor(
+            WireMock.get(WireMock.urlPathMatching("/b2b/api/v1/ads/${stilling.uuid}"))
+                .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
+                .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE)).withHeader(AUTHORIZATION, WireMock.matching("Bearer .*"))
+                .willReturn(
+                    WireMock.aResponse().withStatus(200).withHeader(HttpHeaders.CONNECTION, "close") // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBody(objectMapper.writeValueAsString(stilling))
+                )
+        )
     }
 
-    fun mockStilling(stilling: Stilling) {
-        whenever(arbeidsplassenKlient.hentStilling(eq(stilling.uuid), anyBoolean())).thenReturn(stilling)
+    fun mockHentStillingMedAnnonseNr() {
+        wireMock.stubFor(
+            WireMock.get(WireMock.urlPathMatching("/b2b/api/v1/ads"))
+                .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
+                .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE)).withHeader(AUTHORIZATION, WireMock.matching("Bearer .*"))
+                .willReturn(
+                    WireMock.aResponse().withStatus(200).withHeader(HttpHeaders.CONNECTION, "close") // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBody(objectMapper.writeValueAsString(Page(content = listOf(Testdata.enStilling), totalPages = 1, totalElements = 1)))
+                )
+        )
+    }
+
+    fun mockOppdaterStilling(stilling: Stilling) {
+        wireMock.stubFor(
+            WireMock.put(WireMock.urlPathMatching("/api/v1/ads/${stilling.uuid}"))
+                .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
+                .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE)).withHeader(AUTHORIZATION, WireMock.matching("Bearer .*"))
+                .willReturn(
+                    WireMock.aResponse().withStatus(200).withHeader(HttpHeaders.CONNECTION, "close") // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBody(objectMapper.writeValueAsString(stilling))
+                )
+        )
+    }
+
+    fun mockSlettStilling(stilling: Stilling) {
+        wireMock.stubFor(
+            WireMock.delete(WireMock.urlPathMatching("/api/v1/ads/${stilling.uuid}"))
+                .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
+                .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE)).withHeader(AUTHORIZATION, WireMock.matching("Bearer .*"))
+                .willReturn(
+                    WireMock.aResponse().withStatus(200).withHeader(HttpHeaders.CONNECTION, "close") // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBody(objectMapper.writeValueAsString(stilling))
+                )
+        )
     }
 
     fun mockOboToken(token: String) {
         whenever(azureKlient.hentOBOToken(anyString(), anyString(), anyString())).thenReturn(token)
+    }
+
+    fun mockArbeidsplassenGetSearch() {
+        wireMock.stubFor(
+            WireMock.request(HttpMethod.GET.name(), WireMock.urlPathMatching("/search-api/underenhet/_search"))
+                .willReturn(
+                    WireMock.aResponse().withStatus(200)
+                        .withHeader(HttpHeaders.CONNECTION, "close")
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBody("")
+                )
+        )
+    }
+
+    fun mockArbeidsplassenPostSearch() {
+        wireMock.stubFor(
+            WireMock.request(HttpMethod.POST.name(), WireMock.urlPathMatching("/search-api/underenhet/_search"))
+                .willReturn(
+                    WireMock.aResponse().withStatus(200)
+                        .withHeader(HttpHeaders.CONNECTION, "close")
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBody("")
+                )
+        )
+    }
+
+    fun mockPAMAdGet(endPath: String) {
+        wireMock.stubFor(
+            WireMock.request(HttpMethod.GET.name(), WireMock.urlPathMatching("/api/v1/$endPath"))
+                .willReturn(
+                    WireMock.aResponse().withStatus(200)
+                        .withHeader(HttpHeaders.CONNECTION, "close")
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBody("")
+                )
+        )
+    }
+
+    fun lagreStandardSøk() {
+        standardsøkRepository.oppdaterStandardsøk(LagreStandardsøkDto("søk"), navIdent)
     }
 }
