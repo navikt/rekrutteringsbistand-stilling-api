@@ -31,18 +31,21 @@ class StillingController(private val stillingService: StillingService, private v
 
     @PostMapping("/rekrutteringsbistandstilling/kopier/{stillingsId}")
     fun kopierStilling(@PathVariable stillingsId: String): ResponseEntity<RekrutteringsbistandStilling> {
+        tokenUtils.hentInnloggetVeileder().validerMinstEnAvRollene(Rolle.ARBEIDSGIVERRETTET)
         val kopiertStilling = stillingService.kopierStilling(stillingsId)
         return ok(kopiertStilling)
     }
 
     @PutMapping("/rekrutteringsbistandstilling")
     fun oppdaterStilling(request: HttpServletRequest, @RequestBody rekrutteringsbistandStillingDto: OppdaterRekrutteringsbistandStillingDto): ResponseEntity<OppdaterRekrutteringsbistandStillingDto> {
+        tokenUtils.hentInnloggetVeileder().validerMinstEnAvRollene(Rolle.ARBEIDSGIVERRETTET)
         val oppdatertStilling = stillingService.oppdaterRekrutteringsbistandStilling(rekrutteringsbistandStillingDto, request.queryString)
         return ok(oppdatertStilling)
     }
 
     @DeleteMapping("/rekrutteringsbistandstilling/{stillingsId}")
     fun slettRekrutteringsbistandStilling(@PathVariable(value = "stillingsId") stillingsId: String): ResponseEntity<Stilling> {
+        tokenUtils.hentInnloggetVeileder().validerMinstEnAvRollene(Rolle.ARBEIDSGIVERRETTET)
         val slettetStilling = stillingService.slettRekrutteringsbistandStilling(stillingsId)
         return ok(slettetStilling)
     }

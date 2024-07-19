@@ -177,21 +177,21 @@ class TilgangTest {
             stilling::oppdaterStilling to Varianter(forbidden, ok, ok, forbidden),
             stilling::kopierStilling to Varianter(forbidden, ok, ok, forbidden),
             stilling::slettStilling to Varianter(forbidden, ok, ok, forbidden),
-            stilling::hentStillingMedUuid to Varianter(ok, ok, ok, forbidden),
-            stilling::hentStillingMedAnnonsenr to Varianter(ok, ok, ok, forbidden),
-            stilling::hentStillingForPersonBruker to Varianter(forbidden, forbidden, forbidden, forbidden),
-            stillingsInfo::overtaEierskapForEksternStillingOgKandidatliste to Varianter(forbidden, ok, forbidden, forbidden),
-            indekser::hentStillingsinfoBulk to Varianter(forbidden, forbidden, forbidden, forbidden),
+            stilling::hentStillingMedUuid to Varianter(ok, ok, ok, ok),
+            stilling::hentStillingMedAnnonsenr to Varianter(ok, ok, ok, ok),
+            stilling::hentStillingForPersonBruker to Varianter(unauthorized, unauthorized, unauthorized, unauthorized),   //Hvis alt er forbidden kan testen liksågodt endres til dette
+            stillingsInfo::overtaEierskapForEksternStillingOgKandidatliste to Varianter(forbidden, ok, ok, forbidden),
+            indekser::hentStillingsinfoBulk to Varianter(unauthorized, unauthorized, unauthorized, unauthorized),   //Hvis alt er forbidden kan testen liksågodt endres til dette
             innloggetVeileder::hentInnloggetVeileder to Varianter(ok, ok, ok, ok),
-            arbeidsplassenProxy::kategorier to Varianter(ok, ok, ok, forbidden),
-            arbeidsplassenProxy::geografiPostnr to Varianter(ok, ok, ok, forbidden),
-            arbeidsplassenProxy::geografiKommuner to Varianter(ok, ok, ok, forbidden),
-            arbeidsplassenProxy::geografiFylker to Varianter(ok, ok, ok, forbidden),
-            arbeidsplassenProxy::geografiLand to Varianter(ok, ok, ok, forbidden),
-            arbeidsplassenProxy::getSøk to Varianter(ok, ok, ok, forbidden),
-            arbeidsplassenProxy::postSøk to Varianter(ok, ok, ok, forbidden),
-            standardSøk::hentStandardsøk to Varianter(ok, ok, ok, forbidden),
-            standardSøk::upsertStandardsøk to Varianter(ok, ok, ok, forbidden)
+            arbeidsplassenProxy::kategorier to Varianter(ok, ok, ok, ok),
+            arbeidsplassenProxy::geografiPostnr to Varianter(ok, ok, ok, ok),
+            arbeidsplassenProxy::geografiKommuner to Varianter(ok, ok, ok, ok),
+            arbeidsplassenProxy::geografiFylker to Varianter(ok, ok, ok, ok),
+            arbeidsplassenProxy::geografiLand to Varianter(ok, ok, ok, ok),
+            arbeidsplassenProxy::getSøk to Varianter(ok, ok, ok, ok),
+            arbeidsplassenProxy::postSøk to Varianter(ok, ok, ok, ok),
+            standardSøk::hentStandardsøk to Varianter(ok, ok, ok, ok),
+            standardSøk::upsertStandardsøk to Varianter(ok, ok, ok, ok)
         ).flatMap { (kall, svar) ->
             listOf(
                 Arguments.of(kall.name, TestRolle.Jobbsøkerrettet, svar.jobbsøkerrettet, kall()),
@@ -227,6 +227,7 @@ typealias EndepunktHandler = (TestRolle) -> StatusAssertions
 
 enum class StatusType(val assertion: StatusAssertions.() -> Unit) {
     ok(StatusAssertions::isOk),
+    unauthorized(StatusAssertions::isUnauthorized),
     forbidden(StatusAssertions::isForbidden),
     no_content(StatusAssertions::isNoContent),
     created(StatusAssertions::isCreated),
