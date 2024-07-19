@@ -191,7 +191,7 @@ class TilgangTest {
             arbeidsplassenProxy::getSøk to Varianter(ok, ok, ok, ok),
             arbeidsplassenProxy::postSøk to Varianter(ok, ok, ok, ok),
             standardSøk::hentStandardsøk to Varianter(ok, ok, ok, ok),
-            standardSøk::upsertStandardsøk to Varianter(ok, ok, ok, ok)
+            standardSøk::upsertStandardsøk to Varianter(created, created, created, created)
         ).flatMap { (kall, svar) ->
             listOf(
                 Arguments.of(kall.name, TestRolle.Jobbsøkerrettet, svar.jobbsøkerrettet, kall()),
@@ -447,7 +447,7 @@ private class Kall(private val webClient: WebTestClient, private val mockLogin: 
             put(
                 standardsokPath,
                 rolle,
-                ""
+                LagreStandardsøkDto("")
             )
         }
     }
