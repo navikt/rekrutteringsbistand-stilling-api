@@ -175,6 +175,8 @@ class TilgangTest {
             stilling::opprettJobbmesse to Varianter(forbidden, ok, ok, forbidden),
             stilling::opprettFormidling to Varianter(ok, ok, ok, forbidden),
             stilling::oppdaterStilling to Varianter(forbidden, ok, ok, forbidden),
+            stilling::oppdaterJobbmesse to Varianter(forbidden, ok, ok, forbidden),
+            stilling::oppdaterFormidling to Varianter(ok, ok, ok, forbidden),
             stilling::kopierStilling to Varianter(forbidden, ok, ok, forbidden),
             stilling::slettStilling to Varianter(forbidden, ok, ok, forbidden),
             stilling::hentStillingMedUuid to Varianter(ok, ok, ok, ok),
@@ -273,17 +275,9 @@ private class Kall(private val webClient: WebTestClient, private val mockLogin: 
         val opprettStilling: EndepunktHandler = { rolle -> oppRettStillingKall(rolle, Stillingskategori.STILLING) }
         val opprettJobbmesse: EndepunktHandler = { rolle -> oppRettStillingKall(rolle, Stillingskategori.JOBBMESSE) }
         val opprettFormidling: EndepunktHandler = { rolle -> oppRettStillingKall(rolle, Stillingskategori.FORMIDLING) }
-        val oppdaterStilling: EndepunktHandler = { rolle ->
-            val stilling = Testdata.enStilling
-            val stillingsInfo = Testdata.enStillingsinfo
-            stubber.mockOppdaterStilling(stilling)
-            stubber.mockHentStilling(stilling)
-            put(
-                stillingPath,
-                rolle,
-                OppdaterRekrutteringsbistandStillingDto(stillingsInfo.stillingsinfoid.asString(), stilling)
-            )
-        }
+        val oppdaterStilling: EndepunktHandler = { rolle -> oppdaterStilling(rolle, Stillingskategori.STILLING) }
+        val oppdaterJobbmesse: EndepunktHandler = { rolle -> oppdaterStilling(rolle, Stillingskategori.JOBBMESSE) }
+        val oppdaterFormidling: EndepunktHandler = { rolle -> oppdaterStilling(rolle, Stillingskategori.FORMIDLING) }
         val kopierStilling: EndepunktHandler = { rolle ->
             val stilling = Testdata.enStilling
             stubber.mockHentStilling(stilling)
@@ -330,6 +324,18 @@ private class Kall(private val webClient: WebTestClient, private val mockLogin: 
                 stillingPath,
                 rolle,
                 Testdata.enOpprettRekrutteringsbistandstillingDtoMedKategori(stillingskategori)
+            )
+        }
+
+        private fun oppdaterStilling(rolle: TestRolle, stillingskategori: Stillingskategori): StatusAssertions {
+            val stilling = Testdata.enStilling
+            val stillingsInfo = Testdata.enStillingsinfo.copy(stillingskategori = stillingskategori)
+            stubber.mockOppdaterStilling(stilling)
+            stubber.mockHentStilling(stilling)
+            return put(
+                stillingPath,
+                rolle,
+                OppdaterRekrutteringsbistandStillingDto(stillingsInfo.stillingsinfoid.asString(), stilling)
             )
         }
     }
