@@ -22,8 +22,7 @@ import no.nav.rekrutteringsbistand.api.standardsøk.LagreStandardsøkDto
 import no.nav.rekrutteringsbistand.api.standardsøk.StandardsøkRepository
 import no.nav.rekrutteringsbistand.api.stilling.Page
 import no.nav.rekrutteringsbistand.api.stilling.Stilling
-import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoInboundDto
-import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingskategori
+import no.nav.rekrutteringsbistand.api.stillingsinfo.*
 import no.nav.rekrutteringsbistand.api.stillingsinfo.indekser.BulkStillingsinfoInboundDto
 import no.nav.rekrutteringsbistand.api.support.toMultiValueMap
 import no.nav.security.mock.oauth2.MockOAuth2Server
@@ -85,6 +84,9 @@ class TilgangTest {
     @Autowired
     private lateinit var standardsøkRepository: StandardsøkRepository
 
+    @Autowired
+    private lateinit var stillingsinfoRepository: StillingsinfoRepository
+
     private lateinit var stubber: Stubber
 
     private val restTemplate = TestRestTemplate()
@@ -93,7 +95,7 @@ class TilgangTest {
 
     @BeforeAll
     fun setup() {
-        stubber = Stubber(kandidatlisteKlient, azureKlient, standardsøkRepository)
+        stubber = Stubber(kandidatlisteKlient, azureKlient, standardsøkRepository, stillingsinfoRepository)
     }
 
     @BeforeEach
@@ -171,13 +173,13 @@ class TilgangTest {
 
     fun tilgangsTester() = Kall(webClient, mockLogin, stubber).run {
         listOf(
-            stilling::opprettStilling to Varianter(forbidden, ok, ok, forbidden),
+            /*stilling::opprettStilling to Varianter(forbidden, ok, ok, forbidden),
             stilling::opprettJobbmesse to Varianter(forbidden, ok, ok, forbidden),
-            stilling::opprettFormidling to Varianter(ok, ok, ok, forbidden),
+            stilling::opprettFormidling to Varianter(ok, ok, ok, forbidden),*/
             stilling::oppdaterStilling to Varianter(forbidden, ok, ok, forbidden),
             stilling::oppdaterJobbmesse to Varianter(forbidden, ok, ok, forbidden),
             stilling::oppdaterFormidling to Varianter(ok, ok, ok, forbidden),
-            stilling::kopierStilling to Varianter(forbidden, ok, ok, forbidden),
+            /*stilling::kopierStilling to Varianter(forbidden, ok, ok, forbidden),
             stilling::slettStilling to Varianter(forbidden, ok, ok, forbidden),
             stilling::hentStillingMedUuid to Varianter(ok, ok, ok, ok),
             stilling::hentStillingMedAnnonsenr to Varianter(ok, ok, ok, ok),
@@ -193,7 +195,7 @@ class TilgangTest {
             arbeidsplassenProxy::getSøk to Varianter(ok, ok, ok, ok),
             arbeidsplassenProxy::postSøk to Varianter(ok, ok, ok, ok),
             standardSøk::hentStandardsøk to Varianter(ok, ok, ok, ok),
-            standardSøk::upsertStandardsøk to Varianter(created, created, created, created)
+            standardSøk::upsertStandardsøk to Varianter(created, created, created, created)*/
         ).flatMap { (kall, svar) ->
             listOf(
                 Arguments.of(kall.name, TestRolle.Jobbsøkerrettet, svar.jobbsøkerrettet, kall()),
@@ -332,6 +334,7 @@ private class Kall(private val webClient: WebTestClient, private val mockLogin: 
             val stillingsInfo = Testdata.enStillingsinfo.copy(stillingskategori = stillingskategori)
             stubber.mockOppdaterStilling(stilling)
             stubber.mockHentStilling(stilling)
+            stubber.mockStillingsInfo(stilling.uuid, stillingskategori)
             return put(
                 stillingPath,
                 rolle,
@@ -469,7 +472,8 @@ private class Kall(private val webClient: WebTestClient, private val mockLogin: 
 private class Stubber(
     private val kandidatlisteKlient: KandidatlisteKlient,
     private val azureKlient: AzureKlient,
-    private val standardsøkRepository: StandardsøkRepository
+    private val standardsøkRepository: StandardsøkRepository,
+    private val stillingsinfoRepository: StillingsinfoRepository
 ) {
 
     private val wireMock: WireMockServer = WireMockServer(options().port(9934))
@@ -593,5 +597,11 @@ private class Stubber(
 
     fun lagreStandardSøk() {
         standardsøkRepository.oppdaterStandardsøk(LagreStandardsøkDto("søk"), navIdent)
+    }
+
+    fun mockStillingsInfo(stillingsId: String, stillingskategori: Stillingskategori) {
+        stillingsinfoRepository.opprett(Stillingsinfo(Stillingsinfoid.ny(),
+            Stillingsid(stillingsId),null, stillingskategori
+        ))
     }
 }

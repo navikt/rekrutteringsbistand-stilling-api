@@ -11,12 +11,15 @@ import org.springframework.web.bind.annotation.*
 import jakarta.servlet.http.HttpServletRequest
 import no.nav.rekrutteringsbistand.api.autorisasjon.Rolle
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
+import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsid
+import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsinfo
+import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoService
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingskategori
 
 
 @RestController
 @Protected
-class StillingController(private val stillingService: StillingService, private val tokenUtils: TokenUtils) {
+class StillingController(private val stillingsinfoService: StillingsinfoService, private val stillingService: StillingService, private val tokenUtils: TokenUtils) {
 
     @PostMapping("/rekrutteringsbistandstilling")
     fun opprettStilling(@RequestBody stilling: OpprettRekrutteringsbistandstillingDto): ResponseEntity<RekrutteringsbistandStilling> {
@@ -38,7 +41,14 @@ class StillingController(private val stillingService: StillingService, private v
 
     @PutMapping("/rekrutteringsbistandstilling")
     fun oppdaterStilling(request: HttpServletRequest, @RequestBody rekrutteringsbistandStillingDto: OppdaterRekrutteringsbistandStillingDto): ResponseEntity<OppdaterRekrutteringsbistandStillingDto> {
-        tokenUtils.hentInnloggetVeileder().validerMinstEnAvRollene(Rolle.ARBEIDSGIVERRETTET)
+        val stillingskategori = stillingsinfoService.hentForStilling(Stillingsid(rekrutteringsbistandStillingDto.stilling.uuid))
+            .map(Stillingsinfo::stillingskategori)
+            .getOrElse { Stillingskategori.STILLING }
+        if(stillingskategori==Stillingskategori.FORMIDLING) {
+            tokenUtils.hentInnloggetVeileder().validerMinstEnAvRollene(Rolle.JOBBSØKERRETTET, Rolle.ARBEIDSGIVERRETTET)
+        } else {
+            tokenUtils.hentInnloggetVeileder().validerMinstEnAvRollene(Rolle.ARBEIDSGIVERRETTET)
+        }
         val oppdatertStilling = stillingService.oppdaterRekrutteringsbistandStilling(rekrutteringsbistandStillingDto, request.queryString)
         return ok(oppdatertStilling)
     }
