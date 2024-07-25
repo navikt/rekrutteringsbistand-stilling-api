@@ -53,7 +53,6 @@ class StillingsinfoRepository(
     fun hentForStilling(stillingId: Stillingsid): Option<Stillingsinfo> {
         val list = hentForStillinger(listOf(stillingId))
         check(list.size <= 1) { "Antall stillingsinfo for stillingsid ${stillingId.asString()}: ${list.size}" }
-        log.error(list.joinToString { it.stillingskategori.toString() })
         return list.firstOrNull().toOption()
     }
 
