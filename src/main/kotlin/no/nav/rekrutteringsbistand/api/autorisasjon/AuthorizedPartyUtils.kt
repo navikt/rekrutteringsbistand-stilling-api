@@ -33,7 +33,7 @@ class AuthorizedPartyUtils(
         return authorizedPartyName() == kandidatvarselAzpName
     }
 
-    private fun authorizedPartyName(): String {
+    private fun authorizedPartyName(): String? {
         return contextHolder.tokenValidationContext.getClaims(azureAdIssuer).getStringClaim(authorizedPartyNameClaim)
     }
 }

@@ -1,6 +1,8 @@
 package no.nav.rekrutteringsbistand.api.stillingsinfo
 
 import no.nav.rekrutteringsbistand.AuditLogg
+import no.nav.rekrutteringsbistand.api.autorisasjon.Rolle
+import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
 import no.nav.rekrutteringsbistand.api.support.secureLog
 import no.nav.security.token.support.core.api.Protected
 import org.springframework.http.HttpStatus
@@ -15,11 +17,13 @@ import org.springframework.web.bind.annotation.RestController
 @Protected
 class StillingsinfoController(
     val service: StillingsinfoService,
+    val tokenUtils: TokenUtils
 ) {
     @PutMapping
     fun overtaEierskapForEksternStillingOgKandidatliste(
         @RequestBody dto: StillingsinfoInboundDto
     ): ResponseEntity<StillingsinfoDto> {
+        tokenUtils.hentInnloggetVeileder().validerMinstEnAvRollene(Rolle.ARBEIDSGIVERRETTET)
         val stillingsid = Stillingsid(dto.stillingsid)
 
         val forrigeStillingsinfo = service.hentForStilling(stillingId = stillingsid)

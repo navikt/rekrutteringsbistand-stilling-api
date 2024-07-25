@@ -2,6 +2,7 @@ package no.nav.rekrutteringsbistand.api.stillingsinfo
 
 import arrow.core.Option
 import arrow.core.toOption
+import no.nav.rekrutteringsbistand.api.support.log
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert
@@ -52,6 +53,7 @@ class StillingsinfoRepository(
     fun hentForStilling(stillingId: Stillingsid): Option<Stillingsinfo> {
         val list = hentForStillinger(listOf(stillingId))
         check(list.size <= 1) { "Antall stillingsinfo for stillingsid ${stillingId.asString()}: ${list.size}" }
+        log.error(list.joinToString { it.stillingskategori.toString() })
         return list.firstOrNull().toOption()
     }
 
