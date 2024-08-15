@@ -9,6 +9,8 @@ import no.nav.rekrutteringsbistand.api.support.toMultiValueMap
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.*
 import org.springframework.stereotype.Component
+import org.springframework.web.client.HttpClientErrorException
+import org.springframework.web.client.RestClientResponseException
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
@@ -46,22 +48,25 @@ class KandidatlisteKlient(
         val url: URI = byggUrlTilDeleteEndepunkt(stillingsid)
         val httpMethod = HttpMethod.DELETE
         log.info("Skal slette kandidatliste med stillingsid $stillingsid ved å sende en HTTP $httpMethod til URL $url")
-        return restTemplate.exchange(
-            url,
-            httpMethod,
-            HttpEntity(null, headers()),
-            Void::class.java
-        )
-            .also {
+        return try {
+            restTemplate.exchange(
+                url,
+                httpMethod,
+                HttpEntity(null, headers()),
+                Void::class.java
+            ).also {
                 log.info("Varsle kandidatliste om sletting av stilling ${stillingsid.asString()} returnerte ${it.statusCode}")
-                if (it.statusCode != HttpStatus.NOT_FOUND && it.statusCode != HttpStatus.NO_CONTENT) {
-                    log.warn(
-                        "Uventet response fra kandidatliste-api for ad {}: {}",
-                        stillingsid.asString(),
-                        it.statusCodeValue
-                    )
-                }
             }
+        }
+        catch (e: HttpClientErrorException.NotFound) { ResponseEntity.notFound().build() }
+        catch (e: RestClientResponseException) {
+            log.warn(
+                "Uventet response fra kandidatliste-api for ad {}: {}",
+                stillingsid.asString(),
+                e.statusCode
+            )
+            throw e
+        }
     }
 
     private fun byggUrlTilDeleteEndepunkt(stillingsid: Stillingsid): URI {
