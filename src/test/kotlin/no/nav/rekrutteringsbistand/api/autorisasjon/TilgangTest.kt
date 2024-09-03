@@ -173,13 +173,13 @@ class TilgangTest {
 
     fun tilgangsTester() = Kall(webClient, mockLogin, stubber).run {
         listOf(
-            /*stilling::opprettStilling to Varianter(forbidden, ok, ok, forbidden),
+            stilling::opprettStilling to Varianter(forbidden, ok, ok, forbidden),
             stilling::opprettJobbmesse to Varianter(forbidden, ok, ok, forbidden),
-            stilling::opprettFormidling to Varianter(ok, ok, ok, forbidden),*/
+            stilling::opprettFormidling to Varianter(ok, ok, ok, forbidden),
             stilling::oppdaterStilling to Varianter(forbidden, ok, ok, forbidden),
             stilling::oppdaterJobbmesse to Varianter(forbidden, ok, ok, forbidden),
             stilling::oppdaterFormidling to Varianter(ok, ok, ok, forbidden),
-            /*stilling::kopierStilling to Varianter(forbidden, ok, ok, forbidden),
+            stilling::kopierStilling to Varianter(forbidden, ok, ok, forbidden),
             stilling::slettStilling to Varianter(forbidden, ok, ok, forbidden),
             stilling::hentStillingMedUuid to Varianter(ok, ok, ok, ok),
             stilling::hentStillingMedAnnonsenr to Varianter(ok, ok, ok, ok),
@@ -195,7 +195,7 @@ class TilgangTest {
             arbeidsplassenProxy::getSøk to Varianter(ok, ok, ok, ok),
             arbeidsplassenProxy::postSøk to Varianter(ok, ok, ok, ok),
             standardSøk::hentStandardsøk to Varianter(ok, ok, ok, ok),
-            standardSøk::upsertStandardsøk to Varianter(created, created, created, created)*/
+            standardSøk::upsertStandardsøk to Varianter(created, created, created, created)
         ).flatMap { (kall, svar) ->
             listOf(
                 Arguments.of(kall.name, TestRolle.Jobbsøkerrettet, svar.jobbsøkerrettet, kall()),
