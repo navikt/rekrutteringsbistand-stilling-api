@@ -31,6 +31,16 @@
         <jackson-module-kotlin.version>2.13.4</jackson-module-kotlin.version>
         <token-validation.version>3.0.10</token-validation.version>
         <resilience4j.version>2.0.0</resilience4j.version>
+        <mockito-kotlin.version>2.2.0</mockito-kotlin.version>
+        <flyway.version>9.5.1</flyway.version>
+        <h2.version>2.2.220</h2.version>
+        <postgresql.version>42.5.5</postgresql.version>
+        <okhttp.version>4.10.0</okhttp.version>
+        <nav-common.version>3.2024.04.10_12.03-fddb587e3a68</nav-common.version>
+        <janino.version>3.1.12</janino.version>
+        <nimbus.version>9.37.3</nimbus.version>
+        <json-smart.version>2.4.10</json-smart.version>
+        <rapids-and-rivers.version>2023041310341681374880.67ced5ad4dda</rapids-and-rivers.version>
     </properties>
 
     <dependencies>
@@ -96,7 +106,7 @@
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
-            <version>9.5.1</version>
+            <version>${flyway.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -109,13 +119,13 @@
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
-            <version>2.2.220</version>
+            <version>${h2.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.5.5</version>
+            <version>${postgresql.version}</version>
             <scope>runtime</scope>
         </dependency>
 
@@ -130,13 +140,13 @@
         <dependency>
             <groupId>no.nav.common</groupId>
             <artifactId>audit-log</artifactId>
-            <version>3.2024.04.10_12.03-fddb587e3a68</version>
+            <version>${nav-common.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.codehaus.janino</groupId>
             <artifactId>janino</artifactId>
-            <version>3.1.12</version>
+            <version>${janino.version}</version>
         </dependency>
 
         <!-- Prometheus -->
@@ -179,24 +189,24 @@
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>mockwebserver</artifactId>
-            <version>4.10.0</version>
+            <version>${okhttp.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>okhttp</artifactId>
-            <version>4.10.0</version>
+            <version>${okhttp.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.nimbusds</groupId>
             <artifactId>nimbus-jose-jwt</artifactId>
-            <version>9.37.3</version>
+            <version>${nimbus.version}</version>
         </dependency>
         <dependency>
             <groupId>net.minidev</groupId>
             <artifactId>json-smart</artifactId>
-            <version>2.4.10</version>
+            <version>${json-smart.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -206,14 +216,14 @@
         <dependency>
             <groupId>com.nhaarman.mockitokotlin2</groupId>
             <artifactId>mockito-kotlin</artifactId>
-            <version>2.2.0</version>
+            <version>${mockito-kotlin.version}</version>
             <scope>test</scope>
         </dependency>
         <!-- Slutt, dependencies relatert til login -->
         <dependency>
             <groupId>com.github.navikt</groupId>
             <artifactId>rapids-and-rivers</artifactId>
-            <version>2023041310341681374880.67ced5ad4dda</version>
+            <version>${rapids-and-rivers.version}</version>
         </dependency>
 
     </dependencies>
@@ -248,7 +258,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>
+                <version>3.13.0</version>
                 <executions>
                     <!-- Replacing default-compile as it is treated specially by maven -->
                     <execution>
