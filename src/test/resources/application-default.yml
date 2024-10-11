@@ -21,8 +21,7 @@ AZURE_OPENID_CONFIG_TOKEN_ENDPOINT: http://localhost:9954/token
 AZURE_APP_CLIENT_ID: placeholder
 AZURE_APP_CLIENT_SECRET: placeholder
 
-OPENAI_API_URL: http://localhost:9955
-OPENAI_API_KEY: placeholder
+: placeholder
 
 scope:
   forarbeidsplassen: placeholder
