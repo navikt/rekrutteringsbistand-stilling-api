@@ -32,8 +32,8 @@ class MockLogin(private val mockOauth2Server: MockOAuth2Server) {
         ).serialize()
     }
 
-    fun leggAzureVeilederTokenPåAlleRequests(testRestTemplate: TestRestTemplate) {
-        val token = hentAzureAdVeilederToken()
+    fun leggAzureVeilederTokenPåAlleRequests(testRestTemplate: TestRestTemplate, roller: List<String> = listOf(arbeidsgiverrettet)) {
+        val token = hentAzureAdVeilederToken(roller = roller)
 
         testRestTemplate.restTemplate.interceptors.add(ClientHttpRequestInterceptor { request, body, execution ->
             request.headers.set("Authorization", "Bearer $token")
