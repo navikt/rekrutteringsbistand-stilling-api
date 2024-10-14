@@ -33,7 +33,7 @@ class OpenAiClient(
                 mapOf("role" to "user", "content" to prompt)
             ),
             "temperature" to 0.5,
-            "max_tokens" to 500
+            "max_tokens" to 4000
         )
 
         val entity = HttpEntity(requestBody, headers)
