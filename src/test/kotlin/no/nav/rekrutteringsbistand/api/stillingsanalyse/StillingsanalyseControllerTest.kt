@@ -83,7 +83,11 @@ internal class StillingsanalyseControllerTest {
         assertThat(response.body).isEqualTo(
             StillingsanalyseController.StillingsanalyseResponsDto(
                 sensitiv = true,
-                begrunnelse = "Stillingsbeskrivelsen inneholder sensitive termer."
+                sensitivBegrunnelse = "Stillingsbeskrivelsen inneholder sensitive termer.",
+                samsvarMedTittel = true,
+                tittelBegrunnelse = "Tittel samsvarer ikke",
+                samsvarMedType = true,
+                typeBegrunnelse = "Type samsvarer ikke"
             )
         )
     }
@@ -122,14 +126,15 @@ internal class StillingsanalyseControllerTest {
 
     // Mocked response from OpenAI API
     private val openAiApiResponseBody = """
-        {
-            "choices": [
-                {
-                    "message": {
-                        "content": "{ \"sensitiv\": true, \"begrunnelse\": \"Stillingsbeskrivelsen inneholder sensitive termer.\" }"
-                    }
-                }
-            ]
-        }
+       {
+  "choices": [
+    {
+      "message": {
+        "content": "{ \"sensitiv\": true, \"sensitivBegrunnelse\": \"Stillingsbeskrivelsen inneholder sensitive termer.\", \"samsvarMedTittel\": true, \"tittelBegrunnelse\": \"Tittel samsvarer ikke\", \"samsvarMedType\": true, \"typeBegrunnelse\": \"Type samsvarer ikke\" }"
+      }
+    }
+  ]
+}
+
     """.trimIndent()
 }

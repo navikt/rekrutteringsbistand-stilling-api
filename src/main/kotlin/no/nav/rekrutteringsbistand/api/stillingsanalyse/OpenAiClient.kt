@@ -48,8 +48,7 @@ class OpenAiClient(
                 String::class.java
             )
             val stop = System.currentTimeMillis()
-            secureLog.info("OpenAI API Response for stilling ${stillingsId} (${start-stop}ms: ${response.body}")
-
+            secureLog.info("OpenAI API Response for stilling ${stillingsId} (${stop-start}ms: ${response.body}")
 
             val cleanedResponse = response.body!!.removePrefix("```json").removeSuffix("```").trim()
 

@@ -28,7 +28,12 @@ class StillingsanalyseController(
 
     data class StillingsanalyseResponsDto(
         val sensitiv: Boolean,
-        val begrunnelse: String
+        val sensitivBegrunnelse: String,
+        val samsvarMedTittel: Boolean,
+        val tittelBegrunnelse: String,
+        val samsvarMedType: Boolean,
+        val typeBegrunnelse: String
+
     )
 
     data class StillingsanalyseDto(
