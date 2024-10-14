@@ -88,7 +88,7 @@ internal class StillingsanalyseControllerTest {
         )
     }
 
-    //@Test
+    @Test
     fun `analyserStilling should return 403 Forbidden if user lacks UTVIKLER role`() {
         mockLogin.leggAzureVeilederTokenPåAlleRequests(restTemplate)
 

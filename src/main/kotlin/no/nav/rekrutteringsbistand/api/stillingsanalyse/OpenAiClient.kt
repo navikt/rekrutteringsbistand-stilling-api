@@ -45,7 +45,7 @@ class OpenAiClient(
                 entity,
                 String::class.java
             )
-            println("OpenAI API Response: ${response.body}")
+            secureLog.info("OpenAI API Response for stilling ${stillingsId}: ${response.body}")
             val objectMapper = jacksonObjectMapper()
             val openAiResponse = objectMapper.readValue<OpenAiResponse>(response.body!!)
 
@@ -53,12 +53,12 @@ class OpenAiClient(
                 ?: throw IllegalStateException("Ingen respons fra OpenAI")
 
             val retur: StillingsanalyseResponsDto = objectMapper.readValue(aiContent)
-            log.info("Suksessfult kall mot openAI API")
+            log.info("Suksessfult kall mot openAI API for stilling $stillingsId")
             retur
 
         } catch (ex: Exception) {
-            log.error("Feil ved kall til OpenAI API")
-            secureLog.error("Feil ved kall til OpenAI API", ex)
+            log.error("Feil ved kall til OpenAI API for stilling ${stillingsId}")
+            secureLog.error("Feil ved kall til OpenAI API for stilling ${stillingsId}", ex)
             throw RuntimeException("Feil ved kall til OpenAI API", ex)
         }
     }
