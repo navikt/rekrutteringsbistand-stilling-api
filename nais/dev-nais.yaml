@@ -67,7 +67,7 @@ spec:
         - host: pam-ad-api.intern.dev.nav.no
         - host: rekrutteringsbistand-kandidat-api.dev-fss-pub.nais.io
   envFrom:
-    - secret: opensearch-toi-rekrutteringsbistand-stilling
+    - secret: openai-toi-rekrutteringsbistand-stilling
   env:
     - name: SPRING_PROFILES_ACTIVE
       value: dev
