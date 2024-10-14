@@ -16,8 +16,8 @@ import org.springframework.web.client.RestTemplate
 @Component
 class OpenAiClient(
     private val restTemplate: RestTemplate,
-    @Value("\${OPENAI_API_URL}") private val openAiApiUrl: String,
-    @Value("\${OPENAI_API_KEY}") private val openAiApiKey: String,
+    @Value("\${openai.api.url}") private val openAiApiUrl: String,
+    @Value("\${openai.api.url}") private val openAiApiKey: String,
 ) {
     fun analyserStilling(prompt: String, stillingsId: String): StillingsanalyseResponsDto {
         val headers = HttpHeaders().apply {

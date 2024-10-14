@@ -21,8 +21,10 @@ AZURE_OPENID_CONFIG_TOKEN_ENDPOINT: http://localhost:9954/token
 AZURE_APP_CLIENT_ID: placeholder
 AZURE_APP_CLIENT_SECRET: placeholder
 
-OPENAI_API_URL: http://localhost:9955/openai/deployments/toi-gpt-4o/chat/completions?api-version=2023-03-15-preview
-OPENAI_API_KEY: test-key
+openai:
+  api:
+    url: http://localhost:9955/openai/deployments/toi-gpt-4o/chat/completions?api-version=2023-03-15-preview
+    key: test-key
 
 scope:
   forarbeidsplassen: placeholder
