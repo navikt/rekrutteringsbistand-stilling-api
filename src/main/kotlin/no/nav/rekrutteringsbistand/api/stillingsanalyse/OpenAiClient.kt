@@ -33,7 +33,6 @@ class OpenAiClient(
             ),
             "temperature" to 0.5,
             "max_tokens" to 1500,
-            "model" to "gpt-4o-2024-08-06",
         )
 
         secureLog.info("OpenAI API Request for stilling ${stillingsId}: headers: ${headers} body: ${requestBody} url: ${openAiApiUrl}")
@@ -41,13 +40,15 @@ class OpenAiClient(
         val entity = HttpEntity(requestBody, headers)
 
         return try {
+            val start = System.currentTimeMillis()
             val response = restTemplate.exchange(
                 openAiApiUrl,
                 HttpMethod.POST,
                 entity,
                 String::class.java
             )
-            secureLog.info("OpenAI API Response for stilling ${stillingsId}: ${response.body}")
+            val stop = System.currentTimeMillis()
+            secureLog.info("OpenAI API Response for stilling ${stillingsId} (${start-stop}ms: ${response.body}")
 
 
             val cleanedResponse = response.body!!.removePrefix("```json").removeSuffix("```").trim()
