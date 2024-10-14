@@ -21,7 +21,7 @@ object StillingsanalyseTemplate {
           "begrunnelse": "Din begrunnelse her."
         }
         
-        Vennligst svar kun med JSON-objektet uten ytterligere forklaring.
+        Vennligst svar kun med JSON-objektet uten ytterligere forklaring, og uten kodeblokker eller markdown.
         
         """.trimIndent()
 }
