@@ -71,7 +71,7 @@ internal class StillingsanalyseControllerTest {
 
         val entity = HttpEntity(stillingsanalyseDto, headers)
 
-        val url = "$localBaseUrl/rekrutteringsbistand/api/stillingsanalyse"
+        val url = "$localBaseUrl/rekrutteringsbistand/stillingsanalyse"
 
         val response = restTemplate.postForEntity(
             url,
@@ -103,7 +103,7 @@ internal class StillingsanalyseControllerTest {
         headers.contentType = MediaType.APPLICATION_JSON
 
         val entity = HttpEntity(stillingsanalyseDto, headers)
-        val url = "$localBaseUrl/rekrutteringsbistand/api/stillingsanalyse"
+        val url = "$localBaseUrl/rekrutteringsbistand/stillingsanalyse"
         val response = restTemplate.postForEntity(url, entity, String::class.java)
         assertThat(response.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
     }
