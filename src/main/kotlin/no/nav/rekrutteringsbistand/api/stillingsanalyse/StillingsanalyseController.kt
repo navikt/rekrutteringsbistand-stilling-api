@@ -1,6 +1,5 @@
 package no.nav.rekrutteringsbistand.api.stillingsanalyse
 
-import OpenAiClient
 import no.nav.rekrutteringsbistand.api.autorisasjon.Rolle
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingskategori

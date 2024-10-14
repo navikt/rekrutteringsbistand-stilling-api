@@ -1,11 +1,11 @@
 package no.nav.rekrutteringsbistand.api
 
-import OpenAiClient
+import no.nav.rekrutteringsbistand.api.stillingsanalyse.OpenAiClient
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.web.client.RestTemplate
 
-@Configuration
+//@Configuration
 class TestApplicationConfig {
 
     @Bean

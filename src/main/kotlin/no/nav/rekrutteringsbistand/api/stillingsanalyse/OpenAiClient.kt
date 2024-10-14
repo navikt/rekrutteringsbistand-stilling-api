@@ -1,3 +1,5 @@
+package no.nav.rekrutteringsbistand.api.stillingsanalyse
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper

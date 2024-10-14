@@ -1,6 +1,5 @@
 package no.nav.rekrutteringsbistand.api.stillingsanalyse
 
-import OpenAiClient
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.github.tomakehurst.wiremock.junit.WireMockRule
