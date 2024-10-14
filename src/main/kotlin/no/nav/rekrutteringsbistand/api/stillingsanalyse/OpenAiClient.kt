@@ -28,7 +28,6 @@ class OpenAiClient(
         }
 
         val requestBody = mapOf(
-            "model" to "gpt-4o-2024-08-06",
             "messages" to listOf(
                 mapOf("role" to "user", "content" to prompt)
             ),
