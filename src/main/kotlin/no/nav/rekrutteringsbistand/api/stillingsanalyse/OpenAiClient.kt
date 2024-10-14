@@ -37,7 +37,7 @@ class OpenAiClient(
             "max_tokens" to 4000
         )
 
-        secureLog.log.info("OpenAI API Request for stilling ${stillingsId}: headers: ${headers} body: ${requestBody}")
+        secureLog.info("OpenAI API Request for stilling ${stillingsId}: headers: ${headers} body: ${requestBody}")
 
         val entity = HttpEntity(requestBody, headers)
 
