@@ -69,6 +69,8 @@ spec:
         - host: arbeidsmarked-dev.openai.azure.com
           ports:
             - port: 443
+  envFrom:
+    - secret: openai-toi-rekrutteringsbistand-stilling
   env:
     - name: SPRING_PROFILES_ACTIVE
       value: dev
