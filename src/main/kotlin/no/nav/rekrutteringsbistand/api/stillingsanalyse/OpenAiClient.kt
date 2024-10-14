@@ -22,8 +22,10 @@ class OpenAiClient(
     @Value("\${openai.api.key}") private val openAiApiKey: String,
 ) {
     fun analyserStilling(prompt: String, stillingsId: String): StillingsanalyseResponsDto {
+        val bearer = "Bearer $openAiApiKey"
+        secureLog.info("Kaller OpenAI API for stilling ${stillingsId} med bearer token: $bearer")
         val headers = HttpHeaders().apply {
-            set("Authorization", "Bearer $openAiApiKey")
+            set("Authorization", bearer)
             contentType = MediaType.APPLICATION_JSON
         }
 
