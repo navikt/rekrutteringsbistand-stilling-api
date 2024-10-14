@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.rekrutteringsbistand.api.stillingsanalyse.StillingsanalyseController.StillingsanalyseResponsDto
+import no.nav.rekrutteringsbistand.api.support.log
+import no.nav.rekrutteringsbistand.api.support.secureLog
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
@@ -50,8 +52,13 @@ class OpenAiClient(
             val aiContent = openAiResponse.choices?.firstOrNull()?.message?.content
                 ?: throw IllegalStateException("Ingen respons fra OpenAI")
 
-            objectMapper.readValue(aiContent)
+            val retur: StillingsanalyseResponsDto = objectMapper.readValue(aiContent)
+            log.info("Suksessfult kall mot openAI API")
+            retur
+
         } catch (ex: Exception) {
+            log.error("Feil ved kall til OpenAI API")
+            secureLog.error("Feil ved kall til OpenAI API", ex)
             throw RuntimeException("Feil ved kall til OpenAI API", ex)
         }
     }
