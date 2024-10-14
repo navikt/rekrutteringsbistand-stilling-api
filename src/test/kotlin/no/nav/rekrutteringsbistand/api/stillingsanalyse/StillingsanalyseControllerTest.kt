@@ -4,6 +4,7 @@ import OpenAiClient
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.github.tomakehurst.wiremock.junit.WireMockRule
+import no.nav.rekrutteringsbistand.api.TestApplicationConfig
 import no.nav.rekrutteringsbistand.api.config.MockLogin
 import no.nav.rekrutteringsbistand.api.mockAzureObo
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingskategori
@@ -18,6 +19,7 @@ import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Import
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
@@ -28,19 +30,6 @@ import org.springframework.web.client.RestTemplate
 @RunWith(SpringRunner::class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 internal class StillingsanalyseControllerTest {
-
-    @TestConfiguration
-    class TestConfig {
-        @Bean
-        fun openAiClient(): OpenAiClient {
-            // Return a mock or a real instance as needed
-            return OpenAiClient(
-                restTemplate = RestTemplate(),
-                openAiApiUrl = "http://localhost:9955/openai/deployments/toi-gpt-4o/chat/completions?api-version=2023-03-15-preview", // Use a test URL
-                openAiApiKey = "test-key"
-            )
-        }
-    }
 
     val utviklerrolle = "a1749d9a-52e0-4116-bb9f-935c38f6c74a"
 
