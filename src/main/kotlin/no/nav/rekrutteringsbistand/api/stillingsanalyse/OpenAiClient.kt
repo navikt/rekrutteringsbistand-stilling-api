@@ -23,20 +23,21 @@ class OpenAiClient(
 ) {
     fun analyserStilling(prompt: String, stillingsId: String): StillingsanalyseResponsDto {
         val bearer = "Bearer $openAiApiKey"
-        secureLog.info("Kaller OpenAI API for stilling ${stillingsId} med bearer token: $bearer")
         val headers = HttpHeaders().apply {
             set("Authorization", bearer)
             contentType = MediaType.APPLICATION_JSON
         }
 
         val requestBody = mapOf(
-            "model" to "gpt-4o",
+            "model" to "gpt-4o-2024-08-06",
             "messages" to listOf(
                 mapOf("role" to "user", "content" to prompt)
             ),
             "temperature" to 0.5,
             "max_tokens" to 4000
         )
+
+        secureLog.log.info("OpenAI API Request for stilling ${stillingsId}: headers: ${headers} body: ${requestBody}")
 
         val entity = HttpEntity(requestBody, headers)
 
