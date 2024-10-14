@@ -33,8 +33,7 @@ class OpenAiClient(
                 mapOf("role" to "user", "content" to prompt)
             ),
             "temperature" to 0.5,
-            "max_tokens" to 4000,
-            "timeout" to 30,
+            "max_tokens" to 4000
         )
 
         secureLog.info("OpenAI API Request for stilling ${stillingsId}: headers: ${headers} body: ${requestBody} url: ${openAiApiUrl}")
