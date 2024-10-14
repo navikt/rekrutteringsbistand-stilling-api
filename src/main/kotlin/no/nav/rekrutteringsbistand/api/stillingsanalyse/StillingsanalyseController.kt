@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*
 
 @RestController
 @Protected
-@RequestMapping("/rekrutteringsbistand/stillingsanalyse")
+@RequestMapping("/rekrutteringsbistand/api/stillingsanalyse")
 class StillingsanalyseController(
     private val openAiClient: OpenAiClient,
     private val tokenUtils: TokenUtils
