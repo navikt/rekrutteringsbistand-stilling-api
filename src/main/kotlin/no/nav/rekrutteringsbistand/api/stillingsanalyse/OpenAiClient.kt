@@ -22,9 +22,8 @@ class OpenAiClient(
     @Value("\${openai.api.key}") private val openAiApiKey: String,
 ) {
     fun analyserStilling(prompt: String, stillingsId: String): StillingsanalyseResponsDto {
-        val bearer = "Bearer $openAiApiKey"
         val headers = HttpHeaders().apply {
-            set("Authorization", bearer)
+            set("api-key", openAiApiKey)
             contentType = MediaType.APPLICATION_JSON
         }
 
@@ -34,7 +33,8 @@ class OpenAiClient(
                 mapOf("role" to "user", "content" to prompt)
             ),
             "temperature" to 0.5,
-            "max_tokens" to 4000
+            "max_tokens" to 4000,
+            "timeout" to 30,
         )
 
         secureLog.info("OpenAI API Request for stilling ${stillingsId}: headers: ${headers} body: ${requestBody} url: ${openAiApiUrl}")
