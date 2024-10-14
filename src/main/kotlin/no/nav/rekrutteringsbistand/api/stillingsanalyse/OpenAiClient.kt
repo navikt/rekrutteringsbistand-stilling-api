@@ -32,7 +32,8 @@ class OpenAiClient(
                 mapOf("role" to "user", "content" to prompt)
             ),
             "temperature" to 0.5,
-            "max_tokens" to 1500
+            "max_tokens" to 1500,
+            "model" to "gpt-4o-2024-08-06",
         )
 
         secureLog.info("OpenAI API Request for stilling ${stillingsId}: headers: ${headers} body: ${requestBody} url: ${openAiApiUrl}")
