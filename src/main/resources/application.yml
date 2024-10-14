@@ -11,6 +11,11 @@ management:
 
 nais.cluster-name: ${NAIS_CLUSTER_NAME}
 
+openai:
+  api:
+    url: ${OPENAI_API_URL}
+    key: ${OPENAI_API_KEY}
+
 no.nav.security.jwt:
   issuer.azuread:
     discoveryurl: ${AZURE_APP_WELL_KNOWN_URL}
