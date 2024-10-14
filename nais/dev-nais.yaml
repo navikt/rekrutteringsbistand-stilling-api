@@ -66,8 +66,9 @@ spec:
       external:
         - host: pam-ad-api.intern.dev.nav.no
         - host: rekrutteringsbistand-kandidat-api.dev-fss-pub.nais.io
-  envFrom:
-    - secret: openai-toi-rekrutteringsbistand-stilling
+        - host: arbeidsmarked-dev.openai.azure.com
+          ports:
+            - port: 443
   env:
     - name: SPRING_PROFILES_ACTIVE
       value: dev
