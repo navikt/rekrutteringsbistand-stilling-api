@@ -19,7 +19,7 @@ class StillingsanalyseController(
     fun analyserStilling(
         @RequestBody stillingsanalyseDto: StillingsanalyseDto
     ): ResponseEntity<StillingsanalyseResponsDto> {
-        tokenUtils.hentInnloggetVeileder().validerMinstEnAvRollene(Rolle.UTVIKLER)
+        //tokenUtils.hentInnloggetVeileder().validerMinstEnAvRollene(Rolle.UTVIKLER)
 
         val prompt = StillingsanalyseTemplate.lagPrompt(stillingsanalyseDto)
         val response = openAiClient.analyserStilling(prompt, stillingsanalyseDto.stillingsId)
