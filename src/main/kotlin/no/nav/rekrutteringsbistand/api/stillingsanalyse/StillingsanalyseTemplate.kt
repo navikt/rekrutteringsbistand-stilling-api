@@ -33,7 +33,7 @@ object StillingsanalyseTemplate {
         
         **Unntak:**
         
-        Hvis et sensitivt ord brukes i sammenheng med arbeidsoppgaver, ansvar eller kvalifikasjoner (f.eks. "KVP"), skal det ikke anses som sensitivt. Sensitivitet gjelder kun hvis bruken kan identifisere sårbare individer eller koble spesifikke brukere til stillingen, noe som kan avsløre deres deltakelse i beskyttede eller sårbare programmer.
+        Hvis et sensitivt ord brukes i sammenheng med arbeidsoppgaver, ansvar eller kvalifikasjoner (f.eks. "IPS"), skal det ikke anses som sensitivt. Sensitivitet gjelder kun hvis bruken kan identifisere sårbare individer eller koble spesifikke brukere til stillingen, noe som kan avsløre deres deltakelse i beskyttede eller sårbare programmer.
         
         ---
         
