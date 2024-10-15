@@ -51,11 +51,14 @@ class OpenAiClient(
                 entity,
                 String::class.java
             )
+
+            val cleanedResponse = response.body!!.removePrefix("```json").removeSuffix("```").trim()
+
             val stop = System.currentTimeMillis()
             log.info("OpenAI API Response for stilling ${stillingsanalyseDto.stillingsId} (${stop - start}ms)")
 
             val objectMapper = jacksonObjectMapper()
-            val openAiResponse = objectMapper.readValue<OpenAiResponse>(response.body!!)
+            val openAiResponse = objectMapper.readValue<OpenAiResponse>(cleanedResponse)
 
             val aiContent = openAiResponse.choices?.firstOrNull()?.message?.content
                 ?: throw IllegalStateException("Ingen respons fra OpenAI")
