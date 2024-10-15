@@ -13,11 +13,12 @@ object StillingsanalyseTemplate {
     
     Sett "sensitiv": true hvis teksten inneholder noen av de sensitive ordene og disse ordene ikke refererer til arbeidsoppgaver, ansvar eller mål for stillingen som skal besettes.
     Sett "sensitiv": false hvis de sensitive ordene refererer til arbeidsoppgaver, ansvar eller mål direkte knyttet til stillingen.
+    Viktig: Hvis sensitive ord brukes i konteksten av stillingens arbeidsoppgaver, ansvarsområder eller mål, skal de ikke anses som sensitive. Modellen skal fokusere på hvordan ordene brukes i forhold til stillingens funksjoner.
     Samsvar med tittel:
     
     Sett "samsvarMedTittel": true hvis stillingstittelen er relevant og samsvarer med innholdet i stillingsbeskrivelsen.
     Sett "samsvarMedTittel": false hvis det er uoverensstemmelse mellom stillingstittelen og innholdet i stillingsbeskrivelsen.
-    tittelBegrunnelse: Gi en kort begrunnelse for ditt valg.
+    tittelBegrunnelse: Gi en kort begrunnelse for ditt valg, og forklar om tittelen er relevant i forhold til stillingsbeskrivelsen.
     Samsvar med type:
     
     Sett "samsvarMedType": true hvis stillingstypen er korrekt i forhold til innholdet i stillingsbeskrivelsen.
@@ -31,7 +32,7 @@ object StillingsanalyseTemplate {
     
     Unntak:
     
-    Hvis et sensitivt ord brukes i sammenheng med stillingens oppgaver, ansvar eller kvalifikasjoner (for eksempel "Oppfølging av deltakere på kvalifiseringsprogrammet (KVP)"), skal det ikke anses som sensitivt. Ingenting er sensitivt om det refererer til ønsket om en spesialist på et av de sensitive temaene.
+    Hvis et sensitivt ord brukes i sammenheng med stillingens arbeidsoppgaver, ansvar eller kvalifikasjoner (for eksempel "Oppfølging av deltakere på kvalifiseringsprogrammet (KVP)"), skal det ikke anses som sensitivt. Ingenting er sensitivt om det refererer til ønsket om en spesialist på et av de sensitive temaene.
     
     Svarformat:
     
@@ -51,7 +52,7 @@ object StillingsanalyseTemplate {
     
     samsvarMedTittel: Indikerer om stillingstittelen er relevant og samsvarer med innholdet i stillingsbeskrivelsen. Denne evalueringen skal vurdere om tittelen korrekt representerer stillingen som beskrives.
     
-    samsvarMedType: Indikerer om stillingstypen er korrekt valgt i forhold til innholdet i stillingsbeskrivelsen. Dette skal kun vurdere om stillingstypen (f.eks. "stilling", "jobbmesse", "formidling") passer til beskrivelsen, og skal ikke overlappe med evalueringen av tittel eller detaljer som heltid/deltid.
+    samsvarMedType: Indikerer om stillingstypen er korrekt valgt i forhold til innholdet i stillingsbeskrivelsen. Dette skal kun vurdere om stillingstypen (f.eks. "stilling", "jobbmesse", "formidling") passer til beskrivelsen, og skal ikke overlappe med evalueringen av tittelen eller detaljer som heltid/deltid.
     
     Stillingstittel:
     
