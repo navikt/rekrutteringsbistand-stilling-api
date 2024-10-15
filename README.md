@@ -15,7 +15,7 @@ stillingMock er default.
 ### Starte applikasjonen i utviklingsmiljø
 Start main i klassen RekrutteringsbistandApplication.
 
-## Docker
+## Docker 
 1. Bygg image: `docker build -t rekrutteringsbistand-stilling-api .`
 2. Kjør container: `docker run -d -p 9501:9501 rekrutteringsbistand-stilling-api`
 
