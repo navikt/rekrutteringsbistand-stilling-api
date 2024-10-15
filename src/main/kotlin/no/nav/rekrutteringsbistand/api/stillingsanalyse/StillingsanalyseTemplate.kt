@@ -9,10 +9,10 @@ object StillingsanalyseTemplate {
         
         1. **Sensitivitet:**
         
-           - Sett `"sensitiv": true` hvis teksten inneholder sensitive ord og disse ordene ikke refererer til stillingens arbeidsoppgaver, ansvar eller mål.
-           - Sett `"sensitiv": false` hvis de sensitive ordene brukes i sammenheng med arbeidsoppgaver, ansvar eller mål direkte knyttet til stillingen.
-           - **Viktig:** Sensitive ord som er relatert til arbeidsoppgaver eller ansvar i stillingen skal **ikke** anses som sensitive. Det er heller ikke sensitivt når en stilling har som oppgave å følge opp personer i sårbare grupper, som for eksempel deltakere i KVP, når dette er en naturlig del av arbeidsoppgavene som er eksplisitt nevnt i stillingsbeskrivelsen. 
-           - Sensitivitet oppstår når teksten gir innsikt i spesifikke personer som er koblet til stillingen, og som dermed kan avsløre deltakelse i programmer eller tiltak (som KVP). Dette gjelder særlig når teksten kan gi en indirekte identifisering av brukere, for eksempel ved å koble kandidaten direkte til sensitive tjenester eller tiltak. Hvis det er tvil om sensitivitet, skal det settes til `true` for å beskytte mot eksponering av sårbare grupper.
+           - Sett `"sensitiv": true` hvis teksten inneholder sensitive ord og disse ordene refererer til sensitive opplysninger om individer eller deres tilknytning til programmer og tiltak.
+           - Sett `"sensitiv": false` hvis de sensitive ordene brukes i sammenheng med arbeidsoppgaver, ansvar eller mål direkte knyttet til stillingen, uten å avsløre spesifikk informasjon om enkeltpersoner.
+           - **Viktig:** Arbeid med sensitive oppgaver eller ansvar, som for eksempel oppfølging av deltakere i KVP eller arbeidsrettede tiltak, skal **ikke** anses som sensitive så lenge det ikke gir innsikt i spesifikke personer eller deres deltakelse i beskyttede programmer.
+           - Sensitivitet oppstår når teksten gir innsikt i spesifikke personer som er koblet til stillingen, og som dermed kan avsløre deltakelse i programmer eller tiltak (som IPS). Dette gjelder særlig når teksten kan gi en indirekte identifisering av brukere, for eksempel ved å koble kandidaten direkte til sensitive tjenester eller tiltak. Hvis det er tvil om sensitivitet, skal det settes til `true` for å beskytte mot eksponering av sårbare grupper.
         
         2. **Samsvar med tittel:**
         
@@ -33,7 +33,7 @@ object StillingsanalyseTemplate {
         
         **Unntak:**
         
-        Hvis et sensitivt ord brukes i sammenheng med arbeidsoppgaver, ansvar eller kvalifikasjoner (f.eks. "Oppfølging av deltakere på kvalifiseringsprogrammet (KVP)"), skal det ikke anses som sensitivt. Sensitivitet gjelder kun hvis bruken kan identifisere sårbare individer eller koble spesifikke brukere til stillingen, noe som kan avsløre deres deltakelse i beskyttede eller sårbare programmer.
+        Hvis et sensitivt ord brukes i sammenheng med arbeidsoppgaver, ansvar eller kvalifikasjoner (f.eks. "KVP"), skal det ikke anses som sensitivt. Sensitivitet gjelder kun hvis bruken kan identifisere sårbare individer eller koble spesifikke brukere til stillingen, noe som kan avsløre deres deltakelse i beskyttede eller sårbare programmer.
         
         ---
         
