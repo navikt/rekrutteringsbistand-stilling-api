@@ -21,7 +21,10 @@ class OpenAiClient(
     @Value("\${openai.api.url}") private val openAiApiUrl: String,
     @Value("\${openai.api.key}") private val openAiApiKey: String,
 ) {
-    fun analyserStilling(prompt: String, stillingsId: String): StillingsanalyseResponsDto {
+    fun analyserStilling(stillingsanalyseDto: StillingsanalyseController.StillingsanalyseDto): StillingsanalyseResponsDto {
+        val systemMessage = StillingsanalyseTemplate.SYSTEM_MESSAGE
+        val userMessage = StillingsanalyseTemplate.lagUserPrompt(stillingsanalyseDto)
+
         val headers = HttpHeaders().apply {
             set("api-key", openAiApiKey)
             contentType = MediaType.APPLICATION_JSON
@@ -29,13 +32,14 @@ class OpenAiClient(
 
         val requestBody = mapOf(
             "messages" to listOf(
-                mapOf("role" to "user", "content" to prompt)
+                mapOf("role" to "system", "content" to systemMessage),
+                mapOf("role" to "user", "content" to userMessage)
             ),
             "temperature" to 0.5,
             "max_tokens" to 3000,
         )
 
-        secureLog.info("OpenAI API Request for stilling ${stillingsId}: headers: ${headers} body: ${requestBody} url: ${openAiApiUrl}")
+        secureLog.info("OpenAI API Request for stilling ${stillingsanalyseDto.stillingsId}: headers: $headers body: $requestBody url: $openAiApiUrl")
 
         val entity = HttpEntity(requestBody, headers)
 
@@ -48,9 +52,12 @@ class OpenAiClient(
                 String::class.java
             )
             val stop = System.currentTimeMillis()
-            secureLog.info("OpenAI API Response for stilling ${stillingsId} (${stop-start}ms: ${response.body}")
+            secureLog.info("OpenAI API Response for stilling ${stillingsanalyseDto.stillingsId} (${stop - start}ms): ${response.body}")
 
-            val cleanedResponse = response.body!!.removePrefix("```json").removeSuffix("```").trim()
+            val cleanedResponse = response.body!!
+                .removePrefix("```json")
+                .removeSuffix("```")
+                .trim()
 
             val objectMapper = jacksonObjectMapper()
             val openAiResponse = objectMapper.readValue<OpenAiResponse>(cleanedResponse)
@@ -59,12 +66,12 @@ class OpenAiClient(
                 ?: throw IllegalStateException("Ingen respons fra OpenAI")
 
             val retur: StillingsanalyseResponsDto = objectMapper.readValue(aiContent)
-            log.info("Suksessfult kall mot openAI API for stilling $stillingsId")
+            log.info("Suksessfult kall mot OpenAI API for stilling ${stillingsanalyseDto.stillingsId}")
             retur
 
         } catch (ex: Exception) {
-            log.error("Feil ved kall til OpenAI API for stilling ${stillingsId}")
-            secureLog.error("Feil ved kall til OpenAI API for stilling ${stillingsId}", ex)
+            log.error("Feil ved kall til OpenAI API for stilling ${stillingsanalyseDto.stillingsId}")
+            secureLog.error("Feil ved kall til OpenAI API for stilling ${stillingsanalyseDto.stillingsId}", ex)
             throw RuntimeException("Feil ved kall til OpenAI API", ex)
         }
     }

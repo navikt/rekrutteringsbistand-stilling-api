@@ -1,6 +1,5 @@
 package no.nav.rekrutteringsbistand.api.stillingsanalyse
 
-import no.nav.rekrutteringsbistand.api.autorisasjon.Rolle
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingskategori
 import no.nav.security.token.support.core.api.Protected
@@ -21,8 +20,7 @@ class StillingsanalyseController(
     ): ResponseEntity<StillingsanalyseResponsDto> {
         tokenUtils.hentInnloggetVeileder().validerMinstEnAvRollene()
 
-        val prompt = StillingsanalyseTemplate.lagPrompt(stillingsanalyseDto)
-        val response = openAiClient.analyserStilling(prompt, stillingsanalyseDto.stillingsId)
+        val response = openAiClient.analyserStilling(stillingsanalyseDto)
         return ResponseEntity.ok(response)
     }
 
@@ -33,7 +31,6 @@ class StillingsanalyseController(
         val tittelBegrunnelse: String,
         val samsvarMedType: Boolean,
         val typeBegrunnelse: String
-
     )
 
     data class StillingsanalyseDto(
