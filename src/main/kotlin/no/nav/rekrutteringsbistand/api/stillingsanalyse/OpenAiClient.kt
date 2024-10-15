@@ -1,7 +1,5 @@
 package no.nav.rekrutteringsbistand.api.stillingsanalyse
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.rekrutteringsbistand.api.stillingsanalyse.StillingsanalyseController.StillingsanalyseResponsDto
@@ -14,6 +12,8 @@ import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import com.fasterxml.jackson.annotation.JsonProperty
 
 @Component
 class OpenAiClient(
@@ -30,18 +30,18 @@ class OpenAiClient(
             contentType = MediaType.APPLICATION_JSON
         }
 
-        val requestBody = mapOf(
-            "messages" to listOf(
-                mapOf("role" to "system", "content" to systemMessage),
-                mapOf("role" to "user", "content" to userMessage)
+        val openAiRequest = OpenAiRequest(
+            messages = listOf(
+                OpenAiMessage(role = "system", content = systemMessage),
+                OpenAiMessage(role = "user", content = userMessage)
             ),
-            "temperature" to 0.5,
-            "max_tokens" to 3000,
+            temperature = 0.5,
+            max_tokens = 3000
         )
 
-        secureLog.info("OpenAI API Request for stilling ${stillingsanalyseDto.stillingsId}: headers: $headers body: $requestBody url: $openAiApiUrl")
+        log.info("OpenAI API Request for stilling ${stillingsanalyseDto.stillingsId} url: $openAiApiUrl")
 
-        val entity = HttpEntity(requestBody, headers)
+        val entity = HttpEntity(openAiRequest, headers)
 
         return try {
             val start = System.currentTimeMillis()
@@ -52,15 +52,10 @@ class OpenAiClient(
                 String::class.java
             )
             val stop = System.currentTimeMillis()
-            secureLog.info("OpenAI API Response for stilling ${stillingsanalyseDto.stillingsId} (${stop - start}ms): ${response.body}")
-
-            val cleanedResponse = response.body!!
-                .removePrefix("```json")
-                .removeSuffix("```")
-                .trim()
+            log.info("OpenAI API Response for stilling ${stillingsanalyseDto.stillingsId} (${stop - start}ms)")
 
             val objectMapper = jacksonObjectMapper()
-            val openAiResponse = objectMapper.readValue<OpenAiResponse>(cleanedResponse)
+            val openAiResponse = objectMapper.readValue<OpenAiResponse>(response.body!!)
 
             val aiContent = openAiResponse.choices?.firstOrNull()?.message?.content
                 ?: throw IllegalStateException("Ingen respons fra OpenAI")
@@ -75,21 +70,33 @@ class OpenAiClient(
             throw RuntimeException("Feil ved kall til OpenAI API", ex)
         }
     }
-
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    data class OpenAiResponse(
-        val id: String? = null,
-        val choices: List<AiChoices>? = null
-    )
-
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    data class AiChoices(
-        val message: AiMessage? = null,
-        @JsonProperty("finish_reason") val finishReason: String? = null,
-    )
-
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    data class AiMessage(
-        val content: String? = null,
-    )
 }
+
+data class OpenAiMessage(
+    val role: String,
+    val content: String
+)
+
+data class OpenAiRequest(
+    val messages: List<OpenAiMessage>,
+    val temperature: Double,
+    val max_tokens: Int
+)
+
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class OpenAiResponse(
+    val id: String?,
+    val choices: List<Choice>?
+)
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class Choice(
+    val message: OpenAiMessageContent?,
+    @JsonProperty("finish_reason") val finishReason: String?
+)
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class OpenAiMessageContent(
+    val content: String?
+)
