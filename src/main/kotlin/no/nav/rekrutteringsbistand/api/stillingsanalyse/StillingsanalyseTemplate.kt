@@ -9,22 +9,22 @@ object StillingsanalyseTemplate {
         
         1. **Sensitivitet:**
         
-           - Sett "sensitiv": true hvis teksten inneholder noen av de sensitive ordene og disse ordene ikke refererer til arbeidsoppgaver, ansvar eller mål for stillingen som skal besettes.
-           - Sett "sensitiv": false hvis de sensitive ordene refererer til arbeidsoppgaver, ansvar eller mål direkte knyttet til stillingen.
+           - Sett `"sensitiv": true` hvis teksten inneholder noen av de sensitive ordene og disse ordene ikke refererer til arbeidsoppgaver, ansvar eller mål for stillingen som skal besettes.
+           - Sett `"sensitiv": false` hvis de sensitive ordene refererer til arbeidsoppgaver, ansvar eller mål direkte knyttet til stillingen.
            - **Viktig:** Hvis sensitive ord brukes i konteksten av stillingens arbeidsoppgaver, ansvarsområder eller mål, skal de **ikke** anses som sensitive. Modellen skal fokusere på hvordan ordene brukes i forhold til stillingens funksjoner.
         
         2. **Samsvar med tittel:**
         
-           - Sett "samsvarMedTittel": true hvis stillingstittelen er relevant og samsvarer med innholdet i stillingsbeskrivelsen.
-           - Sett "samsvarMedTittel": false hvis det er uoverensstemmelse mellom stillingstittelen og innholdet i stillingsbeskrivelsen.
+           - Sett `"samsvarMedTittel": true` hvis stillingstittelen er relevant og samsvarer med innholdet i stillingsbeskrivelsen.
+           - Sett `"samsvarMedTittel": false` hvis det er uoverensstemmelse mellom stillingstittelen og innholdet i stillingsbeskrivelsen.
            - **tittelBegrunnelse**: Gi en kort begrunnelse for ditt valg, og forklar om tittelen er relevant i forhold til stillingsbeskrivelsen.
         
         3. **Samsvar med type:**
         
-           - Sett "samsvarMedType": true hvis stillingstypen er korrekt i forhold til innholdet i stillingsbeskrivelsen.
-             - For stillingstype "stilling": Dette inkluderer alle typer stillingsannonser, uavhengig av om det er heltid, deltid, vikariat osv. 
-             - For stillingstype "jobbmesse" eller "formidling": Disse har mindre krav til innhold i teksten og er ofte arrangementer eller tjenester for å koble arbeidsgivere og arbeidssøkere.
-           - Sett "samsvarMedType": false hvis stillingstypen ikke passer med innholdet i stillingsbeskrivelsen.
+           - Sett `"samsvarMedType": true` hvis stillingstypen er korrekt i forhold til innholdet i stillingsbeskrivelsen.
+             - For stillingstype **"stilling"**: Dette inkluderer alle typer stillingsannonser, uavhengig av om det er heltid, deltid, vikariat osv. Stillingstypen bør ha en detaljert beskrivelse som klart forklarer arbeidsoppgavene og ansvarsområdene.
+             - For stillingstype **"jobbmesse"** eller **"formidling"**: Disse har mindre krav til innhold i teksten og er ofte arrangementer eller tjenester for å koble arbeidsgivere og arbeidssøkere.
+           - Sett `"samsvarMedType": false` hvis stillingstypen ikke passer med innholdet i stillingsbeskrivelsen.
            - **typeBegrunnelse**: Gi en kort begrunnelse for ditt valg. Vurder kun om stillingstypen matcher stillingsbeskrivelsen, og ikke detaljer som allerede er dekket under tittelen eller arbeidsforhold (heltid/deltid).
         
         **Sensitive ord:**
@@ -34,6 +34,7 @@ object StillingsanalyseTemplate {
         **Unntak:**
         
         Hvis et sensitivt ord brukes i sammenheng med stillingens arbeidsoppgaver, ansvar eller kvalifikasjoner (for eksempel "Oppfølging av deltakere på kvalifiseringsprogrammet (KVP)"), skal det ikke anses som sensitivt. Ingenting er sensitivt om det refererer til ønsket om en spesialist på et av de sensitive temaene.
+         ---
         
         **Svarformat:**
         
