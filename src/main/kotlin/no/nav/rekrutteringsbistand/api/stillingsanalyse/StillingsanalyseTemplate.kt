@@ -5,7 +5,7 @@ object StillingsanalyseTemplate {
 
     fun lagPrompt(stillingsanalyseDto: StillingsanalyseController.StillingsanalyseDto): String =
         """
-       Vennligst analyser følgende stillingsbeskrivelse og avgjør om den inneholder sensitiv informasjon basert på listen over sensitive ord. Hvis teksten inneholder noen av ordene fra listen, skal den anses som sensitiv med mindre ordene refererer til arbeidsoppgaver, ansvar eller mål for stillingen som skal besettes (for eksempel 'oppfølging av KVP-deltakere' for en 'støttekontakt').
+       Vennligst analyser  stillingsbeskrivelsen og avgjør om den inneholder sensitiv informasjon basert på listen over sensitive ord. Hvis teksten inneholder noen av ordene fra listen, skal den anses som sensitiv med mindre ordene refererer til arbeidsoppgaver, ansvar eller mål for stillingen som skal besettes (for eksempel 'oppfølging av KVP-deltakere' for en 'støttekontakt').
        Sensitive ord relatert til arbeidsoppgaver, ansvar eller mål direkte knyttet til stillingen skal ikke anses som sensitiv informasjon, og skal i de tilfellene oppføres som sensitiv=false.
 
         **Sensitive ord:**
