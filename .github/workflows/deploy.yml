@@ -29,7 +29,7 @@ jobs:
   deploy-to-dev:
     name: Deploy to dev
     needs: test
-    if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/openai-evaluering'
+    if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/trivy'
     runs-on: ubuntu-latest
     outputs:
       image: ${{ steps.docker-build-push.outputs.image }}
@@ -54,6 +54,8 @@ jobs:
           team: toi
           identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
           project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
+          # The tag "latest" should only be applied to images based on the default branch
+          tag: ${{ contains(fromJSON('["refs/heads/master", "refs/heads/main"]'), github.ref) && 'latest' || github.sha }}
       - uses: nais/deploy/actions/deploy@v2
         env:
           CLUSTER: dev-gcp
@@ -83,3 +85,13 @@ jobs:
         env:
           CLUSTER: prod-gcp
           RESOURCE: nais/prod-alerts.yaml
+
+  call-trivy-security-scan:
+    needs: deploy-to-dev
+    uses: navikt/toi-github-actions-workflows/.github/workflows/trivy-security-scan.yaml@main
+    with:
+      image: ${{ needs.deploy-to-dev.outputs.image }}
+    permissions:
+      id-token: write
+      security-events: write
+    secrets: inherit
