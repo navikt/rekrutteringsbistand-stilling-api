@@ -12,10 +12,10 @@ Maven: `mvn clean install`
 I application.yml, velg mellom mocket stilling eller mot en localhost stillingserver med profilene 'stillingMock' og 'eksternStilling'.
 stillingMock er default.
 
-### Starte applikasjonen i utviklingsmiljø
+### Starte applikasjonen i utviklingsmiljø 
 Start main i klassen RekrutteringsbistandApplication.
 
-## Docker
+## Docker 
 1. Bygg image: `docker build -t rekrutteringsbistand-stilling-api .`
 2. Kjør container: `docker run -d -p 9501:9501 rekrutteringsbistand-stilling-api`
 

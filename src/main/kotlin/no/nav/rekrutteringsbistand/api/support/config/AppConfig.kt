@@ -15,7 +15,7 @@ class AppConfig {
     @Bean
     fun restTemplate(): RestTemplate {
         val restTemplate = RestTemplateBuilder()
-                .setConnectTimeout(Duration.ofSeconds(10))
+                .setConnectTimeout(Duration.ofSeconds(30))
                 .setReadTimeout(Duration.ofMinutes(1))
                 .build()
         restTemplate.messageConverters.add(0, StringHttpMessageConverter(StandardCharsets.UTF_8))
