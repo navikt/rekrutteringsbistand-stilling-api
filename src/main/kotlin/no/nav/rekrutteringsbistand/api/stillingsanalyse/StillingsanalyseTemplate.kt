@@ -38,6 +38,8 @@ object StillingsanalyseTemplate {
             Vurdering: Sett `"sensitiv": true` fordi stillingen er relatert til IPS, og det står ikke noe spesifikt om at dette gjelder arbeidsoppgaver, så vi må anta at det her søkes etter personer med IPS tilknytning.
         2. Stillingstekten innholder teksten: "Ansvarsområder: Veilede personer med IPS."
             Vurdering: Sett `"sensitiv: false` fordi det er klart at det er snakk om arbeidsoppgaver, og det er ikke sensitivt at noen skal jobbe med IPS brukere.
+        3. Stillingsteksten inneholder "oppfølging av brukere med IPS".
+            Vurdering: Sett `"sensitiv: false` fordi det dette gjelder ansvarsoppgaver til de som får stillingen. Ingen sensitiv informasjon er avslørt, fordi det ikke sier noe sensitivt om personen som er tilknyttet denne stillingen.
             
         **Svarformat:**
         
