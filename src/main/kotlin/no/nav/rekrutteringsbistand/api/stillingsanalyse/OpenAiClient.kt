@@ -53,6 +53,7 @@ class OpenAiClient(
             )
 
             val cleanedResponse = response.body!!.removePrefix("```json").removeSuffix("```").trim()
+            secureLog.info("svar fra openai: $cleanedResponse")
 
             val stop = System.currentTimeMillis()
             log.info("OpenAI API Response for stilling ${stillingsanalyseDto.stillingsId} (${stop - start}ms)")
