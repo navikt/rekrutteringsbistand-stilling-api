@@ -12,7 +12,7 @@ object StillingsanalyseTemplate {
            - Sett `"sensitiv": true` hvis teksten inneholder sensitive ord som avslører informasjon om enkeltpersoner eller deres deltakelse i programmer og tiltak.
            - Sett `"sensitiv": false` hvis sensitive ord brukes i forbindelse med arbeidsoppgaver, ansvar eller mål som er en del av stillingen, uten å nevne spesifikke personer.
            - **Viktig:** Arbeid med sensitive oppgaver, som oppfølging av deltakere i KVP eller arbeidsrettede tiltak, er **ikke** sensitivt med mindre det identifiserer enkeltpersoner eller deres deltakelse i spesifikke programmer.
-           - Hvis det ike er klart om dette gjelder oppgaver, eller om det gjelder egenskaper til personer tilknyttet stillingen som søkere, sett `"sensitiv": true` for å beskytte personvernet til sårbare grupper.
+           - Hvis det er for lite informasjon til å finne ut om konteksten til et sensitivt ord, sett alltid stillingen som sensitiv.
         
         2. **Samsvar med tittel:**
         
