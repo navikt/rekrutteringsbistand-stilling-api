@@ -2,12 +2,15 @@ package no.nav.rekrutteringsbistand.api.stillingsanalyse
 
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingskategori
+import no.nav.rekrutteringsbistand.api.support.log
 import no.nav.security.token.support.core.api.Protected
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
-import org.springframework.http.HttpStatusCode
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.client.HttpClientErrorException
 
 @RestController
@@ -15,7 +18,7 @@ import org.springframework.web.client.HttpClientErrorException
 @RequestMapping("/rekrutteringsbistand/stillingsanalyse")
 class StillingsanalyseController(
     private val openAiClient: OpenAiClient,
-    private val tokenUtils: TokenUtils
+    private val tokenUtils: TokenUtils,
 ) {
 
     @PostMapping
@@ -23,10 +26,25 @@ class StillingsanalyseController(
         @RequestBody stillingsanalyseDto: StillingsanalyseDto
     ): ResponseEntity<StillingsanalyseResponsDto> {
         tokenUtils.hentInnloggetVeileder().validerMinstEnAvRollene()
-        if(stillingsanalyseDto.source != "DIR") {
-            throw HttpClientErrorException.create("Kan kun analysere stillinger med source DIR", HttpStatus.BAD_REQUEST, "Bad request", HttpHeaders(),byteArrayOf(),null)
+
+        if (stillingsanalyseDto.source != "DIR") {
+            log.error("Mottatt stilling for analyse som ikke er source=DIR, source=${stillingsanalyseDto.source}")
+            throw HttpClientErrorException.create(
+                "Kan kun analysere stillinger med source DIR",
+                HttpStatus.BAD_REQUEST,
+                "Bad request",
+                HttpHeaders(),
+                byteArrayOf(),
+                null
+            )
         }
-        val response = openAiClient.analyserStilling(stillingsanalyseDto)
+
+        val filtrertDto = stillingsanalyseDto.copy(
+            stillingstittel = persondataFilter.filtrerUtPersonsensitiveData(stillingsanalyseDto.stillingstittel),
+            stillingstekst = persondataFilter.filtrerUtPersonsensitiveData(stillingsanalyseDto.stillingstekst)
+        )
+
+        val response = openAiClient.analyserStilling(filtrertDto)
         return ResponseEntity.ok(response)
     }
 
