@@ -22,6 +22,9 @@ class OpenAiClient(
     @Value("\${openai.api.key}") private val openAiApiKey: String,
 ) {
     fun analyserStilling(stillingsanalyseDto: StillingsanalyseController.StillingsanalyseDto): StillingsanalyseResponsDto {
+        if(stillingsanalyseDto.source != "DIR") {
+            throw IllegalArgumentException("Kan kun analysere stillinger med source DIR")
+        }
         val systemMessage = StillingsanalyseTemplate.SYSTEM_MESSAGE
         val userMessage = StillingsanalyseTemplate.lagUserPrompt(stillingsanalyseDto)
 
@@ -36,7 +39,7 @@ class OpenAiClient(
                 OpenAiMessage(role = "user", content = userMessage)
             ),
             temperature = 0.5,
-            max_tokens = 3000
+            max_tokens = 4000
         )
 
         log.info("OpenAI API Request for stilling ${stillingsanalyseDto.stillingsId} url: $openAiApiUrl")
