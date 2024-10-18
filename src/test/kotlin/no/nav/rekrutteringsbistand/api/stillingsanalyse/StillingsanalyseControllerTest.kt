@@ -63,7 +63,8 @@ internal class StillingsanalyseControllerTest {
             stillingsId = "1",
             stillingstype = Stillingskategori.STILLING,
             stillingstittel = "Teststilling",
-            stillingstekst = "Dette er en test"
+            stillingstekst = "Dette er en test",
+            source = "DIR"
         )
 
         val headers = HttpHeaders()
@@ -93,6 +94,34 @@ internal class StillingsanalyseControllerTest {
     }
 
     @Test
+    fun `analyserStilling should return bad request if not source=dir`() {
+        mockOpenAiResponse(openAiApiResponseBody)
+
+        val stillingsanalyseDto = StillingsanalyseController.StillingsanalyseDto(
+            stillingsId = "1",
+            stillingstype = Stillingskategori.STILLING,
+            stillingstittel = "Teststilling",
+            stillingstekst = "Dette er en test",
+            source = "ASS"
+        )
+
+        val headers = HttpHeaders()
+        headers.contentType = MediaType.APPLICATION_JSON
+
+        val entity = HttpEntity(stillingsanalyseDto, headers)
+
+        val url = "$localBaseUrl/rekrutteringsbistand/stillingsanalyse"
+
+        val response = restTemplate.postForEntity(
+            url,
+            entity,
+            StillingsanalyseController.StillingsanalyseResponsDto::class.java
+        )
+
+        assertThat(response.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
+    }
+
+    @Test
     fun `analyserStilling should return 403 Forbidden if user lacks UTVIKLER role`() {
         mockLogin.leggAzureVeilederTokenPåAlleRequests(restTemplate)
 
@@ -100,7 +129,8 @@ internal class StillingsanalyseControllerTest {
             stillingsId = "1",
             stillingstype = Stillingskategori.STILLING,
             stillingstittel = "Teststilling",
-            stillingstekst = "Dette er en test"
+            stillingstekst = "Dette er en test",
+            source= "DIR"
         )
 
         val headers = HttpHeaders()
