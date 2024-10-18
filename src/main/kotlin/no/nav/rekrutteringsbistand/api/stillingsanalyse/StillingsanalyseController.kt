@@ -40,8 +40,8 @@ class StillingsanalyseController(
         }
 
         val filtrertDto = stillingsanalyseDto.copy(
-            stillingstittel = persondataFilter.filtrerUtPersonsensitiveData(stillingsanalyseDto.stillingstittel),
-            stillingstekst = persondataFilter.filtrerUtPersonsensitiveData(stillingsanalyseDto.stillingstekst)
+            stillingstittel = PersondataFilter.filtrerUtPersonsensitiveData(stillingsanalyseDto.stillingstittel),
+            stillingstekst = PersondataFilter.filtrerUtPersonsensitiveData(stillingsanalyseDto.stillingstekst)
         )
 
         val response = openAiClient.analyserStilling(filtrertDto)

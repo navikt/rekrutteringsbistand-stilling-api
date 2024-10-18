@@ -1,14 +1,16 @@
 package no.nav.rekrutteringsbistand.api.stillingsanalyse
 
+object PersondataFilter {
 
-object persondataFilter {
-
+    // Regex for å matche e-postadresser
     private val emailRegex = "[a-zA-Z0-9_+.%-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}".toRegex()
-    private val langtNummerRegex = "\\b\\d{3,}\\b".toRegex()
+
+    // Regex for å matche tall med 3 eller flere sifre, med eller uten mellomrom eller bindestrek
+    private val numberRegex = "\\d(?:[ -]?\\d){2,}".toRegex()
 
     fun filtrerUtPersonsensitiveData(tekst: String): String {
         return tekst
             .let { emailRegex.replace(it, "emailadresse") }
-            .let { langtNummerRegex.replace(it, "") }
+            .let { numberRegex.replace(it, "") }
     }
 }
