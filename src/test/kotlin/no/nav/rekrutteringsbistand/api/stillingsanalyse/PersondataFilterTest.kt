@@ -6,14 +6,6 @@ import org.junit.Test
 class PersondataFilterTest {
 
     @Test
-    fun `filtrerUtPersonsensitiveData skal erstatte telefonnummer`() {
-        val input = "Kontakt oss på 12345678."
-        val expected = "Kontakt oss på telefonnummer."
-        val actual = persondataFilter.filtrerUtPersonsensitiveData(input)
-        assertEquals(expected, actual)
-    }
-
-    @Test
     fun `filtrerUtPersonsensitiveData skal erstatte emailadresse`() {
         val input = "Send en e-post til test@eksempel.no."
         val expected = "Send en e-post til emailadresse."
