@@ -38,5 +38,6 @@ class StillingsanalyseController(
         val stillingstype: Stillingskategori,
         val stillingstittel: String,
         val stillingstekst: String,
+        val source: String
     )
 }

@@ -22,6 +22,9 @@ class OpenAiClient(
     @Value("\${openai.api.key}") private val openAiApiKey: String,
 ) {
     fun analyserStilling(stillingsanalyseDto: StillingsanalyseController.StillingsanalyseDto): StillingsanalyseResponsDto {
+        if(stillingsanalyseDto.source != "DIR") {
+            throw IllegalArgumentException("Kan kun analysere stillinger med source DIR")
+        }
         val systemMessage = StillingsanalyseTemplate.SYSTEM_MESSAGE
         val userMessage = StillingsanalyseTemplate.lagUserPrompt(stillingsanalyseDto)
 
