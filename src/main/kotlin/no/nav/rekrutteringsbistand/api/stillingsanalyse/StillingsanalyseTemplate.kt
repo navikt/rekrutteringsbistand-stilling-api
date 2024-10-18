@@ -15,7 +15,7 @@ object StillingsanalyseTemplate {
         
         I noen tilfeller står det svært lite i stillingsannonsen. For eksempel kan det stå kun "IPS" i stillingsbeskrivelsen. Eller "Oppfølging av IPS". Vi må da anta at dette er en liste over personer med IPS som noen har laget.
         
-        I tillegg vil jeg gjerne ha tilbake om tittel og tekst samsvarer. Er det en fornuftig tittel på stillingsannonsen? Bidrar tittel til å gi inntrykk av at dette er en personvernssensitiv stilling?
+        I tillegg vil jeg gjerne ha tilbake om tittel og tekst samsvarer. Er det en fornuftig tittel på stillingsannonsen?
         
         I tillegg vil jeg gjerne ha informasjon om stillingstype samsvarer med stillingsbeskrivelse. Det er tre typer stillinger
          - Type Formidling: Ingen spesielle krav, ofte lite tekst, og det er ok.
