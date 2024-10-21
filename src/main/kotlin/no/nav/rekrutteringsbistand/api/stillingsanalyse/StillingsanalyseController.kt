@@ -25,6 +25,7 @@ class StillingsanalyseController(
     fun analyserStilling(
         @RequestBody stillingsanalyseDto: StillingsanalyseDto
     ): ResponseEntity<StillingsanalyseResponsDto> {
+        log.info("Analyserer stilling ${stillingsanalyseDto.stillingsId}")
         tokenUtils.hentInnloggetVeileder().validerMinstEnAvRollene()
 
         if (stillingsanalyseDto.source != "DIR") {
