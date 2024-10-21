@@ -62,6 +62,7 @@ spec:
       external:
         - host: pam-ad-api.intern.nav.no
         - host: rekrutteringsbistand-kandidat-api.prod-fss-pub.nais.io
+        - host: arbeidsmarked-prod.openai.azure.com
   envFrom:
     - secret: openai-toi-rekrutteringsbistand-stilling
   env:
