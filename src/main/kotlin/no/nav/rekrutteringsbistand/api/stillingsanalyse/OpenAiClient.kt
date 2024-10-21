@@ -37,7 +37,7 @@ class OpenAiClient(
                 OpenAiMessage(role = "user", content = userMessage)
             ),
             temperature = 0.5,
-            max_tokens = 4000
+            max_tokens = 10000
         )
 
         log.info("OpenAI API Request for stilling ${stillingsanalyseDto.stillingsId} url: $openAiApiUrl")
