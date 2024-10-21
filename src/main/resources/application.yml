@@ -20,3 +20,8 @@ ad:
     jobbsøkerrettet: ${AD_GRUPPE_JOBBSOKERRETTET}
     arbeidsgiverrettet: ${AD_GRUPPE_ARBEIDSGIVERRETTET}
     utvikler: ${AD_GRUPPE_UTVIKLER}
+
+openai:
+  api:
+    url: ${OPENAI_API_URL}
+    key: ${OPENAI_API_KEY}

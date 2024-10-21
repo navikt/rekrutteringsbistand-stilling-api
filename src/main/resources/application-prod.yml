@@ -6,11 +6,6 @@ external:
   pam-ad-api.url: https://pam-ad-api.intern.nav.no/adapi
   kandidatliste-api.url: https://rekrutteringsbistand-kandidat-api.prod-fss-pub.nais.io/rekrutteringsbistand-kandidat-api/rest/veileder/stilling
 
-openai:
-  api:
-    url: TODO
-    key: TODO
-
 spring:
   datasource:
     url: jdbc:postgresql://${NAIS_DATABASE_REKRUTTERINGSBISTAND_STILLING_API_REKRUTTERINGSBISTAND_STILLING_HOST}:${NAIS_DATABASE_REKRUTTERINGSBISTAND_STILLING_API_REKRUTTERINGSBISTAND_STILLING_PORT}/${NAIS_DATABASE_REKRUTTERINGSBISTAND_STILLING_API_REKRUTTERINGSBISTAND_STILLING_DATABASE}
