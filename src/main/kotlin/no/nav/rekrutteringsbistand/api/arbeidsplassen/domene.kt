@@ -18,7 +18,6 @@ data class OpprettStillingDto(
     val contactList: List<Contact>? = ArrayList(),
     val medium: String? = null,
     val employer: Arbeidsgiver? = null,
-    val location: Geografi? = null,
     val locationList: List<Geografi>? = ArrayList(),
     val categoryList: List<Kategori>? = ArrayList(),
     val properties: Map<String, String>? = HashMap(),

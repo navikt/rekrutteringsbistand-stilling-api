@@ -34,7 +34,6 @@ class StillingTest {
 
         assertThat(kopiertStilling.medium).isEqualTo(stilling.medium)
         assertThat(kopiertStilling.employer).isEqualTo(stilling.employer)
-        assertThat(kopiertStilling.location).isEqualTo(stilling.location)
         assertThat(kopiertStilling.locationList).isEqualTo(stilling.locationList)
         assertThat(kopiertStilling.properties).isEqualTo(stilling.properties)
         assertThat(kopiertStilling.businessName).isEqualTo(stilling.businessName)

@@ -52,7 +52,6 @@ data class Stilling(
             contactList = contactList,
             medium = medium,
             employer = employer,
-            location = location,
             locationList = locationList,
             categoryList = categoryList,
             properties = properties,
@@ -142,38 +141,43 @@ data class Kategori(
     val parentId: Int?
 ) {
     fun toNonNullKategori() =
-        if (code != null && name != null)
-            NonNullKategori(code = code, name = name)
+        if (code != null && name != null && categoryType != null)
+            NonNullKategori(code = code, name = name, categoryType = categoryType)
         else
             null
 
+
+
     companion object {
+        private val styrk08SeksSiffer = Regex("""^[0-9]{4}\.[0-9]{2}$""")
+
         fun List<Kategori>.styrkkodenavn(
             kontekstForLoggmelding: String,
         ): String {
-            val passendeStyrkkkoder = this
-                .mapNotNull { it.toNonNullKategori() }
-                .filter { it.code.matches(styrk08SeksSiffer) }
 
-            return when (val antall = passendeStyrkkkoder.size) {
-                1 -> passendeStyrkkkoder[0].name
-                0 -> {
-                    log.info("Fant ikke styrk8 for {}", kontekstForLoggmelding)
-                    "Stilling uten valgt jobbtittel"
-                }
-                else -> {
-                    log.info("Forventer en 6-sifret styrk08-kode, fant $antall stykker for {}: {}", kontekstForLoggmelding, this.joinToString { "${it.code}-${it.name}" })
-                    passendeStyrkkkoder.map { it.name }.sorted().joinToString("/")
-                }
+            if(filter { it.categoryType == "JANZZ" }.size > 1) {
+                log.error("Mer enn én JANZZ-kategori funnet for kategori i $kontekstForLoggmelding")
             }
-        }
 
-        private val styrk08SeksSiffer = Regex("""^[0-9]{4}\.[0-9]{2}$""")
+            val janzzKategori = find { it.categoryType == "JANZZ" }
+            if (janzzKategori != null) {
+                return janzzKategori.name ?: throw IllegalStateException("JANZZ-kategori mangler navn")
+            }
+
+            val styrkKategori = find { it.categoryType == "STYRK" && it.code?.matches(styrk08SeksSiffer) == true }
+            if (styrkKategori != null) {
+                return styrkKategori.name ?: throw IllegalStateException("STYRK-kategori mangler navn")
+            }
+
+            throw IllegalStateException("Ingen passende kategori funnet: verken JANZZ eller gyldig STYRK")
+        }
     }
+
 }
 
 data class NonNullKategori(
     val code: String,
+    val categoryType: String,
     val name: String,
 )
 
@@ -238,7 +242,6 @@ data class OpprettStillingDto(
         contactList = contactList,
         medium = medium,
         employer = employer,
-        location = location,
         locationList = locationList,
         categoryList = categoryList,
         properties = properties,
