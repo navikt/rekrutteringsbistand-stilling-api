@@ -156,7 +156,7 @@ data class Kategori(
             kontekstForLoggmelding: String,
         ): String {
 
-            if(filter { it.categoryType == "JANZZ" }.size > 1) {
+            if(filter(Kategori::erJanzz).size > 1) {
                 log.error("Mer enn én JANZZ-kategori funnet for kategori i $kontekstForLoggmelding")
             }
 
