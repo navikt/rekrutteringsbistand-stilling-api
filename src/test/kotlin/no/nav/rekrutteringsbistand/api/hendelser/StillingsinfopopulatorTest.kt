@@ -144,7 +144,51 @@ class StillingsinfopopulatorTest {
         )
 
     @Test
-    fun `populering av en direktemeldt stilling bruker styrk i stillingstittel`() {
+    fun `populering av en direktemeldt stilling bruker janzz i stillingstittel`() {
+        val stillingsId = Stillingsid(UUID.randomUUID())
+
+        Mockito.`when`(arbeidsplassenKlient.hentStillingBasertPåUUID(stillingsId.toString()))
+            .thenReturn(
+                Some(
+                    enStillingMed(
+                        tittel = "Tittel fra arbeidsplassen",
+                        source = "DIR",
+                        categoryList = listOf(Kategori(
+                            name = "Kokk",
+                            code = "0000.00",
+                            id = null,
+                            categoryType = null,
+                            description = null,
+                            parentId = null,
+                        ),Kategori(
+                            name = "Statsminister",
+                            code = "0000.00",
+                            id = null,
+                            categoryType = "JANZZ",
+                            description = null,
+                            parentId = null,
+                        ))
+                    )
+                )
+            )
+
+        testRapid.sendTestMessage(
+            """
+            {
+                "uinteressant": "felt",
+                "uinteressant2": "felt2",
+                "stillingsId": "${stillingsId.asString()}"
+            }
+        """.trimIndent()
+        )
+        assertEquals(1, testRapid.inspektør.size)
+        val message = testRapid.inspektør.message(0)
+
+        assertEquals("Statsminister", message.path("stilling").get("stillingstittel").asText())
+    }
+
+    @Test
+    fun `populering av en direktemeldt stilling bruker styrk i stillingstittel hvis janzz ikke finnes`() {
         val stillingsId = Stillingsid(UUID.randomUUID())
 
         Mockito.`when`(arbeidsplassenKlient.hentStillingBasertPåUUID(stillingsId.toString()))

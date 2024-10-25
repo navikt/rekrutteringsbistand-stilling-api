@@ -164,12 +164,12 @@ data class Kategori(
                 return janzzKategori.name ?: throw IllegalStateException("JANZZ-kategori mangler navn")
             }
 
-            val styrkKategori = find { it.categoryType == "STYRK" && it.code?.matches(styrk08SeksSiffer) == true }
+            val styrkKategori = find { it.code?.matches(styrk08SeksSiffer) == true }
             if (styrkKategori != null) {
                 return styrkKategori.name ?: throw IllegalStateException("STYRK-kategori mangler navn")
             }
 
-            throw IllegalStateException("Ingen passende kategori funnet: verken JANZZ eller gyldig STYRK")
+            return "Stilling uten valgt jobbtittel"
         }
     }
 
