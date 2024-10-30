@@ -72,10 +72,10 @@ data class Stilling(
             Stillingskategori.STILLING,
             Stillingskategori.FORMIDLING,
             Stillingskategori.ARBEIDSTRENING ->
-                this.copy(title = styrkEllerTitle())
+                this.copy(title = hentInternEllerEksternTittel())
         }
 
-    fun styrkEllerTitle(): String =
+    fun hentInternEllerEksternTittel(): String =
         if (erDirektemeldt())
             categoryList.hentTittel(kontekstForLoggmelding = "stillingsId $uuid opprettet $created")
         else
