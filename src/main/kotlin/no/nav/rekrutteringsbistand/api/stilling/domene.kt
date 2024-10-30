@@ -3,7 +3,7 @@ package no.nav.rekrutteringsbistand.api.stilling
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import no.nav.rekrutteringsbistand.api.arbeidsplassen.OpprettStillingAdministrationDto
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
-import no.nav.rekrutteringsbistand.api.stilling.Kategori.Companion.styrkkodenavn
+import no.nav.rekrutteringsbistand.api.stilling.Kategori.Companion.hentTittel
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingskategori
 import no.nav.rekrutteringsbistand.api.support.log
 import java.time.LocalDateTime
@@ -42,7 +42,7 @@ data class Stilling(
     val activationOnPublishingDate: Boolean?
 ) {
     fun toKopiertStilling(tokenUtils: TokenUtils): no.nav.rekrutteringsbistand.api.arbeidsplassen.OpprettStillingDto {
-        val nyTittel = categoryList.styrkkodenavn("kopi av stillingsId $uuid som ble opprettet $created")
+        val nyTittel = categoryList.hentTittel("kopi av stillingsId $uuid som ble opprettet $created")
 
         return no.nav.rekrutteringsbistand.api.arbeidsplassen.OpprettStillingDto(
             tittel = nyTittel,
@@ -77,7 +77,7 @@ data class Stilling(
 
     fun styrkEllerTitle(): String =
         if (erDirektemeldt())
-            categoryList.styrkkodenavn(kontekstForLoggmelding = "stillingsId $uuid opprettet $created")
+            categoryList.hentTittel(kontekstForLoggmelding = "stillingsId $uuid opprettet $created")
         else
             title
 
@@ -152,7 +152,7 @@ data class Kategori(
     companion object {
         private val styrk08SeksSiffer = Regex("""^[0-9]{4}\.[0-9]{2}$""")
 
-        fun List<Kategori>.styrkkodenavn(
+        fun List<Kategori>.hentTittel(
             kontekstForLoggmelding: String,
         ): String {
 
