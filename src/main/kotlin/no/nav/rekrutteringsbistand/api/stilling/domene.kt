@@ -3,7 +3,7 @@ package no.nav.rekrutteringsbistand.api.stilling
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import no.nav.rekrutteringsbistand.api.arbeidsplassen.OpprettStillingAdministrationDto
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
-import no.nav.rekrutteringsbistand.api.stilling.Kategori.Companion.styrkkodenavn
+import no.nav.rekrutteringsbistand.api.stilling.Kategori.Companion.hentTittel
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingskategori
 import no.nav.rekrutteringsbistand.api.support.log
 import java.time.LocalDateTime
@@ -42,7 +42,7 @@ data class Stilling(
     val activationOnPublishingDate: Boolean?
 ) {
     fun toKopiertStilling(tokenUtils: TokenUtils): no.nav.rekrutteringsbistand.api.arbeidsplassen.OpprettStillingDto {
-        val nyTittel = categoryList.styrkkodenavn("kopi av stillingsId $uuid som ble opprettet $created")
+        val nyTittel = categoryList.hentTittel("kopi av stillingsId $uuid som ble opprettet $created")
 
         return no.nav.rekrutteringsbistand.api.arbeidsplassen.OpprettStillingDto(
             tittel = nyTittel,
@@ -52,7 +52,6 @@ data class Stilling(
             contactList = contactList,
             medium = medium,
             employer = employer,
-            location = location,
             locationList = locationList,
             categoryList = categoryList,
             properties = properties,
@@ -73,12 +72,12 @@ data class Stilling(
             Stillingskategori.STILLING,
             Stillingskategori.FORMIDLING,
             Stillingskategori.ARBEIDSTRENING ->
-                this.copy(title = styrkEllerTitle())
+                this.copy(title = hentInternEllerEksternTittel())
         }
 
-    fun styrkEllerTitle(): String =
+    fun hentInternEllerEksternTittel(): String =
         if (erDirektemeldt())
-            categoryList.styrkkodenavn(kontekstForLoggmelding = "stillingsId $uuid opprettet $created")
+            categoryList.hentTittel(kontekstForLoggmelding = "stillingsId $uuid opprettet $created")
         else
             title
 
@@ -142,38 +141,36 @@ data class Kategori(
     val parentId: Int?
 ) {
     fun toNonNullKategori() =
-        if (code != null && name != null)
-            NonNullKategori(code = code, name = name)
+        if (code != null && name != null && categoryType != null)
+            NonNullKategori(code = code, name = name, categoryType = categoryType)
         else
             null
 
+    fun erJanzz() = categoryType == "JANZZ"
+    fun erStyrk() = code?.matches(styrk08SeksSiffer) == true
+
     companion object {
-        fun List<Kategori>.styrkkodenavn(
+        private val styrk08SeksSiffer = Regex("""^[0-9]{4}\.[0-9]{2}$""")
+
+        fun List<Kategori>.hentTittel(
             kontekstForLoggmelding: String,
         ): String {
-            val passendeStyrkkkoder = this
-                .mapNotNull { it.toNonNullKategori() }
-                .filter { it.code.matches(styrk08SeksSiffer) }
 
-            return when (val antall = passendeStyrkkkoder.size) {
-                1 -> passendeStyrkkkoder[0].name
-                0 -> {
-                    log.info("Fant ikke styrk8 for {}", kontekstForLoggmelding)
-                    "Stilling uten valgt jobbtittel"
-                }
-                else -> {
-                    log.info("Forventer en 6-sifret styrk08-kode, fant $antall stykker for {}: {}", kontekstForLoggmelding, this.joinToString { "${it.code}-${it.name}" })
-                    passendeStyrkkkoder.map { it.name }.sorted().joinToString("/")
-                }
+            if(filter(Kategori::erJanzz).size > 1) {
+                log.error("Mer enn én JANZZ-kategori funnet for kategori i $kontekstForLoggmelding")
             }
-        }
 
-        private val styrk08SeksSiffer = Regex("""^[0-9]{4}\.[0-9]{2}$""")
+            return find(Kategori::erJanzz)?.name
+                ?: find(Kategori::erStyrk)?.name
+                ?: "Stilling uten valgt jobbtittel"
+        }
     }
+
 }
 
 data class NonNullKategori(
     val code: String,
+    val categoryType: String,
     val name: String,
 )
 
@@ -238,7 +235,6 @@ data class OpprettStillingDto(
         contactList = contactList,
         medium = medium,
         employer = employer,
-        location = location,
         locationList = locationList,
         categoryList = categoryList,
         properties = properties,

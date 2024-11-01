@@ -45,7 +45,7 @@ class StillingsinfoPopulator(
 
         arbeidsplassenKlient.hentStillingBasertPåUUID(stillingsId.asString()).map {
             packet["stilling"] = Stilling(
-                stillingstittel = it.styrkEllerTitle(),
+                stillingstittel = it.hentInternEllerEksternTittel(),
                 erDirektemeldt = it.source == "DIR",
                 stillingOpprettetTidspunkt = it.publishedByAdmin?.let { tidspunkt -> isoStringTilNorskTidssone(tidspunkt) },
                 antallStillinger = parseAntallStillinger(it),
