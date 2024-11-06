@@ -147,7 +147,7 @@ data class Kategori(
             null
 
     fun erJanzz() = categoryType == "JANZZ"
-    fun erStyrk() = code?.matches(styrk08SeksSiffer) == true
+    fun erStyrk08Nav() = code?.matches(styrk08SeksSiffer) == true
 
     companion object {
         private val styrk08SeksSiffer = Regex("""^[0-9]{4}\.[0-9]{2}$""")
@@ -160,8 +160,12 @@ data class Kategori(
                 log.error("Mer enn én JANZZ-kategori funnet for kategori i $kontekstForLoggmelding")
             }
 
-            return find(Kategori::erJanzz)?.name
-                ?: find(Kategori::erStyrk)?.name
+            if(filter(Kategori::erStyrk08Nav).size > 1) {
+                log.error("Mer enn én JANZZ-kategori funnet for kategori i $kontekstForLoggmelding")
+            }
+
+            return find(Kategori::erStyrk08Nav)?.name
+                ?: find(Kategori::erJanzz)?.name
                 ?: "Stilling uten valgt jobbtittel"
         }
     }
