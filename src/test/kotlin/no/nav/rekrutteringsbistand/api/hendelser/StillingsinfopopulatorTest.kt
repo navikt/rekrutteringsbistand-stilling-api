@@ -22,7 +22,6 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.context.ApplicationContext
 import org.springframework.test.context.junit4.SpringRunner
-import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
@@ -101,16 +100,18 @@ class StillingsinfopopulatorTest {
         assertEquals("felt2", message.path("uinteressant2").asText())
         assertEquals(stillingsId.asString(), message.path("stillingsId").asText())
         assertEquals(stillingsTittel, message.path("stilling").get("stillingstittel").asText())
-        assertEquals(stillingsTittel=="DIR", message.path("stilling").get("erDirektemeldt").asBoolean())
+        assertEquals(stillingsTittel == "DIR", message.path("stilling").get("erDirektemeldt").asBoolean())
         assertEquals(
             ZonedDateTime.of(stillingstidspunkt, ZoneId.of("Europe/Oslo")),
-            message.path("stilling").get("stillingOpprettetTidspunkt").asZonedDateTime().toInstant().atZone(ZoneId.of("Europe/Oslo"))
+            message.path("stilling").get("stillingOpprettetTidspunkt").asZonedDateTime().toInstant()
+                .atZone(ZoneId.of("Europe/Oslo"))
         )
         assertEquals(antallStillinger, message.path("stilling").get("antallStillinger").asInt())
         assertEquals(organisasjonsnummer, message.path("stilling").get("organisasjonsnummer").asText())
         assertEquals(
             ZonedDateTime.of(stillingensPubliseringstidspunkt, ZoneId.of("Europe/Oslo")),
-            ZonedDateTime.parse(message.path("stilling").get("stillingensPubliseringstidspunkt").asText()).toInstant().atZone(ZoneId.of("Europe/Oslo"))
+            ZonedDateTime.parse(message.path("stilling").get("stillingensPubliseringstidspunkt").asText()).toInstant()
+                .atZone(ZoneId.of("Europe/Oslo"))
         )
         assertFalse(message.path("stilling").get("erDirektemeldt").asBoolean())
         val stillingNode = message.path("stillingsinfo")
@@ -144,7 +145,7 @@ class StillingsinfopopulatorTest {
         )
 
     @Test
-    fun `populering av en direktemeldt stilling bruker janzz i stillingstittel`() {
+    fun `populering av en direktemeldt stilling bruker janzz i stillingstittel hvis ikke styrk08Nav finnes`() {
         val stillingsId = Stillingsid(UUID.randomUUID())
 
         Mockito.`when`(arbeidsplassenKlient.hentStillingBasertPåUUID(stillingsId.toString()))
@@ -153,21 +154,23 @@ class StillingsinfopopulatorTest {
                     enStillingMed(
                         tittel = "Tittel fra arbeidsplassen",
                         source = "DIR",
-                        categoryList = listOf(Kategori(
-                            name = "Kokk",
-                            code = "0000.00",
-                            id = null,
-                            categoryType = null,
-                            description = null,
-                            parentId = null,
-                        ),Kategori(
-                            name = "Statsminister",
-                            code = "0000.00",
-                            id = null,
-                            categoryType = "JANZZ",
-                            description = null,
-                            parentId = null,
-                        ))
+                        categoryList = listOf(
+                            Kategori(
+                                name = "Kokk",
+                                code = "0000",
+                                id = null,
+                                categoryType = null,
+                                description = null,
+                                parentId = null,
+                            ), Kategori(
+                                name = "Statsminister",
+                                code = "0000.00",
+                                id = null,
+                                categoryType = "JANZZ",
+                                description = null,
+                                parentId = null,
+                            )
+                        )
                     )
                 )
             )
@@ -188,7 +191,7 @@ class StillingsinfopopulatorTest {
     }
 
     @Test
-    fun `populering av en direktemeldt stilling bruker styrk i stillingstittel hvis janzz ikke finnes`() {
+    fun `populering av en direktemeldt stilling bruker styrk08Nav i stillingstittel hvis janzz og Styrk08 finnes`() {
         val stillingsId = Stillingsid(UUID.randomUUID())
 
         Mockito.`when`(arbeidsplassenKlient.hentStillingBasertPåUUID(stillingsId.toString()))
@@ -197,14 +200,24 @@ class StillingsinfopopulatorTest {
                     enStillingMed(
                         tittel = "Tittel fra arbeidsplassen",
                         source = "DIR",
-                        categoryList = listOf(Kategori(
-                            name = "Kokk",
-                            code = "0000.00",
-                            id = null,
-                            categoryType = null,
-                            description = null,
-                            parentId = null,
-                        ))
+                        categoryList = listOf(
+                            Kategori(
+                                name = "Kokk",
+                                code = "0000.00",
+                                id = null,
+                                categoryType = null,
+                                description = null,
+                                parentId = null,
+                            ),
+                            Kategori(
+                                name = "Statsminister",
+                                code = "000000",
+                                id = null,
+                                categoryType = "JANZZ",
+                                description = null,
+                                parentId = null,
+                            )
+                        )
                     )
                 )
             )
@@ -234,14 +247,16 @@ class StillingsinfopopulatorTest {
                     enStillingMed(
                         tittel = "Tittel fra arbeidsplassen",
                         source = "AMEDIA",
-                        categoryList = listOf(Kategori(
-                            name = "Kokk",
-                            code = "0000.00",
-                            id = null,
-                            categoryType = null,
-                            description = null,
-                            parentId = null,
-                        ))
+                        categoryList = listOf(
+                            Kategori(
+                                name = "Kokk",
+                                code = "0000.00",
+                                id = null,
+                                categoryType = null,
+                                description = null,
+                                parentId = null,
+                            )
+                        )
                     )
                 )
             )
@@ -291,7 +306,9 @@ class StillingsinfopopulatorTest {
         assertThat(testRapid.inspektør.size).isOne
         val message = testRapid.inspektør.message(0)
         val stillingsinfo = message.path("stillingsinfo")
-        assertThat(stillingsinfo.path("stillingsinfoid").asText()).isEqualTo(lagretStillingsinfo.stillingsinfoid.toString())
+        assertThat(
+            stillingsinfo.path("stillingsinfoid").asText()
+        ).isEqualTo(lagretStillingsinfo.stillingsinfoid.toString())
         assertThat(stillingsinfo.path("stillingsid").asText()).isEqualTo(lagretStillingsinfo.stillingsid.toString())
         assertTrue(stillingsinfo.path("stillingskategori").isNull)
         assertTrue(stillingsinfo.path("eier").isNull)
