@@ -161,7 +161,7 @@ data class Kategori(
             }
 
             if(filter(Kategori::erStyrk08Nav).size > 1) {
-                log.error("Mer enn én JANZZ-kategori funnet for kategori i $kontekstForLoggmelding")
+                log.error("Mer enn én STYRK08Nav-kategori funnet for kategori i $kontekstForLoggmelding")
             }
 
             return find(Kategori::erStyrk08Nav)?.name
