@@ -33,7 +33,7 @@
         <resilience4j.version>2.0.0</resilience4j.version>
         <mockito-kotlin.version>2.2.0</mockito-kotlin.version>
         <flyway.version>9.5.1</flyway.version>
-        <h2.version>2.2.220</h2.version>
+        <testcontainers.version>1.20.3</testcontainers.version>
         <postgresql.version>42.5.5</postgresql.version>
         <okhttp.version>4.10.0</okhttp.version>
         <nav-common.version>3.2024.04.10_12.03-fddb587e3a68</nav-common.version>
@@ -117,16 +117,16 @@
             <artifactId>spring-data-jdbc</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-            <version>${h2.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <version>${postgresql.version}</version>
             <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>${testcontainers.version}</version>
+            <scope>test</scope>
         </dependency>
 
         <!-- JSON-logging -->
