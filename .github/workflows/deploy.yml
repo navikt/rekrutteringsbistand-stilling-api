@@ -29,7 +29,7 @@ jobs:
   deploy-to-dev:
     name: Deploy to dev
     needs: test
-    if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/benytt_postgres_i_testcontainers_for_tester'
+    if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/ny_tabell_for_intern_stillinger'
     runs-on: ubuntu-latest
     outputs:
       image: ${{ steps.docker-build-push.outputs.image }}
