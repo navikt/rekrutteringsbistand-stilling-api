@@ -24,12 +24,10 @@ class AuthorizedPartyUtils(
     private val kandidatvarselAzpName: String = ""
 
     fun kallKommerFraStillingIndekser(): Boolean {
-        log.info("authorizedPartyName(): ${authorizedPartyName()}, stillingIndekserAzpName: $stillingIndekserAzpName")
         return authorizedPartyName() == stillingIndekserAzpName
     }
 
     fun kallKommerFraVisStilling(): Boolean {
-        secureLog.info("authorizedPartyName(): ${authorizedPartyName()}, visStillingAzpName: $visStillingAzpName")
         return authorizedPartyName() == visStillingAzpName
     }
 
