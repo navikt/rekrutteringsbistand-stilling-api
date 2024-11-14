@@ -49,9 +49,6 @@ spec:
     inbound:
       rules:
         - application: vis-stilling
-          namespace: arbeidsgiver
-          cluster: dev-gcp
-        - application: vis-stilling
           namespace: toi
           cluster: dev-gcp
         - application: rekrutteringsbistand-stilling-indekser
@@ -78,7 +75,7 @@ spec:
     - name: SPRING_PROFILES_ACTIVE
       value: dev
     - name: VIS_STILLING_AZP_NAME
-      value: "dev-gcp:arbeidsgiver:vis-stilling"
+      value: "dev-gcp:toi:vis-stilling"
     - name: KANDIDATVARSEL_AZP_NAME
       value: "dev-gcp:toi:rekrutteringsbistand-kandidatvarsel-api"
     - name: REKRUTTERINGSBISTAND_STILLING_INDEKSER_AZP_NAME
