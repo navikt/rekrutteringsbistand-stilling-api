@@ -49,6 +49,9 @@ spec:
         - application: vis-stilling
           namespace: arbeidsgiver
           cluster: prod-gcp
+        - application: vis-stilling
+          namespace: toi
+          cluster: prod-gcp
         - application: rekrutteringsbistand-stilling-indekser
           cluster: prod-gcp
         - application: rekrutteringsbistand-container

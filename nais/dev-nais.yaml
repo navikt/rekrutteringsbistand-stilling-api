@@ -51,6 +51,9 @@ spec:
         - application: vis-stilling
           namespace: arbeidsgiver
           cluster: dev-gcp
+        - application: vis-stilling
+          namespace: toi
+          cluster: dev-gcp
         - application: rekrutteringsbistand-stilling-indekser
           cluster: dev-gcp
         - application: rekrutteringsbistand-container
