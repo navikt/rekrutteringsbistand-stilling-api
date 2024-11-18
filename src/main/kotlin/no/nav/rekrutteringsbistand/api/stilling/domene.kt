@@ -7,8 +7,7 @@ import no.nav.rekrutteringsbistand.api.stilling.Kategori.Companion.hentTittel
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingskategori
 import no.nav.rekrutteringsbistand.api.support.log
 import java.time.LocalDateTime
-import java.util.*
-import kotlin.collections.ArrayList
+import java.util.UUID
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Stilling(
@@ -247,5 +246,14 @@ data class OpprettStillingDto(
         deactivatedByExpiry = deactivatedByExpiry,
         activationOnPublishingDate = activationOnPublishingDate,
     )
+
 }
 
+data class InternStilling(
+    val stillingsid: UUID,
+    val innhold: Stilling,
+    val opprettet: LocalDateTime,
+    val opprettetAv: String,
+    val sistEndret: LocalDateTime,
+    val sistEndretAv: String
+)

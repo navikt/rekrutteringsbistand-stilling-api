@@ -72,4 +72,13 @@ class StillingController(private val stillingsinfoService: StillingsinfoService,
         val stilling = stillingService.hentRekrutteringsbistandStillingBasertPåAnnonsenr(annonsenr)
         return stilling.map { ok(it) }.getOrElse { notFound().build() }
     }
+
+    @PostMapping("/rekrutteringsbistandstilling/lagre")
+    fun lagreStilling(@RequestBody stillingsId: String) : ResponseEntity<String>{
+        // hent stillinger fra ad-api og lagre
+
+        stillingService.lagreInternStilling(stillingsId)
+        return ok("Stilling lagret")
+    }
+
 }
