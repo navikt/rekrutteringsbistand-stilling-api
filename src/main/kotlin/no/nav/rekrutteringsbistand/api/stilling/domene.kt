@@ -7,6 +7,7 @@ import no.nav.rekrutteringsbistand.api.stilling.Kategori.Companion.hentTittel
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingskategori
 import no.nav.rekrutteringsbistand.api.support.log
 import java.time.LocalDateTime
+import java.time.ZonedDateTime
 import java.util.UUID
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -252,8 +253,8 @@ data class OpprettStillingDto(
 data class InternStilling(
     val stillingsid: UUID,
     val innhold: Stilling,
-    val opprettet: LocalDateTime,
+    val opprettet: ZonedDateTime,
     val opprettetAv: String,
-    val sistEndret: LocalDateTime,
+    val sistEndret: ZonedDateTime,
     val sistEndretAv: String
 )

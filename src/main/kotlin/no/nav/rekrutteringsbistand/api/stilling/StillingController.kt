@@ -15,6 +15,7 @@ import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsid
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsinfo
 import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoService
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingskategori
+import no.nav.rekrutteringsbistand.api.support.log
 
 
 @RestController
@@ -35,6 +36,7 @@ class StillingController(private val stillingsinfoService: StillingsinfoService,
     @PostMapping("/rekrutteringsbistandstilling/kopier/{stillingsId}")
     fun kopierStilling(@PathVariable stillingsId: String): ResponseEntity<RekrutteringsbistandStilling> {
         tokenUtils.hentInnloggetVeileder().validerMinstEnAvRollene(Rolle.ARBEIDSGIVERRETTET)
+        log.info("Kopierer stilling med uuid $stillingsId")
         val kopiertStilling = stillingService.kopierStilling(stillingsId)
         return ok(kopiertStilling)
     }
@@ -73,6 +75,7 @@ class StillingController(private val stillingsinfoService: StillingsinfoService,
         return stilling.map { ok(it) }.getOrElse { notFound().build() }
     }
 
+    // Endepunkt som kan brukes i rekrutteringsbistand-stilling-indekser
     @PostMapping("/rekrutteringsbistandstilling/lagre")
     fun lagreStilling(@RequestBody stillingsId: String) : ResponseEntity<String>{
         // hent stillinger fra ad-api og lagre

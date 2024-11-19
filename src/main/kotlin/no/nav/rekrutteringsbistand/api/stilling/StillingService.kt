@@ -12,7 +12,8 @@ import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteKlient
 import no.nav.rekrutteringsbistand.api.stillingsinfo.*
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.ZonedDateTime
 import java.util.*
 
 
@@ -71,7 +72,8 @@ class StillingService(
         )
 
         // Lagre stillingen i intern_stilling
-        opprettOgLagreInternStilling(opprettetStilling, opprettetStilling.uuid)
+        val internStilling = opprettInternStilling(opprettetStilling, opprettetStilling.uuid)
+        internStillingRepository.lagreInternStilling(internStilling)
 
         val stillingsinfo = stillingsinfoService.hentStillingsinfo(opprettetStilling)
 
@@ -83,17 +85,16 @@ class StillingService(
         }
     }
 
-    private fun opprettOgLagreInternStilling(opprettStilling: Stilling, stillingsId: String) {
+    private fun opprettInternStilling(opprettStilling: Stilling, stillingsId: String) : InternStilling {
         val internStilling = InternStilling(
             UUID.fromString(stillingsId),
             opprettStilling,
-            opprettet = LocalDateTime.now(),
+            opprettet = ZonedDateTime.now(ZoneId.of("Europe/Oslo")),
             opprettetAv = opprettStilling.createdBy,
             sistEndretAv = opprettStilling.updatedBy,
-            sistEndret = LocalDateTime.now()
+            sistEndret = ZonedDateTime.now(ZoneId.of("Europe/Oslo"))
         )
-
-        internStillingRepository.lagreInternStilling(internStilling)
+        return internStilling
     }
 
 
@@ -126,6 +127,9 @@ class StillingService(
         val stilling = dto.stilling.copyMedBeregnetTitle(
             stillingskategori = eksisterendeStillingsinfo?.stillingskategori
         )
+
+        val internStilling = opprettInternStilling(dto.stilling, id.asString())
+        internStillingRepository.lagreInternStilling(internStilling)
 
         val oppdatertStilling = arbeidsplassenKlient.oppdaterStilling(stilling, queryString)
 
@@ -165,10 +169,10 @@ class StillingService(
         val internStilling = InternStilling(
             UUID.fromString(stillingsId),
             stilling,
-            opprettet = LocalDateTime.now(),
+            opprettet = ZonedDateTime.now(ZoneId.of("Europe/Oslo")),
             opprettetAv = stilling.createdBy,
             sistEndretAv = stilling.updatedBy,
-            sistEndret = LocalDateTime.now()
+            sistEndret = ZonedDateTime.now(ZoneId.of("Europe/Oslo"))
         )
         internStillingRepository.lagreInternStilling(internStilling)
     }

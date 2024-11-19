@@ -5,12 +5,14 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.rekrutteringsbistand.api.support.log
 import org.springframework.jdbc.core.RowMapper
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.stereotype.Repository
 import java.sql.ResultSet
 import java.sql.SQLException
+import java.time.ZoneId
 import java.util.*
 
 
@@ -30,9 +32,12 @@ class InternStillingRepository(private val namedJdbcTemplate: NamedParameterJdbc
         const val OPPRETTET_AV = "opprettet_av"
         const val SIST_ENDRET = "sist_endret"
         const val SIST_ENDRET_AV = "sist_endret_av"
+        const val INTERN_STILLING_TABELL = "intern_stilling"
     }
 
     fun lagreInternStilling(internStilling: InternStilling) {
+        log.info("Lagrer intern stilling med uuid: ${internStilling.stillingsid}")
+
         val sql = """
           insert into intern_stilling ($STILLINGSID, $INNHOLD, $OPPRETTET, $OPPRETTET_AV, $SIST_ENDRET, $SIST_ENDRET_AV)
             values(:stillingsid, :innhold ::jsonb, :opprettet, :opprettet_av, :sist_endret, :sist_endret_av)
@@ -77,9 +82,9 @@ class InternStillingRepository(private val namedJdbcTemplate: NamedParameterJdbc
             val internStilling = InternStilling(
                 stillingsid = rs.getObject("stillingsid", UUID::class.java),
                 innhold = objectMapper.readValue(rs.getString("innhold"), Stilling::class.java),
-                opprettet = rs.getTimestamp("opprettet").toLocalDateTime(),
+                opprettet = rs.getTimestamp("opprettet").toInstant().atZone(ZoneId.of("Europe/Oslo")),
                 opprettetAv = rs.getString("opprettet_av"),
-                sistEndret = rs.getTimestamp("sist_endret").toLocalDateTime(),
+                sistEndret = rs.getTimestamp("sist_endret").toInstant().atZone(ZoneId.of("Europe/Oslo")),
                 sistEndretAv = rs.getString("sist_endret_av")
             )
 

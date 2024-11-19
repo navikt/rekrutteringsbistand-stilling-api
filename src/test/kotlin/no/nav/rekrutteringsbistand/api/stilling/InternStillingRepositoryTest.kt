@@ -9,7 +9,8 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.ZonedDateTime
 import java.util.*
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -36,18 +37,18 @@ class InternStillingRepositoryTest {
         val internStilling1 = InternStilling(
             UUID.fromString(stilling.uuid),
             stilling,
-            opprettet = LocalDateTime.now(),
+            opprettet = ZonedDateTime.now(ZoneId.of("Europe/Oslo")),
             opprettetAv = stilling.createdBy,
             sistEndretAv = stilling.updatedBy,
-            sistEndret = LocalDateTime.now()
+            sistEndret = ZonedDateTime.now(ZoneId.of("Europe/Oslo"))
         )
         val internStilling2 = InternStilling(
             UUID.fromString(stilling2.uuid),
             stilling2,
-            opprettet = LocalDateTime.now(),
+            opprettet = ZonedDateTime.now(ZoneId.of("Europe/Oslo")),
             opprettetAv = stilling2.createdBy,
             sistEndretAv = stilling2.createdBy,
-            sistEndret = LocalDateTime.now()
+            sistEndret = ZonedDateTime.now(ZoneId.of("Europe/Oslo"))
         )
         repository.lagreInternStilling(internStilling1)
         repository.lagreInternStilling(internStilling2)
