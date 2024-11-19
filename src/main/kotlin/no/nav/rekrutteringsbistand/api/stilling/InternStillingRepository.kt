@@ -12,6 +12,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.stereotype.Repository
 import java.sql.ResultSet
 import java.sql.SQLException
+import java.sql.Timestamp
 import java.time.ZoneId
 import java.util.*
 
@@ -51,9 +52,9 @@ class InternStillingRepository(private val namedJdbcTemplate: NamedParameterJdbc
         val params =  mapOf(
             "stillingsid" to internStilling.stillingsid,
             "innhold" to objectMapper.writeValueAsString(internStilling.innhold),
-            "opprettet" to internStilling.opprettet,
+            "opprettet" to Timestamp.from(internStilling.opprettet.toInstant()),
             "opprettet_av" to internStilling.opprettetAv,
-            "sist_endret" to internStilling.sistEndret,
+            "sist_endret" to Timestamp.from(internStilling.sistEndret.toInstant()),
             "sist_endret_av" to internStilling.sistEndretAv
         )
 
