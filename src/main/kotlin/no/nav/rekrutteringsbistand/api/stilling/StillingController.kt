@@ -65,11 +65,4 @@ class StillingController(private val stillingsinfoService: StillingsinfoService,
         // TODO styrk(kan tas til slutt): Interne stillinger burde ikke sende tittel.
         return ok(stillingService.hentRekrutteringsbistandStilling(uuid))
     }
-
-    @GetMapping("/rekrutteringsbistandstilling/annonsenr/{annonsenr}")
-    fun hentRekrutteringsbistandStillingBasertPåAnnonsenr(@PathVariable annonsenr: String): ResponseEntity<RekrutteringsbistandStilling> {
-        // TODO styrk(kan tas til slutt): Interne stillinger burde ikke sende tittel.
-        val stilling = stillingService.hentRekrutteringsbistandStillingBasertPåAnnonsenr(annonsenr)
-        return stilling.map { ok(it) }.getOrElse { notFound().build() }
-    }
 }

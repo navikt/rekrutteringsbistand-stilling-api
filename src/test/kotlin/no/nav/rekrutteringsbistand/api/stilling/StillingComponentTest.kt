@@ -173,30 +173,6 @@ internal class StillingComponentTest {
         wiremockPamAdApi.verify(1, getRequestedFor(urlPathMatching(urlPath)))
     }
 
-
-    @Test
-    fun `GET mot en stilling med annonsenummer skal returnere en stilling beriket med stillingsinfo`() {
-
-        val stilling = enStilling
-        val page = Page(
-            content = listOf(stilling), totalPages = 1, totalElements = 1
-        )
-        val stillingsinfo = enStillingsinfo.copy(stillingsid = Stillingsid(stilling.uuid))
-
-        repository.opprett(stillingsinfo)
-
-        mockUtenAuthorization("/b2b/api/v1/ads?id=1000", page)
-        mockAzureObo(wiremockAzure)
-
-        restTemplate.getForObject(
-            "$localBaseUrl/rekrutteringsbistandstilling/annonsenr/${stilling.id}",
-            RekrutteringsbistandStilling::class.java
-        ).also {
-            assertThat(it!!.stillingsinfo).isEqualTo(stillingsinfo.asStillingsinfoDto())
-            assertThat(it.stilling).isEqualTo(stilling)
-        }
-    }
-
     @Test
     fun `Ved opprettelse av stilling skal stillingstittel i arbeidsplassen være "Ny stilling" selv om frontend ikke sender noen stillingstittel`() {
         val requestUtenStillingstittel = enOpprettRekrutteringsbistandstillingDto.copy(
