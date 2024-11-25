@@ -10,6 +10,37 @@ import java.time.LocalDateTime
 import java.time.ZonedDateTime
 import java.util.UUID
 
+data class NyInternStilling(
+    val uuid: String,
+    val created: LocalDateTime,
+    val createdBy: String,
+    val updated: LocalDateTime,
+    val updatedBy: String,
+    val title: String,
+    val status: String,
+
+    val administration: Administration?,
+    val mediaList: List<Media> = ArrayList(),
+    val contactList: List<Contact> = ArrayList(),
+    val privacy: String?,
+    val source: String?,
+    val medium: String?,
+    val reference: String?,
+    val published: LocalDateTime?,
+    val expires: LocalDateTime?,
+    val employer: Arbeidsgiver?,
+    val location: Geografi?,
+    val locationList: List<Geografi> = ArrayList(),
+    val categoryList: List<Kategori> = ArrayList(),
+    val properties: Map<String, String> = HashMap(),
+    val publishedByAdmin: String?,
+    val businessName: String?,
+    val firstPublished: Boolean?,
+    val deactivatedByExpiry: Boolean?,
+    val activationOnPublishingDate: Boolean?
+)
+
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Stilling(
     val id: Long,
@@ -41,6 +72,37 @@ data class Stilling(
     val deactivatedByExpiry: Boolean?,
     val activationOnPublishingDate: Boolean?
 ) {
+    fun toNyInternStilling(): NyInternStilling {
+        return NyInternStilling(
+            uuid = uuid,
+            created = created,
+            createdBy = createdBy,
+            updated = updated,
+            updatedBy = updatedBy,
+            title = title,
+            status = status,
+            administration = administration,
+            mediaList = mediaList,
+            contactList = contactList,
+            privacy = privacy,
+            source = source,
+            medium = medium,
+            reference = reference,
+            published = published,
+            expires = expires,
+            employer = employer,
+            location = location,
+            locationList = locationList,
+            categoryList = categoryList,
+            properties = properties,
+            publishedByAdmin = publishedByAdmin,
+            businessName = businessName,
+            firstPublished = firstPublished,
+            deactivatedByExpiry = deactivatedByExpiry,
+            activationOnPublishingDate = activationOnPublishingDate,
+        )
+    }
+
     fun toKopiertStilling(tokenUtils: TokenUtils): no.nav.rekrutteringsbistand.api.arbeidsplassen.OpprettStillingDto {
         val nyTittel = categoryList.hentTittel("kopi av stillingsId $uuid som ble opprettet $created")
 
@@ -252,7 +314,7 @@ data class OpprettStillingDto(
 
 data class InternStilling(
     val stillingsid: UUID,
-    val innhold: Stilling,
+    val innhold: NyInternStilling,
     val opprettet: ZonedDateTime,
     val opprettetAv: String,
     val sistEndret: ZonedDateTime,

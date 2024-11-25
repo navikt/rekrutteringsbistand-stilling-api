@@ -1,6 +1,5 @@
 package no.nav.rekrutteringsbistand.api.stilling
 
-import arrow.core.Option
 import arrow.core.getOrElse
 import no.nav.rekrutteringsbistand.AuditLogg
 import no.nav.rekrutteringsbistand.api.OppdaterRekrutteringsbistandStillingDto
@@ -41,20 +40,6 @@ class StillingService(
         )
     }
 
-    fun hentRekrutteringsbistandStillingBasertPåAnnonsenr(annonsenr: String): Option<RekrutteringsbistandStilling> {
-        val stillinger = arbeidsplassenKlient.hentStillingBasertPåAnnonsenr(annonsenr)
-        return stillinger.map { stilling ->
-            val stillingsinfo: Option<Stillingsinfo> = stillingsinfoService.hentStillingsinfo(stilling)
-
-            RekrutteringsbistandStilling(
-                stilling = stilling,
-                stillingsinfo = stillingsinfo.map { it.asStillingsinfoDto() }.getOrElse { null }
-            )
-        }
-    }
-
-
-
     fun opprettNyStilling(opprettDto: OpprettRekrutteringsbistandstillingDto): RekrutteringsbistandStilling {
         return opprettStilling(
             opprettStilling = opprettDto.stilling.toArbeidsplassenDto(title = "Ny stilling"),
@@ -63,6 +48,7 @@ class StillingService(
     }
 
     private fun opprettStilling(opprettStilling: OpprettStillingDto, stillingskategori: Stillingskategori): RekrutteringsbistandStilling {
+        val opprettetInternStilling = lagStilling(opprettStilling)
         val opprettetStilling = arbeidsplassenKlient.opprettStilling(opprettStilling)
         val stillingsId = Stillingsid(opprettetStilling.uuid)
 
@@ -72,7 +58,7 @@ class StillingService(
         )
 
         // Lagre stillingen i intern_stilling
-        val internStilling = opprettInternStilling(opprettetStilling, opprettetStilling.uuid)
+        val internStilling = opprettInternStilling(opprettetInternStilling, opprettetInternStilling.uuid)
         internStillingRepository.lagreInternStilling(internStilling)
 
         val stillingsinfo = stillingsinfoService.hentStillingsinfo(opprettetStilling)
@@ -85,7 +71,49 @@ class StillingService(
         }
     }
 
-    private fun opprettInternStilling(opprettStilling: Stilling, stillingsId: String) : InternStilling {
+    private fun lagStilling(opprettStilling: OpprettStillingDto) : NyInternStilling {
+        val uuid = UUID.randomUUID().toString()
+        val opprettetTidspunkt = ZonedDateTime.now(ZoneId.of("Europe/Oslo")).toLocalDateTime()
+        val opprettetInternStilling = NyInternStilling(
+            uuid = uuid,
+            created = opprettetTidspunkt,
+            createdBy = opprettStilling.createdBy,
+            updated = opprettetTidspunkt,
+            updatedBy = opprettStilling.updatedBy,
+            title = "Ny stilling",
+            status = "INACTIVE",
+            administration = Administration(
+                status = opprettStilling.administration.status,
+                navIdent = opprettStilling.administration.navIdent,
+                reportee = opprettStilling.administration.reportee,
+                comments = null,
+                remarks = emptyList(),
+                id = null // TODO må fjernes etterhvert
+            ),
+            mediaList = emptyList(),
+            contactList = emptyList(),
+            privacy = opprettStilling.privacy,
+            source = opprettStilling.source,
+            medium = opprettStilling.medium,
+            reference = uuid,
+            published = opprettetTidspunkt,
+            expires = opprettetTidspunkt,
+            employer = opprettStilling.employer,
+            location = null,
+            locationList = emptyList(),
+            categoryList = emptyList(),
+            properties = emptyMap(),
+            publishedByAdmin = null,
+            businessName = opprettStilling.employer?.name,
+            firstPublished = false,
+            deactivatedByExpiry = false,
+            activationOnPublishingDate = false,
+        )
+
+        return opprettetInternStilling
+    }
+
+    private fun opprettInternStilling(opprettStilling: NyInternStilling, stillingsId: String) : InternStilling {
         val internStilling = InternStilling(
             UUID.fromString(stillingsId),
             opprettStilling,
@@ -128,7 +156,7 @@ class StillingService(
             stillingskategori = eksisterendeStillingsinfo?.stillingskategori
         )
 
-        val internStilling = opprettInternStilling(dto.stilling, id.asString())
+        val internStilling = opprettInternStilling(dto.stilling.toNyInternStilling(), id.asString())
         internStillingRepository.lagreInternStilling(internStilling)
 
         val oppdatertStilling = arbeidsplassenKlient.oppdaterStilling(stilling, queryString)
@@ -166,9 +194,11 @@ class StillingService(
     fun lagreInternStilling(stillingsId: String) {
         val stilling = arbeidsplassenKlient.hentStilling(stillingsId, true)
 
+        val nyInternStilling = stilling.toNyInternStilling()
+
         val internStilling = InternStilling(
             UUID.fromString(stillingsId),
-            stilling,
+            nyInternStilling,
             opprettet = ZonedDateTime.now(ZoneId.of("Europe/Oslo")),
             opprettetAv = stilling.createdBy,
             sistEndretAv = stilling.updatedBy,

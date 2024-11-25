@@ -31,6 +31,7 @@ data class OpprettStillingDto(
         createdBy = "pam-rekrutteringsbistand",
         updatedBy = "pam-rekrutteringsbistand",
         source = "DIR",
+        medium = "DIR",
         privacy = "INTERNAL_NOT_SHOWN",
         administration = OpprettStillingAdministrationDto(
             status = "PENDING",
