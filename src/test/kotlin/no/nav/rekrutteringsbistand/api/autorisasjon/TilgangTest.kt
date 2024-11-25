@@ -182,7 +182,6 @@ class TilgangTest {
             stilling::kopierStilling to Varianter(forbidden, ok, ok, forbidden),
             stilling::slettStilling to Varianter(forbidden, ok, ok, forbidden),
             stilling::hentStillingMedUuid to Varianter(ok, ok, ok, ok),
-            stilling::hentStillingMedAnnonsenr to Varianter(ok, ok, ok, ok),
             stilling::hentStillingForPersonBruker to Varianter(unauthorized, unauthorized, unauthorized, unauthorized),   //Hvis alt er forbidden kan testen liksågodt endres til dette
             stillingsInfo::overtaEierskapForEksternStillingOgKandidatliste to Varianter(forbidden, ok, ok, forbidden),
             indekser::hentStillingsinfoBulk to Varianter(unauthorized, unauthorized, unauthorized, unauthorized),   //Hvis alt er forbidden kan testen liksågodt endres til dette
