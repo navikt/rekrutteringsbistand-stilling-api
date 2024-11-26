@@ -94,7 +94,7 @@ class StillingService(
             contactList = emptyList(),
             privacy = opprettStilling.privacy,
             source = opprettStilling.source,
-            medium = opprettStilling.medium,
+            medium = opprettStilling.source,  // medium === source
             reference = uuid,
             published = opprettetTidspunkt,
             expires = opprettetTidspunkt,

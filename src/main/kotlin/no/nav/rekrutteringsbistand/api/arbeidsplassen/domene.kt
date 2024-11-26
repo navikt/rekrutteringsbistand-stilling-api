@@ -1,9 +1,7 @@
 package no.nav.rekrutteringsbistand.api.arbeidsplassen
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
 import no.nav.rekrutteringsbistand.api.stilling.*
-import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingskategori
 import java.util.HashMap
 
 data class OpprettStillingDto(
