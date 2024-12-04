@@ -7,39 +7,9 @@ import no.nav.rekrutteringsbistand.api.stilling.Kategori.Companion.hentTittel
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingskategori
 import no.nav.rekrutteringsbistand.api.support.log
 import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.util.UUID
-
-data class NyInternStilling(
-    val uuid: String,
-    val created: LocalDateTime,
-    val createdBy: String,
-    val updated: LocalDateTime,
-    val updatedBy: String,
-    val title: String,
-    val status: String,
-
-    val administration: Administration?,
-    val mediaList: List<Media> = ArrayList(),
-    val contactList: List<Contact> = ArrayList(),
-    val privacy: String?,
-    val source: String?,
-    val medium: String?,
-    val reference: String?,
-    val published: LocalDateTime?,
-    val expires: LocalDateTime?,
-    val employer: Arbeidsgiver?,
-    val location: Geografi?,
-    val locationList: List<Geografi> = ArrayList(),
-    val categoryList: List<Kategori> = ArrayList(),
-    val properties: Map<String, String> = HashMap(),
-    val publishedByAdmin: String?,
-    val businessName: String?,
-    val firstPublished: Boolean?,
-    val deactivatedByExpiry: Boolean?,
-    val activationOnPublishingDate: Boolean?
-)
-
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Stilling(
@@ -72,28 +42,30 @@ data class Stilling(
     val deactivatedByExpiry: Boolean?,
     val activationOnPublishingDate: Boolean?
 ) {
-    fun toNyInternStilling(): NyInternStilling {
-        return NyInternStilling(
-            uuid = uuid,
-            created = created,
-            createdBy = createdBy,
-            updated = updated,
-            updatedBy = updatedBy,
+    fun toInternStillingInfo(): InternStillingInfo {
+        return InternStillingInfo(
             title = title,
-            status = status,
-            administration = administration,
+            administration = administration?.let {
+                InternStillngAdministration(
+                    status = it.status,
+                    comments = it.comments,
+                    reportee = it.reportee,
+                    navIdent = it.navIdent,
+                    remarks = it.remarks
+                )
+            },
             mediaList = mediaList,
             contactList = contactList,
             privacy = privacy,
             source = source,
             medium = medium,
             reference = reference,
-            published = published,
-            expires = expires,
-            employer = employer,
+            published = published?.atZone(ZoneId.of("Europe/Oslo")),
+            expires = expires?.atZone(ZoneId.of("Europe/Oslo")),
+            employer = employer?.toInternStillingArbeidsgiver(),
             location = location,
             locationList = locationList,
-            categoryList = categoryList,
+            categoryList = categoryList.map { it.toInternStillingKategori() },
             properties = properties,
             publishedByAdmin = publishedByAdmin,
             businessName = businessName,
@@ -178,7 +150,25 @@ data class Arbeidsgiver(
     val deactivated: LocalDateTime?,
     val orgform: String?,
     val employees: Int?
-)
+) {
+    fun toInternStillingArbeidsgiver(): InternStillingArbeidsgiver {
+        return InternStillingArbeidsgiver(
+            mediaList = mediaList,
+            contactList = contactList,
+            location = location,
+            locationList = locationList,
+            properties = properties,
+            name = name,
+            orgnr = orgnr,
+            status = status,
+            parentOrgnr = parentOrgnr,
+            publicName = publicName,
+            deactivated = deactivated?.atZone(ZoneId.of("Europe/Oslo")),
+            orgform = orgform,
+            employees = employees
+        )
+    }
+}
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Geografi(
@@ -232,7 +222,27 @@ data class Kategori(
         }
     }
 
+    fun toInternStillingKategori(): InternStillingKategori {
+        return InternStillingKategori(
+            code = code,
+            categoryType = categoryType,
+            name = name,
+            description = description,
+            parentId = parentId
+        )
+    }
 }
+
+data class InternStillingKategori(
+    val code: String?,
+    val categoryType: String?,
+    val name: String?,
+    val description: String?,
+    val parentId: Int?
+)
+
+
+
 
 data class NonNullKategori(
     val code: String,
@@ -312,11 +322,59 @@ data class OpprettStillingDto(
 
 }
 
+data class InternStillngAdministration(
+    val status: String?,
+    val comments: String?,
+    val reportee: String?,
+    val remarks: List<String> = ArrayList(),
+    val navIdent: String?
+)
+
+data class InternStillingArbeidsgiver(
+    val mediaList: List<Media> = ArrayList(),
+    val contactList: List<Contact> = ArrayList(),
+    val location: Geografi?,
+    val locationList: List<Geografi> = ArrayList(),
+    val properties: Map<String, String> = HashMap(),
+    val name: String?,
+    val orgnr: String?,
+    val status: String?,
+    val parentOrgnr: String?,
+    val publicName: String?,
+    val deactivated: ZonedDateTime?,
+    val orgform: String?,
+    val employees: Int?
+)
+
+data class InternStillingInfo(
+    val title: String,
+    val administration: InternStillngAdministration?,
+    val mediaList: List<Media> = ArrayList(),
+    val contactList: List<Contact> = ArrayList(),
+    val privacy: String?,
+    val source: String?,
+    val medium: String?,
+    val reference: String?,
+    val published: ZonedDateTime?,
+    val expires: ZonedDateTime?,
+    val employer: InternStillingArbeidsgiver?,
+    val location: Geografi?, // TODO ta bort denne?
+    val locationList: List<Geografi> = ArrayList(),
+    val categoryList: List<InternStillingKategori> = ArrayList(),
+    val properties: Map<String, String> = HashMap(),
+    val publishedByAdmin: String?,
+    val businessName: String?,
+    val firstPublished: Boolean?,
+    val deactivatedByExpiry: Boolean?,
+    val activationOnPublishingDate: Boolean?
+)
+
 data class InternStilling(
     val stillingsid: UUID,
-    val innhold: NyInternStilling,
+    val innhold: InternStillingInfo,
     val opprettet: ZonedDateTime,
     val opprettetAv: String,
     val sistEndret: ZonedDateTime,
-    val sistEndretAv: String
+    val sistEndretAv: String,
+    val status: String
 )

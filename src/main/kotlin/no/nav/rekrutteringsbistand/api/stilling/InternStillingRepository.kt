@@ -33,6 +33,7 @@ class InternStillingRepository(private val namedJdbcTemplate: NamedParameterJdbc
         const val OPPRETTET_AV = "opprettet_av"
         const val SIST_ENDRET = "sist_endret"
         const val SIST_ENDRET_AV = "sist_endret_av"
+        const val STATUS = "status"
         const val INTERN_STILLING_TABELL = "intern_stilling"
     }
 
@@ -40,12 +41,13 @@ class InternStillingRepository(private val namedJdbcTemplate: NamedParameterJdbc
         log.info("Lagrer intern stilling med uuid: ${internStilling.stillingsid}")
 
         val sql = """
-          insert into intern_stilling ($STILLINGSID, $INNHOLD, $OPPRETTET, $OPPRETTET_AV, $SIST_ENDRET, $SIST_ENDRET_AV)
-            values(:stillingsid, :innhold ::jsonb, :opprettet, :opprettet_av, :sist_endret, :sist_endret_av)
+          insert into intern_stilling ($STILLINGSID, $INNHOLD, $OPPRETTET, $OPPRETTET_AV, $SIST_ENDRET, $SIST_ENDRET_AV, $STATUS)
+            values(:stillingsid, :innhold ::jsonb, :opprettet, :opprettet_av, :sist_endret, :sist_endret_av, :status)
             on conflict($STILLINGSID) do update 
             set $SIST_ENDRET_AV=:sist_endret_av, 
                 $INNHOLD=:innhold ::jsonb,
-                $SIST_ENDRET=:sist_endret
+                $SIST_ENDRET=:sist_endret,
+                $STATUS=:status
             returning id   
         """.trimIndent()
 
@@ -55,14 +57,15 @@ class InternStillingRepository(private val namedJdbcTemplate: NamedParameterJdbc
             "opprettet" to Timestamp.from(internStilling.opprettet.toInstant()),
             "opprettet_av" to internStilling.opprettetAv,
             "sist_endret" to Timestamp.from(internStilling.sistEndret.toInstant()),
-            "sist_endret_av" to internStilling.sistEndretAv
+            "sist_endret_av" to internStilling.sistEndretAv,
+            "status" to internStilling.status
         )
 
        namedJdbcTemplate.query(sql, MapSqlParameterSource(params)) {rs -> if (rs.next()) rs.getLong("id") else null}
     }
 
     fun getInternStilling(stillingsid: String) : InternStilling {
-        val sql = "select stillingsid, innhold, opprettet, opprettet_av, sist_endret, sist_endret_av from intern_stilling where $STILLINGSID=:stillingsid ::uuid"
+        val sql = "select stillingsid, innhold, opprettet, opprettet_av, sist_endret, sist_endret_av, status from intern_stilling where $STILLINGSID=:stillingsid ::uuid"
         val params = mapOf("stillingsid" to stillingsid)
 
         val internStilling = namedJdbcTemplate.queryForObject(
@@ -82,11 +85,12 @@ class InternStillingRepository(private val namedJdbcTemplate: NamedParameterJdbc
         override fun mapRow(rs: ResultSet, rowNum: Int): InternStilling {
             val internStilling = InternStilling(
                 stillingsid = rs.getObject("stillingsid", UUID::class.java),
-                innhold = objectMapper.readValue(rs.getString("innhold"), NyInternStilling::class.java),
+                innhold = objectMapper.readValue(rs.getString("innhold"), InternStillingInfo::class.java),
                 opprettet = rs.getTimestamp("opprettet").toInstant().atZone(ZoneId.of("Europe/Oslo")),
                 opprettetAv = rs.getString("opprettet_av"),
                 sistEndret = rs.getTimestamp("sist_endret").toInstant().atZone(ZoneId.of("Europe/Oslo")),
-                sistEndretAv = rs.getString("sist_endret_av")
+                sistEndretAv = rs.getString("sist_endret_av"),
+                status = rs.getString("status"),
             )
 
             return internStilling

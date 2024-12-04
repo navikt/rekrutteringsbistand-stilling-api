@@ -36,19 +36,21 @@ class InternStillingRepositoryTest {
 
         val internStilling1 = InternStilling(
             UUID.fromString(stilling.uuid),
-            stilling.toNyInternStilling(),
+            stilling.toInternStillingInfo(),
             opprettet = ZonedDateTime.now(ZoneId.of("Europe/Oslo")),
             opprettetAv = stilling.createdBy,
             sistEndretAv = stilling.updatedBy,
-            sistEndret = ZonedDateTime.now(ZoneId.of("Europe/Oslo"))
+            sistEndret = ZonedDateTime.now(ZoneId.of("Europe/Oslo")),
+            status = stilling.status
         )
         val internStilling2 = InternStilling(
             UUID.fromString(stilling2.uuid),
-            stilling2.toNyInternStilling(),
+            stilling2.toInternStillingInfo(),
             opprettet = ZonedDateTime.now(ZoneId.of("Europe/Oslo")),
             opprettetAv = stilling2.createdBy,
             sistEndretAv = stilling2.createdBy,
-            sistEndret = ZonedDateTime.now(ZoneId.of("Europe/Oslo"))
+            sistEndret = ZonedDateTime.now(ZoneId.of("Europe/Oslo")),
+            status = stilling2.status,
         )
         repository.lagreInternStilling(internStilling1)
         repository.lagreInternStilling(internStilling2)
