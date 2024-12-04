@@ -65,4 +65,13 @@ class StillingController(private val stillingsinfoService: StillingsinfoService,
         // TODO styrk(kan tas til slutt): Interne stillinger burde ikke sende tittel.
         return ok(stillingService.hentRekrutteringsbistandStilling(uuid))
     }
+
+    // Endepunkt som kan brukes i rekrutteringsbistand-stilling-indekser
+    @PostMapping("/rekrutteringsbistandstilling/lagre")
+    fun lagreStilling(@RequestBody stillingsId: String) : ResponseEntity<String>{
+        // hent stillinger fra ad-api og lagre
+
+        stillingService.lagreInternStilling(stillingsId)
+        return ok("Stilling lagret")
+    }
 }

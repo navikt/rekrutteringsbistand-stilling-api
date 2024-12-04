@@ -1,6 +1,5 @@
 package no.nav.rekrutteringsbistand.api.stilling
 
-import arrow.core.Option
 import arrow.core.getOrElse
 import no.nav.rekrutteringsbistand.AuditLogg
 import no.nav.rekrutteringsbistand.api.OppdaterRekrutteringsbistandStillingDto
@@ -10,9 +9,10 @@ import no.nav.rekrutteringsbistand.api.arbeidsplassen.OpprettStillingDto
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
 import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteKlient
 import no.nav.rekrutteringsbistand.api.stillingsinfo.*
-import no.nav.rekrutteringsbistand.api.support.secureLog
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.ZoneId
+import java.util.*
 
 
 @Service
@@ -20,7 +20,8 @@ class StillingService(
     val stillingsinfoService: StillingsinfoService,
     val tokenUtils: TokenUtils,
     val kandidatlisteKlient: KandidatlisteKlient,
-    val arbeidsplassenKlient: ArbeidsplassenKlient
+    val arbeidsplassenKlient: ArbeidsplassenKlient,
+    val internStillingRepository: InternStillingRepository
 ) {
     fun hentRekrutteringsbistandStilling(
         stillingsId: String,
@@ -124,5 +125,22 @@ class StillingService(
     fun slettRekrutteringsbistandStilling(stillingsId: String): Stilling {
         kandidatlisteKlient.varsleOmSlettetStilling(Stillingsid(stillingsId))
         return arbeidsplassenKlient.slettStilling(stillingsId)
+    }
+
+    fun lagreInternStilling(stillingsId: String) {
+        val stilling = arbeidsplassenKlient.hentStilling(stillingsId, true)
+
+        val internStillingInfo = stilling.toInternStillingInfo()
+
+        val internStilling = InternStilling(
+            UUID.fromString(stillingsId),
+            internStillingInfo,
+            opprettet = stilling.created.atZone(ZoneId.of("Europe/Oslo")),
+            opprettetAv = stilling.createdBy,
+            sistEndretAv = stilling.updatedBy,
+            sistEndret = stilling.updated.atZone(ZoneId.of("Europe/Oslo")),
+            status = stilling.status
+        )
+        internStillingRepository.lagreInternStilling(internStilling)
     }
 }
