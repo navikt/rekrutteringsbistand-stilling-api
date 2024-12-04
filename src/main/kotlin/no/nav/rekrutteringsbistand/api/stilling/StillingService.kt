@@ -38,20 +38,6 @@ class StillingService(
         )
     }
 
-    fun hentRekrutteringsbistandStillingBasertPåAnnonsenr(annonsenr: String): Option<RekrutteringsbistandStilling> {
-        val stillinger = arbeidsplassenKlient.hentStillingBasertPåAnnonsenr(annonsenr)
-        return stillinger.map { stilling ->
-            val stillingsinfo: Option<Stillingsinfo> = stillingsinfoService.hentStillingsinfo(stilling)
-
-            RekrutteringsbistandStilling(
-                stilling = stilling,
-                stillingsinfo = stillingsinfo.map { it.asStillingsinfoDto() }.getOrElse { null }
-            )
-        }
-    }
-
-
-
     fun opprettNyStilling(opprettDto: OpprettRekrutteringsbistandstillingDto): RekrutteringsbistandStilling {
         return opprettStilling(
             opprettStilling = opprettDto.stilling.toArbeidsplassenDto(title = "Ny stilling"),
