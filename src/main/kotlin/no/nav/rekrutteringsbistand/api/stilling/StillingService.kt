@@ -58,7 +58,7 @@ class StillingService(
         )
 
         // Lagre stillingen i intern_stilling
-        val internStilling = opprettInternStilling(opprettetInternStilling, opprettetStilling.uuid)
+        val internStilling = opprettInternStilling(opprettetInternStilling, opprettetStilling)
         internStillingRepository.lagreInternStilling(internStilling)
 
         val stillingsinfo = stillingsinfoService.hentStillingsinfo(opprettetStilling)
@@ -99,15 +99,15 @@ class StillingService(
         return opprettetInternStilling
     }
 
-    private fun opprettInternStilling(opprettStilling: InternStillingInfo, stillingsId: String) : InternStilling {
+    private fun opprettInternStilling(opprettStilling: InternStillingInfo, stilling: Stilling) : InternStilling {
         val internStilling = InternStilling(
-            UUID.fromString(stillingsId),
+            UUID.fromString(stilling.uuid),
             opprettStilling,
-            opprettet = ZonedDateTime.now(ZoneId.of("Europe/Oslo")),
-            opprettetAv = "pam-rekrutteringsbistand",
+            opprettet = stilling.created.atZone(ZoneId.of("Europe/Oslo")),
+            opprettetAv = stilling.createdBy,
             sistEndretAv = "pam-rekrutteringsbistand",
             sistEndret = ZonedDateTime.now(ZoneId.of("Europe/Oslo")),
-            status = "INACTIVE"
+            status = stilling.status
         )
         return internStilling
     }
@@ -143,7 +143,7 @@ class StillingService(
             stillingskategori = eksisterendeStillingsinfo?.stillingskategori
         )
 
-        val internStilling = opprettInternStilling(dto.stilling.toInternStillingInfo(), id.asString())
+        val internStilling = opprettInternStilling(dto.stilling.toInternStillingInfo(), dto.stilling)
         internStillingRepository.lagreInternStilling(internStilling)
 
         val oppdatertStilling = arbeidsplassenKlient.oppdaterStilling(stilling, queryString)

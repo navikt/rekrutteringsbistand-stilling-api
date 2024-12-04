@@ -160,10 +160,8 @@ data class Arbeidsgiver(
             properties = properties,
             name = name,
             orgnr = orgnr,
-            status = status,
             parentOrgnr = parentOrgnr,
             publicName = publicName,
-            deactivated = deactivated?.atZone(ZoneId.of("Europe/Oslo")),
             orgform = orgform,
             employees = employees
         )
@@ -338,10 +336,8 @@ data class InternStillingArbeidsgiver(
     val properties: Map<String, String> = HashMap(),
     val name: String?,
     val orgnr: String?,
-    val status: String?,
     val parentOrgnr: String?,
     val publicName: String?,
-    val deactivated: ZonedDateTime?,
     val orgform: String?,
     val employees: Int?
 )
