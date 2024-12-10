@@ -5,21 +5,22 @@ import no.nav.rekrutteringsbistand.api.RekrutteringsbistandStilling
 import no.nav.rekrutteringsbistand.api.OppdaterRekrutteringsbistandStillingDto
 import no.nav.security.token.support.core.api.Protected
 import org.springframework.http.ResponseEntity
-import org.springframework.http.ResponseEntity.notFound
 import org.springframework.http.ResponseEntity.ok
 import org.springframework.web.bind.annotation.*
 import jakarta.servlet.http.HttpServletRequest
+import no.nav.rekrutteringsbistand.api.autorisasjon.AuthorizedPartyUtils
 import no.nav.rekrutteringsbistand.api.autorisasjon.Rolle
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsid
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsinfo
 import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoService
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingskategori
+import org.springframework.http.HttpStatus
 
 
 @RestController
 @Protected
-class StillingController(private val stillingsinfoService: StillingsinfoService, private val stillingService: StillingService, private val tokenUtils: TokenUtils) {
+class StillingController(private val stillingsinfoService: StillingsinfoService, private val stillingService: StillingService, private val tokenUtils: TokenUtils, private val authorizedPartyUtils: AuthorizedPartyUtils) {
 
     @PostMapping("/rekrutteringsbistandstilling")
     fun opprettStilling(@RequestBody stilling: OpprettRekrutteringsbistandstillingDto): ResponseEntity<RekrutteringsbistandStilling> {
@@ -68,7 +69,10 @@ class StillingController(private val stillingsinfoService: StillingsinfoService,
 
     // Endepunkt som kan brukes i rekrutteringsbistand-stilling-indekser
     @PostMapping("/rekrutteringsbistandstilling/lagre")
-    fun lagreStilling(@RequestBody stillingsId: String) : ResponseEntity<String>{
+    fun lagreStilling(@RequestBody stillingsId: String) : ResponseEntity<String> {
+        if (!authorizedPartyUtils.kallKommerFraStillingIndekser()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+        }
         // hent stillinger fra ad-api og lagre
 
         stillingService.lagreInternStilling(stillingsId)
