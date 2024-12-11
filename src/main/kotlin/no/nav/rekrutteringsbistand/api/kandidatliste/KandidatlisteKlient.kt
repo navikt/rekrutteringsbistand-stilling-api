@@ -25,23 +25,38 @@ class KandidatlisteKlient(
 ) {
 
     fun sendStillingOppdatert(stilling: RekrutteringsbistandStilling): ResponseEntity<Void> {
-        val url = byggUrlTilPutEndepunkt()
-        log.info("Oppdaterer kandidatliste, stillingsid: ${stilling.stilling.uuid}")
-        return restTemplate.exchange(
-            url,
-            HttpMethod.PUT,
-            HttpEntity(stilling, headers()),
-            Void::class.java
-        )
-            .also {
-                if (it.statusCode != HttpStatus.NO_CONTENT) {
+        fun send(): ResponseEntity<Void> {
+            val url = byggUrlTilPutEndepunkt()
+            return restTemplate.exchange(
+                url,
+                HttpMethod.PUT,
+                HttpEntity(stilling, headers()),
+                Void::class.java
+            )
+        }
+
+        fun sendMedLogging(): ResponseEntity<Void> {
+            try {
+                val re = send()
+                if (re.statusCode != HttpStatus.NO_CONTENT) {
                     log.warn(
                         "Uventet response fra kandidatliste-api for ad {}: {}",
                         stilling.stilling.uuid,
-                        it.statusCodeValue
+                        re.statusCode.value()
                     )
                 }
+                return re
+            } catch (e: RestClientResponseException) {
+                if (e.statusCode.isSameCodeAs(HttpStatus.FORBIDDEN)) {
+                    val msg =
+                        "Mangler tilgang til å oppdatere stilling. stilingsId=[${stilling.stilling.uuid}], innloggetVeileder=[${tokenUtils.hentInnloggetVeileder()}]"
+                    log.warn(msg, e)
+                }
+                throw e
             }
+        }
+
+        return sendMedLogging()
     }
 
     fun varsleOmSlettetStilling(stillingsid: Stillingsid): ResponseEntity<Void> {
@@ -57,13 +72,14 @@ class KandidatlisteKlient(
             ).also {
                 log.info("Varsle kandidatliste om sletting av stilling ${stillingsid.asString()} returnerte ${it.statusCode}")
             }
-        }
-        catch (e: HttpClientErrorException.NotFound) { ResponseEntity.notFound().build() }
-        catch (e: RestClientResponseException) {
+        } catch (e: HttpClientErrorException.NotFound) {
+            log.info("$e", e)
+            ResponseEntity.notFound().build()
+        } catch (e: RestClientResponseException) {
             log.warn(
                 "Uventet response fra kandidatliste-api for ad {}: {}",
                 stillingsid.asString(),
-                e.statusCode
+                e.statusCode.value()
             )
             throw e
         }
