@@ -100,27 +100,6 @@ class ArbeidsplassenKlient(
             log.info("Trigget resending av stillingsmelding fra Arbeidsplassen for stilling $stillingsid")
         }
 
-    fun hentStillingBasertPåAnnonsenr(annonsenr: String): Option<Stilling> =
-        timer("rekrutteringsbistand.stilling.arbeidsplassen.hentStillingBasertPåAnnonsenr.kall.tid") {
-            val url =
-                UriComponentsBuilder.fromHttpUrl("${hentBaseUrl()}/b2b/api/v1/ads").query("id=${annonsenr}")
-                    .build()
-                    .toString()
-
-            try {
-                val response = restTemplate.exchange(url,
-                    HttpMethod.GET,
-                    HttpEntity(null, httpHeaders()),
-                    object : ParameterizedTypeReference<Page<Stilling>>() {})
-                return@timer response.body?.content?.firstOrNone() ?: throw kunneIkkeTolkeBodyException()
-
-            } catch (exception: RestClientResponseException) {
-                throw svarMedFeilmelding(
-                    "Klarte ikke hente stillingen med annonsenr $annonsenr fra Arbeidsplassen", url, exception
-                )
-            }
-        }
-
     fun hentStillingBasertPåUUID(uuid: String): Option<Stilling> =
         timer("rekrutteringsbistand.stilling.arbeidsplassen.hentStillingBasertPåUUID.kall.tid") {
             val url = UriComponentsBuilder.fromHttpUrl("${hentBaseUrl()}/b2b/api/v1/ads").query("uuid=${uuid}")

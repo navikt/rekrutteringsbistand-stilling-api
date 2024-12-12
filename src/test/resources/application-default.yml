@@ -11,7 +11,9 @@ no.nav.security.jwt:
 
 spring:
   datasource:
-    url: jdbc:tc:postgresql:14:///rekrutteringsbistandstilling
+    url: jdbc:tc:postgresql:16:///test?TC_INITSCRIPT=postgres/postgres-init.sql
+    username: postgres
+    password: password
   jpa:
     show-sql=false
     properties.hibernate.show_sql=false
