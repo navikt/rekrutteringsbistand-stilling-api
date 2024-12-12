@@ -83,7 +83,7 @@ class InternStillingRepository(private val namedJdbcTemplate: NamedParameterJdbc
         override fun mapRow(rs: ResultSet, rowNum: Int): InternStilling {
             val internStilling = InternStilling(
                 stillingsid = rs.getObject("stillingsid", UUID::class.java),
-                innhold = objectMapper.readValue(rs.getString("innhold"), InternStillingInfo::class.java),
+                innhold = objectMapper.readValue(rs.getString("innhold"), InternStillingBlob::class.java),
                 opprettet = rs.getTimestamp("opprettet").toInstant().atZone(ZoneId.of("Europe/Oslo")),
                 opprettetAv = rs.getString("opprettet_av"),
                 sistEndret = rs.getTimestamp("sist_endret").toInstant().atZone(ZoneId.of("Europe/Oslo")),

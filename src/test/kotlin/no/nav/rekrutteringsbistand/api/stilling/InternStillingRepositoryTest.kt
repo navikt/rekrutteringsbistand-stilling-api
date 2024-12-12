@@ -36,7 +36,7 @@ class InternStillingRepositoryTest {
 
         val internStilling1 = InternStilling(
             UUID.fromString(stilling.uuid),
-            stilling.toInternStillingInfo(),
+            stilling.toInternStillingBlob(),
             opprettet = ZonedDateTime.now(ZoneId.of("Europe/Oslo")),
             opprettetAv = stilling.createdBy,
             sistEndretAv = stilling.updatedBy,
@@ -45,7 +45,7 @@ class InternStillingRepositoryTest {
         )
         val internStilling2 = InternStilling(
             UUID.fromString(stilling2.uuid),
-            stilling2.toInternStillingInfo(),
+            stilling2.toInternStillingBlob(),
             opprettet = ZonedDateTime.now(ZoneId.of("Europe/Oslo")),
             opprettetAv = stilling2.createdBy,
             sistEndretAv = stilling2.createdBy,

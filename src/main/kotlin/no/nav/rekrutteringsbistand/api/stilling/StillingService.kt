@@ -130,11 +130,11 @@ class StillingService(
     fun lagreInternStilling(stillingsId: String) {
         val stilling = arbeidsplassenKlient.hentStilling(stillingsId, true)
 
-        val internStillingInfo = stilling.toInternStillingInfo()
+        val internStillingBlob = stilling.toInternStillingBlob()
 
         val internStilling = InternStilling(
             UUID.fromString(stillingsId),
-            internStillingInfo,
+            internStillingBlob,
             opprettet = stilling.created.atZone(ZoneId.of("Europe/Oslo")),
             opprettetAv = stilling.createdBy,
             sistEndretAv = stilling.updatedBy,

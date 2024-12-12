@@ -64,8 +64,8 @@ data class Stilling(
         )
     }
 
-    fun toInternStillingInfo(): InternStillingInfo {
-        return InternStillingInfo(
+    fun toInternStillingBlob(): InternStillingBlob {
+        return InternStillingBlob(
             title = title,
             administration = administration?.let {
                 InternStillngAdministration(
@@ -339,7 +339,7 @@ data class InternStillingArbeidsgiver(
     val employees: Int?
 )
 
-data class InternStillingInfo(
+data class InternStillingBlob(
     val title: String,
     val administration: InternStillngAdministration?,
     val mediaList: List<Media> = ArrayList(),
@@ -364,7 +364,7 @@ data class InternStillingInfo(
 
 data class InternStilling(
     val stillingsid: UUID,
-    val innhold: InternStillingInfo,
+    val innhold: InternStillingBlob,
     val opprettet: ZonedDateTime,
     val opprettetAv: String,
     val sistEndret: ZonedDateTime,
