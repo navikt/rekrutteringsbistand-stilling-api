@@ -13,7 +13,7 @@ spec:
           expr: kube_deployment_status_replicas_available{deployment="rekrutteringsbistand-stilling-api"} == 0
           for: 1s
           annotations:
-            summary: Appen er nede
+            summary: Applikasjonen er nede
             action: "https://logs.adeo.no/app/r/s/Gnw9k"
           labels:
             namespace: toi
@@ -23,7 +23,7 @@ spec:
           expr: sum(increase(log_messages_errors{app="rekrutteringsbistand-stilling-api", level="Error"}[10m])) > 0
           for: 1s
           annotations:
-            summary: Appen har logget en error
+            summary: Applikasjonen har logget en error
             action: "https://logs.adeo.no/app/r/s/Gnw9k"
           labels:
             namespace: toi
