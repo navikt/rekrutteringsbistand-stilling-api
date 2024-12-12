@@ -68,7 +68,7 @@ data class Stilling(
         return InternStillingBlob(
             title = title,
             administration = administration?.let {
-                InternStillngAdministration(
+                InternStillingAdministration(
                     status = it.status,
                     comments = it.comments,
                     reportee = it.reportee,
@@ -317,7 +317,7 @@ data class InternStillingKategori(
     val parentId: Int?
 )
 
-data class InternStillngAdministration(
+data class InternStillingAdministration(
     val status: String?,
     val comments: String?,
     val reportee: String?,
@@ -341,7 +341,7 @@ data class InternStillingArbeidsgiver(
 
 data class InternStillingBlob(
     val title: String,
-    val administration: InternStillngAdministration?,
+    val administration: InternStillingAdministration?,
     val mediaList: List<Media> = ArrayList(),
     val contactList: List<Contact> = ArrayList(),
     val privacy: String?,
@@ -351,7 +351,7 @@ data class InternStillingBlob(
     val published: ZonedDateTime?,
     val expires: ZonedDateTime?,
     val employer: InternStillingArbeidsgiver?,
-    val location: Geografi?, // TODO ta bort denne?
+    val location: Geografi?,
     val locationList: List<Geografi> = ArrayList(),
     val categoryList: List<InternStillingKategori> = ArrayList(),
     val properties: Map<String, String> = HashMap(),

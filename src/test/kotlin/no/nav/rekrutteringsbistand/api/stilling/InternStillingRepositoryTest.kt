@@ -32,7 +32,7 @@ class InternStillingRepositoryTest {
     @Test
     fun `Skal kunne opprette 2 ulike annonser med forskjellig stillingsid`() {
         val stilling = enStilling
-        val stilling2 = enStilling.copy(id = 2000, uuid = UUID.randomUUID().toString(), title = "Stlling 2", reference = UUID.randomUUID().toString())
+        val stilling2 = enStilling.copy(id = 2000, uuid = UUID.randomUUID().toString(), title = "Stilling 2", reference = UUID.randomUUID().toString())
 
         val internStilling1 = InternStilling(
             UUID.fromString(stilling.uuid),
@@ -65,6 +65,6 @@ class InternStillingRepositoryTest {
         assertEquals(hentetStilling2.stillingsid, internStilling2.stillingsid)
 
         assertEquals("testnss", hentetStilling1.innhold.title)
-        assertEquals("Stlling 2", hentetStilling2.innhold.title)
+        assertEquals("Stilling 2", hentetStilling2.innhold.title)
     }
 }
