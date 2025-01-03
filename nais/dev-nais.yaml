@@ -17,8 +17,8 @@ spec:
     path: /internal/actuator/health
     initialDelay: 30
   replicas:
-    max: 1
-    min: 1
+    max: 0
+    min: 0
   prometheus:
     enabled: true
     path: /internal/actuator/prometheus
