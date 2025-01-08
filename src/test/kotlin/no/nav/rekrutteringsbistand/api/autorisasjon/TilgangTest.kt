@@ -6,7 +6,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.options
-import com.nhaarman.mockitokotlin2.whenever
+import org.mockito.kotlin.whenever
 import io.ktor.http.*
 import io.ktor.utils.io.core.*
 import no.nav.rekrutteringsbistand.api.OppdaterRekrutteringsbistandStillingDto

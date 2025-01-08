@@ -21,7 +21,7 @@ class TokenUtils(
     }
 
     fun hentInnloggetVeileder(): InnloggetVeileder {
-        val claims = contextHolder.tokenValidationContext.getClaims(ISSUER_AZUREAD)
+        val claims = contextHolder.getTokenValidationContext().getClaims(ISSUER_AZUREAD)
 
         return claims.run {
             InnloggetVeileder(
@@ -40,12 +40,12 @@ class TokenUtils(
     }
 
     fun hentNavIdent(): String {
-        val claims = contextHolder.tokenValidationContext.getClaims(ISSUER_AZUREAD)
+        val claims = contextHolder.getTokenValidationContext().getClaims(ISSUER_AZUREAD)
         return claims.getStringClaim("NAVident")
     }
 
     fun hentToken(): String {
-        val token = contextHolder.tokenValidationContext.getJwtToken(ISSUER_AZUREAD)
+        val token = contextHolder.getTokenValidationContext().getJwtToken(ISSUER_AZUREAD) ?: throw RuntimeException("Fant ikke token")
         return token.tokenAsString
     }
 

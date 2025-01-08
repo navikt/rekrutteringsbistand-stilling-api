@@ -27,8 +27,8 @@ internal class OrganisasjonssøkTest {
     val wiremockPamAdApi = WireMockRule(WireMockConfiguration
         .options()
         .port(9934)
-        .notifier(Slf4jNotifier(true))
-        .extensions(ResponseTemplateTransformer(true)))
+        .notifier(Slf4jNotifier(true)))
+        //.extensions(ResponseTemplateTransformer(true)))
 
     @get:Rule
     val wiremockAzure = WireMockRule(9954)
