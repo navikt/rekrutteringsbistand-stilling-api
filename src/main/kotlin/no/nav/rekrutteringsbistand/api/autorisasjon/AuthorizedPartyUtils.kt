@@ -36,6 +36,6 @@ class AuthorizedPartyUtils(
     }
 
     private fun authorizedPartyName(): String? {
-        return contextHolder.tokenValidationContext.getClaims(azureAdIssuer).getStringClaim(authorizedPartyNameClaim)
+        return contextHolder.getTokenValidationContext().getClaims(azureAdIssuer).getStringClaim(authorizedPartyNameClaim)
     }
 }
