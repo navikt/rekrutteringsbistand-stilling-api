@@ -60,7 +60,6 @@ internal class StillingComponentTest {
     @get:Rule
     val wiremockPamAdApi = WireMockRule(
         WireMockConfiguration.options().port(9935).notifier(Slf4jNotifier(true))
-            //.extensions(ResponseTemplateTransformer(true))
     )
 
     @get:Rule
