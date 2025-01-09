@@ -1,11 +1,9 @@
 package no.nav.rekrutteringsbistand.api.stillingsinfo
 
-import arrow.core.Option
 import no.nav.rekrutteringsbistand.api.RekrutteringsbistandStilling
 import no.nav.rekrutteringsbistand.api.arbeidsplassen.ArbeidsplassenKlient
 import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteKlient
 import no.nav.rekrutteringsbistand.api.stilling.Stilling
-import no.nav.rekrutteringsbistand.api.stilling.StillingService
 import no.nav.rekrutteringsbistand.api.support.log
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
@@ -23,7 +21,7 @@ class StillingsinfoService(
 
     @Transactional
     fun overtaEierskapForEksternStillingOgKandidatliste(stillingsId: Stillingsid, nyEier: Eier): Stillingsinfo {
-        val opprinneligStillingsinfo = repo.hentForStilling(stillingsId).orNull()
+        val opprinneligStillingsinfo = repo.hentForStilling(stillingsId)
 
 
         if (opprinneligStillingsinfo?.stillingskategori == Stillingskategori.FORMIDLING) {
@@ -55,10 +53,10 @@ class StillingsinfoService(
         return stillingsinfoMedNyEier
     }
 
-    fun hentStillingsinfo(stilling: Stilling): Option<Stillingsinfo> =
+    fun hentStillingsinfo(stilling: Stilling): Stillingsinfo? =
         hentForStilling(Stillingsid(stilling.uuid))
 
-    fun hentForStilling(stillingId: Stillingsid): Option<Stillingsinfo> =
+    fun hentForStilling(stillingId: Stillingsid): Stillingsinfo? =
         repo.hentForStilling(stillingId)
 
     fun hentForStillinger(stillingIder: List<Stillingsid>): List<Stillingsinfo> {

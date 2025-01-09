@@ -1,6 +1,5 @@
 package no.nav.rekrutteringsbistand.api.hendelser
 
-import arrow.core.getOrElse
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
@@ -31,7 +30,7 @@ class StillingsinfoPopulatorGammel(
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
         val stillingsId = Stillingsid(packet["kandidathendelse.stillingsId"].asText())
 
-        val stillingsinfo = stillingsinfoRepository.hentForStilling(stillingsId).getOrElse {
+        val stillingsinfo = stillingsinfoRepository.hentForStilling(stillingsId) ?: run {
             val nyStillingsinfo = Stillingsinfo(
                 stillingsinfoid = Stillingsinfoid(UUID.randomUUID()),
                 stillingsid = stillingsId,
@@ -43,7 +42,7 @@ class StillingsinfoPopulatorGammel(
         }
         packet["stillingsinfo"] = stillingsinfo.tilStillingsinfoIHendelse()
 
-        arbeidsplassenKlient.hentStillingBasertPåUUID(stillingsId.asString()).map {
+        arbeidsplassenKlient.hentStillingBasertPåUUID(stillingsId.asString())?.also {
             packet["stilling"] = Stilling(
                 stillingstittel = it.title,
                 erDirektemeldt = it.source == "DIR",

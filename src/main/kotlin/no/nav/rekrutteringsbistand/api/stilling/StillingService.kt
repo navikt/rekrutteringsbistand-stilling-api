@@ -1,6 +1,5 @@
 package no.nav.rekrutteringsbistand.api.stilling
 
-import arrow.core.getOrElse
 import no.nav.rekrutteringsbistand.AuditLogg
 import no.nav.rekrutteringsbistand.api.OppdaterRekrutteringsbistandStillingDto
 import no.nav.rekrutteringsbistand.api.RekrutteringsbistandStilling
@@ -30,8 +29,7 @@ class StillingService(
         val stilling = arbeidsplassenKlient.hentStilling(stillingsId, somSystembruker)
         val stillingsinfo = stillingsinfoService
             .hentStillingsinfo(stilling)
-            .map { it.asStillingsinfoDto() }
-            .getOrElse { null }
+            ?.asStillingsinfoDto()
 
         return RekrutteringsbistandStilling(
             stillingsinfo = stillingsinfo,
@@ -59,7 +57,7 @@ class StillingService(
 
         return RekrutteringsbistandStilling(
             stilling = opprettetStilling,
-            stillingsinfo = stillingsinfo.map { it.asStillingsinfoDto() }.orNull()
+            stillingsinfo = stillingsinfo?.asStillingsinfoDto()
         ).also {
             kandidatlisteKlient.sendStillingOppdatert(it)
         }
@@ -89,7 +87,7 @@ class StillingService(
 
         val id = Stillingsid(dto.stilling.uuid)
         val eksisterendeStillingsinfo: Stillingsinfo? =
-            stillingsinfoService.hentForStilling(id).orNull()
+            stillingsinfoService.hentForStilling(id)
 
         val stilling = dto.stilling.copyMedBeregnetTitle(
             stillingskategori = eksisterendeStillingsinfo?.stillingskategori

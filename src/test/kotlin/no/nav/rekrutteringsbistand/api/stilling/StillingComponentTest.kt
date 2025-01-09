@@ -7,7 +7,6 @@ import com.github.tomakehurst.wiremock.client.MappingBuilder
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.common.Slf4jNotifier
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
-import com.github.tomakehurst.wiremock.extension.responsetemplating.ResponseTemplateTransformer
 import com.github.tomakehurst.wiremock.http.Fault
 import com.github.tomakehurst.wiremock.http.Fault.CONNECTION_RESET_BY_PEER
 import com.github.tomakehurst.wiremock.http.RequestMethod
@@ -521,9 +520,7 @@ internal class StillingComponentTest {
         mockPamAdApi(HttpMethod.DELETE, "/api/v1/ads/${slettetStilling.uuid}", slettetStilling)
         mockKandidatlisteSlettet()
         mockAzureObo(wiremockAzure)
-        repository.hentForStilling(stillingsId).tapNone {
-            fail("Setup")
-        }
+        repository.hentForStilling(stillingsId) ?: fail("Setup")
 
         // når vi sletter stillingen
         restTemplate.exchange(
@@ -538,9 +535,8 @@ internal class StillingComponentTest {
         }
 
         // så skal stillingens Stillingsinfo ikke slettes
-        repository.hentForStilling(stillingsId).tapNone {
-            fail("Det skal finnes en Stillingsinfo i db for ")
-        }
+        repository.hentForStilling(stillingsId) ?: fail("Det skal finnes en Stillingsinfo i db for ")
+
     }
 
     private fun mockPamAdApi(method: HttpMethod, urlPath: String, responseBody: Any) {
