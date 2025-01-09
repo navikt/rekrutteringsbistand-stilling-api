@@ -138,9 +138,8 @@ class StillingsinfopopulatorGammelTest {
         """.trimIndent()
         )
 
-        val lagretStillingsinfo = stillingsinfoRepository.hentForStilling(stillingsId) ?: run {
-            fail("Stillingsinfo ikke lagret")
-        }
+        val lagretStillingsinfo = stillingsinfoRepository.hentForStilling(stillingsId) ?: fail("Stillingsinfo ikke lagret")
+
         assertNull(lagretStillingsinfo.eier)
         assertNull(lagretStillingsinfo.stillingskategori)
         assertThat(lagretStillingsinfo.stillingsid).isEqualTo(stillingsId)
@@ -149,9 +148,8 @@ class StillingsinfopopulatorGammelTest {
         assertThat(testRapid.inspektør.size).isOne
         val message = testRapid.inspektør.message(0)
         val stillingsinfo = message.path("stillingsinfo")
-        assertThat(
-            stillingsinfo.path("stillingsinfoid").asText()
-        ).isEqualTo(lagretStillingsinfo.stillingsinfoid.toString())
+        assertThat(stillingsinfo.path("stillingsinfoid").asText())
+            .isEqualTo(lagretStillingsinfo.stillingsinfoid.toString())
         assertThat(stillingsinfo.path("stillingsid").asText()).isEqualTo(lagretStillingsinfo.stillingsid.toString())
         assertTrue(stillingsinfo.path("stillingskategori").isNull)
         assertTrue(stillingsinfo.path("eier").isNull)

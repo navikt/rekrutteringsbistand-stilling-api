@@ -285,9 +285,8 @@ class StillingsinfopopulatorTest {
         """.trimIndent()
         )
 
-        val lagretStillingsinfo = stillingsinfoRepository.hentForStilling(stillingsId) ?: run {
-            fail("Stillingsinfo ikke lagret")
-        }
+        val lagretStillingsinfo = stillingsinfoRepository.hentForStilling(stillingsId) ?: fail("Stillingsinfo ikke lagret")
+
         assertNull(lagretStillingsinfo.eier)
         assertNull(lagretStillingsinfo.stillingskategori)
         assertThat(lagretStillingsinfo.stillingsid).isEqualTo(stillingsId)
