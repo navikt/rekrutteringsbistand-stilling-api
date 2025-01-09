@@ -10,7 +10,6 @@ import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.util.*
-import kotlin.collections.ArrayList
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Stilling(
@@ -202,18 +201,13 @@ data class Kategori(
     companion object {
         private val styrk08SeksSiffer = Regex("""^[0-9]{4}\.[0-9]{2}$""")
 
-        fun List<Kategori>.hentTittel(
-            kontekstForLoggmelding: String,
-        ): String {
-
-            if(filter(Kategori::erJanzz).size > 1) {
-                log.error("Mer enn én JANZZ-kategori funnet for kategori i $kontekstForLoggmelding")
+        fun List<Kategori>.hentTittel(kontekstForLoggmelding: String): String {
+            if (filter(Kategori::erJanzz).size > 1) {
+                log.warn("Mer enn én JANZZ-kategori funnet for kategori i $kontekstForLoggmelding. Velger en tilfeldig.")
             }
-
-            if(filter(Kategori::erStyrk08Nav).size > 1) {
-                log.error("Mer enn én STYRK08Nav-kategori funnet for kategori i $kontekstForLoggmelding")
+            if (filter(Kategori::erStyrk08Nav).size > 1) {
+                log.warn("Mer enn én STYRK08Nav-kategori funnet for kategori i $kontekstForLoggmelding. Velger en tilfeldig.")
             }
-
             return find(Kategori::erStyrk08Nav)?.name
                 ?: find(Kategori::erJanzz)?.name
                 ?: "Stilling uten valgt jobbtittel"
