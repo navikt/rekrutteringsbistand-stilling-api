@@ -1,18 +1,12 @@
 package no.nav.rekrutteringsbistand.api.stillingsinfo
 
-import arrow.core.getOrElse
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.github.tomakehurst.wiremock.junit.WireMockRule
 import no.nav.rekrutteringsbistand.api.TestRepository
-import no.nav.rekrutteringsbistand.api.Testdata
 import no.nav.rekrutteringsbistand.api.Testdata.enRekrutteringsbistandStilling
 import no.nav.rekrutteringsbistand.api.Testdata.enStilling
-import no.nav.rekrutteringsbistand.api.Testdata.enStillingsinfoInboundDto
 import no.nav.rekrutteringsbistand.api.Testdata.enStillingsinfo
+import no.nav.rekrutteringsbistand.api.Testdata.enStillingsinfoInboundDto
 import no.nav.rekrutteringsbistand.api.arbeidsplassen.ArbeidsplassenKlient
 import no.nav.rekrutteringsbistand.api.config.MockLogin
 import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteKlient
@@ -31,7 +25,6 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.boot.test.web.server.LocalServerPort
-import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders.*
 import org.springframework.http.HttpMethod
@@ -108,7 +101,7 @@ class StillingsinfoComponentTest {
         val stillingsinfoRespons =
             restTemplate.exchange(url, HttpMethod.PUT, httpEntity(tilLagring), StillingsinfoDto::class.java)
         val lagretStillingsinfo =
-            repository.hentForStilling(enStillingsinfo.stillingsid).getOrElse { fail("fant ikke stillingen") }
+            repository.hentForStilling(enStillingsinfo.stillingsid) ?: fail("fant ikke stillingen")
 
         assertThat(stillingsinfoRespons.statusCode).isEqualTo(HttpStatus.OK)
         assertThat(stillingsinfoRespons.body).isEqualTo(lagretStillingsinfo.asStillingsinfoDto())
@@ -124,7 +117,7 @@ class StillingsinfoComponentTest {
             restTemplate.exchange("$localBaseUrl/stillingsinfo", HttpMethod.PUT, httpEntity(dto), String::class.java)
 
         assertThat(respons.statusCodeValue).isEqualTo(500)
-        val stillingsinfo = repository.hentForStilling(Stillingsid(dto.stillingsid)).orNull()
+        val stillingsinfo = repository.hentForStilling(Stillingsid(dto.stillingsid))
         assertThat(stillingsinfo).isNull()
     }
 
@@ -140,10 +133,15 @@ class StillingsinfoComponentTest {
         mockAzureObo(wiremockAzure)
         `when`(kandidatlisteKlient.sendStillingOppdatert(enRekrutteringsbistandStilling)).thenThrow(RuntimeException::class.java)
 
-        val respons = restTemplate.exchange("$localBaseUrl/stillingsinfo", HttpMethod.PUT, httpEntity(endringDto), String::class.java)
+        val respons = restTemplate.exchange(
+            "$localBaseUrl/stillingsinfo",
+            HttpMethod.PUT,
+            httpEntity(endringDto),
+            String::class.java
+        )
 
         assertThat(respons.statusCodeValue).isEqualTo(500)
-        val lagretStillingsinfo = repository.hentForStilling(stillingsinfo.stillingsid).orNull()
+        val lagretStillingsinfo = repository.hentForStilling(stillingsinfo.stillingsid)
         assertThat(lagretStillingsinfo!!.eier).isEqualTo(stillingsinfo.eier)
     }
 
@@ -157,13 +155,19 @@ class StillingsinfoComponentTest {
             eierNavident = "X998877",
             eierNavn = "Helt Annet Navn"
         )
-        val rekrutteringsbistandStilling = enRekrutteringsbistandStilling.copy(stillingsinfo = stillingsinfoDerEierErNull.asStillingsinfoDto())
+        val rekrutteringsbistandStilling =
+            enRekrutteringsbistandStilling.copy(stillingsinfo = stillingsinfoDerEierErNull.asStillingsinfoDto())
         `when`(kandidatlisteKlient.sendStillingOppdatert(rekrutteringsbistandStilling)).thenThrow(RuntimeException::class.java)
 
-        val respons = restTemplate.exchange("$localBaseUrl/stillingsinfo", HttpMethod.PUT, httpEntity(endringDto), String::class.java)
+        val respons = restTemplate.exchange(
+            "$localBaseUrl/stillingsinfo",
+            HttpMethod.PUT,
+            httpEntity(endringDto),
+            String::class.java
+        )
 
         assertThat(respons.statusCodeValue).isEqualTo(500)
-        val lagretStillingsinfo = repository.hentForStilling(stillingsinfoDerEierErNull.stillingsid).orNull()
+        val lagretStillingsinfo = repository.hentForStilling(stillingsinfoDerEierErNull.stillingsid)
         assertThat(lagretStillingsinfo!!.eier).isNull()
     }
 
@@ -171,7 +175,8 @@ class StillingsinfoComponentTest {
     fun `Når vi prøver å endre eier på en formidlingsstilling skal vi returnere 403 Forbidden`() {
         val stillingsinfoForFormidlingsstilling = enStillingsinfo.copy(
             eier = Eier(navident = "A123456", navn = "En veileder"),
-            stillingskategori = Stillingskategori.FORMIDLING)
+            stillingskategori = Stillingskategori.FORMIDLING
+        )
 
         repository.opprett(stillingsinfoForFormidlingsstilling)
 
@@ -181,7 +186,12 @@ class StillingsinfoComponentTest {
             eierNavn = "Helt Annet Navn"
         )
 
-        val respons = restTemplate.exchange("$localBaseUrl/stillingsinfo", HttpMethod.PUT, httpEntity(endringDto), String::class.java)
+        val respons = restTemplate.exchange(
+            "$localBaseUrl/stillingsinfo",
+            HttpMethod.PUT,
+            httpEntity(endringDto),
+            String::class.java
+        )
 
         assertThat(respons.statusCodeValue).isEqualTo(403)
     }

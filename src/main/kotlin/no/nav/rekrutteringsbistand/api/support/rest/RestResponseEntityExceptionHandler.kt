@@ -25,7 +25,7 @@ class RestResponseEntityExceptionHandler : ResponseEntityExceptionHandler() {
 
     @ExceptionHandler(value = [EmptyResultDataAccessException::class, NoContentException::class])
     @ResponseBody
-    @Deprecated("Bruk arrow.core.Option eller en tom collection istedenfor. Exceptions for kontrollflyt som ikke er feilsituasjoner er et anti-pattern.")
+    @Deprecated("Bruk en tom collection istedenfor. Exceptions for kontrollflyt som ikke er feilsituasjoner er et anti-pattern.")
     protected fun handleNoContent(e: RuntimeException, request: HttpServletRequest): ResponseEntity<Any> {
         val uri = request.requestURI
         log.info("No content found at requestURI=${request.requestURI}, HTTP method=${request.method}", e)

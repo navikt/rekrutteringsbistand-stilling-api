@@ -1,8 +1,5 @@
 package no.nav.rekrutteringsbistand.api.hendelser
 
-import arrow.core.Some
-import arrow.core.getOrElse
-import no.nav.helse.rapids_rivers.asLocalDateTime
 import no.nav.helse.rapids_rivers.isMissingOrNull
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.rekrutteringsbistand.api.Testdata.enStilling
@@ -62,21 +59,20 @@ class StillingsinfopopulatorGammelTest {
         val eksternStillingskilde = "ASS"
         Mockito.`when`(arbeidsplassenKlient.hentStillingBasertPåUUID(stillingsId.toString()))
             .thenReturn(
-                Some(
-                    enStilling.copy(
-                        title = stillingsTittel,
-                        source = eksternStillingskilde,
-                        publishedByAdmin = stillingstidspunkt.toString(),
-                        properties = mapOf("positioncount" to "$antallStillinger"),
-                        employer = Arbeidsgiver(
-                            null, null, null, null, null,
-                            null, emptyList(), emptyList(), null, emptyList(),
-                            emptyMap(), null,
-                            organisasjonsnummer,
-                            null, null, null, null, null, null
-                        ),
-                        published = stillingensPubliseringstidspunkt
-                    )
+
+                enStilling.copy(
+                    title = stillingsTittel,
+                    source = eksternStillingskilde,
+                    publishedByAdmin = stillingstidspunkt.toString(),
+                    properties = mapOf("positioncount" to "$antallStillinger"),
+                    employer = Arbeidsgiver(
+                        null, null, null, null, null,
+                        null, emptyList(), emptyList(), null, emptyList(),
+                        emptyMap(), null,
+                        organisasjonsnummer,
+                        null, null, null, null, null, null
+                    ),
+                    published = stillingensPubliseringstidspunkt
                 )
             )
         val stillingsinfoid = Stillingsinfoid(UUID.randomUUID())
@@ -101,7 +97,7 @@ class StillingsinfopopulatorGammelTest {
         assertEquals("felt2", message.path("kandidathendelse").get("uinteressant2").asText())
         assertEquals(stillingsId.asString(), message.path("kandidathendelse").get("stillingsId").asText())
         assertEquals(stillingsTittel, message.path("stilling").get("stillingstittel").asText())
-        assertEquals(stillingsTittel=="DIR", message.path("stilling").get("erDirektemeldt").asBoolean())
+        assertEquals(stillingsTittel == "DIR", message.path("stilling").get("erDirektemeldt").asBoolean())
         assertEquals(
             ZonedDateTime.of(stillingstidspunkt, ZoneId.of("Europe/Oslo")),
             message.path("stilling").get("stillingOpprettetTidspunkt").asZonedDateTime()
@@ -125,8 +121,8 @@ class StillingsinfopopulatorGammelTest {
     fun `skal lagre stillinginfo og publisere ny melding når vi mottar hendelse for stilling uten stillingsinfo`() {
         val stillingsId = Stillingsid(UUID.randomUUID())
         Mockito.`when`(arbeidsplassenKlient.hentStillingBasertPåUUID(stillingsId.toString()))
-            .thenReturn(Some(enStilling.copy(title = "Dummy-tittel")))
-        stillingsinfoRepository.hentForStilling(stillingsId).tap {
+            .thenReturn(enStilling.copy(title = "Dummy-tittel"))
+        stillingsinfoRepository.hentForStilling(stillingsId)?.also {
             fail("Setup")
         }
 
@@ -142,9 +138,8 @@ class StillingsinfopopulatorGammelTest {
         """.trimIndent()
         )
 
-        val lagretStillingsinfo = stillingsinfoRepository.hentForStilling(stillingsId).getOrElse {
-            fail("Stillingsinfo ikke lagret")
-        }
+        val lagretStillingsinfo = stillingsinfoRepository.hentForStilling(stillingsId) ?: fail("Stillingsinfo ikke lagret")
+
         assertNull(lagretStillingsinfo.eier)
         assertNull(lagretStillingsinfo.stillingskategori)
         assertThat(lagretStillingsinfo.stillingsid).isEqualTo(stillingsId)
@@ -153,7 +148,8 @@ class StillingsinfopopulatorGammelTest {
         assertThat(testRapid.inspektør.size).isOne
         val message = testRapid.inspektør.message(0)
         val stillingsinfo = message.path("stillingsinfo")
-        assertThat(stillingsinfo.path("stillingsinfoid").asText()).isEqualTo(lagretStillingsinfo.stillingsinfoid.toString())
+        assertThat(stillingsinfo.path("stillingsinfoid").asText())
+            .isEqualTo(lagretStillingsinfo.stillingsinfoid.toString())
         assertThat(stillingsinfo.path("stillingsid").asText()).isEqualTo(lagretStillingsinfo.stillingsid.toString())
         assertTrue(stillingsinfo.path("stillingskategori").isNull)
         assertTrue(stillingsinfo.path("eier").isNull)

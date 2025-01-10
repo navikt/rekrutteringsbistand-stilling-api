@@ -1,7 +1,5 @@
 package no.nav.rekrutteringsbistand.api.hendelser
 
-import arrow.core.Some
-import arrow.core.getOrElse
 import no.nav.helse.rapids_rivers.isMissingOrNull
 import no.nav.helse.rapids_rivers.testsupport.TestRapid
 import no.nav.rekrutteringsbistand.api.Testdata.enStilling
@@ -63,21 +61,19 @@ class StillingsinfopopulatorTest {
 
         Mockito.`when`(arbeidsplassenKlient.hentStillingBasertPåUUID(stillingsId.toString()))
             .thenReturn(
-                Some(
-                    enStilling.copy(
-                        title = stillingsTittel,
-                        source = eksternStillingskilde,
-                        publishedByAdmin = stillingstidspunkt.toString(),
-                        properties = mapOf("positioncount" to "$antallStillinger"),
-                        employer = Arbeidsgiver(
-                            null, null, null, null, null,
-                            null, emptyList(), emptyList(), null, emptyList(),
-                            emptyMap(), null,
-                            organisasjonsnummer,
-                            null, null, null, null, null, null
-                        ),
-                        published = stillingensPubliseringstidspunkt
-                    )
+                enStilling.copy(
+                    title = stillingsTittel,
+                    source = eksternStillingskilde,
+                    publishedByAdmin = stillingstidspunkt.toString(),
+                    properties = mapOf("positioncount" to "$antallStillinger"),
+                    employer = Arbeidsgiver(
+                        null, null, null, null, null,
+                        null, emptyList(), emptyList(), null, emptyList(),
+                        emptyMap(), null,
+                        organisasjonsnummer,
+                        null, null, null, null, null, null
+                    ),
+                    published = stillingensPubliseringstidspunkt
                 )
             )
         val stillingsinfoid = Stillingsinfoid(UUID.randomUUID())
@@ -150,26 +146,24 @@ class StillingsinfopopulatorTest {
 
         Mockito.`when`(arbeidsplassenKlient.hentStillingBasertPåUUID(stillingsId.toString()))
             .thenReturn(
-                Some(
-                    enStillingMed(
-                        tittel = "Tittel fra arbeidsplassen",
-                        source = "DIR",
-                        categoryList = listOf(
-                            Kategori(
-                                name = "Kokk",
-                                code = "0000",
-                                id = null,
-                                categoryType = null,
-                                description = null,
-                                parentId = null,
-                            ), Kategori(
-                                name = "Statsminister",
-                                code = "0000.00",
-                                id = null,
-                                categoryType = "JANZZ",
-                                description = null,
-                                parentId = null,
-                            )
+                enStillingMed(
+                    tittel = "Tittel fra arbeidsplassen",
+                    source = "DIR",
+                    categoryList = listOf(
+                        Kategori(
+                            name = "Kokk",
+                            code = "0000",
+                            id = null,
+                            categoryType = null,
+                            description = null,
+                            parentId = null,
+                        ), Kategori(
+                            name = "Statsminister",
+                            code = "0000.00",
+                            id = null,
+                            categoryType = "JANZZ",
+                            description = null,
+                            parentId = null,
                         )
                     )
                 )
@@ -196,7 +190,6 @@ class StillingsinfopopulatorTest {
 
         Mockito.`when`(arbeidsplassenKlient.hentStillingBasertPåUUID(stillingsId.toString()))
             .thenReturn(
-                Some(
                     enStillingMed(
                         tittel = "Tittel fra arbeidsplassen",
                         source = "DIR",
@@ -220,7 +213,6 @@ class StillingsinfopopulatorTest {
                         )
                     )
                 )
-            )
 
         testRapid.sendTestMessage(
             """
@@ -243,7 +235,6 @@ class StillingsinfopopulatorTest {
 
         Mockito.`when`(arbeidsplassenKlient.hentStillingBasertPåUUID(stillingsId.toString()))
             .thenReturn(
-                Some(
                     enStillingMed(
                         tittel = "Tittel fra arbeidsplassen",
                         source = "AMEDIA",
@@ -259,7 +250,6 @@ class StillingsinfopopulatorTest {
                         )
                     )
                 )
-            )
 
         testRapid.sendTestMessage(
             """
@@ -280,8 +270,8 @@ class StillingsinfopopulatorTest {
     fun `skal lagre stillinginfo og publisere ny melding når vi mottar hendelse for stilling uten stillingsinfo`() {
         val stillingsId = Stillingsid(UUID.randomUUID())
         Mockito.`when`(arbeidsplassenKlient.hentStillingBasertPåUUID(stillingsId.toString()))
-            .thenReturn(Some(enStilling.copy(title = "Dummy-tittel")))
-        stillingsinfoRepository.hentForStilling(stillingsId).tap {
+            .thenReturn(enStilling.copy(title = "Dummy-tittel"))
+        stillingsinfoRepository.hentForStilling(stillingsId)?.also {
             fail("Setup")
         }
 
@@ -295,9 +285,8 @@ class StillingsinfopopulatorTest {
         """.trimIndent()
         )
 
-        val lagretStillingsinfo = stillingsinfoRepository.hentForStilling(stillingsId).getOrElse {
-            fail("Stillingsinfo ikke lagret")
-        }
+        val lagretStillingsinfo = stillingsinfoRepository.hentForStilling(stillingsId) ?: fail("Stillingsinfo ikke lagret")
+
         assertNull(lagretStillingsinfo.eier)
         assertNull(lagretStillingsinfo.stillingskategori)
         assertThat(lagretStillingsinfo.stillingsid).isEqualTo(stillingsId)

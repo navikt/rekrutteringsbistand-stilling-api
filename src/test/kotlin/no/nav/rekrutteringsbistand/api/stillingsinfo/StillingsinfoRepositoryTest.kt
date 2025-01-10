@@ -1,8 +1,5 @@
 package no.nav.rekrutteringsbistand.api.stillingsinfo
 
-import arrow.core.Option
-import arrow.core.getOrElse
-import arrow.core.toOption
 import no.nav.rekrutteringsbistand.api.TestRepository
 import no.nav.rekrutteringsbistand.api.Testdata.enAnnenStillingsinfo
 import no.nav.rekrutteringsbistand.api.Testdata.enStillingsinfo
@@ -31,9 +28,9 @@ class StillingsinfoRepositoryTest {
     @Test
     fun `Skal kunne lagre og hente ut stillingsinfo`() {
         repository.opprett(tilLagring)
-        val lagretStillingsinfo: Option<Stillingsinfo> = repository.hentForStilling(tilLagring.stillingsid)
+        val lagretStillingsinfo: Stillingsinfo? = repository.hentForStilling(tilLagring.stillingsid)
 
-        assertThat(lagretStillingsinfo).isEqualTo(tilLagring.toOption())
+        assertThat(lagretStillingsinfo).isEqualTo(tilLagring)
     }
 
     @Test
@@ -58,7 +55,7 @@ class StillingsinfoRepositoryTest {
         repository.oppdaterEier(enStillingsinfoOppdatering.stillingsinfoid, enStillingsinfoOppdatering.eier)
 
         val endretRekrutteringsbistand =
-            repository.hentForStilling(tilLagring.stillingsid).getOrElse { fail("Testsetup") }
+            repository.hentForStilling(tilLagring.stillingsid) ?: fail("Testsetup")
 
         assertThat(endretRekrutteringsbistand.eier?.navident).isEqualTo(enStillingsinfoOppdatering.eier.navident)
         assertThat(endretRekrutteringsbistand.eier?.navn).isEqualTo(enStillingsinfoOppdatering.eier.navn)

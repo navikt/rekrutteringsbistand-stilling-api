@@ -1,6 +1,5 @@
 package no.nav.rekrutteringsbistand.api.hendelser
 
-import arrow.core.getOrElse
 import com.fasterxml.jackson.annotation.JsonFormat
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -29,21 +28,19 @@ class StillingsinfoPopulator(
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
+
         val stillingsId = Stillingsid(packet["stillingsId"].asText())
 
-        val stillingsinfo = stillingsinfoRepository.hentForStilling(stillingsId).getOrElse {
-            val nyStillingsinfo = Stillingsinfo(
-                stillingsinfoid = Stillingsinfoid(UUID.randomUUID()),
-                stillingsid = stillingsId,
-                eier = null,
-                stillingskategori = null
-            )
-            stillingsinfoRepository.opprett(nyStillingsinfo)
-            nyStillingsinfo
-        }
+        val stillingsinfo = stillingsinfoRepository.hentForStilling(stillingsId) ?: Stillingsinfo(
+            stillingsinfoid = Stillingsinfoid(UUID.randomUUID()),
+            stillingsid = stillingsId,
+            eier = null,
+            stillingskategori = null
+        ).also { stillingsinfoRepository.opprett(it) }
+
         packet["stillingsinfo"] = stillingsinfo.tilStillingsinfoIHendelse()
 
-        arbeidsplassenKlient.hentStillingBasertPåUUID(stillingsId.asString()).map {
+        arbeidsplassenKlient.hentStillingBasertPåUUID(stillingsId.asString())?.also {
             packet["stilling"] = Stilling(
                 stillingstittel = it.hentInternEllerEksternTittel(),
                 erDirektemeldt = it.source == "DIR",

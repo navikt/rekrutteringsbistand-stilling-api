@@ -1,6 +1,5 @@
 package no.nav.rekrutteringsbistand.api.stilling
 
-import arrow.core.getOrElse
 import no.nav.rekrutteringsbistand.api.RekrutteringsbistandStilling
 import no.nav.rekrutteringsbistand.api.OppdaterRekrutteringsbistandStillingDto
 import no.nav.security.token.support.core.api.Protected
@@ -42,9 +41,9 @@ class StillingController(private val stillingsinfoService: StillingsinfoService,
 
     @PutMapping("/rekrutteringsbistandstilling")
     fun oppdaterStilling(request: HttpServletRequest, @RequestBody rekrutteringsbistandStillingDto: OppdaterRekrutteringsbistandStillingDto): ResponseEntity<OppdaterRekrutteringsbistandStillingDto> {
-        val stillingskategori = stillingsinfoService.hentForStilling(Stillingsid(rekrutteringsbistandStillingDto.stilling.uuid))
-            .map(Stillingsinfo::stillingskategori)
-            .getOrElse { Stillingskategori.STILLING }
+        val stillingskategori = stillingsinfoService.hentForStilling(
+            Stillingsid(rekrutteringsbistandStillingDto.stilling.uuid)
+        )?.stillingskategori ?: Stillingskategori.STILLING
         if(stillingskategori==Stillingskategori.FORMIDLING) {
             tokenUtils.hentInnloggetVeileder().validerMinstEnAvRollene(Rolle.JOBBSØKERRETTET, Rolle.ARBEIDSGIVERRETTET)
         } else {
