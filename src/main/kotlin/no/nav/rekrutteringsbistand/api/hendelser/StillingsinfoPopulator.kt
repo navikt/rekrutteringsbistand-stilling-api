@@ -28,18 +28,16 @@ class StillingsinfoPopulator(
     }
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
+
         val stillingsId = Stillingsid(packet["stillingsId"].asText())
 
-        val stillingsinfo = stillingsinfoRepository.hentForStilling(stillingsId) ?: run {
-            val nyStillingsinfo = Stillingsinfo(
-                stillingsinfoid = Stillingsinfoid(UUID.randomUUID()),
-                stillingsid = stillingsId,
-                eier = null,
-                stillingskategori = null
-            )
-            stillingsinfoRepository.opprett(nyStillingsinfo)
-            nyStillingsinfo
-        }
+        val stillingsinfo = stillingsinfoRepository.hentForStilling(stillingsId) ?: Stillingsinfo(
+            stillingsinfoid = Stillingsinfoid(UUID.randomUUID()),
+            stillingsid = stillingsId,
+            eier = null,
+            stillingskategori = null
+        ).also { stillingsinfoRepository.opprett(it) }
+
         packet["stillingsinfo"] = stillingsinfo.tilStillingsinfoIHendelse()
 
         arbeidsplassenKlient.hentStillingBasertPåUUID(stillingsId.asString())?.also {
