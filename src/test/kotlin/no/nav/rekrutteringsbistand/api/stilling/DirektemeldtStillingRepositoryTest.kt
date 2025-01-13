@@ -15,11 +15,11 @@ import java.util.*
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class InternStillingRepositoryTest {
+class DirektemeldtStillingRepositoryTest {
 
 
     @Autowired
-    lateinit var repository: InternStillingRepository
+    lateinit var repository: DirektemeldtStillingRepository
 
     @Autowired
     lateinit var testRepository: TestRepository
@@ -34,35 +34,35 @@ class InternStillingRepositoryTest {
         val stilling = enStilling
         val stilling2 = enStilling.copy(id = 2000, uuid = UUID.randomUUID().toString(), title = "Stilling 2", reference = UUID.randomUUID().toString())
 
-        val internStilling1 = InternStilling(
+        val direktemeldtStilling1 = DirektemeldtStilling(
             UUID.fromString(stilling.uuid),
-            stilling.toInternStillingBlob(),
+            stilling.toDirektemeldtStillingBlob(),
             opprettet = ZonedDateTime.now(ZoneId.of("Europe/Oslo")),
             opprettetAv = stilling.createdBy,
             sistEndretAv = stilling.updatedBy,
             sistEndret = ZonedDateTime.now(ZoneId.of("Europe/Oslo")),
             status = stilling.status
         )
-        val internStilling2 = InternStilling(
+        val direktemeldtStilling2 = DirektemeldtStilling(
             UUID.fromString(stilling2.uuid),
-            stilling2.toInternStillingBlob(),
+            stilling2.toDirektemeldtStillingBlob(),
             opprettet = ZonedDateTime.now(ZoneId.of("Europe/Oslo")),
             opprettetAv = stilling2.createdBy,
             sistEndretAv = stilling2.createdBy,
             sistEndret = ZonedDateTime.now(ZoneId.of("Europe/Oslo")),
             status = stilling2.status,
         )
-        repository.lagreInternStilling(internStilling1)
-        repository.lagreInternStilling(internStilling2)
+        repository.lagreDirektemeldtStilling(direktemeldtStilling1)
+        repository.lagreDirektemeldtStilling(direktemeldtStilling2)
 
-        val hentetStilling1 = repository.getInternStilling(internStilling1.stillingsid.toString())
-        val hentetStilling2 = repository.getInternStilling(internStilling2.stillingsid.toString())
+        val hentetStilling1 = repository.hentDirektemeldtStilling(direktemeldtStilling1.stillingsid.toString())
+        val hentetStilling2 = repository.hentDirektemeldtStilling(direktemeldtStilling2.stillingsid.toString())
 
         assertNotNull(hentetStilling1)
         assertNotNull(hentetStilling2)
 
-        assertEquals(hentetStilling1.stillingsid, internStilling1.stillingsid)
-        assertEquals(hentetStilling2.stillingsid, internStilling2.stillingsid)
+        assertEquals(hentetStilling1.stillingsid, direktemeldtStilling1.stillingsid)
+        assertEquals(hentetStilling2.stillingsid, direktemeldtStilling2.stillingsid)
 
         assertEquals("testnss", hentetStilling1.innhold.title)
         assertEquals("Stilling 2", hentetStilling2.innhold.title)
