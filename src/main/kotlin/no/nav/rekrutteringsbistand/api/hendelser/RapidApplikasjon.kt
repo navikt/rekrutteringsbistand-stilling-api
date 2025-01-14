@@ -1,7 +1,7 @@
 package no.nav.rekrutteringsbistand.api.hendelser
 
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import no.nav.helse.rapids_rivers.RapidApplication
-import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.rekrutteringsbistand.api.arbeidsplassen.ArbeidsplassenKlient
 import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoRepository
 import org.springframework.beans.factory.annotation.Autowired

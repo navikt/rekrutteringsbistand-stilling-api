@@ -1,7 +1,7 @@
 package no.nav.rekrutteringsbistand.api.hendelser
 
-import no.nav.helse.rapids_rivers.isMissingOrNull
-import no.nav.helse.rapids_rivers.testsupport.TestRapid
+import com.github.navikt.tbd_libs.rapids_and_rivers.isMissingOrNull
+import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import no.nav.rekrutteringsbistand.api.Testdata.enStilling
 import no.nav.rekrutteringsbistand.api.arbeidsplassen.ArbeidsplassenKlient
 import no.nav.rekrutteringsbistand.api.asZonedDateTime

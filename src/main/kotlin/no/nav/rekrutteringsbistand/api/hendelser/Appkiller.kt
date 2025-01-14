@@ -1,6 +1,6 @@
 package no.nav.rekrutteringsbistand.api.hendelser
 
-import no.nav.helse.rapids_rivers.RapidsConnection
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import org.springframework.boot.availability.AvailabilityChangeEvent
 import org.springframework.boot.availability.LivenessState
 import org.springframework.context.ApplicationContext
