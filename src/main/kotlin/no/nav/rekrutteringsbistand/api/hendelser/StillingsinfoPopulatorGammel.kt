@@ -24,8 +24,10 @@ class StillingsinfoPopulatorGammel(
 ) : River.PacketListener {
     init {
         River(rapidsConnection).apply {
+            precondition{
+                it.forbid("stillingsinfo")
+            }
             validate { it.requireKey("kandidathendelse.stillingsId") }
-            validate { it.rejectKey("stillingsinfo") }
         }.register(this)
     }
 

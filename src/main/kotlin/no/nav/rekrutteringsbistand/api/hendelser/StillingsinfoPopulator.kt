@@ -22,10 +22,13 @@ class StillingsinfoPopulator(
 ) : River.PacketListener {
     init {
         River(rapidsConnection).apply {
+            precondition{
+                 it.forbid("stillingsinfo")
+                 it.forbid("stilling")
+                 it.forbidValue("@event_name", "arbeidsgiversKandidatliste.VisningKontaktinfo")
+            }
             validate { it.requireKey("stillingsId") }
-            validate { it.rejectKey("stillingsinfo") }
-            validate { it.rejectKey("stilling") }
-            validate { it.rejectValue("@event_name", "arbeidsgiversKandidatliste.VisningKontaktinfo") }
+
         }.register(this)
     }
 
