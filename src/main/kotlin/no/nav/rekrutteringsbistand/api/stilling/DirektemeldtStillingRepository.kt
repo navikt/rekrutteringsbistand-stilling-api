@@ -32,14 +32,14 @@ class DirektemeldtStillingRepository(private val namedJdbcTemplate: NamedParamet
         const val SIST_ENDRET = "sist_endret"
         const val SIST_ENDRET_AV = "sist_endret_av"
         const val STATUS = "status"
-        const val INTERN_STILLING_TABELL = "intern_stilling"
+        const val DIREKTEMELDT_STILLING_TABELL = "direktemeldt_stilling"
     }
 
     fun lagreDirektemeldtStilling(direktemeldtStilling: DirektemeldtStilling) {
         log.info("Lagrer direktemeldt stilling med uuid: ${direktemeldtStilling.stillingsid}")
 
         val sql = """
-          insert into $INTERN_STILLING_TABELL ($STILLINGSID, $INNHOLD, $OPPRETTET, $OPPRETTET_AV, $SIST_ENDRET, $SIST_ENDRET_AV, $STATUS)
+          insert into $DIREKTEMELDT_STILLING_TABELL ($STILLINGSID, $INNHOLD, $OPPRETTET, $OPPRETTET_AV, $SIST_ENDRET, $SIST_ENDRET_AV, $STATUS)
             values(:stillingsid, :innhold ::jsonb, :opprettet, :opprettet_av, :sist_endret, :sist_endret_av, :status)
             on conflict($STILLINGSID) do update 
             set $SIST_ENDRET_AV=:sist_endret_av, 
@@ -63,7 +63,7 @@ class DirektemeldtStillingRepository(private val namedJdbcTemplate: NamedParamet
     }
 
     fun hentDirektemeldtStilling(stillingsid: String) : DirektemeldtStilling {
-        val sql = "select stillingsid, innhold, opprettet, opprettet_av, sist_endret, sist_endret_av, status from $INTERN_STILLING_TABELL where $STILLINGSID=:stillingsid ::uuid"
+        val sql = "select stillingsid, innhold, opprettet, opprettet_av, sist_endret, sist_endret_av, status from $DIREKTEMELDT_STILLING_TABELL where $STILLINGSID=:stillingsid ::uuid"
         val params = mapOf("stillingsid" to stillingsid)
 
         val direktemeldtStilling = namedJdbcTemplate.queryForObject(

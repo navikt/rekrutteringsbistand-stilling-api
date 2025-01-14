@@ -10,7 +10,7 @@ class TestRepository(val jdbcTemplate: JdbcTemplate) {
 
     fun slettAlt() {
         jdbcTemplate.update("DELETE FROM ${StillingsinfoRepository.STILLINGSINFO}")
-        jdbcTemplate.update("DELETE FROM ${DirektemeldtStillingRepository.INTERN_STILLING_TABELL}")
+        jdbcTemplate.update("DELETE FROM ${DirektemeldtStillingRepository.DIREKTEMELDT_STILLING_TABELL}")
 
     }
 }
