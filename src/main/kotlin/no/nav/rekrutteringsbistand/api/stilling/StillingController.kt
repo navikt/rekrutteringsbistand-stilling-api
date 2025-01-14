@@ -74,7 +74,7 @@ class StillingController(private val stillingsinfoService: StillingsinfoService,
         }
         // hent stillinger fra ad-api og lagre
 
-        stillingService.lagreInternStilling(stillingsId)
+        stillingService.lagreDirektemeldtStilling(stillingsId)
         return ok("Stilling lagret")
     }
 }

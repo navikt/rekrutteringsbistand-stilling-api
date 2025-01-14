@@ -20,7 +20,7 @@ class StillingService(
     val tokenUtils: TokenUtils,
     val kandidatlisteKlient: KandidatlisteKlient,
     val arbeidsplassenKlient: ArbeidsplassenKlient,
-    val internStillingRepository: InternStillingRepository
+    val direktemeldtStillingRepository: DirektemeldtStillingRepository
 ) {
     fun hentRekrutteringsbistandStilling(
         stillingsId: String,
@@ -125,20 +125,20 @@ class StillingService(
         return arbeidsplassenKlient.slettStilling(stillingsId)
     }
 
-    fun lagreInternStilling(stillingsId: String) {
+    fun lagreDirektemeldtStilling(stillingsId: String) {
         val stilling = arbeidsplassenKlient.hentStilling(stillingsId, true)
 
-        val internStillingBlob = stilling.toInternStillingBlob()
+        val direktemeldtStillingBlob = stilling.toDirektemeldtStillingBlob()
 
-        val internStilling = InternStilling(
+        val direktemeldtStilling = DirektemeldtStilling(
             UUID.fromString(stillingsId),
-            internStillingBlob,
+            direktemeldtStillingBlob,
             opprettet = stilling.created.atZone(ZoneId.of("Europe/Oslo")),
             opprettetAv = stilling.createdBy,
             sistEndretAv = stilling.updatedBy,
             sistEndret = stilling.updated.atZone(ZoneId.of("Europe/Oslo")),
             status = stilling.status
         )
-        internStillingRepository.lagreInternStilling(internStilling)
+        direktemeldtStillingRepository.lagreDirektemeldtStilling(direktemeldtStilling)
     }
 }

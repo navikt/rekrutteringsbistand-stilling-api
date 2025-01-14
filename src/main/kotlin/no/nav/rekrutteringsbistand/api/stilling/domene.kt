@@ -63,11 +63,11 @@ data class Stilling(
         )
     }
 
-    fun toInternStillingBlob(): InternStillingBlob {
-        return InternStillingBlob(
+    fun toDirektemeldtStillingBlob(): DirektemeldtStillingBlob {
+        return DirektemeldtStillingBlob(
             title = title,
             administration = administration?.let {
-                InternStillingAdministration(
+                DirektemeldtStillingAdministration(
                     status = it.status,
                     comments = it.comments,
                     reportee = it.reportee,
@@ -83,10 +83,10 @@ data class Stilling(
             reference = reference,
             published = published?.atZone(ZoneId.of("Europe/Oslo")),
             expires = expires?.atZone(ZoneId.of("Europe/Oslo")),
-            employer = employer?.toInternStillingArbeidsgiver(),
+            employer = employer?.toDirektemeldtStillingArbeidsgiver(),
             location = location,
             locationList = locationList,
-            categoryList = categoryList.map { it.toInternStillingKategori() },
+            categoryList = categoryList.map { it.toDirektemeldtStillingKategori() },
             properties = properties,
             publishedByAdmin = publishedByAdmin,
             businessName = businessName,
@@ -150,8 +150,8 @@ data class Arbeidsgiver(
     val orgform: String?,
     val employees: Int?
 ) {
-    fun toInternStillingArbeidsgiver(): InternStillingArbeidsgiver {
-        return InternStillingArbeidsgiver(
+    fun toDirektemeldtStillingArbeidsgiver(): DirektemeldtStillingArbeidsgiver {
+        return DirektemeldtStillingArbeidsgiver(
             mediaList = mediaList,
             contactList = contactList,
             location = location,
@@ -214,8 +214,8 @@ data class Kategori(
         }
     }
 
-    fun toInternStillingKategori(): InternStillingKategori {
-        return InternStillingKategori(
+    fun toDirektemeldtStillingKategori(): DirektemeldtStillingKategori {
+        return DirektemeldtStillingKategori(
             code = code,
             categoryType = categoryType,
             name = name,
@@ -303,7 +303,7 @@ data class OpprettStillingDto(
     )
 }
 
-data class InternStillingKategori(
+data class DirektemeldtStillingKategori(
     val code: String?,
     val categoryType: String?,
     val name: String?,
@@ -311,7 +311,7 @@ data class InternStillingKategori(
     val parentId: Int?
 )
 
-data class InternStillingAdministration(
+data class DirektemeldtStillingAdministration(
     val status: String?,
     val comments: String?,
     val reportee: String?,
@@ -319,7 +319,7 @@ data class InternStillingAdministration(
     val navIdent: String?
 )
 
-data class InternStillingArbeidsgiver(
+data class DirektemeldtStillingArbeidsgiver(
     val mediaList: List<Media> = ArrayList(),
     val contactList: List<Contact> = ArrayList(),
     val location: Geografi?,
@@ -333,9 +333,9 @@ data class InternStillingArbeidsgiver(
     val employees: Int?
 )
 
-data class InternStillingBlob(
+data class DirektemeldtStillingBlob(
     val title: String,
-    val administration: InternStillingAdministration?,
+    val administration: DirektemeldtStillingAdministration?,
     val mediaList: List<Media> = ArrayList(),
     val contactList: List<Contact> = ArrayList(),
     val privacy: String?,
@@ -344,10 +344,10 @@ data class InternStillingBlob(
     val reference: String?,
     val published: ZonedDateTime?,
     val expires: ZonedDateTime?,
-    val employer: InternStillingArbeidsgiver?,
+    val employer: DirektemeldtStillingArbeidsgiver?,
     val location: Geografi?,
     val locationList: List<Geografi> = ArrayList(),
-    val categoryList: List<InternStillingKategori> = ArrayList(),
+    val categoryList: List<DirektemeldtStillingKategori> = ArrayList(),
     val properties: Map<String, String> = HashMap(),
     val publishedByAdmin: String?,
     val businessName: String?,
@@ -356,9 +356,9 @@ data class InternStillingBlob(
     val activationOnPublishingDate: Boolean?
 )
 
-data class InternStilling(
+data class DirektemeldtStilling(
     val stillingsid: UUID,
-    val innhold: InternStillingBlob,
+    val innhold: DirektemeldtStillingBlob,
     val opprettet: ZonedDateTime,
     val opprettetAv: String,
     val sistEndret: ZonedDateTime,

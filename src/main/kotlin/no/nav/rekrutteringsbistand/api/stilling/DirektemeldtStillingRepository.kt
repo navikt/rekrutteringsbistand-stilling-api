@@ -17,7 +17,7 @@ import java.time.ZoneId
 import java.util.*
 
 @Repository
-class InternStillingRepository(private val namedJdbcTemplate: NamedParameterJdbcTemplate) {
+class DirektemeldtStillingRepository(private val namedJdbcTemplate: NamedParameterJdbcTemplate) {
     companion object {
         val objectMapper: ObjectMapper = jacksonObjectMapper().registerModule(JavaTimeModule())
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
@@ -32,14 +32,14 @@ class InternStillingRepository(private val namedJdbcTemplate: NamedParameterJdbc
         const val SIST_ENDRET = "sist_endret"
         const val SIST_ENDRET_AV = "sist_endret_av"
         const val STATUS = "status"
-        const val INTERN_STILLING_TABELL = "intern_stilling"
+        const val DIREKTEMELDT_STILLING_TABELL = "direktemeldt_stilling"
     }
 
-    fun lagreInternStilling(internStilling: InternStilling) {
-        log.info("Lagrer intern stilling med uuid: ${internStilling.stillingsid}")
+    fun lagreDirektemeldtStilling(direktemeldtStilling: DirektemeldtStilling) {
+        log.info("Lagrer direktemeldt stilling med uuid: ${direktemeldtStilling.stillingsid}")
 
         val sql = """
-          insert into $INTERN_STILLING_TABELL ($STILLINGSID, $INNHOLD, $OPPRETTET, $OPPRETTET_AV, $SIST_ENDRET, $SIST_ENDRET_AV, $STATUS)
+          insert into $DIREKTEMELDT_STILLING_TABELL ($STILLINGSID, $INNHOLD, $OPPRETTET, $OPPRETTET_AV, $SIST_ENDRET, $SIST_ENDRET_AV, $STATUS)
             values(:stillingsid, :innhold ::jsonb, :opprettet, :opprettet_av, :sist_endret, :sist_endret_av, :status)
             on conflict($STILLINGSID) do update 
             set $SIST_ENDRET_AV=:sist_endret_av, 
@@ -50,40 +50,40 @@ class InternStillingRepository(private val namedJdbcTemplate: NamedParameterJdbc
         """.trimIndent()
 
         val params =  mapOf(
-            "stillingsid" to internStilling.stillingsid,
-            "innhold" to objectMapper.writeValueAsString(internStilling.innhold),
-            "opprettet" to Timestamp.from(internStilling.opprettet.toInstant()),
-            "opprettet_av" to internStilling.opprettetAv,
-            "sist_endret" to Timestamp.from(internStilling.sistEndret.toInstant()),
-            "sist_endret_av" to internStilling.sistEndretAv,
-            "status" to internStilling.status
+            "stillingsid" to direktemeldtStilling.stillingsid,
+            "innhold" to objectMapper.writeValueAsString(direktemeldtStilling.innhold),
+            "opprettet" to Timestamp.from(direktemeldtStilling.opprettet.toInstant()),
+            "opprettet_av" to direktemeldtStilling.opprettetAv,
+            "sist_endret" to Timestamp.from(direktemeldtStilling.sistEndret.toInstant()),
+            "sist_endret_av" to direktemeldtStilling.sistEndretAv,
+            "status" to direktemeldtStilling.status
         )
 
         namedJdbcTemplate.query(sql, MapSqlParameterSource(params)) {rs -> if (rs.next()) rs.getLong("id") else null}
     }
 
-    fun getInternStilling(stillingsid: String) : InternStilling {
-        val sql = "select stillingsid, innhold, opprettet, opprettet_av, sist_endret, sist_endret_av, status from $INTERN_STILLING_TABELL where $STILLINGSID=:stillingsid ::uuid"
+    fun hentDirektemeldtStilling(stillingsid: String) : DirektemeldtStilling {
+        val sql = "select stillingsid, innhold, opprettet, opprettet_av, sist_endret, sist_endret_av, status from $DIREKTEMELDT_STILLING_TABELL where $STILLINGSID=:stillingsid ::uuid"
         val params = mapOf("stillingsid" to stillingsid)
 
-        val internStilling = namedJdbcTemplate.queryForObject(
-            sql, params, InternStillingRowMapper()
+        val direktemeldtStilling = namedJdbcTemplate.queryForObject(
+            sql, params, DirektemeldtStillingRowMapper()
         )
 
-        if(internStilling == null) {
-            throw RuntimeException("Fant ikke intern stilling")
+        if(direktemeldtStilling == null) {
+            throw RuntimeException("Fant ikke direktemeldt stilling")
         }
 
-        return internStilling
+        return direktemeldtStilling
     }
 
 
-    class InternStillingRowMapper : RowMapper<InternStilling?> {
+    class DirektemeldtStillingRowMapper : RowMapper<DirektemeldtStilling?> {
         @Throws(SQLException::class)
-        override fun mapRow(rs: ResultSet, rowNum: Int): InternStilling {
-            val internStilling = InternStilling(
+        override fun mapRow(rs: ResultSet, rowNum: Int): DirektemeldtStilling {
+            val direktemeldtStilling = DirektemeldtStilling(
                 stillingsid = rs.getObject("stillingsid", UUID::class.java),
-                innhold = objectMapper.readValue(rs.getString("innhold"), InternStillingBlob::class.java),
+                innhold = objectMapper.readValue(rs.getString("innhold"), DirektemeldtStillingBlob::class.java),
                 opprettet = rs.getTimestamp("opprettet").toInstant().atZone(ZoneId.of("Europe/Oslo")),
                 opprettetAv = rs.getString("opprettet_av"),
                 sistEndret = rs.getTimestamp("sist_endret").toInstant().atZone(ZoneId.of("Europe/Oslo")),
@@ -91,7 +91,7 @@ class InternStillingRepository(private val namedJdbcTemplate: NamedParameterJdbc
                 status = rs.getString("status"),
             )
 
-            return internStilling
+            return direktemeldtStilling
         }
     }
 
