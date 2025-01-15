@@ -36,7 +36,7 @@ class DirektemeldtStillingRepositoryTest {
 
         val direktemeldtStilling1 = DirektemeldtStilling(
             UUID.fromString(stilling.uuid),
-            stilling.toDirektemeldtStillingBlob(),
+            stilling.toDirektemeldtStillingInnhold(),
             opprettet = ZonedDateTime.now(ZoneId.of("Europe/Oslo")),
             opprettetAv = stilling.createdBy,
             sistEndretAv = stilling.updatedBy,
@@ -45,7 +45,7 @@ class DirektemeldtStillingRepositoryTest {
         )
         val direktemeldtStilling2 = DirektemeldtStilling(
             UUID.fromString(stilling2.uuid),
-            stilling2.toDirektemeldtStillingBlob(),
+            stilling2.toDirektemeldtStillingInnhold(),
             opprettet = ZonedDateTime.now(ZoneId.of("Europe/Oslo")),
             opprettetAv = stilling2.createdBy,
             sistEndretAv = stilling2.createdBy,

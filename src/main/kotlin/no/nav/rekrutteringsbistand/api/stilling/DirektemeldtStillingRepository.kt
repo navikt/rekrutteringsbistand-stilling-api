@@ -83,7 +83,7 @@ class DirektemeldtStillingRepository(private val namedJdbcTemplate: NamedParamet
         override fun mapRow(rs: ResultSet, rowNum: Int): DirektemeldtStilling {
             val direktemeldtStilling = DirektemeldtStilling(
                 stillingsid = rs.getObject("stillingsid", UUID::class.java),
-                innhold = objectMapper.readValue(rs.getString("innhold"), DirektemeldtStillingBlob::class.java),
+                innhold = objectMapper.readValue(rs.getString("innhold"), DirektemeldtStillingInnhold::class.java),
                 opprettet = rs.getTimestamp("opprettet").toInstant().atZone(ZoneId.of("Europe/Oslo")),
                 opprettetAv = rs.getString("opprettet_av"),
                 sistEndret = rs.getTimestamp("sist_endret").toInstant().atZone(ZoneId.of("Europe/Oslo")),

@@ -63,8 +63,8 @@ data class Stilling(
         )
     }
 
-    fun toDirektemeldtStillingBlob(): DirektemeldtStillingBlob {
-        return DirektemeldtStillingBlob(
+    fun toDirektemeldtStillingInnhold(): DirektemeldtStillingInnhold {
+        return DirektemeldtStillingInnhold(
             title = title,
             administration = administration?.let {
                 DirektemeldtStillingAdministration(
@@ -333,7 +333,7 @@ data class DirektemeldtStillingArbeidsgiver(
     val employees: Int?
 )
 
-data class DirektemeldtStillingBlob(
+data class DirektemeldtStillingInnhold(
     val title: String,
     val administration: DirektemeldtStillingAdministration?,
     val mediaList: List<Media> = ArrayList(),
@@ -345,7 +345,7 @@ data class DirektemeldtStillingBlob(
     val published: ZonedDateTime?,
     val expires: ZonedDateTime?,
     val employer: DirektemeldtStillingArbeidsgiver?,
-    val location: Geografi?,
+    val location: Geografi?, // Ta bort den denne TODO
     val locationList: List<Geografi> = ArrayList(),
     val categoryList: List<DirektemeldtStillingKategori> = ArrayList(),
     val properties: Map<String, String> = HashMap(),
@@ -358,7 +358,7 @@ data class DirektemeldtStillingBlob(
 
 data class DirektemeldtStilling(
     val stillingsid: UUID,
-    val innhold: DirektemeldtStillingBlob,
+    val innhold: DirektemeldtStillingInnhold,
     val opprettet: ZonedDateTime,
     val opprettetAv: String,
     val sistEndret: ZonedDateTime,
