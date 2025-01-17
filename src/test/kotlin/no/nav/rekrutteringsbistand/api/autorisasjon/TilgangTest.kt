@@ -7,8 +7,6 @@ import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.options
 import org.mockito.kotlin.whenever
-import io.ktor.http.*
-import io.ktor.utils.io.core.*
 import no.nav.rekrutteringsbistand.api.OppdaterRekrutteringsbistandStillingDto
 import no.nav.rekrutteringsbistand.api.TestRepository
 import no.nav.rekrutteringsbistand.api.Testdata
@@ -20,6 +18,8 @@ import no.nav.rekrutteringsbistand.api.config.utvikler
 import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteKlient
 import no.nav.rekrutteringsbistand.api.standardsøk.LagreStandardsøkDto
 import no.nav.rekrutteringsbistand.api.standardsøk.StandardsøkRepository
+import no.nav.rekrutteringsbistand.api.stilling.DirektemeldtStilling
+import no.nav.rekrutteringsbistand.api.stilling.DirektemeldtStillingRepository
 import no.nav.rekrutteringsbistand.api.stilling.Page
 import no.nav.rekrutteringsbistand.api.stilling.Stilling
 import no.nav.rekrutteringsbistand.api.stillingsinfo.*
@@ -50,6 +50,8 @@ import org.springframework.http.HttpMethod
 import org.springframework.test.context.junit4.SpringRunner
 import org.springframework.test.web.reactive.server.StatusAssertions
 import org.springframework.test.web.reactive.server.WebTestClient
+import java.time.ZoneId
+import java.time.ZonedDateTime
 import java.util.*
 
 private val objectMapper: ObjectMapper =
@@ -87,6 +89,10 @@ class TilgangTest {
     @Autowired
     private lateinit var stillingsinfoRepository: StillingsinfoRepository
 
+    @Autowired
+    private lateinit var direktemeldtStillingRepository: DirektemeldtStillingRepository
+
+
     private lateinit var stubber: Stubber
 
     private val restTemplate = TestRestTemplate()
@@ -95,7 +101,7 @@ class TilgangTest {
 
     @BeforeAll
     fun setup() {
-        stubber = Stubber(kandidatlisteKlient, azureKlient, standardsøkRepository, stillingsinfoRepository)
+        stubber = Stubber(kandidatlisteKlient, azureKlient, standardsøkRepository, stillingsinfoRepository, direktemeldtStillingRepository)
     }
 
     @BeforeEach
@@ -281,6 +287,9 @@ private class Kall(private val webClient: WebTestClient, private val mockLogin: 
         val oppdaterFormidling: EndepunktHandler = { rolle -> oppdaterStilling(rolle, Stillingskategori.FORMIDLING) }
         val kopierStilling: EndepunktHandler = { rolle ->
             val stilling = Testdata.enStilling
+
+            stubber.mockHentDirektemeldtStilling(Testdata.enStilling.uuid)
+
             stubber.mockHentStilling(stilling)
             stubber.mockArbeidsplassenKlientOpprettStilling()
             post(
@@ -472,7 +481,8 @@ private class Stubber(
     private val kandidatlisteKlient: KandidatlisteKlient,
     private val azureKlient: AzureKlient,
     private val standardsøkRepository: StandardsøkRepository,
-    private val stillingsinfoRepository: StillingsinfoRepository
+    private val stillingsinfoRepository: StillingsinfoRepository,
+    private val direktemeldtStillingRepository: DirektemeldtStillingRepository
 ) {
 
     private val wireMock: WireMockServer = WireMockServer(options().port(9934))
@@ -602,5 +612,21 @@ private class Stubber(
         stillingsinfoRepository.opprett(Stillingsinfo(Stillingsinfoid.ny(),
             Stillingsid(stillingsId),null, stillingskategori
         ))
+    }
+
+    fun mockHentDirektemeldtStilling(stillingsId: String) {
+        val stilling = Testdata.enStilling
+        val direktemeldtStilling = DirektemeldtStilling(
+            UUID.fromString(stilling.uuid),
+            stilling.toDirektemeldtStillingInnhold(),
+            opprettet = ZonedDateTime.now(ZoneId.of("Europe/Oslo")),
+            opprettetAv = stilling.createdBy,
+            sistEndretAv = stilling.updatedBy,
+            sistEndret = ZonedDateTime.now(ZoneId.of("Europe/Oslo")),
+            status = stilling.status
+        )
+        direktemeldtStillingRepository.lagreDirektemeldtStilling(direktemeldtStilling)
+
+        direktemeldtStillingRepository.hentDirektemeldtStilling(stillingsId)
     }
 }

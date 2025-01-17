@@ -50,6 +50,13 @@ class StillingService(
     private fun opprettStilling(opprettStilling: OpprettStillingDto, stillingskategori: Stillingskategori): RekrutteringsbistandStilling {
         log.info("Stilling som blir mottatt ved opprettese i frontend: $opprettStilling")
 
+        // berik stillingen med det den får fra pam-ad
+        // sett medium i frontend
+        // sett businessName som name fra employer
+        // opprett uuid
+        // sett uuid som referanse
+        // sett status som inactive
+
         val opprettetStilling = arbeidsplassenKlient.opprettStilling(opprettStilling)
 
         log.info("Stilling som er opprettet i pam-ad: $opprettetStilling")
@@ -77,13 +84,22 @@ class StillingService(
     }
 
     fun kopierStilling(stillingsId: String): RekrutteringsbistandStilling {
+        val direktemeldtStilling = direktemeldtStillingRepository.hentDirektemeldtStilling(stillingsId)
+        val direktemeldtStillingKopi = direktemeldtStilling.toKopiertStilling(tokenUtils)
+        val direktemeldtStillingInfo = stillingsinfoService
+            .hentForStilling(Stillingsid(stillingsId))
+            ?.asStillingsinfoDto()
+
         val eksisterendeRekrutteringsbistandStilling = hentRekrutteringsbistandStilling(stillingsId)
         val eksisterendeStilling = eksisterendeRekrutteringsbistandStilling.stilling
         val kopi = eksisterendeStilling.toKopiertStilling(tokenUtils)
 
+        log.info("Kopi som ble opprettet før: $kopi")
+        log.info("Kopi som ble opprettet nå fra databasen: $direktemeldtStillingKopi")
+
         return opprettStilling(
-            kopi,
-            kategoriMedDefault(eksisterendeRekrutteringsbistandStilling.stillingsinfo)
+            direktemeldtStillingKopi,
+            kategoriMedDefault(direktemeldtStillingInfo)
         )
     }
 

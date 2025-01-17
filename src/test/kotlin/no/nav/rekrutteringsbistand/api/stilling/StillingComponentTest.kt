@@ -15,9 +15,7 @@ import com.github.tomakehurst.wiremock.matching.EqualToPattern
 import com.github.tomakehurst.wiremock.matching.MatchesJsonPathPattern
 import com.github.tomakehurst.wiremock.matching.RequestPatternBuilder
 import com.github.tomakehurst.wiremock.matching.UrlPattern
-import no.nav.rekrutteringsbistand.api.OppdaterRekrutteringsbistandStillingDto
-import no.nav.rekrutteringsbistand.api.RekrutteringsbistandStilling
-import no.nav.rekrutteringsbistand.api.TestRepository
+import no.nav.rekrutteringsbistand.api.*
 import no.nav.rekrutteringsbistand.api.Testdata.enOpprettRekrutteringsbistandstillingDto
 import no.nav.rekrutteringsbistand.api.Testdata.enOpprettStillingDto
 import no.nav.rekrutteringsbistand.api.Testdata.enOpprettetStilling
@@ -27,7 +25,6 @@ import no.nav.rekrutteringsbistand.api.Testdata.enStilling
 import no.nav.rekrutteringsbistand.api.Testdata.enStillingsinfo
 import no.nav.rekrutteringsbistand.api.Testdata.enStillingsinfoUtenEier
 import no.nav.rekrutteringsbistand.api.config.MockLogin
-import no.nav.rekrutteringsbistand.api.mockAzureObo
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsid
 import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoRepository
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingskategori
@@ -47,6 +44,8 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatus.OK
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.test.context.junit4.SpringRunner
+import java.time.ZoneId
+import java.time.ZonedDateTime
 import java.util.*
 
 @RunWith(SpringRunner::class)
@@ -74,6 +73,9 @@ internal class StillingComponentTest {
 
     @Autowired
     lateinit var repository: StillingsinfoRepository
+
+    @Autowired
+    lateinit var direktemeldtStillingRepository: DirektemeldtStillingRepository
 
     @Autowired
     lateinit var testRepository: TestRepository
@@ -220,6 +222,7 @@ internal class StillingComponentTest {
         mockPamAdApi(HttpMethod.POST, "/api/v1/ads", enOpprettetStilling)
         mockKandidatlisteOppdatering()
         mockAzureObo(wiremockAzure)
+        mockHentDirektemeldtStilling(eksisterendeStillingsId.toString(), eksisterendeStillingMedStyrk)
 
         restTemplate.postForObject(
             "$localBaseUrl/rekrutteringsbistandstilling/kopier/$eksisterendeStillingsId",
@@ -655,6 +658,21 @@ internal class StillingComponentTest {
                 ) // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
             )
         )
+    }
+
+    fun mockHentDirektemeldtStilling(stillingsId: String, stilling: Stilling) {
+        val direktemeldtStilling = DirektemeldtStilling(
+            UUID.fromString(stillingsId),
+            stilling.toDirektemeldtStillingInnhold(),
+            opprettet = ZonedDateTime.now(ZoneId.of("Europe/Oslo")),
+            opprettetAv = stilling.createdBy,
+            sistEndretAv = stilling.updatedBy,
+            sistEndret = ZonedDateTime.now(ZoneId.of("Europe/Oslo")),
+            status = stilling.status
+        )
+        direktemeldtStillingRepository.lagreDirektemeldtStilling(direktemeldtStilling)
+
+        direktemeldtStillingRepository.hentDirektemeldtStilling(stillingsId)
     }
 
     @After

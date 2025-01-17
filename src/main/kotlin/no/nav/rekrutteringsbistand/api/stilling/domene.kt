@@ -3,6 +3,7 @@ package no.nav.rekrutteringsbistand.api.stilling
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import no.nav.rekrutteringsbistand.api.arbeidsplassen.OpprettStillingAdministrationDto
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
+import no.nav.rekrutteringsbistand.api.stilling.DirektemeldtStillingKategori.Companion.hentTittel
 import no.nav.rekrutteringsbistand.api.stilling.Kategori.Companion.hentTittel
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingskategori
 import no.nav.rekrutteringsbistand.api.support.log
@@ -309,7 +310,35 @@ data class DirektemeldtStillingKategori(
     val name: String?,
     val description: String?,
     val parentId: Int?
-)
+){
+    fun erJanzz() = categoryType == "JANZZ"
+    fun erStyrk08Nav() = code?.matches(styrk08SeksSiffer) == true
+
+    companion object {
+        private val styrk08SeksSiffer = Regex("""^[0-9]{4}\.[0-9]{2}$""")
+
+        fun List<DirektemeldtStillingKategori>.hentTittel(kontekstForLoggmelding: String): String {
+            if (filter(DirektemeldtStillingKategori::erJanzz).size > 1) {
+                log.warn("Mer enn én JANZZ-kategori funnet for kategori i $kontekstForLoggmelding. Velger en tilfeldig.")
+            }
+            if (filter(DirektemeldtStillingKategori::erStyrk08Nav).size > 1) {
+                log.warn("Mer enn én STYRK08Nav-kategori funnet for kategori i $kontekstForLoggmelding. Velger en tilfeldig.")
+            }
+            return find(DirektemeldtStillingKategori::erStyrk08Nav)?.name
+                ?: find(DirektemeldtStillingKategori::erJanzz)?.name
+                ?: "Stilling uten valgt jobbtittel"
+        }
+    }
+
+    fun toKategori() = Kategori(
+        code = code,
+        categoryType = categoryType,
+        name = name,
+        description = description,
+        parentId = parentId,
+        id = null
+    )
+}
 
 data class DirektemeldtStillingAdministration(
     val status: String?,
@@ -331,7 +360,29 @@ data class DirektemeldtStillingArbeidsgiver(
     val publicName: String?,
     val orgform: String?,
     val employees: Int?
-)
+) {
+    fun toArbeidsgiver() = Arbeidsgiver(
+        mediaList = mediaList,
+        contactList = contactList,
+        location = location,
+        locationList = locationList,
+        properties = properties,
+        name = name,
+        orgnr = orgnr,
+        parentOrgnr = parentOrgnr,
+        publicName = publicName,
+        orgform = orgform,
+        employees = employees,
+        id = null,
+        uuid = null,
+        created = null,
+        createdBy = null,
+        updated = null,
+        updatedBy = null,
+        status = null,
+        deactivated = null
+    )
+}
 
 data class DirektemeldtStillingInnhold(
     val title: String,
@@ -364,5 +415,28 @@ data class DirektemeldtStilling(
     val sistEndret: ZonedDateTime,
     val sistEndretAv: String,
     val status: String
-)
+) {
+    fun toKopiertStilling(tokenUtils: TokenUtils): no.nav.rekrutteringsbistand.api.arbeidsplassen.OpprettStillingDto {
+        val nyTittel = innhold.categoryList.hentTittel("kopi av stillingsId $stillingsid som ble opprettet $opprettet")
+
+        return no.nav.rekrutteringsbistand.api.arbeidsplassen.OpprettStillingDto(
+            tittel = nyTittel,
+            tokenUtils = tokenUtils
+        ).copy(
+            mediaList = innhold.mediaList,
+            contactList = innhold.contactList,
+            medium = innhold.medium,
+            employer = innhold.employer?.toArbeidsgiver(),
+            locationList = innhold.locationList,
+            categoryList = innhold.categoryList.map{ kategori -> kategori.toKategori()},
+            properties = innhold.properties,
+            businessName = innhold.businessName,
+            firstPublished = innhold.firstPublished,
+            deactivatedByExpiry = innhold.deactivatedByExpiry,
+            activationOnPublishingDate = innhold.activationOnPublishingDate
+        )
+    }
+
+
+}
 
