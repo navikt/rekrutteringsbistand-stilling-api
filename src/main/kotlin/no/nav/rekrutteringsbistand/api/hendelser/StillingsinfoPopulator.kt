@@ -41,8 +41,7 @@ class StillingsinfoPopulator(
     ) {
         val stillingsId = Stillingsid(packet["stillingsId"].asText())
         log.info("StillingsinfoPopulator er kalt for stillingsid=$stillingsId")
-
-
+        
         val stillingsinfo = stillingsinfoRepository.hentForStilling(stillingsId) ?: Stillingsinfo(
             stillingsinfoid = Stillingsinfoid(UUID.randomUUID()),
             stillingsid = stillingsId,
