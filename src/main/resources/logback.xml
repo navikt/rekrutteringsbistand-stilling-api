@@ -40,6 +40,5 @@
     </root>
 
     <logger name="no.nav.rekrutteringsbistand.api" level="info"/>
-    <logger name="no.nav.rekrutteringsbistand.api.hendelser.StillingsinfoPopulatorGammel" level="debug"/>
     <logger name="no.nav.rekrutteringsbistand.api.hendelser.StillingPopulator" level="debug"/>
 </configuration>
