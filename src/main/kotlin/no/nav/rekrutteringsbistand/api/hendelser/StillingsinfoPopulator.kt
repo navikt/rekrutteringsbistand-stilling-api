@@ -9,6 +9,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import io.micrometer.core.instrument.MeterRegistry
 import no.nav.rekrutteringsbistand.api.arbeidsplassen.ArbeidsplassenKlient
 import no.nav.rekrutteringsbistand.api.stillingsinfo.*
+import no.nav.rekrutteringsbistand.api.support.log
 import org.apache.commons.lang3.math.NumberUtils
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -39,6 +40,8 @@ class StillingsinfoPopulator(
         meterRegistry: MeterRegistry
     ) {
         val stillingsId = Stillingsid(packet["stillingsId"].asText())
+        log.info("StillingsinfoPopulator er kalt for stillingsid=$stillingsId")
+
 
         val stillingsinfo = stillingsinfoRepository.hentForStilling(stillingsId) ?: Stillingsinfo(
             stillingsinfoid = Stillingsinfoid(UUID.randomUUID()),
