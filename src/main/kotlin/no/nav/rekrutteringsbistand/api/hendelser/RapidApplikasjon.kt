@@ -29,7 +29,7 @@ class RapidApplikasjon(
             context: ApplicationContext,
             arbeidsplassenKlient: ArbeidsplassenKlient
         ) = apply {
-            StillingsinfoPopulator(this, stillingsinfoRepository, arbeidsplassenKlient)
+            StillingPopulator(this, stillingsinfoRepository, arbeidsplassenKlient)
             StillingsinfoPopulatorGammel(this, stillingsinfoRepository, arbeidsplassenKlient)
             Appkiller(this, context)
         }

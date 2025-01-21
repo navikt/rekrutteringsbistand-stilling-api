@@ -16,7 +16,7 @@ import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.util.*
 
-class StillingsinfoPopulator(
+class StillingPopulator(
     rapidsConnection: RapidsConnection,
     private val stillingsinfoRepository: StillingsinfoRepository,
     private val arbeidsplassenKlient: ArbeidsplassenKlient
@@ -78,13 +78,12 @@ private fun parseAntallStillinger(stilling: no.nav.rekrutteringsbistand.api.stil
 }
 
 fun Stillingsinfo.tilStillingsinfoIHendelse() =
-    StillingsinfoIHendelse(stillingsinfoid.asString(), stillingsid.asString(), eier, null, stillingskategori)
+    StillingsinfoIHendelse(stillingsinfoid.asString(), stillingsid.asString(), eier, stillingskategori)
 
 data class StillingsinfoIHendelse(
     val stillingsinfoid: String,
     val stillingsid: String,
     val eier: Eier?,
-    val notat: String?,
     val stillingskategori: Stillingskategori?
 )
 

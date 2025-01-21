@@ -28,7 +28,7 @@ import java.util.*
 
 @RunWith(SpringRunner::class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class StillingsinfopopulatorTest {
+class StillingPopulatorTest {
 
 
     @Autowired
