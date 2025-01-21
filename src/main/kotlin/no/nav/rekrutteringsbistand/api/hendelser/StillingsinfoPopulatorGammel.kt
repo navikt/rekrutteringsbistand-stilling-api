@@ -11,6 +11,7 @@ import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsid
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsinfo
 import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoRepository
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsinfoid
+import no.nav.rekrutteringsbistand.api.support.log
 import org.apache.commons.lang3.math.NumberUtils
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -38,6 +39,7 @@ class StillingsinfoPopulatorGammel(
         meterRegistry: MeterRegistry
     ) {
         val stillingsId = Stillingsid(packet["kandidathendelse.stillingsId"].asText())
+        log.info("StillingsinfoPopulatorGammel er kalt for stillingsid=$stillingsId")
 
         val stillingsinfo = stillingsinfoRepository.hentForStilling(stillingsId) ?: Stillingsinfo(
             stillingsinfoid = Stillingsinfoid(UUID.randomUUID()),
