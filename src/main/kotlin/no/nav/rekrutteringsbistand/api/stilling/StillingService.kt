@@ -48,7 +48,7 @@ class StillingService(
     }
 
     private fun opprettStilling(opprettStilling: OpprettStillingDto, stillingskategori: Stillingskategori): RekrutteringsbistandStilling {
-        log.info("Stilling som blir mottatt ved opprettese i frontend: $opprettStilling")
+        log.info("Stilling som blir mottatt ved opprettelse i frontend: $opprettStilling")
 
         // berik stillingen med det den får fra pam-ad
         // sett medium i frontend
@@ -123,6 +123,9 @@ class StillingService(
         )
 
         val oppdatertStilling = arbeidsplassenKlient.oppdaterStilling(stilling, queryString)
+
+        log.info("Stilling som sendes til pam-ad-api for oppdatering: $stilling")
+        log.info("Stilling som mottas fra pam-ad-api for oppdatering: $oppdatertStilling")
 
         return OppdaterRekrutteringsbistandStillingDto(
             stilling = oppdatertStilling,
