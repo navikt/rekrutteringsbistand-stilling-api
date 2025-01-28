@@ -57,8 +57,6 @@ class StillingPopulator(
 
         val message: String = packet.toJson()
 
-        secureLog.info("StillingPopulator: $message")
-
         context.publish(message)
     }
 }
