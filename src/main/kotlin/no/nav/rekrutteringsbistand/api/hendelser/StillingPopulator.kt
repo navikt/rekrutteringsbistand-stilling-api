@@ -9,8 +9,6 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import io.micrometer.core.instrument.MeterRegistry
 import no.nav.rekrutteringsbistand.api.stilling.StillingService
 import no.nav.rekrutteringsbistand.api.stillingsinfo.*
-import no.nav.rekrutteringsbistand.api.support.log
-import no.nav.rekrutteringsbistand.api.support.secureLog
 import org.apache.commons.lang3.math.NumberUtils
 import java.time.LocalDateTime
 import java.time.ZoneId
