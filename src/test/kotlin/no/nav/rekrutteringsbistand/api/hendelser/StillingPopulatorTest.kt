@@ -2,12 +2,13 @@ package no.nav.rekrutteringsbistand.api.hendelser
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.isMissingOrNull
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
+import no.nav.rekrutteringsbistand.api.RekrutteringsbistandStilling
 import no.nav.rekrutteringsbistand.api.Testdata.enStilling
-import no.nav.rekrutteringsbistand.api.arbeidsplassen.ArbeidsplassenKlient
 import no.nav.rekrutteringsbistand.api.asZonedDateTime
 import no.nav.rekrutteringsbistand.api.hendelser.RapidApplikasjon.Companion.registrerLyttere
 import no.nav.rekrutteringsbistand.api.stilling.Arbeidsgiver
 import no.nav.rekrutteringsbistand.api.stilling.Kategori
+import no.nav.rekrutteringsbistand.api.stilling.StillingService
 import no.nav.rekrutteringsbistand.api.stillingsinfo.*
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
@@ -28,24 +29,21 @@ import java.util.*
 
 @RunWith(SpringRunner::class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class StillingsinfopopulatorTest {
+class StillingPopulatorTest {
 
-
-    @Autowired
-    private lateinit var stillingsinfoRepository: StillingsinfoRepository
 
     @Autowired
     private lateinit var context: ApplicationContext
 
     @MockBean
-    private lateinit var arbeidsplassenKlient: ArbeidsplassenKlient
+    private lateinit var stillingService: StillingService
     private lateinit var testRapid: TestRapid
 
 
     @Before
     fun setUp() {
         if (!this::testRapid.isInitialized) testRapid =
-            TestRapid().registrerLyttere(stillingsinfoRepository, context, arbeidsplassenKlient)
+            TestRapid().registrerLyttere(context, stillingService)
         testRapid.reset()
     }
 
@@ -59,28 +57,32 @@ class StillingsinfopopulatorTest {
         val organisasjonsnummer = "123"
         val stillingensPubliseringstidspunkt = LocalDateTime.now().truncatedTo(ChronoUnit.MILLIS)
 
-        Mockito.`when`(arbeidsplassenKlient.hentStillingBasertPåUUID(stillingsId.toString()))
-            .thenReturn(
-                enStilling.copy(
-                    title = stillingsTittel,
-                    source = eksternStillingskilde,
-                    publishedByAdmin = stillingstidspunkt.toString(),
-                    properties = mapOf("positioncount" to "$antallStillinger"),
-                    employer = Arbeidsgiver(
-                        null, null, null, null, null,
-                        null, emptyList(), emptyList(), null, emptyList(),
-                        emptyMap(), null,
-                        organisasjonsnummer,
-                        null, null, null, null, null, null
-                    ),
-                    published = stillingensPubliseringstidspunkt
-                )
-            )
         val stillingsinfoid = Stillingsinfoid(UUID.randomUUID())
         val eier = Eier("AB123456", "Navnesen")
-        val stillingskategori = Stillingskategori.ARBEIDSTRENING
-        val stillingsinfo = Stillingsinfo(stillingsinfoid, stillingsId, eier, stillingskategori)
-        stillingsinfoRepository.opprett(stillingsinfo)
+        val stillingskategori = Stillingskategori.STILLING
+        val stillingsinfoDto = StillingsinfoDto(stillingsId.asString(), stillingsinfoid.asString(), eier.navident, eier.navn, stillingskategori)
+
+        Mockito.`when`(stillingService.hentRekrutteringsbistandStilling(stillingsId.toString(), somSystembruker = true))
+            .thenReturn(
+                RekrutteringsbistandStilling(
+                    stillingsinfoDto,
+                    enStilling.copy(
+                        title = stillingsTittel,
+                        source = eksternStillingskilde,
+                        publishedByAdmin = stillingstidspunkt.toString(),
+                        properties = mapOf("positioncount" to "$antallStillinger"),
+                        employer = Arbeidsgiver(
+                            null, null, null, null, null,
+                            null, emptyList(), emptyList(), null, emptyList(),
+                            emptyMap(), null,
+                            organisasjonsnummer,
+                            null, null, null, null, null, null
+                        ),
+                        published = stillingensPubliseringstidspunkt
+                    )
+                )
+            )
+
         testRapid.sendTestMessage(
             """
             {
@@ -112,11 +114,11 @@ class StillingsinfopopulatorTest {
         assertFalse(message.path("stilling").get("erDirektemeldt").asBoolean())
         val stillingNode = message.path("stillingsinfo")
         assertFalse(stillingNode.isMissingOrNull())
-        assertEquals(stillingsinfo.stillingsinfoid.asString(), stillingNode.path("stillingsinfoid").asText())
-        assertEquals(stillingsinfo.stillingsid.asString(), stillingNode.path("stillingsid").asText())
-        assertEquals(stillingsinfo.stillingskategori?.name, stillingNode.path("stillingskategori").asText())
-        assertEquals(stillingsinfo.eier!!.navident, stillingNode.path("eier").path("navident").asText())
-        assertEquals(stillingsinfo.eier!!.navn, stillingNode.path("eier").path("navn").asText())
+        assertEquals(stillingsinfoDto.stillingsinfoid, stillingNode.path("stillingsinfoid").asText())
+        assertEquals(stillingsinfoDto.stillingsid, stillingNode.path("stillingsid").asText())
+        assertEquals(stillingsinfoDto.stillingskategori?.name, stillingNode.path("stillingskategori").asText())
+        assertEquals(stillingsinfoDto.eierNavident, stillingNode.path("eier").path("navident").asText())
+        assertEquals(stillingsinfoDto.eierNavn, stillingNode.path("eier").path("navn").asText())
     }
 
     fun enStillingMed(
@@ -144,26 +146,35 @@ class StillingsinfopopulatorTest {
     fun `populering av en direktemeldt stilling bruker janzz i stillingstittel hvis ikke styrk08Nav finnes`() {
         val stillingsId = Stillingsid(UUID.randomUUID())
 
-        Mockito.`when`(arbeidsplassenKlient.hentStillingBasertPåUUID(stillingsId.toString()))
+        val stillingsinfoid = Stillingsinfoid(UUID.randomUUID())
+        val eier = Eier("AB123456", "Navnesen")
+        val stillingskategori = Stillingskategori.STILLING
+        val stillingsinfoDto = StillingsinfoDto(stillingsId.asString(), stillingsinfoid.asString(), eier.navident, eier.navn, stillingskategori)
+
+
+        Mockito.`when`(stillingService.hentRekrutteringsbistandStilling(stillingsId.toString(), somSystembruker = true))
             .thenReturn(
-                enStillingMed(
-                    tittel = "Tittel fra arbeidsplassen",
-                    source = "DIR",
-                    categoryList = listOf(
-                        Kategori(
-                            name = "Kokk",
-                            code = "0000",
-                            id = null,
-                            categoryType = null,
-                            description = null,
-                            parentId = null,
-                        ), Kategori(
-                            name = "Statsminister",
-                            code = "0000.00",
-                            id = null,
-                            categoryType = "JANZZ",
-                            description = null,
-                            parentId = null,
+                RekrutteringsbistandStilling(
+                    stillingsinfoDto,
+                    enStillingMed(
+                        tittel = "Tittel fra arbeidsplassen",
+                        source = "DIR",
+                        categoryList = listOf(
+                            Kategori(
+                                name = "Kokk",
+                                code = "0000",
+                                id = null,
+                                categoryType = null,
+                                description = null,
+                                parentId = null,
+                            ), Kategori(
+                                name = "Statsminister",
+                                code = "0000.00",
+                                id = null,
+                                categoryType = "JANZZ",
+                                description = null,
+                                parentId = null,
+                            )
                         )
                     )
                 )
@@ -188,8 +199,16 @@ class StillingsinfopopulatorTest {
     fun `populering av en direktemeldt stilling bruker styrk08Nav i stillingstittel hvis janzz og Styrk08 finnes`() {
         val stillingsId = Stillingsid(UUID.randomUUID())
 
-        Mockito.`when`(arbeidsplassenKlient.hentStillingBasertPåUUID(stillingsId.toString()))
+        val stillingsinfoid = Stillingsinfoid(UUID.randomUUID())
+        val eier = Eier("AB123456", "Navnesen")
+        val stillingskategori = Stillingskategori.STILLING
+        val stillingsinfoDto = StillingsinfoDto(stillingsId.asString(), stillingsinfoid.asString(), eier.navident, eier.navn, stillingskategori)
+
+
+        Mockito.`when`(stillingService.hentRekrutteringsbistandStilling(stillingsId.toString(), somSystembruker = true))
             .thenReturn(
+                RekrutteringsbistandStilling(
+                    stillingsinfoDto,
                     enStillingMed(
                         tittel = "Tittel fra arbeidsplassen",
                         source = "DIR",
@@ -213,6 +232,7 @@ class StillingsinfopopulatorTest {
                         )
                     )
                 )
+            )
 
         testRapid.sendTestMessage(
             """
@@ -233,8 +253,16 @@ class StillingsinfopopulatorTest {
     fun `populering av en ekstern stilling bruker tittel fra arbeidsplassen`() {
         val stillingsId = Stillingsid(UUID.randomUUID())
 
-        Mockito.`when`(arbeidsplassenKlient.hentStillingBasertPåUUID(stillingsId.toString()))
+        val stillingsinfoid = Stillingsinfoid(UUID.randomUUID())
+        val eier = Eier("AB123456", "Navnesen")
+        val stillingskategori = Stillingskategori.STILLING
+        val stillingsinfoDto = StillingsinfoDto(stillingsId.asString(), stillingsinfoid.asString(), eier.navident, eier.navn, stillingskategori)
+
+
+        Mockito.`when`(stillingService.hentRekrutteringsbistandStilling(stillingsId.toString(), somSystembruker = true))
             .thenReturn(
+                RekrutteringsbistandStilling(
+                    stillingsinfoDto,
                     enStillingMed(
                         tittel = "Tittel fra arbeidsplassen",
                         source = "AMEDIA",
@@ -250,6 +278,8 @@ class StillingsinfopopulatorTest {
                         )
                     )
                 )
+            )
+
 
         testRapid.sendTestMessage(
             """
@@ -267,13 +297,17 @@ class StillingsinfopopulatorTest {
     }
 
     @Test
-    fun `skal lagre stillinginfo og publisere ny melding når vi mottar hendelse for stilling uten stillingsinfo`() {
+    fun `skal ikke lagre stillinginfo og publisere ny melding når vi mottar hendelse for stilling uten stillingsinfo`() {
         val stillingsId = Stillingsid(UUID.randomUUID())
-        Mockito.`when`(arbeidsplassenKlient.hentStillingBasertPåUUID(stillingsId.toString()))
-            .thenReturn(enStilling.copy(title = "Dummy-tittel"))
-        stillingsinfoRepository.hentForStilling(stillingsId)?.also {
-            fail("Setup")
-        }
+
+        val rekrutteringsbistandStilling = RekrutteringsbistandStilling(
+            null,
+            enStilling.copy(title = "Dummy-tittel")
+        )
+        Mockito.`when`(stillingService.hentRekrutteringsbistandStilling(stillingsId.toString(), somSystembruker = true))
+            .thenReturn(
+                rekrutteringsbistandStilling
+            )
 
         testRapid.sendTestMessage(
             """
@@ -285,23 +319,12 @@ class StillingsinfopopulatorTest {
         """.trimIndent()
         )
 
-        val lagretStillingsinfo = stillingsinfoRepository.hentForStilling(stillingsId) ?: fail("Stillingsinfo ikke lagret")
-
-        assertNull(lagretStillingsinfo.eier)
-        assertNull(lagretStillingsinfo.stillingskategori)
-        assertThat(lagretStillingsinfo.stillingsid).isEqualTo(stillingsId)
-        assertNotNull(lagretStillingsinfo.stillingsinfoid)
+        assertNull(rekrutteringsbistandStilling.stillingsinfo)
 
         assertThat(testRapid.inspektør.size).isOne
         val message = testRapid.inspektør.message(0)
-        val stillingsinfo = message.path("stillingsinfo")
-        assertThat(
-            stillingsinfo.path("stillingsinfoid").asText()
-        ).isEqualTo(lagretStillingsinfo.stillingsinfoid.toString())
-        assertThat(stillingsinfo.path("stillingsid").asText()).isEqualTo(lagretStillingsinfo.stillingsid.toString())
-        assertTrue(stillingsinfo.path("stillingskategori").isNull)
-        assertTrue(stillingsinfo.path("eier").isNull)
-        assertTrue(stillingsinfo.path("stillingskategori").isNull)
+        assertTrue(message.path("stillingsinfo").isMissingNode)
+        assertFalse(message.path("stilling").isMissingOrNull())
     }
 
     @Test

@@ -7,19 +7,16 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import io.micrometer.core.instrument.MeterRegistry
-import no.nav.rekrutteringsbistand.api.arbeidsplassen.ArbeidsplassenKlient
+import no.nav.rekrutteringsbistand.api.stilling.StillingService
 import no.nav.rekrutteringsbistand.api.stillingsinfo.*
-import no.nav.rekrutteringsbistand.api.support.log
 import org.apache.commons.lang3.math.NumberUtils
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
-import java.util.*
 
-class StillingsinfoPopulator(
+class StillingPopulator(
     rapidsConnection: RapidsConnection,
-    private val stillingsinfoRepository: StillingsinfoRepository,
-    private val arbeidsplassenKlient: ArbeidsplassenKlient
+    private val stillingService: StillingService
 ) : River.PacketListener {
     init {
         River(rapidsConnection).apply {
@@ -40,29 +37,24 @@ class StillingsinfoPopulator(
         meterRegistry: MeterRegistry
     ) {
         val stillingsId = Stillingsid(packet["stillingsId"].asText())
-        log.info("StillingsinfoPopulator er kalt for stillingsid=$stillingsId")
-        
-        val stillingsinfo = stillingsinfoRepository.hentForStilling(stillingsId) ?: Stillingsinfo(
-            stillingsinfoid = Stillingsinfoid(UUID.randomUUID()),
-            stillingsid = stillingsId,
-            eier = null,
-            stillingskategori = null
-        ).also { stillingsinfoRepository.opprett(it) }
 
-        packet["stillingsinfo"] = stillingsinfo.tilStillingsinfoIHendelse()
+        val rekrutteringsbistandStilling = stillingService.hentRekrutteringsbistandStilling(stillingsId.asString(), somSystembruker = true)
 
-        arbeidsplassenKlient.hentStillingBasertPåUUID(stillingsId.asString())?.also {
-            packet["stilling"] = Stilling(
-                stillingstittel = it.hentInternEllerEksternTittel(),
-                erDirektemeldt = it.source == "DIR",
-                stillingOpprettetTidspunkt = it.publishedByAdmin?.let { tidspunkt -> isoStringTilNorskTidssone(tidspunkt) },
-                antallStillinger = parseAntallStillinger(it),
-                organisasjonsnummer = it.employer?.orgnr,
-                stillingensPubliseringstidspunkt = ZonedDateTime.of(it.published, ZoneId.of("Europe/Oslo"))
-            )
+        rekrutteringsbistandStilling.stillingsinfo?.also {
+            packet["stillingsinfo"] = it.tilStillingsinfoIHendelse()
         }
 
+        packet["stilling"] = Stilling(
+            stillingstittel = rekrutteringsbistandStilling.stilling.hentInternEllerEksternTittel(),
+            erDirektemeldt = rekrutteringsbistandStilling.stilling.source == "DIR",
+            stillingOpprettetTidspunkt = rekrutteringsbistandStilling.stilling.publishedByAdmin?.let { tidspunkt -> isoStringTilNorskTidssone(tidspunkt) },
+            antallStillinger = parseAntallStillinger(rekrutteringsbistandStilling.stilling),
+            organisasjonsnummer = rekrutteringsbistandStilling.stilling.employer?.orgnr,
+            stillingensPubliseringstidspunkt = ZonedDateTime.of(rekrutteringsbistandStilling.stilling.published, ZoneId.of("Europe/Oslo"))
+        )
+
         val message: String = packet.toJson()
+
         context.publish(message)
     }
 }
@@ -77,14 +69,13 @@ private fun parseAntallStillinger(stilling: no.nav.rekrutteringsbistand.api.stil
     return if (NumberUtils.isCreatable(antallStillinger)) antallStillinger.toInt() else 0
 }
 
-fun Stillingsinfo.tilStillingsinfoIHendelse() =
-    StillingsinfoIHendelse(stillingsinfoid.asString(), stillingsid.asString(), eier, null, stillingskategori)
+fun StillingsinfoDto.tilStillingsinfoIHendelse() =
+    StillingsinfoIHendelse(stillingsinfoid, stillingsid, Eier(eierNavident, eierNavn), stillingskategori)
 
 data class StillingsinfoIHendelse(
     val stillingsinfoid: String,
     val stillingsid: String,
     val eier: Eier?,
-    val notat: String?,
     val stillingskategori: Stillingskategori?
 )
 
