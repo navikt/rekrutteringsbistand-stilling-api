@@ -52,8 +52,6 @@ jobs:
         id: docker-build-push
         with:
           team: toi
-          identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
-          project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
           tag: ${{ contains(fromJSON('["refs/heads/master", "refs/heads/main"]'), github.ref) && 'latest' || github.sha }}
       - uses: nais/deploy/actions/deploy@v2
         env:
@@ -87,7 +85,7 @@ jobs:
 
   call-trivy-security-scan:
     needs: deploy-to-dev
-    uses: navikt/toi-github-actions-workflows/.github/workflows/trivy-security-scan.yaml@main
+    uses: navikt/toi-github-actions-workflows/.github/workflows/trivy-security-scan.yaml@v1
     with:
       image: ${{ needs.deploy-to-dev.outputs.image }}
     permissions:
