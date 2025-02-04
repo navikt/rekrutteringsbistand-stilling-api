@@ -408,7 +408,8 @@ data class DirektemeldtStillingInnhold(
 )
 
 data class DirektemeldtStilling(
-    val stillingsid: UUID,
+    val annonseId: Long?,
+    val stillingsId: UUID,
     val innhold: DirektemeldtStillingInnhold,
     val opprettet: ZonedDateTime,
     val opprettetAv: String,
@@ -417,7 +418,7 @@ data class DirektemeldtStilling(
     val status: String
 ) {
     fun toKopiertStilling(tokenUtils: TokenUtils): no.nav.rekrutteringsbistand.api.arbeidsplassen.OpprettStillingDto {
-        val nyTittel = innhold.categoryList.hentTittel("kopi av stillingsId $stillingsid som ble opprettet $opprettet")
+        val nyTittel = innhold.categoryList.hentTittel("kopi av stillingsId $stillingsId som ble opprettet $opprettet")
 
         return no.nav.rekrutteringsbistand.api.arbeidsplassen.OpprettStillingDto(
             tittel = nyTittel,

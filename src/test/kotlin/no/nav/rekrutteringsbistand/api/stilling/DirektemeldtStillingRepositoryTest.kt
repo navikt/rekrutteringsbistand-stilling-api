@@ -35,34 +35,36 @@ class DirektemeldtStillingRepositoryTest {
         val stilling2 = enStilling.copy(id = 2000, uuid = UUID.randomUUID().toString(), title = "Stilling 2", reference = UUID.randomUUID().toString())
 
         val direktemeldtStilling1 = DirektemeldtStilling(
-            UUID.fromString(stilling.uuid),
-            stilling.toDirektemeldtStillingInnhold(),
+            stillingsId = UUID.fromString(stilling.uuid),
+            innhold = stilling.toDirektemeldtStillingInnhold(),
             opprettet = ZonedDateTime.now(ZoneId.of("Europe/Oslo")),
             opprettetAv = stilling.createdBy,
             sistEndretAv = stilling.updatedBy,
             sistEndret = ZonedDateTime.now(ZoneId.of("Europe/Oslo")),
-            status = stilling.status
+            status = stilling.status,
+            annonseId = stilling.id
         )
         val direktemeldtStilling2 = DirektemeldtStilling(
-            UUID.fromString(stilling2.uuid),
-            stilling2.toDirektemeldtStillingInnhold(),
+            stillingsId = UUID.fromString(stilling2.uuid),
+            innhold = stilling2.toDirektemeldtStillingInnhold(),
             opprettet = ZonedDateTime.now(ZoneId.of("Europe/Oslo")),
             opprettetAv = stilling2.createdBy,
             sistEndretAv = stilling2.createdBy,
             sistEndret = ZonedDateTime.now(ZoneId.of("Europe/Oslo")),
             status = stilling2.status,
+            annonseId = stilling2.id
         )
         repository.lagreDirektemeldtStilling(direktemeldtStilling1)
         repository.lagreDirektemeldtStilling(direktemeldtStilling2)
 
-        val hentetStilling1 = repository.hentDirektemeldtStilling(direktemeldtStilling1.stillingsid.toString())
-        val hentetStilling2 = repository.hentDirektemeldtStilling(direktemeldtStilling2.stillingsid.toString())
+        val hentetStilling1 = repository.hentDirektemeldtStilling(direktemeldtStilling1.stillingsId.toString())
+        val hentetStilling2 = repository.hentDirektemeldtStilling(direktemeldtStilling2.stillingsId.toString())
 
         assertNotNull(hentetStilling1)
         assertNotNull(hentetStilling2)
 
-        assertEquals(hentetStilling1.stillingsid, direktemeldtStilling1.stillingsid)
-        assertEquals(hentetStilling2.stillingsid, direktemeldtStilling2.stillingsid)
+        assertEquals(hentetStilling1.stillingsId, direktemeldtStilling1.stillingsId)
+        assertEquals(hentetStilling2.stillingsId, direktemeldtStilling2.stillingsId)
 
         assertEquals("testnss", hentetStilling1.innhold.title)
         assertEquals("Stilling 2", hentetStilling2.innhold.title)

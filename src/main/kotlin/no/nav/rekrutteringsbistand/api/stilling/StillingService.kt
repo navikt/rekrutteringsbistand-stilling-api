@@ -160,13 +160,14 @@ class StillingService(
     private fun opprettDirektemeldtStilling(opprettStilling: OpprettStillingDto, uuid: String, stilling: Stilling) : DirektemeldtStilling {
         val stillingsInnhold = lagDirektemeldtStillingInnhold(opprettStilling, uuid)
         val direktemeldtStilling = DirektemeldtStilling(
-            stillingsid = UUID.fromString(stilling.uuid),
+            stillingsId = UUID.fromString(stilling.uuid),
             innhold = stillingsInnhold,
             opprettet = stilling.created.atZone(ZoneId.of("Europe/Oslo")),
             opprettetAv = stilling.createdBy,
             sistEndretAv = "pam-rekrutteringsbistand",
             sistEndret = ZonedDateTime.now(ZoneId.of("Europe/Oslo")),
-            status = stilling.status
+            status = stilling.status,
+            annonseId = null
         )
         return direktemeldtStilling
     }
@@ -205,13 +206,14 @@ class StillingService(
         val direktemeldtStillingBlob = stilling.toDirektemeldtStillingInnhold()
 
         val direktemeldtStilling = DirektemeldtStilling(
-            UUID.fromString(stillingsId),
-            direktemeldtStillingBlob,
+            stillingsId = UUID.fromString(stillingsId),
+            innhold = direktemeldtStillingBlob,
             opprettet = stilling.created.atZone(ZoneId.of("Europe/Oslo")),
             opprettetAv = stilling.createdBy,
             sistEndretAv = stilling.updatedBy,
             sistEndret = stilling.updated.atZone(ZoneId.of("Europe/Oslo")),
-            status = stilling.status
+            status = stilling.status,
+            annonseId = stilling.id
         )
         log.info("Direktemeldt stilling som blir lagret ved melding på kafka: $direktemeldtStilling")
 

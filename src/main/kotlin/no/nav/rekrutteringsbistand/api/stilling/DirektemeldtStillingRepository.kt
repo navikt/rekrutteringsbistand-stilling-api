@@ -36,7 +36,7 @@ class DirektemeldtStillingRepository(private val namedJdbcTemplate: NamedParamet
     }
 
     fun lagreDirektemeldtStilling(direktemeldtStilling: DirektemeldtStilling) {
-        log.info("Lagrer direktemeldt stilling med uuid: ${direktemeldtStilling.stillingsid}")
+        log.info("Lagrer direktemeldt stilling med uuid: ${direktemeldtStilling.stillingsId}")
 
         val sql = """
           insert into $DIREKTEMELDT_STILLING_TABELL ($STILLINGSID, $INNHOLD, $OPPRETTET, $OPPRETTET_AV, $SIST_ENDRET, $SIST_ENDRET_AV, $STATUS)
@@ -50,7 +50,7 @@ class DirektemeldtStillingRepository(private val namedJdbcTemplate: NamedParamet
         """.trimIndent()
 
         val params =  mapOf(
-            "stillingsid" to direktemeldtStilling.stillingsid,
+            "stillingsid" to direktemeldtStilling.stillingsId,
             "innhold" to objectMapper.writeValueAsString(direktemeldtStilling.innhold),
             "opprettet" to Timestamp.from(direktemeldtStilling.opprettet.toInstant()),
             "opprettet_av" to direktemeldtStilling.opprettetAv,
@@ -63,7 +63,7 @@ class DirektemeldtStillingRepository(private val namedJdbcTemplate: NamedParamet
     }
 
     fun hentDirektemeldtStilling(stillingsid: String) : DirektemeldtStilling {
-        val sql = "select stillingsid, innhold, opprettet, opprettet_av, sist_endret, sist_endret_av, status from $DIREKTEMELDT_STILLING_TABELL where $STILLINGSID=:stillingsid ::uuid"
+        val sql = "select id, stillingsid, innhold, opprettet, opprettet_av, sist_endret, sist_endret_av, status from $DIREKTEMELDT_STILLING_TABELL where $STILLINGSID=:stillingsid ::uuid"
         val params = mapOf("stillingsid" to stillingsid)
 
         val direktemeldtStilling = namedJdbcTemplate.queryForObject(
@@ -82,13 +82,14 @@ class DirektemeldtStillingRepository(private val namedJdbcTemplate: NamedParamet
         @Throws(SQLException::class)
         override fun mapRow(rs: ResultSet, rowNum: Int): DirektemeldtStilling {
             val direktemeldtStilling = DirektemeldtStilling(
-                stillingsid = rs.getObject("stillingsid", UUID::class.java),
+                stillingsId = rs.getObject("stillingsid", UUID::class.java),
                 innhold = objectMapper.readValue(rs.getString("innhold"), DirektemeldtStillingInnhold::class.java),
                 opprettet = rs.getTimestamp("opprettet").toInstant().atZone(ZoneId.of("Europe/Oslo")),
                 opprettetAv = rs.getString("opprettet_av"),
                 sistEndret = rs.getTimestamp("sist_endret").toInstant().atZone(ZoneId.of("Europe/Oslo")),
                 sistEndretAv = rs.getString("sist_endret_av"),
                 status = rs.getString("status"),
+                annonseId = rs.getLong("id"),
             )
 
             return direktemeldtStilling

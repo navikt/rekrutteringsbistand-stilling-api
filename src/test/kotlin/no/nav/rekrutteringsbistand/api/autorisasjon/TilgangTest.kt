@@ -617,13 +617,14 @@ private class Stubber(
     fun mockHentDirektemeldtStilling(stillingsId: String) {
         val stilling = Testdata.enStilling
         val direktemeldtStilling = DirektemeldtStilling(
-            UUID.fromString(stilling.uuid),
-            stilling.toDirektemeldtStillingInnhold(),
+            stillingsId = UUID.fromString(stilling.uuid),
+            innhold = stilling.toDirektemeldtStillingInnhold(),
             opprettet = ZonedDateTime.now(ZoneId.of("Europe/Oslo")),
             opprettetAv = stilling.createdBy,
             sistEndretAv = stilling.updatedBy,
             sistEndret = ZonedDateTime.now(ZoneId.of("Europe/Oslo")),
-            status = stilling.status
+            status = stilling.status,
+            annonseId = Testdata.enStilling.id
         )
         direktemeldtStillingRepository.lagreDirektemeldtStilling(direktemeldtStilling)
 

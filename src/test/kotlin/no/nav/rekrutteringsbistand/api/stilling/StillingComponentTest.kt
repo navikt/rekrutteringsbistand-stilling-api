@@ -662,13 +662,14 @@ internal class StillingComponentTest {
 
     fun mockHentDirektemeldtStilling(stillingsId: String, stilling: Stilling) {
         val direktemeldtStilling = DirektemeldtStilling(
-            UUID.fromString(stillingsId),
-            stilling.toDirektemeldtStillingInnhold(),
+            stillingsId = UUID.fromString(stillingsId),
+            innhold = stilling.toDirektemeldtStillingInnhold(),
             opprettet = ZonedDateTime.now(ZoneId.of("Europe/Oslo")),
             opprettetAv = stilling.createdBy,
             sistEndretAv = stilling.updatedBy,
             sistEndret = ZonedDateTime.now(ZoneId.of("Europe/Oslo")),
-            status = stilling.status
+            status = stilling.status,
+            annonseId = stilling.id
         )
         direktemeldtStillingRepository.lagreDirektemeldtStilling(direktemeldtStilling)
 
