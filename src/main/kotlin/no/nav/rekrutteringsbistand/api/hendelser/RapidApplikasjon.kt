@@ -2,8 +2,7 @@ package no.nav.rekrutteringsbistand.api.hendelser
 
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import no.nav.helse.rapids_rivers.RapidApplication
-import no.nav.rekrutteringsbistand.api.arbeidsplassen.ArbeidsplassenKlient
-import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoRepository
+import no.nav.rekrutteringsbistand.api.stilling.StillingService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.ApplicationContext
@@ -18,19 +17,16 @@ import org.springframework.stereotype.Component
 @Component
 class RapidApplikasjon(
     @Autowired private val context: ApplicationContext,
-    @Autowired private val stillingsinfoRepository: StillingsinfoRepository,
     @Autowired private val environment: Environment,
-    @Autowired private val arbeidsplassenKlient: ArbeidsplassenKlient
+    @Autowired private val stillingService: StillingService,
     ): Runnable {
 
     companion object {
         fun <T: RapidsConnection> T.registrerLyttere(
-            stillingsinfoRepository: StillingsinfoRepository,
             context: ApplicationContext,
-            arbeidsplassenKlient: ArbeidsplassenKlient
+            stillingService: StillingService
         ) = apply {
-            StillingsinfoPopulator(this, stillingsinfoRepository, arbeidsplassenKlient)
-            StillingsinfoPopulatorGammel(this, stillingsinfoRepository, arbeidsplassenKlient)
+            StillingPopulator(this, stillingService)
             Appkiller(this, context)
         }
     }
@@ -42,7 +38,7 @@ class RapidApplikasjon(
 
     override fun run() {
         RapidApplication.create(environment.toMap())
-            .registrerLyttere(stillingsinfoRepository, context, arbeidsplassenKlient).start()
+            .registrerLyttere(context, stillingService).start()
     }
 }
 
