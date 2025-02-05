@@ -14,7 +14,7 @@ import java.util.*
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Stilling(
-    val id: Long,
+    val id: Long?,
     val uuid: String,
     val created: LocalDateTime,
     val createdBy: String,
@@ -127,7 +127,15 @@ data class Administration(
     val reportee: String?,
     val remarks: List<String> = ArrayList(),
     val navIdent: String?
-)
+) {
+//    fun toDirekteMeldtStillingAdministration() = DirektemeldtStillingAdministration(
+//        status = status,
+//        comments = comments,
+//        reportee = reportee,
+//        remarks = remarks,
+//        navIdent = navIdent,
+//    )
+}
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Arbeidsgiver(
@@ -346,7 +354,16 @@ data class DirektemeldtStillingAdministration(
     val reportee: String?,
     val remarks: List<String> = ArrayList(),
     val navIdent: String?
-)
+) {
+    fun toAdministration() = Administration(
+        status = status,
+        comments = comments,
+        reportee = reportee,
+        remarks = remarks,
+        id = null,
+        navIdent = navIdent,
+    )
+}
 
 data class DirektemeldtStillingArbeidsgiver(
     val mediaList: List<Media> = ArrayList(),
@@ -437,6 +454,47 @@ data class DirektemeldtStilling(
             activationOnPublishingDate = innhold.activationOnPublishingDate
         )
     }
+
+    fun toStilling() = Stilling(
+        id = null,
+        uuid = stillingsId.toString(),
+        created = opprettet.toLocalDateTime(),
+        createdBy = opprettetAv,
+        updated = sistEndret.toLocalDateTime(),
+        updatedBy = sistEndretAv,
+        title = innhold.title,
+        status = status,
+        administration = innhold.administration?.toAdministration(),
+        mediaList = innhold.mediaList,
+        contactList = innhold.contactList,
+        privacy = innhold.privacy,
+        source = innhold.source,
+        medium = innhold.medium,
+        reference = innhold.reference,
+        published = innhold.published?.toLocalDateTime(),
+        expires = innhold.expires?.toLocalDateTime(),
+        employer = innhold.employer?.toArbeidsgiver(),
+        location = null,
+        locationList = innhold.locationList,
+        categoryList = innhold.categoryList.map { kategori -> kategori.toKategori() },
+        properties = innhold.properties,
+        publishedByAdmin = innhold.publishedByAdmin,
+        businessName = innhold.businessName,
+        firstPublished = innhold.firstPublished,
+        deactivatedByExpiry = innhold.deactivatedByExpiry,
+        activationOnPublishingDate = innhold.activationOnPublishingDate
+    )
+
+
+//    fun byggLokasjoner() : List<Geografi> {
+//        val lokasjoner = innhold.locationList
+//
+//        val arbeidsgiverLokasjoner = innhold.employer?.locationList
+//
+//
+//    }
+
+
 
 
 }

@@ -49,18 +49,15 @@ class StillingService(
 
     private fun opprettStilling(opprettStilling: OpprettStillingDto, stillingskategori: Stillingskategori): RekrutteringsbistandStilling {
         log.info("Stilling som blir mottatt ved opprettelse i frontend: $opprettStilling")
-
         // berik stillingen med det den får fra pam-ad
-        // sett medium i frontend
-        // sett businessName som name fra employer
-        // opprett uuid
-        // sett uuid som referanse
-        // sett status som inactive
 
-        val opprettetStilling = arbeidsplassenKlient.opprettStilling(opprettStilling)
+        val uuid = UUID.randomUUID()
+        // send denne inn i opprettDirektemeldtStilling
 
-        log.info("Stilling som er opprettet i pam-ad: $opprettetStilling")
-        val stillingsId = Stillingsid(opprettetStilling.uuid)
+        // val opprettetStilling = arbeidsplassenKlient.opprettStilling(opprettStilling)
+
+        // log.info("Stilling som er opprettet i pam-ad: $opprettetStilling")
+        val stillingsId = Stillingsid(uuid)
 
         stillingsinfoService.opprettStillingsinfo(
             stillingsId = stillingsId,
@@ -68,15 +65,17 @@ class StillingService(
         )
 
         // Lagrer annonsen i databasen ved opprettelse
-        val direktemeldtStilling = opprettDirektemeldtStilling(opprettStilling, opprettetStilling.uuid, opprettetStilling)
+        val direktemeldtStilling = opprettDirektemeldtStilling(opprettStilling, uuid)
+
+        val stilling = direktemeldtStilling.toStilling()
 
         log.info("Direktemeldt stilling som blir lagret i databasen ved opprettelse: $direktemeldtStilling")
         direktemeldtStillingRepository.lagreDirektemeldtStilling(direktemeldtStilling)
 
-        val stillingsinfo = stillingsinfoService.hentStillingsinfo(opprettetStilling)
+        val stillingsinfo = stillingsinfoService.hentForStilling(stillingsId)
 
         return RekrutteringsbistandStilling(
-            stilling = opprettetStilling,
+            stilling = stilling,
             stillingsinfo = stillingsinfo?.asStillingsinfoDto()
         ).also {
             kandidatlisteKlient.sendStillingOppdatert(it)
@@ -157,16 +156,16 @@ class StillingService(
         return arbeidsplassenKlient.slettStilling(stillingsId)
     }
 
-    private fun opprettDirektemeldtStilling(opprettStilling: OpprettStillingDto, uuid: String, stilling: Stilling) : DirektemeldtStilling {
-        val stillingsInnhold = lagDirektemeldtStillingInnhold(opprettStilling, uuid)
+    private fun opprettDirektemeldtStilling(opprettStilling: OpprettStillingDto, uuid: UUID) : DirektemeldtStilling {
+        val stillingsInnhold = lagDirektemeldtStillingInnhold(opprettStilling, uuid.toString())
         val direktemeldtStilling = DirektemeldtStilling(
-            stillingsId = UUID.fromString(stilling.uuid),
+            stillingsId = uuid,
             innhold = stillingsInnhold,
-            opprettet = stilling.created.atZone(ZoneId.of("Europe/Oslo")),
-            opprettetAv = stilling.createdBy,
+            opprettet = ZonedDateTime.now(ZoneId.of("Europe/Oslo")),
+            opprettetAv = opprettStilling.createdBy,
             sistEndretAv = "pam-rekrutteringsbistand",
             sistEndret = ZonedDateTime.now(ZoneId.of("Europe/Oslo")),
-            status = stilling.status,
+            status = "INACTIVE",
             annonseId = null
         )
         return direktemeldtStilling
@@ -176,7 +175,7 @@ class StillingService(
         val opprettetTidspunkt = ZonedDateTime.now(ZoneId.of("Europe/Oslo"))
         val opprettetDirektemeldStilling = DirektemeldtStillingInnhold(
             title = "Ny stilling",
-            administration = null,
+            administration = opprettStilling.administration.toDirekteMeldtStillingAdministration(),
             mediaList = emptyList(),
             contactList = emptyList(),
             privacy = opprettStilling.privacy,
@@ -202,6 +201,7 @@ class StillingService(
 
     fun lagreDirektemeldtStilling(stillingsId: String) {
         val stilling = arbeidsplassenKlient.hentStilling(stillingsId, true)
+        log.info("Stilling som ville blitt lagret ved oppdatering fra pam-ad: $stilling")
 
         val direktemeldtStillingBlob = stilling.toDirektemeldtStillingInnhold()
 
@@ -217,6 +217,6 @@ class StillingService(
         )
         log.info("Direktemeldt stilling som blir lagret ved melding på kafka: $direktemeldtStilling")
 
-        direktemeldtStillingRepository.lagreDirektemeldtStilling(direktemeldtStilling)
+       // direktemeldtStillingRepository.lagreDirektemeldtStilling(direktemeldtStilling)
     }
 }
