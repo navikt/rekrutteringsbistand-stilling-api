@@ -51,12 +51,13 @@ class StillingService(
         log.info("Stilling som blir mottatt ved opprettelse i frontend: $opprettStilling")
         // berik stillingen med det den får fra pam-ad
 
-        val uuid = UUID.randomUUID()
+        //val uuid = UUID.randomUUID()
         // send denne inn i opprettDirektemeldtStilling
 
-        // val opprettetStilling = arbeidsplassenKlient.opprettStilling(opprettStilling)
+        val opprettetStilling = arbeidsplassenKlient.opprettStilling(opprettStilling)
 
-        // log.info("Stilling som er opprettet i pam-ad: $opprettetStilling")
+        val uuid = opprettetStilling.uuid
+        log.info("Stilling som er opprettet i pam-ad: $opprettetStilling")
         val stillingsId = Stillingsid(uuid)
 
         stillingsinfoService.opprettStillingsinfo(
@@ -65,7 +66,7 @@ class StillingService(
         )
 
         // Lagrer annonsen i databasen ved opprettelse
-        val direktemeldtStilling = opprettDirektemeldtStilling(opprettStilling, uuid)
+        val direktemeldtStilling = opprettDirektemeldtStilling(opprettStilling, UUID.fromString(uuid))
 
         val stilling = direktemeldtStilling.toStilling()
 
