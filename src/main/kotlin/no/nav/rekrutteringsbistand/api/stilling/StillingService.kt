@@ -29,10 +29,10 @@ class StillingService(
         stillingsId: String,
         somSystembruker: Boolean = false
     ): RekrutteringsbistandStilling {
-        val direktemeldtStilling = direktemeldtStillingRepository.hentDirektemeldtStilling(stillingsId)
-        val stilling = direktemeldtStilling.toStilling()
+        //val direktemeldtStilling = direktemeldtStillingRepository.hentDirektemeldtStilling(stillingsId)
+       // val stilling = direktemeldtStilling.toStilling()
 
-        // val stilling = arbeidsplassenKlient.hentStilling(stillingsId, somSystembruker)
+        val stilling = arbeidsplassenKlient.hentStilling(stillingsId, somSystembruker)
         val stillingsinfo = stillingsinfoService
             .hentStillingsinfo(stilling)
             ?.asStillingsinfoDto()
