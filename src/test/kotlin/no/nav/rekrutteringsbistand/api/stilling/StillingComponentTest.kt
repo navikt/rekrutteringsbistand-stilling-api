@@ -54,7 +54,6 @@ import java.util.*
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
     properties = arrayOf("external.pam-ad-api.url=http://localhost:9935")
 )
-@Disabled
 internal class StillingComponentTest {
 
     @get:Rule
@@ -95,43 +94,43 @@ internal class StillingComponentTest {
         mockLogin.leggAzureVeilederTokenPåAlleRequests(restTemplate)
     }
 
-    @Test
-    fun `GET mot en stilling skal returnere en stilling uten stillingsinfo hvis det ikke er lagret`() {
-        val stilling = enStilling
-//        mockUtenAuthorization("/b2b/api/v1/ads/${stilling.uuid}", stilling)
-//        mockAzureObo(wiremockAzure)
+//    @Test
+//    fun `GET mot en stilling skal returnere en stilling uten stillingsinfo hvis det ikke er lagret`() {
+//        val stilling = enStilling
+////        mockUtenAuthorization("/b2b/api/v1/ads/${stilling.uuid}", stilling)
+////        mockAzureObo(wiremockAzure)
+//
+//        mockHentDirektemeldtStilling(stilling.uuid, stilling)
+//
+//        restTemplate.getForObject(
+//            "$localBaseUrl/rekrutteringsbistandstilling/${stilling.uuid}", RekrutteringsbistandStilling::class.java
+//        ).also {
+//            assertThat(it.stillingsinfo).isNull()
+//            //assertThat(it.stilling).isEqualTo(stilling)
+//        }
+//    }
 
-        mockHentDirektemeldtStilling(stilling.uuid, stilling)
-
-        restTemplate.getForObject(
-            "$localBaseUrl/rekrutteringsbistandstilling/${stilling.uuid}", RekrutteringsbistandStilling::class.java
-        ).also {
-            assertThat(it.stillingsinfo).isNull()
-            //assertThat(it.stilling).isEqualTo(stilling)
-        }
-    }
-
-    @Test
-    fun `GET mot en rekrutteringsbistandstilling skal returnere en stilling med stillingsinfo hvis det er lagret`() {
-
-        val stilling = enStilling
-        val stillingsinfo = enStillingsinfo.copy(stillingsid = Stillingsid(stilling.uuid))
-
-//        mockUtenAuthorization("/b2b/api/v1/ads/${stilling.uuid}", stilling)
-//        mockAzureObo(wiremockAzure)
-
-        mockHentDirektemeldtStilling(stilling.uuid, stilling)
-
-
-        repository.opprett(stillingsinfo)
-
-        restTemplate.getForObject(
-            "$localBaseUrl/rekrutteringsbistandstilling/${stilling.uuid}", RekrutteringsbistandStilling::class.java
-        ).also {
-            //assertThat(it.stilling).isEqualTo(stilling)
-            assertThat(it.stillingsinfo).isEqualTo(stillingsinfo.asStillingsinfoDto())
-        }
-    }
+//    @Test
+//    fun `GET mot en rekrutteringsbistandstilling skal returnere en stilling med stillingsinfo hvis det er lagret`() {
+//
+//        val stilling = enStilling
+//        val stillingsinfo = enStillingsinfo.copy(stillingsid = Stillingsid(stilling.uuid))
+//
+////        mockUtenAuthorization("/b2b/api/v1/ads/${stilling.uuid}", stilling)
+////        mockAzureObo(wiremockAzure)
+//
+//        mockHentDirektemeldtStilling(stilling.uuid, stilling)
+//
+//
+//        repository.opprett(stillingsinfo)
+//
+//        restTemplate.getForObject(
+//            "$localBaseUrl/rekrutteringsbistandstilling/${stilling.uuid}", RekrutteringsbistandStilling::class.java
+//        ).also {
+//            //assertThat(it.stilling).isEqualTo(stilling)
+//            assertThat(it.stillingsinfo).isEqualTo(stillingsinfo.asStillingsinfoDto())
+//        }
+//    }
 
 
 //    @Test
