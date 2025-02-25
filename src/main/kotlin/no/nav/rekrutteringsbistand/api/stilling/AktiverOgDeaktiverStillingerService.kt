@@ -3,6 +3,8 @@ package no.nav.rekrutteringsbistand.api.stilling
 import no.nav.rekrutteringsbistand.api.support.log
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.ZoneId
+import java.time.ZonedDateTime
 
 
 @Service
@@ -17,7 +19,7 @@ class AktiverOgDeaktiverStillingerService(
         log.info("Fant ${aktiveringskandidater.size} aktiveringskandidater")
 
         aktiveringskandidater.forEach {
-            val stillingNyStatus = it.copy(status = Status.ACTIVE.toString())
+            val stillingNyStatus = it.copy(status = Status.ACTIVE.toString(), sistEndret = ZonedDateTime.now(ZoneId.of("Europe/Oslo")))
             direktemeldtStillingRepository.lagreDirektemeldtStilling(stillingNyStatus)
         }
 
@@ -28,10 +30,12 @@ class AktiverOgDeaktiverStillingerService(
 
             if(it.innhold.administration?.status != Status.DONE.toString()) {
                 // Setter administration til done for hvis den ikke er det og har utløpt
-                val stillingNyStatus = it.copy(status = Status.INACTIVE.toString(), innhold = it.innhold.copy(administration = it.innhold.administration?.copy(status = Status.DONE.toString())))
+                val stillingNyStatus = it.copy(status = Status.INACTIVE.toString(),
+                    sistEndret = ZonedDateTime.now(ZoneId.of("Europe/Oslo")),
+                    innhold = it.innhold.copy(administration = it.innhold.administration?.copy(status = Status.DONE.toString())))
                 direktemeldtStillingRepository.lagreDirektemeldtStilling(stillingNyStatus)
             } else {
-                val stillingNyStatus = it.copy(status = Status.INACTIVE.toString())
+                val stillingNyStatus = it.copy(status = Status.INACTIVE.toString(), sistEndret = ZonedDateTime.now(ZoneId.of("Europe/Oslo")))
                 direktemeldtStillingRepository.lagreDirektemeldtStilling(stillingNyStatus)
             }
         }
