@@ -20,6 +20,11 @@ Start main i klassen RekrutteringsbistandApplication.
 2. Kjør container: `docker run -d -p 9501:9501 rekrutteringsbistand-stilling-api`
 
 
+## Kode generert av GitHub Copilot
+
+Dette repoet bruker GitHub Copilot til å generere kode.
+
+
 # Henvendelser
 
 ## For Nav-ansatte

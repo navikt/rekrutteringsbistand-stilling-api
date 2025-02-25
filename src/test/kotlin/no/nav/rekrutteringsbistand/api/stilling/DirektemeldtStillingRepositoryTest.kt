@@ -1,7 +1,10 @@
 package no.nav.rekrutteringsbistand.api.stilling
 
 import no.nav.rekrutteringsbistand.api.TestRepository
+import no.nav.rekrutteringsbistand.api.Testdata.enDirektemeldtStilling
 import no.nav.rekrutteringsbistand.api.Testdata.enStilling
+import no.nav.rekrutteringsbistand.api.Testdata.stillingerSomSkalAktiveres
+import no.nav.rekrutteringsbistand.api.Testdata.stillingerSomSkalDeaktiveres
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -66,5 +69,60 @@ class DirektemeldtStillingRepositoryTest {
 
         assertEquals("testnss", hentetStilling1.innhold.title)
         assertEquals("Stilling 2", hentetStilling2.innhold.title)
+    }
+
+    @Test
+    fun `Skal finne direktemeldte stillinger som er kandidater for deaktivering`() {
+        val kandidaterForDeaktivering = stillingerSomSkalDeaktiveres
+
+        kandidaterForDeaktivering.forEach {
+            repository.lagreDirektemeldtStilling(it)
+        }
+
+        val deaktiveringskandidater = repository.hentDeaktiveringskandidater()
+
+        assertEquals(3, deaktiveringskandidater.size)
+
+        assertEquals("Stilling 1", deaktiveringskandidater[0].innhold.title)
+        assertEquals("Stilling 2", deaktiveringskandidater[1].innhold.title)
+        assertEquals("Stilling 3", deaktiveringskandidater[2].innhold.title)
+    }
+
+    @Test
+    fun `Skal finne direktemeldte stillinger som er kandidater for aktivering`() {
+        val kandidaterForAktivering = stillingerSomSkalAktiveres
+
+        kandidaterForAktivering.forEach {
+            repository.lagreDirektemeldtStilling(it)
+        }
+
+        val aktiveringskandidater = repository.hentAktiveringskandidater()
+
+        assertEquals(2, aktiveringskandidater.size)
+
+        assertEquals("Stilling 4", aktiveringskandidater[0].innhold.title)
+        assertEquals("Stilling 12", aktiveringskandidater[1].innhold.title)
+    }
+
+    @Test
+    fun `Skal ikke finne noen kandidater hvis det ikke er noen som skal deaktiveres`() {
+        val stilling = enDirektemeldtStilling.copy(innhold = enDirektemeldtStilling.innhold.copy(expires = ZonedDateTime.now(ZoneId.of("Europe/Oslo")).plusDays(10)))
+
+        repository.lagreDirektemeldtStilling(stilling)
+
+        val deaktiveringskandidater = repository.hentDeaktiveringskandidater()
+
+        assertEquals(0, deaktiveringskandidater.size)
+    }
+
+    @Test
+    fun `Skal ikke finne noen kandidater hvis det ikke er noen som skal aktiveres`() {
+        val stilling = enDirektemeldtStilling.copy(innhold = enDirektemeldtStilling.innhold.copy(expires = ZonedDateTime.now(ZoneId.of("Europe/Oslo")).plusDays(10)))
+
+        repository.lagreDirektemeldtStilling(stilling)
+
+        val aktiveringskandidater = repository.hentAktiveringskandidater()
+
+        assertEquals(0, aktiveringskandidater.size)
     }
 }

@@ -45,6 +45,8 @@ spec:
     pool: nav-dev
   secureLogs:
     enabled: true
+  leaderElection:
+    enabled: true
   accessPolicy:
     inbound:
       rules:

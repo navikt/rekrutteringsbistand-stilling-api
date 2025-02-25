@@ -77,6 +77,44 @@ class DirektemeldtStillingRepository(private val namedJdbcTemplate: NamedParamet
         return direktemeldtStilling
     }
 
+    fun hentAktiveringskandidater() : List<DirektemeldtStilling> {
+        // Henter alle stillinger som har status INACTIVE og hvor published er i løpet av den siste dagen, expires er fram i tid, admminstatus er DONE og publishedByAdmin er satt
+        val sql = """
+          select stillingsid, innhold, opprettet, opprettet_av, sist_endret, sist_endret_av, status
+          from
+              $DIREKTEMELDT_STILLING_TABELL
+          where
+              status = 'INACTIVE' 
+              and (innhold->>'published')::timestamp > now() - interval '1 day'
+              and (innhold->>'published')::timestamp <= now()
+            and (
+            (innhold->>'expires')::timestamp IS NULL
+            or (innhold->>'expires')::timestamp >= DATE_TRUNC('day', CURRENT_TIMESTAMP)
+            )
+            and (innhold->>'publishedByAdmin') is not null
+            and innhold->'administration'->>'status' = 'DONE';
+        """.trimIndent()
+
+        return namedJdbcTemplate.query(
+            sql, DirektemeldtStillingRowMapper()
+        ).filterNotNull()
+    }
+
+    fun hentDeaktiveringskandidater(): List<DirektemeldtStilling> {
+        // Henter alle direktemeldte stillinger som har status ACTIVE og hvor expires er mindre enn dagens dato
+        val sql = """
+            select *
+            from
+                $DIREKTEMELDT_STILLING_TABELL
+            where
+                status = 'ACTIVE'
+                and (innhold->>'expires')::timestamp < DATE_TRUNC('day', CURRENT_TIMESTAMP)
+        """.trimIndent()
+
+        return namedJdbcTemplate.query(
+            sql, DirektemeldtStillingRowMapper()
+        ).filterNotNull()
+    }
 
     class DirektemeldtStillingRowMapper : RowMapper<DirektemeldtStilling?> {
         @Throws(SQLException::class)
@@ -94,6 +132,4 @@ class DirektemeldtStillingRepository(private val namedJdbcTemplate: NamedParamet
             return direktemeldtStilling
         }
     }
-
-
 }

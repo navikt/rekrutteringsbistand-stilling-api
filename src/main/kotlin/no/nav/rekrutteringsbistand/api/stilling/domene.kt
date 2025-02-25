@@ -366,3 +366,16 @@ data class DirektemeldtStilling(
     val status: String
 )
 
+enum class Status {
+    ACTIVE,
+    INACTIVE,
+    DONE,
+    DELETED,
+    STOPPED,
+    REJECTED;
+
+    override fun toString(): String {
+        return name
+    }
+}
+
