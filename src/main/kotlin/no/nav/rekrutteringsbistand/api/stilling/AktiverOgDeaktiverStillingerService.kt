@@ -6,7 +6,6 @@ import org.springframework.transaction.annotation.Transactional
 import java.time.ZoneId
 import java.time.ZonedDateTime
 
-
 @Service
 class AktiverOgDeaktiverStillingerService(
     val direktemeldtStillingRepository: DirektemeldtStillingRepository
@@ -14,18 +13,19 @@ class AktiverOgDeaktiverStillingerService(
 
     @Transactional
     fun aktiverOgDeaktiverStillinger() {
-        val aktiveringskandidater = direktemeldtStillingRepository.hentAktiveringskandidater()
+        // Aktivering av stilinger
+        val stillingerForAktivering = direktemeldtStillingRepository.hentStillingerForAktivering()
+        log.info("Fant ${stillingerForAktivering.size} stillinger for aktivering")
 
-        log.info("Fant ${aktiveringskandidater.size} aktiveringskandidater")
-
-        aktiveringskandidater.forEach {
+        stillingerForAktivering.forEach {
             val stillingNyStatus = it.copy(status = Status.ACTIVE.toString(), sistEndret = ZonedDateTime.now(ZoneId.of("Europe/Oslo")))
             direktemeldtStillingRepository.lagreDirektemeldtStilling(stillingNyStatus)
         }
 
-        val deaktiveringskandidater  = direktemeldtStillingRepository.hentDeaktiveringskandidater()
-        log.info("Fant ${deaktiveringskandidater.size} deaktiveringskandidater")
-        deaktiveringskandidater.forEach {
+        // Deaktivering av stillinger
+        val stillingerForDeaktivering  = direktemeldtStillingRepository.hentStillingerForDeaktivering()
+        log.info("Fant ${stillingerForDeaktivering.size} stillinger for deaktivering")
+        stillingerForDeaktivering.forEach {
             log.info("Sjekker stilling ${it.stillingsid} med publisert ${it.innhold.published} og expires ${it.innhold.expires}")
 
             if(it.innhold.administration?.status != Status.DONE.toString()) {

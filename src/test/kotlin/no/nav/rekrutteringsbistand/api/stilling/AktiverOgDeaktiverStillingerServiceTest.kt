@@ -32,10 +32,10 @@ class AktiverOgDeaktiverStillingerServiceTest {
 
     @Test
     fun `Skal lagre stilling med status inaktiv`() {
-        val deaktiveringskandidat = enDirektemeldtStilling
+        val stilling = enDirektemeldtStilling
 
-        whenever(direktemeldtStillingRepository.hentDeaktiveringskandidater()).thenReturn(listOf(deaktiveringskandidat))
-        whenever(direktemeldtStillingRepository.hentAktiveringskandidater()).thenReturn(listOf())
+        whenever(direktemeldtStillingRepository.hentStillingerForDeaktivering()).thenReturn(listOf(stilling))
+        whenever(direktemeldtStillingRepository.hentStillingerForAktivering()).thenReturn(listOf())
 
         aktiverOgDeaktiverStillingerService.aktiverOgDeaktiverStillinger()
 
@@ -47,12 +47,12 @@ class AktiverOgDeaktiverStillingerServiceTest {
 
     @Test
     fun `Skal lagre stilling med status aktiv`() {
-        val aktiveringsKandidat = enDirektemeldtStilling.copy(status = Status.INACTIVE.toString(),
+        val stilling = enDirektemeldtStilling.copy(status = Status.INACTIVE.toString(),
             innhold = enDirektemeldtStilling.innhold.copy(published = publishedFor2TimerSiden, expires = ZonedDateTime.now(
                 ZoneId.of("Europe/Oslo")).plusDays(10), publishedByAdmin = publishedFor2TimerSiden.toString()))
 
-        whenever(direktemeldtStillingRepository.hentDeaktiveringskandidater()).thenReturn(listOf())
-        whenever(direktemeldtStillingRepository.hentAktiveringskandidater()).thenReturn(listOf(aktiveringsKandidat))
+        whenever(direktemeldtStillingRepository.hentStillingerForDeaktivering()).thenReturn(listOf())
+        whenever(direktemeldtStillingRepository.hentStillingerForAktivering()).thenReturn(listOf(stilling))
 
         aktiverOgDeaktiverStillingerService.aktiverOgDeaktiverStillinger()
 

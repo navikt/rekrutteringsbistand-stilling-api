@@ -72,14 +72,14 @@ class DirektemeldtStillingRepositoryTest {
     }
 
     @Test
-    fun `Skal finne direktemeldte stillinger som er kandidater for deaktivering`() {
+    fun `Skal finne direktemeldte stillinger som skal deaktiveres`() {
         val kandidaterForDeaktivering = stillingerSomSkalDeaktiveres
 
         kandidaterForDeaktivering.forEach {
             repository.lagreDirektemeldtStilling(it)
         }
 
-        val deaktiveringskandidater = repository.hentDeaktiveringskandidater()
+        val deaktiveringskandidater = repository.hentStillingerForDeaktivering()
 
         assertEquals(3, deaktiveringskandidater.size)
 
@@ -89,40 +89,40 @@ class DirektemeldtStillingRepositoryTest {
     }
 
     @Test
-    fun `Skal finne direktemeldte stillinger som er kandidater for aktivering`() {
-        val kandidaterForAktivering = stillingerSomSkalAktiveres
+    fun `Skal finne direktemeldte stillinger som skal bli aktivert`() {
+        val stillingerForAktivering = stillingerSomSkalAktiveres
 
-        kandidaterForAktivering.forEach {
+        stillingerForAktivering.forEach {
             repository.lagreDirektemeldtStilling(it)
         }
 
-        val aktiveringskandidater = repository.hentAktiveringskandidater()
+        val stillinger = repository.hentStillingerForAktivering()
 
-        assertEquals(2, aktiveringskandidater.size)
+        assertEquals(2, stillinger.size)
 
-        assertEquals("Stilling 4", aktiveringskandidater[0].innhold.title)
-        assertEquals("Stilling 12", aktiveringskandidater[1].innhold.title)
+        assertEquals("Stilling 4", stillinger[0].innhold.title)
+        assertEquals("Stilling 12", stillinger[1].innhold.title)
     }
 
     @Test
-    fun `Skal ikke finne noen kandidater hvis det ikke er noen som skal deaktiveres`() {
+    fun `Skal ikke finne noen stillinger hvis det ikke er noen som skal deaktiveres`() {
         val stilling = enDirektemeldtStilling.copy(innhold = enDirektemeldtStilling.innhold.copy(expires = ZonedDateTime.now(ZoneId.of("Europe/Oslo")).plusDays(10)))
 
         repository.lagreDirektemeldtStilling(stilling)
 
-        val deaktiveringskandidater = repository.hentDeaktiveringskandidater()
+        val stillingerForDeaktivering = repository.hentStillingerForDeaktivering()
 
-        assertEquals(0, deaktiveringskandidater.size)
+        assertEquals(0, stillingerForDeaktivering.size)
     }
 
     @Test
-    fun `Skal ikke finne noen kandidater hvis det ikke er noen som skal aktiveres`() {
+    fun `Skal ikke finne noen stillinger hvis det ikke er noen som skal aktiveres`() {
         val stilling = enDirektemeldtStilling.copy(innhold = enDirektemeldtStilling.innhold.copy(expires = ZonedDateTime.now(ZoneId.of("Europe/Oslo")).plusDays(10)))
 
         repository.lagreDirektemeldtStilling(stilling)
 
-        val aktiveringskandidater = repository.hentAktiveringskandidater()
+        val stillingerForAktivering = repository.hentStillingerForAktivering()
 
-        assertEquals(0, aktiveringskandidater.size)
+        assertEquals(0, stillingerForAktivering.size)
     }
 }
