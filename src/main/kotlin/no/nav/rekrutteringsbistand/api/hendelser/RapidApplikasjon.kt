@@ -21,6 +21,8 @@ class RapidApplikasjon(
     @Autowired private val stillingService: StillingService,
     ): Runnable {
 
+    private val rapidsConnection = RapidApplication.create(environment.toMap())
+
     companion object {
         fun <T: RapidsConnection> T.registrerLyttere(
             context: ApplicationContext,
@@ -37,9 +39,10 @@ class RapidApplikasjon(
     }
 
     override fun run() {
-        RapidApplication.create(environment.toMap())
-            .registrerLyttere(context, stillingService).start()
+        rapidsConnection.registrerLyttere(context, stillingService).start()
     }
+
+    fun publish(key: String, value: String) = rapidsConnection.publish(key, value)
 }
 
 private fun Environment.toMap() = if (this is AbstractEnvironment)
