@@ -1,8 +1,10 @@
 package no.nav.rekrutteringsbistand.api.hendelser
 
+import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.rekrutteringsbistand.api.stilling.StillingService
+import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsid
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.ApplicationContext
@@ -42,7 +44,7 @@ class RapidApplikasjon(
         rapidsConnection.registrerLyttere(context, stillingService).start()
     }
 
-    fun publish(key: String, value: String) = rapidsConnection.publish(key, value)
+    fun publish(key: Stillingsid, value: JsonMessage) = rapidsConnection.publish(key.asString(), value.toJson())
 }
 
 private fun Environment.toMap() = if (this is AbstractEnvironment)
