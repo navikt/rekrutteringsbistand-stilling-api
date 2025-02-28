@@ -1,5 +1,7 @@
-package no.nav.rekrutteringsbistand.api.stilling
+package no.nav.rekrutteringsbistand.api.stillingStatusoppdatering
 
+import no.nav.rekrutteringsbistand.api.stilling.DirektemeldtStillingRepository
+import no.nav.rekrutteringsbistand.api.stilling.Status
 import no.nav.rekrutteringsbistand.api.support.log
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -12,8 +14,7 @@ class AktiverOgDeaktiverStillingerService(
 ) {
 
     @Transactional
-    fun aktiverOgDeaktiverStillinger() {
-        // Aktivering av stilinger
+    fun aktiverStillinger() {
         val stillingerForAktivering = direktemeldtStillingRepository.hentStillingerForAktivering()
         log.info("Fant ${stillingerForAktivering.size} stillinger for aktivering")
 
@@ -21,8 +22,10 @@ class AktiverOgDeaktiverStillingerService(
             val stillingNyStatus = it.copy(status = Status.ACTIVE.toString(), sistEndret = ZonedDateTime.now(ZoneId.of("Europe/Oslo")))
             direktemeldtStillingRepository.lagreDirektemeldtStilling(stillingNyStatus)
         }
+    }
 
-        // Deaktivering av stillinger
+    @Transactional
+    fun deaktiverStillinger() {
         val stillingerForDeaktivering  = direktemeldtStillingRepository.hentStillingerForDeaktivering()
         log.info("Fant ${stillingerForDeaktivering.size} stillinger for deaktivering")
         stillingerForDeaktivering.forEach {
@@ -40,4 +43,5 @@ class AktiverOgDeaktiverStillingerService(
             }
         }
     }
+
 }

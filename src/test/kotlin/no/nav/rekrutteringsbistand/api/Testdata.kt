@@ -354,56 +354,58 @@ object Testdata {
             sistEndret = ZonedDateTime.now(ZoneId.of("Europe/Oslo")),
             sistEndretAv = enVeileder.navIdent,
             status = "ACTIVE"
-        ),
-        DirektemeldtStilling(
-            stillingsid = UUID.randomUUID(),
-            innhold = DirektemeldtStillingBlob(
-                title = "Stilling 6",
-                administration = DirektemeldtStillingAdministration(
-                    status = "PENDING",
-                    comments = "",
-                    reportee = enVeileder.displayName,
-                    remarks = listOf(),
-                    navIdent = enVeileder.navIdent
-                ),
-                mediaList = listOf(),
-                contactList = listOf(),
-                privacy = "INTERNAL_NOT_SHOWN",
-                source = "DIR",
-                medium = "DIR",
-                reference = UUID.randomUUID().toString(),
-                published = publishedFor3DagerSiden,
-                expires = ZonedDateTime.now(ZoneId.of("Europe/Oslo")).plusDays(3),
-                employer = DirektemeldtStillingArbeidsgiver(
-                    name = "Arbeidsgiver 4",
-                    mediaList = listOf(),
-                    contactList = listOf(),
-                    location = null,
-                    locationList = listOf(),
-                    properties = mapOf(),
-                    orgnr = "1234567743",
-                    parentOrgnr = "234567891",
-                    publicName = null,
-                    orgform = null,
-                    employees = null
-                ),
-                location = null,
-                locationList = listOf(),
-                categoryList = listOf(),
-                properties = mapOf(),
-                publishedByAdmin = publishedFor3DagerSiden.toString(),
-                businessName = "Bedrift no. 4",
-                firstPublished = true,
-                deactivatedByExpiry = false,
-                activationOnPublishingDate = null
-            ),
-            opprettet = ZonedDateTime.now(ZoneId.of("Europe/Oslo")),
-            opprettetAv = enVeileder.navIdent,
-            sistEndret = ZonedDateTime.now(ZoneId.of("Europe/Oslo")),
-            sistEndretAv = enVeileder.navIdent,
-            status = "ACTIVE"
         )
     )
+
+    val stillingSomIkkeSkalDeaktiveres = DirektemeldtStilling(
+        stillingsid = UUID.randomUUID(),
+        innhold = DirektemeldtStillingBlob(
+            title = "Stilling 6",
+            administration = DirektemeldtStillingAdministration(
+                status = "PENDING",
+                comments = "",
+                reportee = enVeileder.displayName,
+                remarks = listOf(),
+                navIdent = enVeileder.navIdent
+            ),
+            mediaList = listOf(),
+            contactList = listOf(),
+            privacy = "INTERNAL_NOT_SHOWN",
+            source = "DIR",
+            medium = "DIR",
+            reference = UUID.randomUUID().toString(),
+            published = publishedFor3DagerSiden,
+            expires = ZonedDateTime.now(ZoneId.of("Europe/Oslo")).plusDays(3),
+            employer = DirektemeldtStillingArbeidsgiver(
+                name = "Arbeidsgiver 4",
+                mediaList = listOf(),
+                contactList = listOf(),
+                location = null,
+                locationList = listOf(),
+                properties = mapOf(),
+                orgnr = "1234567743",
+                parentOrgnr = "234567891",
+                publicName = null,
+                orgform = null,
+                employees = null
+            ),
+            location = null,
+            locationList = listOf(),
+            categoryList = listOf(),
+            properties = mapOf(),
+            publishedByAdmin = publishedFor3DagerSiden.toString(),
+            businessName = "Bedrift no. 4",
+            firstPublished = true,
+            deactivatedByExpiry = false,
+            activationOnPublishingDate = null
+        ),
+        opprettet = ZonedDateTime.now(ZoneId.of("Europe/Oslo")),
+        opprettetAv = enVeileder.navIdent,
+        sistEndret = ZonedDateTime.now(ZoneId.of("Europe/Oslo")),
+        sistEndretAv = enVeileder.navIdent,
+        status = "ACTIVE"
+    )
+
 
     val stillingerSomSkalAktiveres = listOf(
         DirektemeldtStilling(
@@ -501,58 +503,10 @@ object Testdata {
             sistEndret = ZonedDateTime.now(ZoneId.of("Europe/Oslo")),
             sistEndretAv = enVeileder.navIdent,
             status = "INACTIVE"
-        ),
-        DirektemeldtStilling(
-            stillingsid = UUID.randomUUID(),
-            innhold = DirektemeldtStillingBlob(
-                title = "Stilling 3",
-                administration = DirektemeldtStillingAdministration(
-                    status = "PENDING",
-                    comments = "",
-                    reportee = enVeileder.displayName,
-                    remarks = listOf(),
-                    navIdent = enVeileder.navIdent
-                ),
-                mediaList = listOf(),
-                contactList = listOf(),
-                privacy = "INTERNAL_NOT_SHOWN",
-                source = "DIR",
-                medium = "DIR",
-                reference = UUID.randomUUID().toString(),
-                published = publishedFor2TimerSiden,
-                expires = ZonedDateTime.now(ZoneId.of("Europe/Oslo")).plusDays(10),
-                employer = DirektemeldtStillingArbeidsgiver(
-                    name = "Arbeidsgiver 2",
-                    mediaList = listOf(),
-                    contactList = listOf(),
-                    location = null,
-                    locationList = listOf(),
-                    properties = mapOf(),
-                    orgnr = "123432789",
-                    parentOrgnr = "234567891",
-                    publicName = null,
-                    orgform = null,
-                    employees = null
-                ),
-                location = null,
-                locationList = listOf(),
-                categoryList = listOf(),
-                properties = mapOf(),
-                publishedByAdmin = publishedFor2TimerSiden.toString(),
-                businessName = "Bedrift no. 2",
-                firstPublished = true,
-                deactivatedByExpiry = false,
-                activationOnPublishingDate = null
-            ),
-            opprettet = ZonedDateTime.now(ZoneId.of("Europe/Oslo")),
-            opprettetAv = enVeileder.navIdent,
-            sistEndret = ZonedDateTime.now(ZoneId.of("Europe/Oslo")),
-            sistEndretAv = enVeileder.navIdent,
-            status = "INACTIVE"
         )
     )
 
-    val direkteMeldtStilling = DirektemeldtStilling(
+    val stillingSomIkkeSkalAktiveres = DirektemeldtStilling(
         stillingsid = UUID.randomUUID(),
         innhold = DirektemeldtStillingBlob(
             title = "Stilling 3",

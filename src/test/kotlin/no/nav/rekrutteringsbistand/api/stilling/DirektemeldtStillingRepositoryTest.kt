@@ -3,6 +3,8 @@ package no.nav.rekrutteringsbistand.api.stilling
 import no.nav.rekrutteringsbistand.api.TestRepository
 import no.nav.rekrutteringsbistand.api.Testdata.enDirektemeldtStilling
 import no.nav.rekrutteringsbistand.api.Testdata.enStilling
+import no.nav.rekrutteringsbistand.api.Testdata.stillingSomIkkeSkalAktiveres
+import no.nav.rekrutteringsbistand.api.Testdata.stillingSomIkkeSkalDeaktiveres
 import no.nav.rekrutteringsbistand.api.Testdata.stillingerSomSkalAktiveres
 import no.nav.rekrutteringsbistand.api.Testdata.stillingerSomSkalDeaktiveres
 import org.junit.jupiter.api.AfterEach
@@ -78,6 +80,7 @@ class DirektemeldtStillingRepositoryTest {
         kandidaterForDeaktivering.forEach {
             repository.lagreDirektemeldtStilling(it)
         }
+        repository.lagreDirektemeldtStilling(stillingSomIkkeSkalDeaktiveres)
 
         val deaktiveringskandidater = repository.hentStillingerForDeaktivering()
 
@@ -95,6 +98,7 @@ class DirektemeldtStillingRepositoryTest {
         stillingerForAktivering.forEach {
             repository.lagreDirektemeldtStilling(it)
         }
+        repository.lagreDirektemeldtStilling(stillingSomIkkeSkalAktiveres)
 
         val stillinger = repository.hentStillingerForAktivering()
 

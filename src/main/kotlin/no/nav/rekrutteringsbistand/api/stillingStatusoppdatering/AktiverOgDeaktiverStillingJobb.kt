@@ -1,4 +1,4 @@
-package no.nav.rekrutteringsbistand.api.stilling
+package no.nav.rekrutteringsbistand.api.stillingStatusoppdatering
 
 import no.nav.rekrutteringsbistand.api.support.config.LeaderElection
 import org.springframework.scheduling.annotation.Scheduled
@@ -17,7 +17,8 @@ class AktiverOgDeaktiverStillingJobb(
         // Sjekker om det er leader, slik at jobben kun kjører på en pod
         if(leaderElection.isLeader()) {
             log.info("Startet jobb for å aktivere og deaktivere stillinger")
-            aktiverOgDeaktiverStillingerService.aktiverOgDeaktiverStillinger()
+            aktiverOgDeaktiverStillingerService.aktiverStillinger()
+            aktiverOgDeaktiverStillingerService.deaktiverStillinger()
         }
     }
 }
