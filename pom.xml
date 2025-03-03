@@ -37,7 +37,7 @@
         <nav-common.version>3.2024.11.26_16.35-432a29107830</nav-common.version>
         <janino.version>3.1.12</janino.version>
         <nimbus.version>10.0.1</nimbus.version>
-        <json-smart.version>2.5.1</json-smart.version>
+        <json-smart.version>2.5.2</json-smart.version>
         <rapids-and-rivers.version>2025010715371736260653.d465d681c420</rapids-and-rivers.version>
         <rapids-and-rivers-api.version>2025.01.10-08.49-9e6f64ad</rapids-and-rivers-api.version>
         <rapids-and-rivers-kafka.version>2024.12.18-11.39-73f8eecb</rapids-and-rivers-kafka.version>
