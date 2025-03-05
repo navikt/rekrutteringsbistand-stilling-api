@@ -26,7 +26,7 @@ class StillingIndekserController(
 
         packet["stilling"] = enStilling.stilling
         packet["stillingsinfo"] = stillingsinfoService.hentForStilling(stillingId = Stillingsid(stillingsId)) ?: ""
-        packet["stillingId"] = stillingsId
+        packet["stillingsId"] = stillingsId
 
         packet["direktemeldtStilling"] = stillingService.hentDirektemeldtStilling(stillingsId)
 
