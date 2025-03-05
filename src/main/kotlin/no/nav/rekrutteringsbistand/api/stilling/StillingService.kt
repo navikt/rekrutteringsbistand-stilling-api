@@ -141,4 +141,12 @@ class StillingService(
         )
         direktemeldtStillingRepository.lagreDirektemeldtStilling(direktemeldtStilling)
     }
+
+    fun hentDirektemeldtStilling(stillingsId: String): DirektemeldtStilling {
+        return direktemeldtStillingRepository.hentDirektemeldtStilling(stillingsId)
+    }
+
+    fun hentAlleDirektemeldteStillinger(): List<DirektemeldtStilling> {
+        return direktemeldtStillingRepository.hentAlleDirektemeldteStillinger()
+    }
 }

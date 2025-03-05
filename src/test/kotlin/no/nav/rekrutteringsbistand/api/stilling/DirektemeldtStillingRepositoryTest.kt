@@ -67,4 +67,11 @@ class DirektemeldtStillingRepositoryTest {
         assertEquals("testnss", hentetStilling1.innhold.title)
         assertEquals("Stilling 2", hentetStilling2.innhold.title)
     }
+
+    @Test
+    fun `Skal returnere tom liste hvis det ikke er noen direktemeldte stillinger i tabellen`() {
+        val direktemeldteStillinger = repository.hentAlleDirektemeldteStillinger()
+
+        assertEquals(0, direktemeldteStillinger.size)
+    }
 }
