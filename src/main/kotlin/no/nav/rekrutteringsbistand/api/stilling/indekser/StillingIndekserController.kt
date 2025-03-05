@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*
 
 
 @RestController
-@RequestMapping("internal/stilling")
+@RequestMapping("/internal/stilling")
 @Unprotected
 class StillingIndekserController(
     val stillingService: StillingService,
