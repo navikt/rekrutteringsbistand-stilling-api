@@ -21,7 +21,7 @@ class StillingIndekserController(
 
     @PostMapping("/reindekser")
     fun reindekser(@RequestBody stillingsId: String): ResponseEntity<String> {
-        val enStilling = stillingService.hentRekrutteringsbistandStilling(stillingsId)
+        val enStilling = stillingService.hentRekrutteringsbistandStilling(stillingsId, true)
         val packet = JsonMessage.newMessage(eventName = "direktemeldtStillingRepubliser")
 
         packet["stilling"] = enStilling.stilling
