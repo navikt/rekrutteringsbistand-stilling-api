@@ -3,7 +3,6 @@ package no.nav.rekrutteringsbistand.api
 import no.nav.rekrutteringsbistand.api.arbeidsplassen.OpprettStillingAdministrationDto
 import no.nav.rekrutteringsbistand.api.autorisasjon.InnloggetVeileder
 import no.nav.rekrutteringsbistand.api.autorisasjon.Rolle
-import no.nav.rekrutteringsbistand.api.autorisasjon.TestRolle
 import no.nav.rekrutteringsbistand.api.stilling.*
 import no.nav.rekrutteringsbistand.api.stillingsinfo.*
 import java.time.LocalDateTime
@@ -162,8 +161,8 @@ object Testdata {
 
 
     val enDirektemeldtStilling = DirektemeldtStilling(
-        stillingsid = UUID.randomUUID(),
-        innhold = DirektemeldtStillingBlob(
+        stillingsId = UUID.randomUUID(),
+        innhold = DirektemeldtStillingInnhold(
             title = "Stilling 2",
             administration = DirektemeldtStillingAdministration(
                 status = "DONE",
@@ -207,13 +206,14 @@ object Testdata {
         opprettetAv = enVeileder.navIdent,
         sistEndret = ZonedDateTime.now(ZoneId.of("Europe/Oslo")),
         sistEndretAv = enVeileder.navIdent,
-        status = "ACTIVE"
+        status = "ACTIVE",
+        annonseId = 1
     )
 
     val stillingerSomSkalDeaktiveres = listOf(
         DirektemeldtStilling(
-            stillingsid = UUID.randomUUID(),
-            innhold = DirektemeldtStillingBlob(
+            stillingsId = UUID.randomUUID(),
+            innhold = DirektemeldtStillingInnhold(
                 title = "Stilling 1",
                 administration = DirektemeldtStillingAdministration(
                     status = "DONE",
@@ -227,7 +227,7 @@ object Testdata {
                 privacy = "INTERNAL_NOT_SHOWN",
                 source = "DIR",
                 medium = "DIR",
-                reference =  UUID.randomUUID().toString(),
+                reference = UUID.randomUUID().toString(),
                 published = publishedFor3DagerSiden,
                 expires = ZonedDateTime.now(ZoneId.of("Europe/Oslo")).minusDays(1),
                 employer = DirektemeldtStillingArbeidsgiver(
@@ -257,11 +257,12 @@ object Testdata {
             opprettetAv = enVeileder.navIdent,
             sistEndret = ZonedDateTime.now(ZoneId.of("Europe/Oslo")),
             sistEndretAv = enVeileder.navIdent,
-            status = "ACTIVE"
+            status = "ACTIVE",
+            annonseId = 2
         ),
         DirektemeldtStilling(
-            stillingsid = UUID.randomUUID(),
-            innhold = DirektemeldtStillingBlob(
+            stillingsId = UUID.randomUUID(),
+            innhold = DirektemeldtStillingInnhold(
                 title = "Stilling 2",
                 administration = DirektemeldtStillingAdministration(
                     status = "DONE",
@@ -305,11 +306,12 @@ object Testdata {
             opprettetAv = enVeileder.navIdent,
             sistEndret = ZonedDateTime.now(ZoneId.of("Europe/Oslo")),
             sistEndretAv = enVeileder.navIdent,
-            status = "ACTIVE"
+            status = "ACTIVE",
+            annonseId = 3
         ),
         DirektemeldtStilling(
-            stillingsid = UUID.randomUUID(),
-            innhold = DirektemeldtStillingBlob(
+            stillingsId = UUID.randomUUID(),
+            innhold = DirektemeldtStillingInnhold(
                 title = "Stilling 3",
                 administration = DirektemeldtStillingAdministration(
                     status = "PENDING",
@@ -353,13 +355,14 @@ object Testdata {
             opprettetAv = enVeileder.navIdent,
             sistEndret = ZonedDateTime.now(ZoneId.of("Europe/Oslo")),
             sistEndretAv = enVeileder.navIdent,
-            status = "ACTIVE"
+            status = "ACTIVE",
+            annonseId = 4
         )
     )
 
     val stillingSomIkkeSkalDeaktiveres = DirektemeldtStilling(
-        stillingsid = UUID.randomUUID(),
-        innhold = DirektemeldtStillingBlob(
+        stillingsId = UUID.randomUUID(),
+        innhold = DirektemeldtStillingInnhold(
             title = "Stilling 6",
             administration = DirektemeldtStillingAdministration(
                 status = "PENDING",
@@ -403,14 +406,15 @@ object Testdata {
         opprettetAv = enVeileder.navIdent,
         sistEndret = ZonedDateTime.now(ZoneId.of("Europe/Oslo")),
         sistEndretAv = enVeileder.navIdent,
-        status = "ACTIVE"
+        status = "ACTIVE",
+        annonseId = 5
     )
 
 
     val stillingerSomSkalAktiveres = listOf(
         DirektemeldtStilling(
-            stillingsid = UUID.randomUUID(),
-            innhold = DirektemeldtStillingBlob(
+            stillingsId = UUID.randomUUID(),
+            innhold = DirektemeldtStillingInnhold(
                 title = "Stilling 4",
                 administration = DirektemeldtStillingAdministration(
                     status = "DONE",
@@ -424,7 +428,7 @@ object Testdata {
                 privacy = "INTERNAL_NOT_SHOWN",
                 source = "DIR",
                 medium = "DIR",
-                reference =  UUID.randomUUID().toString(),
+                reference = UUID.randomUUID().toString(),
                 published = publishedFor2TimerSiden,
                 expires = ZonedDateTime.now(ZoneId.of("Europe/Oslo")).plusDays(10),
                 employer = DirektemeldtStillingArbeidsgiver(
@@ -454,11 +458,12 @@ object Testdata {
             opprettetAv = enVeileder.navIdent,
             sistEndret = ZonedDateTime.now(ZoneId.of("Europe/Oslo")),
             sistEndretAv = enVeileder.navIdent,
-            status = "INACTIVE"
+            status = "INACTIVE",
+            annonseId = 6
         ),
         DirektemeldtStilling(
-            stillingsid = UUID.randomUUID(),
-            innhold = DirektemeldtStillingBlob(
+            stillingsId = UUID.randomUUID(),
+            innhold = DirektemeldtStillingInnhold(
                 title = "Stilling 12",
                 administration = DirektemeldtStillingAdministration(
                     status = "DONE",
@@ -502,13 +507,14 @@ object Testdata {
             opprettetAv = enVeileder.navIdent,
             sistEndret = ZonedDateTime.now(ZoneId.of("Europe/Oslo")),
             sistEndretAv = enVeileder.navIdent,
-            status = "INACTIVE"
+            status = "INACTIVE",
+            annonseId = 7
         )
     )
 
     val stillingSomIkkeSkalAktiveres = DirektemeldtStilling(
-        stillingsid = UUID.randomUUID(),
-        innhold = DirektemeldtStillingBlob(
+        stillingsId = UUID.randomUUID(),
+        innhold = DirektemeldtStillingInnhold(
             title = "Stilling 3",
             administration = DirektemeldtStillingAdministration(
                 status = "PENDING",
@@ -552,6 +558,7 @@ object Testdata {
         opprettetAv = enVeileder.navIdent,
         sistEndret = ZonedDateTime.now(ZoneId.of("Europe/Oslo")),
         sistEndretAv = enVeileder.navIdent,
-        status = "INACTIVE"
+        status = "INACTIVE",
+        annonseId = 8
     )
 }
