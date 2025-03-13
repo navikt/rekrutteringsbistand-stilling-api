@@ -82,6 +82,45 @@ class DirektemeldtStillingRepository(private val namedJdbcTemplate: NamedParamet
         return namedJdbcTemplate.query(sql, DirektemeldtStillingRowMapper()).filterNotNull()
     }
 
+    fun hentStillingerForAktivering() : List<DirektemeldtStilling> {
+        // Henter alle stillinger som har status INACTIVE og hvor published er i løpet av de siste 24 timer, expires er fram i tid, admminstatus er DONE og publishedByAdmin er satt
+        val sql = """
+          select stillingsid, innhold, opprettet, opprettet_av, sist_endret, sist_endret_av, status
+          from
+              $DIREKTEMELDT_STILLING_TABELL
+          where
+              status = 'INACTIVE' 
+              and (innhold->>'published')::timestamp > now() - interval '1 day'
+              and (innhold->>'published')::timestamp <= now()
+            and (
+            (innhold->>'expires')::timestamp IS NULL
+            or (innhold->>'expires')::timestamp >= DATE_TRUNC('day', CURRENT_TIMESTAMP)
+            )
+            and (innhold->>'publishedByAdmin') is not null
+            and innhold->'administration'->>'status' = 'DONE';
+        """.trimIndent()
+
+        return namedJdbcTemplate.query(
+            sql, DirektemeldtStillingRowMapper()
+        ).filterNotNull()
+    }
+
+    fun hentStillingerForDeaktivering(): List<DirektemeldtStilling> {
+        // Henter alle direktemeldte stillinger som har status ACTIVE og hvor expires er før dagens dato
+        val sql = """
+            select stillingsid, innhold, opprettet, opprettet_av, sist_endret, sist_endret_av, status
+            from
+                $DIREKTEMELDT_STILLING_TABELL
+            where
+                status = 'ACTIVE'
+                and (innhold->>'expires')::timestamp < DATE_TRUNC('day', CURRENT_TIMESTAMP)
+        """.trimIndent()
+
+        return namedJdbcTemplate.query(
+            sql, DirektemeldtStillingRowMapper()
+        ).filterNotNull()
+    }
+
     class DirektemeldtStillingRowMapper : RowMapper<DirektemeldtStilling?> {
         @Throws(SQLException::class)
         override fun mapRow(rs: ResultSet, rowNum: Int): DirektemeldtStilling {
@@ -98,5 +137,4 @@ class DirektemeldtStillingRepository(private val namedJdbcTemplate: NamedParamet
             return direktemeldtStilling
         }
     }
-
 }

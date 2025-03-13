@@ -1,7 +1,12 @@
 package no.nav.rekrutteringsbistand.api.stilling
 
 import no.nav.rekrutteringsbistand.api.TestRepository
+import no.nav.rekrutteringsbistand.api.Testdata.enDirektemeldtStilling
 import no.nav.rekrutteringsbistand.api.Testdata.enStilling
+import no.nav.rekrutteringsbistand.api.Testdata.stillingSomIkkeSkalAktiveres
+import no.nav.rekrutteringsbistand.api.Testdata.stillingSomIkkeSkalDeaktiveres
+import no.nav.rekrutteringsbistand.api.Testdata.stillingerSomSkalAktiveres
+import no.nav.rekrutteringsbistand.api.Testdata.stillingerSomSkalDeaktiveres
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -66,6 +71,63 @@ class DirektemeldtStillingRepositoryTest {
 
         assertEquals("testnss", hentetStilling1.innhold.title)
         assertEquals("Stilling 2", hentetStilling2.innhold.title)
+    }
+
+    @Test
+    fun `Skal finne direktemeldte stillinger som skal deaktiveres`() {
+        val kandidaterForDeaktivering = stillingerSomSkalDeaktiveres
+
+        kandidaterForDeaktivering.forEach {
+            repository.lagreDirektemeldtStilling(it)
+        }
+        repository.lagreDirektemeldtStilling(stillingSomIkkeSkalDeaktiveres)
+
+        val deaktiveringskandidater = repository.hentStillingerForDeaktivering()
+
+        assertEquals(3, deaktiveringskandidater.size)
+
+        assertEquals("Stilling 1", deaktiveringskandidater[0].innhold.title)
+        assertEquals("Stilling 2", deaktiveringskandidater[1].innhold.title)
+        assertEquals("Stilling 3", deaktiveringskandidater[2].innhold.title)
+    }
+
+    @Test
+    fun `Skal finne direktemeldte stillinger som skal bli aktivert`() {
+        val stillingerForAktivering = stillingerSomSkalAktiveres
+
+        stillingerForAktivering.forEach {
+            repository.lagreDirektemeldtStilling(it)
+        }
+        repository.lagreDirektemeldtStilling(stillingSomIkkeSkalAktiveres)
+
+        val stillinger = repository.hentStillingerForAktivering()
+
+        assertEquals(2, stillinger.size)
+
+        assertEquals("Stilling 4", stillinger[0].innhold.title)
+        assertEquals("Stilling 12", stillinger[1].innhold.title)
+    }
+
+    @Test
+    fun `Skal ikke finne noen stillinger hvis det ikke er noen som skal deaktiveres`() {
+        val stilling = enDirektemeldtStilling.copy(innhold = enDirektemeldtStilling.innhold.copy(expires = ZonedDateTime.now(ZoneId.of("Europe/Oslo")).plusDays(10)))
+
+        repository.lagreDirektemeldtStilling(stilling)
+
+        val stillingerForDeaktivering = repository.hentStillingerForDeaktivering()
+
+        assertEquals(0, stillingerForDeaktivering.size)
+    }
+
+    @Test
+    fun `Skal ikke finne noen stillinger hvis det ikke er noen som skal aktiveres`() {
+        val stilling = enDirektemeldtStilling.copy(innhold = enDirektemeldtStilling.innhold.copy(expires = ZonedDateTime.now(ZoneId.of("Europe/Oslo")).plusDays(10)))
+
+        repository.lagreDirektemeldtStilling(stilling)
+
+        val stillingerForAktivering = repository.hentStillingerForAktivering()
+
+        assertEquals(0, stillingerForAktivering.size)
     }
 
     @Test
