@@ -77,6 +77,8 @@ spec:
       value: "prod-gcp:toi:rekrutteringsbistand-kandidatvarsel-api"
     - name: REKRUTTERINGSBISTAND_STILLING_INDEKSER_AZP_NAME
       value: "prod-gcp:toi:rekrutteringsbistand-stilling-indekser"
+    - name: TOI_STILLING_INDEKSER_AZP_NAME
+      value: "prod-gcp:toi:toi-stilling-indekser"
     - name: KAFKA_RAPID_TOPIC
       value: toi.rapid-1
     - name: KAFKA_CONSUMER_GROUP_ID

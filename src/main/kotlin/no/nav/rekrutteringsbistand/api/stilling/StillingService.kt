@@ -125,6 +125,7 @@ class StillingService(
         return arbeidsplassenKlient.slettStilling(stillingsId)
     }
 
+    @Transactional
     fun lagreDirektemeldtStilling(stillingsId: String) {
         val stilling = arbeidsplassenKlient.hentStilling(stillingsId, true)
 
