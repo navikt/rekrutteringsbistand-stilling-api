@@ -129,4 +129,11 @@ class DirektemeldtStillingRepositoryTest {
 
         assertEquals(0, stillingerForAktivering.size)
     }
+
+    @Test
+    fun `Skal returnere tom liste hvis det ikke er noen direktemeldte stillinger i tabellen`() {
+        val direktemeldteStillinger = repository.hentAlleDirektemeldteStillinger()
+
+        assertEquals(0, direktemeldteStillinger.size)
+    }
 }

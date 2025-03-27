@@ -125,6 +125,7 @@ class StillingService(
         return arbeidsplassenKlient.slettStilling(stillingsId)
     }
 
+    @Transactional
     fun lagreDirektemeldtStilling(stillingsId: String) {
         val stilling = arbeidsplassenKlient.hentStilling(stillingsId, true)
 
@@ -140,5 +141,13 @@ class StillingService(
             status = stilling.status
         )
         direktemeldtStillingRepository.lagreDirektemeldtStilling(direktemeldtStilling)
+    }
+
+    fun hentDirektemeldtStilling(stillingsId: String): DirektemeldtStilling {
+        return direktemeldtStillingRepository.hentDirektemeldtStilling(stillingsId)
+    }
+
+    fun hentAlleDirektemeldteStillinger(): List<DirektemeldtStilling> {
+        return direktemeldtStillingRepository.hentAlleDirektemeldteStillinger()
     }
 }

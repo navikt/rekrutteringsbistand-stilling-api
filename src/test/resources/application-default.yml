@@ -37,3 +37,4 @@ external:
 rekrutteringsbistand.stilling.indekser.azp-name: local:toi:stilling-indekser
 vis-stilling.azp-name: local:toi:vis-stilling
 kandidatvarsel.azp-name: local:toi:kandidatvarsel
+toi.stilling.indekser.azp-name: local:toi:toi-stilling-indekser
