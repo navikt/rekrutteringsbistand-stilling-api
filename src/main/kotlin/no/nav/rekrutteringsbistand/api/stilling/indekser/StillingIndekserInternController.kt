@@ -35,7 +35,7 @@ class StillingIndekserInternController(
         val packet = JsonMessage.newMessage(eventName = "direktemeldtStillingRepubliser")
 
         packet["stilling"] = enStilling.stilling
-        packet["stillingsinfo"] = stillingsinfoService.hentForStilling(stillingId = Stillingsid(uuid)) ?: ""
+        packet["stillingsinfo"] = stillingsinfoService.hentForStilling(stillingId = Stillingsid(uuid))?.asStillingsinfoDto() ?: ""
         packet["stillingsId"] = uuid.toString()
 
         packet["direktemeldtStilling"] = stillingService.hentDirektemeldtStilling(uuid.toString())
@@ -44,5 +44,4 @@ class StillingIndekserInternController(
 
         return ResponseEntity.ok("Stilling $uuid er lagt på rapid")
     }
-
 }
