@@ -33,20 +33,11 @@ class StillingIndekserInternController(
         } catch (e: Exception) {
             return ResponseEntity("Fikk ikke til å konvertere til uuid", HttpStatus.BAD_REQUEST)
         }
-        val enStilling = stillingService.hentRekrutteringsbistandStilling(uuid.toString(), true)
         val packet = JsonMessage.newMessage(eventName = "direktemeldtStillingRepubliser")
 
-        packet["stilling"] = enStilling.stilling
-        packet["stillingsinfo"] =
-            stillingsinfoService.hentForStilling(stillingId = Stillingsid(uuid))?.asStillingsinfoDto() ?: JsonNodeFactory.instance.nullNode()
-//
-//            StillingsinfoDto(
-//            stillingsid = uuid.toString(),
-//            stillingsinfoid = "",
-//            eierNavident = null,
-//            eierNavn = null,
-//            stillingskategori = null
-// )
+        val stillingsinfoDto: StillingsinfoDto? = stillingsinfoService.hentForStilling(stillingId = Stillingsid(uuid))?.asStillingsinfoDto()
+
+        packet["stillingsinfo"] = stillingsinfoDto ?: JsonNodeFactory.instance.nullNode()
         packet["stillingsId"] = uuid.toString()
         packet["direktemeldtStilling"] = stillingService.hentDirektemeldtStilling(uuid.toString())
 

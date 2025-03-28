@@ -1,5 +1,6 @@
 package no.nav.rekrutteringsbistand.api.stilling.indekser
 
+import com.fasterxml.jackson.databind.node.JsonNodeFactory
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import no.nav.rekrutteringsbistand.api.autorisasjon.AuthorizedPartyUtils
 import no.nav.rekrutteringsbistand.api.hendelser.RapidApplikasjon
@@ -32,15 +33,15 @@ class StillingIndekserController(
         val stillinger = stillingService.hentAlleDirektemeldteStillinger()
 
         stillinger.forEach { stilling ->
-            val rekrutteringsbistandStilling = stillingService.hentRekrutteringsbistandStilling(stilling.stillingsid.toString(), true)
             val packet = JsonMessage.newMessage(eventName = "direktemeldtStillingRepubliser")
-            packet["stilling"] = rekrutteringsbistandStilling.stilling
-            packet["stillingsinfo"] = stillingsinfoService.hentForStilling(stillingId = Stillingsid(rekrutteringsbistandStilling.stilling.uuid)) ?: ""
-            packet["stillingsId"] = rekrutteringsbistandStilling.stilling.uuid
-            packet["direktemeldtStilling"] = stillingService.hentDirektemeldtStilling(rekrutteringsbistandStilling.stilling.uuid)
-            rapidApplikasjon.publish(Stillingsid(rekrutteringsbistandStilling.stilling.uuid), packet)
+            val stillingsinfo = stillingsinfoService.hentForStilling(stillingId = Stillingsid(stilling.stillingsid))?.asStillingsinfoDto()
+
+            packet["stillingsinfo"] = stillingsinfo ?: JsonNodeFactory.instance.nullNode()
+            packet["stillingsId"] = stilling.stillingsid
+            packet["direktemeldtStilling"] = stillingService.hentDirektemeldtStilling(stilling.stillingsid.toString())
+            rapidApplikasjon.publish(Stillingsid(stilling.stillingsid), packet)
         }
 
-        return ResponseEntity.ok("Stillinger er lagt på rapid")
+        return ResponseEntity.ok("${stillinger.size} stillinger er lagt på rapid")
     }
 }
