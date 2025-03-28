@@ -1,5 +1,6 @@
 package no.nav.rekrutteringsbistand.api.stilling.indekser
 
+import com.fasterxml.jackson.databind.node.JsonNodeFactory
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import no.nav.rekrutteringsbistand.api.hendelser.RapidApplikasjon
 import no.nav.rekrutteringsbistand.api.stilling.StillingService
@@ -36,13 +37,16 @@ class StillingIndekserInternController(
         val packet = JsonMessage.newMessage(eventName = "direktemeldtStillingRepubliser")
 
         packet["stilling"] = enStilling.stilling
-        packet["stillingsinfo"] = stillingsinfoService.hentForStilling(stillingId = Stillingsid(uuid))?.asStillingsinfoDto() ?: StillingsinfoDto(
-            stillingsid = uuid.toString(),
-            stillingsinfoid = "",
-            eierNavident = null,
-            eierNavn = null,
-            stillingskategori = null
-        )
+        packet["stillingsinfo"] =
+            stillingsinfoService.hentForStilling(stillingId = Stillingsid(uuid))?.asStillingsinfoDto() ?: JsonNodeFactory.instance.nullNode()
+//
+//            StillingsinfoDto(
+//            stillingsid = uuid.toString(),
+//            stillingsinfoid = "",
+//            eierNavident = null,
+//            eierNavn = null,
+//            stillingskategori = null
+// )
         packet["stillingsId"] = uuid.toString()
         packet["direktemeldtStilling"] = stillingService.hentDirektemeldtStilling(uuid.toString())
 
