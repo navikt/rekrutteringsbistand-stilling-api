@@ -23,8 +23,11 @@ class AuthorizedPartyUtils(
     @Value("\${kandidatvarsel.azp-name}")
     private val kandidatvarselAzpName: String = ""
 
+    @Value("\${toi.stilling.indekser.azp-name}")
+    private val toiStillingIndekserAzpName: String = ""
+
     fun kallKommerFraStillingIndekser(): Boolean {
-        return authorizedPartyName() == stillingIndekserAzpName
+        return (authorizedPartyName() == stillingIndekserAzpName) || (authorizedPartyName() == toiStillingIndekserAzpName)
     }
 
     fun kallKommerFraVisStilling(): Boolean {

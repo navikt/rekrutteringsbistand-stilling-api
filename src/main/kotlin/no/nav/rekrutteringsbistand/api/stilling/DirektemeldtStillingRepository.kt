@@ -77,6 +77,11 @@ class DirektemeldtStillingRepository(private val namedJdbcTemplate: NamedParamet
         return direktemeldtStilling
     }
 
+    fun hentAlleDirektemeldteStillinger() : List<DirektemeldtStilling> {
+        val sql = "select stillingsid, innhold, opprettet, opprettet_av, sist_endret, sist_endret_av, status from $DIREKTEMELDT_STILLING_TABELL"
+        return namedJdbcTemplate.query(sql, DirektemeldtStillingRowMapper()).filterNotNull()
+    }
+
     fun hentStillingerForAktivering() : List<DirektemeldtStilling> {
         // Henter alle stillinger som har status INACTIVE og hvor published er i løpet av de siste 24 timer, expires er fram i tid, admminstatus er DONE og publishedByAdmin er satt
         val sql = """

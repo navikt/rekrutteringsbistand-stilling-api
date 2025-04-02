@@ -11,10 +11,10 @@ import no.nav.rekrutteringsbistand.api.autorisasjon.AuthorizedPartyUtils
 import no.nav.rekrutteringsbistand.api.autorisasjon.Rolle
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsid
-import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsinfo
 import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoService
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingskategori
 import org.springframework.http.HttpStatus
+import org.springframework.transaction.annotation.Transactional
 
 
 @RestController
@@ -68,6 +68,7 @@ class StillingController(private val stillingsinfoService: StillingsinfoService,
 
     // Endepunkt som kan brukes i rekrutteringsbistand-stilling-indekser
     @PostMapping("/rekrutteringsbistandstilling/lagre")
+    @Transactional
     fun lagreStilling(@RequestBody stillingsId: String) : ResponseEntity<String> {
         if (!authorizedPartyUtils.kallKommerFraStillingIndekser()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
