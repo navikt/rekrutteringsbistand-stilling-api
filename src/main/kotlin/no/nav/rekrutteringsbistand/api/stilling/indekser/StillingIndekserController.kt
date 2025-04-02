@@ -36,18 +36,19 @@ class StillingIndekserController(
             val stillinger = stillingService.hentAlleDirektemeldteStillinger()
 
             stillinger.forEach { stilling ->
+
                 val packet = JsonMessage.newMessage(eventName = "direktemeldtStillingRepubliser")
                 val stillingsinfo = stillingsinfoService.hentForStilling(stillingId = Stillingsid(stilling.stillingsid))?.asStillingsinfoDto()
 
                 packet["stillingsinfo"] = stillingsinfo ?: JsonNodeFactory.instance.nullNode()
                 packet["stillingsId"] = stilling.stillingsid
-                packet["direktemeldtStilling"] = stillingService.hentDirektemeldtStilling(stilling.stillingsid.toString())
+                packet["direktemeldtStilling"] = stilling
                 rapidApplikasjon.publish(Stillingsid(stilling.stillingsid), packet)
             }
             log.info("${stillinger.size} stillinger er lagt på rapid")
         }
 
-        log.info("Mottat forespørsel om å legge stillinger på rapid")
-        return ResponseEntity.ok("Mottat forespørsel om å legge stillinger på rapid")
+        log.info("Mottatt forespørsel om å legge stillinger på rapid")
+        return ResponseEntity.ok("Mottatt forespørsel om å legge stillinger på rapid")
     }
 }

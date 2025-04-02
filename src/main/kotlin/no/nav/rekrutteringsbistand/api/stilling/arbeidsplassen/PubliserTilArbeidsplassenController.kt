@@ -40,7 +40,7 @@ class PubliserTilArbeidsplassenController(
 
         rapidApplikasjon.publish(Stillingsid(uuid), packet)
 
-        log.info("Publiserte stilling med stillingsId $stillingsId til rapid")
+        log.info("Publiserte stilling med stillingsId $stillingsId på rapid")
 
         return ResponseEntity("La stilling på rapid", HttpStatus.OK)
     }

@@ -10,7 +10,7 @@
     </root>
 
     <logger name="org.springframework.web" level="WARN"/>
-    <logger name="no.nav.rekrutteringsbistand.api" level="WARN"/>
+    <logger name="no.nav.rekrutteringsbistand.api" level="INFO"/>
     <logger name="no.nav.security" level="WARN"/>
     <logger name="com.github.tomakehurst.wiremock" level="WARN"/>
 </configuration>

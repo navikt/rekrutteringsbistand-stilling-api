@@ -1,4 +1,4 @@
-package no.nav.rekrutteringsbistand.api.stilling.arbeidsplassen
+package no.nav.rekrutteringsbistand.api.stilling.indekser
 
 import no.nav.rekrutteringsbistand.api.Testdata.enDirektemeldtStilling
 import no.nav.rekrutteringsbistand.api.hendelser.RapidApplikasjon
@@ -22,7 +22,7 @@ import java.net.http.HttpResponse
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class PubliserTilArbeidsplassenControllerTest {
+class StillingIndekserInternControllerTest {
 
     @LocalServerPort
     var port = 0
@@ -44,13 +44,11 @@ class PubliserTilArbeidsplassenControllerTest {
 
     @Test
     fun `Stilling blir publisert på rapid når endepunkt blir kalt`() {
-        val enDirektemeldtStilling = enDirektemeldtStilling
-
         whenever(stillingService.hentDirektemeldtStilling(any())).thenReturn(enDirektemeldtStilling)
 
         val body = enDirektemeldtStilling.stillingsid.toString()
         val request = HttpRequest.newBuilder()
-            .uri(URI("$baseUrl/internal/arbeidsplassen/send"))
+            .uri(URI("$baseUrl/internal/stilling/reindekser"))
             .POST(HttpRequest.BodyPublishers.ofString(body))
             .build()
 
