@@ -32,7 +32,7 @@ class StillingIndekserController(
         val stillinger = stillingService.hentAlleDirektemeldteStillinger()
 
         stillinger.forEach { stilling ->
-            val rekrutteringsbistandStilling = stillingService.hentRekrutteringsbistandStilling(stilling.stillingsid.toString(), true)
+            val rekrutteringsbistandStilling = stillingService.hentRekrutteringsbistandStilling(stilling.stillingsId.toString(), true)
             val packet = JsonMessage.newMessage(eventName = "direktemeldtStillingRepubliser")
             packet["stilling"] = rekrutteringsbistandStilling.stilling
             packet["stillingsinfo"] = stillingsinfoService.hentForStilling(stillingId = Stillingsid(rekrutteringsbistandStilling.stilling.uuid)) ?: ""
