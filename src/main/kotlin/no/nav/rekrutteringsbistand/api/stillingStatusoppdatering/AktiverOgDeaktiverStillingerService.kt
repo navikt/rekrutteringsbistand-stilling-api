@@ -29,7 +29,7 @@ class AktiverOgDeaktiverStillingerService(
         val stillingerForDeaktivering  = direktemeldtStillingRepository.hentStillingerForDeaktivering()
         log.info("Fant ${stillingerForDeaktivering.size} stillinger for deaktivering")
         stillingerForDeaktivering.forEach {
-            log.info("Sjekker stilling ${it.stillingsid} med publisert ${it.innhold.published} og expires ${it.innhold.expires}")
+            log.info("Sjekker stilling ${it.stillingsId} med publisert ${it.innhold.published} og expires ${it.innhold.expires}")
 
             if(it.innhold.administration?.status != Status.DONE.toString()) {
                 // Setter administration til done for hvis den ikke er det og har utløpt

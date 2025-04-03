@@ -55,7 +55,7 @@ class StillingIndekserControllerTest {
     fun `Alle stillinger i databasen blir publisert på rapid når endepunkt blir kalt`() {
         val direktemeldtStilling = enDirektemeldtStilling
         val direktemeldtStilling2 = enDirektemeldtStilling.copy(
-            stillingsid = UUID.randomUUID(),
+            stillingsId = UUID.randomUUID(),
             innhold = enDirektemeldtStilling.innhold.copy(title = "Dette er en stilling")
         )
 
@@ -83,10 +83,10 @@ class StillingIndekserControllerTest {
         }
 
         val capturedId = idCaptor.firstValue
-        assertEquals(enDirektemeldtStilling.stillingsid, capturedId.verdi)
+        assertEquals(enDirektemeldtStilling.stillingsId, capturedId.verdi)
 
         val capturedId2 = idCaptor.secondValue
-        assertEquals(direktemeldtStilling2.stillingsid, capturedId2.verdi)
+        assertEquals(direktemeldtStilling2.stillingsId, capturedId2.verdi)
 
         assertEquals(200, response.statusCode())
     }
@@ -95,7 +95,7 @@ class StillingIndekserControllerTest {
     fun `Innsendt stilling blir publisert på rapid når endepunkt blir kalt`() {
         whenever(stillingService.hentDirektemeldtStilling(any())).thenReturn(enDirektemeldtStilling)
 
-        val uuid = enDirektemeldtStilling.stillingsid.toString()
+        val uuid = enDirektemeldtStilling.stillingsId.toString()
         val request = HttpRequest.newBuilder()
             .uri(URI("$baseUrl/reindekser/stilling/$uuid"))
             .POST(HttpRequest.BodyPublishers.noBody())
@@ -106,7 +106,7 @@ class StillingIndekserControllerTest {
         verify(rapidApp).publish(idCaptor.capture(), any())
 
         val capturedId = idCaptor.firstValue
-        assertEquals(enDirektemeldtStilling.stillingsid, capturedId.verdi)
+        assertEquals(enDirektemeldtStilling.stillingsId, capturedId.verdi)
         assertEquals(200, response.statusCode() )
     }
 }

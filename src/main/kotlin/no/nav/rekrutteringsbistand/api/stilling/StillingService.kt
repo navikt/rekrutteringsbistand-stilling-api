@@ -129,16 +129,17 @@ class StillingService(
     fun lagreDirektemeldtStilling(stillingsId: String) {
         val stilling = arbeidsplassenKlient.hentStilling(stillingsId, true)
 
-        val direktemeldtStillingBlob = stilling.toDirektemeldtStillingBlob()
+        val direktemeldtStillingInnhold = stilling.toDirektemeldtStillingInnhold()
 
         val direktemeldtStilling = DirektemeldtStilling(
             UUID.fromString(stillingsId),
-            direktemeldtStillingBlob,
+            direktemeldtStillingInnhold,
             opprettet = stilling.created.atZone(ZoneId.of("Europe/Oslo")),
             opprettetAv = stilling.createdBy,
             sistEndretAv = stilling.updatedBy,
             sistEndret = stilling.updated.atZone(ZoneId.of("Europe/Oslo")),
-            status = stilling.status
+            status = stilling.status,
+            annonseId = null
         )
         direktemeldtStillingRepository.lagreDirektemeldtStilling(direktemeldtStilling)
     }

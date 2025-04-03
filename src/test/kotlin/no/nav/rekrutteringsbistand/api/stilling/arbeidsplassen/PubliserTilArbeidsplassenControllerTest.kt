@@ -48,7 +48,7 @@ class PubliserTilArbeidsplassenControllerTest {
 
         whenever(stillingService.hentDirektemeldtStilling(any())).thenReturn(enDirektemeldtStilling)
 
-        val uuid = enDirektemeldtStilling.stillingsid.toString()
+        val uuid = enDirektemeldtStilling.stillingsId.toString()
         val request = HttpRequest.newBuilder()
             .uri(URI("$baseUrl/arbeidsplassen/publiser/$uuid"))
             .POST(HttpRequest.BodyPublishers.noBody())
@@ -59,7 +59,7 @@ class PubliserTilArbeidsplassenControllerTest {
         verify(rapidApp).publish(idCaptor.capture(), any())
 
         val capturedId = idCaptor.firstValue
-        assertEquals(enDirektemeldtStilling.stillingsid, capturedId.verdi)
+        assertEquals(enDirektemeldtStilling.stillingsId, capturedId.verdi)
         assertEquals(200, response.statusCode() )
     }
 }
