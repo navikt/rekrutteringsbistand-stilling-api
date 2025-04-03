@@ -8,6 +8,7 @@ import no.nav.rekrutteringsbistand.api.support.log
 import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -16,15 +17,15 @@ import java.util.UUID
 
 
 @RestController
-@RequestMapping("/internal/arbeidsplassen")
+@RequestMapping("/arbeidsplassen")
 @Unprotected
 class PubliserTilArbeidsplassenController(
     val stillingService: StillingService,
     val rapidApplikasjon: RapidApplikasjon
 ) {
 
-    @PostMapping("/send")
-    fun publiserTilRapid(@RequestBody stillingsId: String): ResponseEntity<String> {
+    @PostMapping("/publiser/{stillingsId}")
+    fun publiserTilRapid(@PathVariable stillingsId: String): ResponseEntity<String> {
         val uuid: UUID
         try {
             uuid = UUID.fromString(stillingsId)

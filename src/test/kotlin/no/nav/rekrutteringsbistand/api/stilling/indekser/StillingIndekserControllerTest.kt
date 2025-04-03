@@ -6,6 +6,7 @@ import no.nav.rekrutteringsbistand.api.hendelser.RapidApplikasjon
 import no.nav.rekrutteringsbistand.api.stilling.StillingService
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsid
 import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoService
+import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -19,10 +20,11 @@ import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
-import java.util.*
+import java.util.concurrent.TimeUnit
+import java.util.UUID
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@TestInstance(TestInstance.Lifecycle.PER_METHOD)
 class StillingIndekserControllerTest {
 
     @LocalServerPort
@@ -50,7 +52,7 @@ class StillingIndekserControllerTest {
     }
 
     @Test
-    fun `Stilling blir publisert på rapid når endepunkt blir kalt`() {
+    fun `Alle stillinger i databasen blir publisert på rapid når endepunkt blir kalt`() {
         val direktemeldtStilling = enDirektemeldtStilling
         val direktemeldtStilling2 = enDirektemeldtStilling.copy(
             stillingsid = UUID.randomUUID(),
@@ -69,15 +71,16 @@ class StillingIndekserControllerTest {
         val token = mockLogin.hentAzureAdMaskinTilMaskinToken("local:toi:toi-stilling-indekser")
 
         val request = HttpRequest.newBuilder()
-            .uri(URI("$baseUrl/stillinger/reindekser"))
+            .uri(URI("$baseUrl/reindekser/stillinger"))
             .header("Authorization", "Bearer $token")
-            .GET()
+            .POST(HttpRequest.BodyPublishers.noBody())
             .build()
 
         val response = HttpClient.newBuilder().build().send(request, HttpResponse.BodyHandlers.ofString())
 
-        Thread.sleep(3000) // Må vente for at tråden skal ha kjørt all koden
-        verify(rapidApp, times(2)).publish(idCaptor.capture(), any())
+        await().atMost(3, TimeUnit.SECONDS).untilAsserted {
+            verify(rapidApp, times(2)).publish(idCaptor.capture(), any())
+        }
 
         val capturedId = idCaptor.firstValue
         assertEquals(enDirektemeldtStilling.stillingsid, capturedId.verdi)
@@ -86,5 +89,24 @@ class StillingIndekserControllerTest {
         assertEquals(direktemeldtStilling2.stillingsid, capturedId2.verdi)
 
         assertEquals(200, response.statusCode())
+    }
+
+    @Test
+    fun `Innsendt stilling blir publisert på rapid når endepunkt blir kalt`() {
+        whenever(stillingService.hentDirektemeldtStilling(any())).thenReturn(enDirektemeldtStilling)
+
+        val uuid = enDirektemeldtStilling.stillingsid.toString()
+        val request = HttpRequest.newBuilder()
+            .uri(URI("$baseUrl/reindekser/stilling/$uuid"))
+            .POST(HttpRequest.BodyPublishers.noBody())
+            .build()
+
+        val response = HttpClient.newBuilder().build().send(request, HttpResponse.BodyHandlers.ofString())
+
+        verify(rapidApp).publish(idCaptor.capture(), any())
+
+        val capturedId = idCaptor.firstValue
+        assertEquals(enDirektemeldtStilling.stillingsid, capturedId.verdi)
+        assertEquals(200, response.statusCode() )
     }
 }

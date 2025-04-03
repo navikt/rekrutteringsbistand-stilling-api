@@ -48,10 +48,10 @@ class PubliserTilArbeidsplassenControllerTest {
 
         whenever(stillingService.hentDirektemeldtStilling(any())).thenReturn(enDirektemeldtStilling)
 
-        val body = enDirektemeldtStilling.stillingsid.toString()
+        val uuid = enDirektemeldtStilling.stillingsid.toString()
         val request = HttpRequest.newBuilder()
-            .uri(URI("$baseUrl/internal/arbeidsplassen/send"))
-            .POST(HttpRequest.BodyPublishers.ofString(body))
+            .uri(URI("$baseUrl/arbeidsplassen/publiser/$uuid"))
+            .POST(HttpRequest.BodyPublishers.noBody())
             .build()
 
         val response = HttpClient.newBuilder().build().send(request, HttpResponse.BodyHandlers.ofString())

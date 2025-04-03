@@ -41,7 +41,7 @@
         <rapids-and-rivers.version>2025010715371736260653.d465d681c420</rapids-and-rivers.version>
         <rapids-and-rivers-api.version>2025.01.10-08.49-9e6f64ad</rapids-and-rivers-api.version>
         <rapids-and-rivers-kafka.version>2024.12.18-11.39-73f8eecb</rapids-and-rivers-kafka.version>
-
+        <awaitility.version>4.3.0</awaitility.version>
         <!-- Tredjeparts -->
         <!--kotlin.version>2.0.20</kotlin.version-->
     </properties>
@@ -216,6 +216,12 @@
             <groupId>org.mockito.kotlin</groupId>
             <artifactId>mockito-kotlin</artifactId>
             <version>${mockito-kotlin.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.awaitility</groupId>
+            <artifactId>awaitility</artifactId>
+            <version>${awaitility.version}</version>
             <scope>test</scope>
         </dependency>
         <!-- Slutt, dependencies relatert til login -->
