@@ -15,4 +15,4 @@ spring_profile: dev
 vis_stilling_azp_name: dev-gcp:toi:vis-stilling
 kandidatvarsel_azp_name: dev-gcp:toi:rekrutteringsbistand-kandidatvarsel-api
 rekrutteringsbistand_stilling_indekser_azp_name: dev-gcp:toi:rekrutteringsbistand-stilling-indekser
-toi-stilling-indekser_azp_name: dev-gcp:toi:rekrutteringsbistand-stilling-indekser
+toi_stilling_indekser_azp_name: dev-gcp:toi:toi-stilling-indekser

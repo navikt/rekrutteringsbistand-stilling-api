@@ -68,7 +68,7 @@ spec:
     - name: SPRING_PROFILES_ACTIVE
       value: {{ spring_profile }}
     - name: VIS_STILLING_AZP_NAME
-      value: {{ vis_stilling_azp_ name }}
+      value: {{ vis_stilling_azp_name }}
     - name: KANDIDATVARSEL_AZP_NAME
       value: {{ kandidatvarsel_azp_name }}
     - name: REKRUTTERINGSBISTAND_STILLING_INDEKSER_AZP_NAME
