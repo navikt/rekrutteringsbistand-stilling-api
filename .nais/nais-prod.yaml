@@ -1,0 +1,19 @@
+ingress: https://rekrutteringsbistand-stilling-api.intern.nav.no
+kafka_pool: nav-prod
+fss_cluster: prod-fss
+min_replicas: 2
+max_replicas: 4
+ad_gruppe_modia_generell_tilgang: ea34edea-1e80-4759-a1d2-fbe696cf1709
+ad_gruppe_jobbsokerrettet: 66b70a6a-3d05-47b3-8b5a-47c681dcd1d5
+ad_gruppe_arbeidsgiverrettet: 46c8e3b2-0469-4740-983f-d8cd2b6e4fee
+ad_gruppe_utvikler: 41080368-439f-4128-858a-afbef876431e
+postgres_tier: db-custom-1-3840
+ad_api_host: pam-ad-api.intern.nav.no
+rekrutteringsbistand_kandidat_api_host: rekrutteringsbistand-kandidat-api.prod-fss-pub.nais.io
+arbeidsmarked_openai_host: arbeidsmarked-prod.openai.azure.com
+spring_profile: prod
+vis_stilling_azp_name: prod-gcp:toi:vis-stilling
+kandidatvarsel_azp_name: prod-gcp:toi:rekrutteringsbistand-kandidatvarsel-api
+rekrutteringsbistand_stilling_indekser_azp_name: prod-gcp:toi:rekrutteringsbistand-stilling-indekser
+toi-stilling-indekser_azp_name: prod-gcp:toi:rekrutteringsbistand-stilling-indekser
+
