@@ -8,6 +8,7 @@ ad_gruppe_jobbsokerrettet: 0dba8374-bf36-4d89-bbba-662447d57b94
 ad_gruppe_arbeidsgiverrettet: 52bc2af7-38d1-468b-b68d-0f3a4de45af2
 ad_gruppe_utvikler: a1749d9a-52e0-4116-bb9f-935c38f6c74a
 postgres_tier: db-f1-micro
+disk_autoresize: false
 ad_api_host: pam-ad-api.intern.dev.nav.no
 rekrutteringsbistand_kandidat_api_host: rekrutteringsbistand-kandidat-api.dev-fss-pub.nais.io
 arbeidsmarked_openai_host: arbeidsmarked-dev.openai.azure.com
@@ -16,3 +17,4 @@ vis_stilling_azp_name: dev-gcp:toi:vis-stilling
 kandidatvarsel_azp_name: dev-gcp:toi:rekrutteringsbistand-kandidatvarsel-api
 rekrutteringsbistand_stilling_indekser_azp_name: dev-gcp:toi:rekrutteringsbistand-stilling-indekser
 toi_stilling_indekser_azp_name: dev-gcp:toi:toi-stilling-indekser
+rekrutteringsbistand_stilling_group_id: rekrutteringsbistand-stilling-rapidconsumer-1

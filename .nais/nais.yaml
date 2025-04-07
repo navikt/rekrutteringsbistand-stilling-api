@@ -26,6 +26,7 @@ spec:
     sqlInstances:
       - type: POSTGRES_16
         tier: {{ postgres_tier }}
+        diskAutoresize:  {{ disk_autoresize }}
         databases:
           - name: rekrutteringsbistand-stilling
   azure:
@@ -78,7 +79,7 @@ spec:
     - name: KAFKA_RAPID_TOPIC
       value: toi.rapid-1
     - name: KAFKA_CONSUMER_GROUP_ID
-      value: rekrutteringsbistand-stilling-rapidconsumer-1
+      value: {{ rekrutteringsbistand_stilling_group_id }}
     - name: KAFKA_RESET_POLICY
       value: "earliest"
     - name: AD_GRUPPE_JOBBSOKERRETTET
