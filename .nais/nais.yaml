@@ -9,7 +9,7 @@ spec:
   image: {{version}}
   port: 9501
   ingresses:
-    - https://rekrutteringsbistand-stilling-api.intern.dev.nav.no
+    - {{ ingress }}
   liveness:
     path: /internal/actuator/health
     initialDelay: 30
@@ -17,15 +17,16 @@ spec:
     path: /internal/actuator/health
     initialDelay: 30
   replicas:
-    max: 1
-    min: 1
+    max: {{ max_replicas }}
+    min: {{ min_replicas }}
   prometheus:
     enabled: true
     path: /internal/actuator/prometheus
   gcp:
     sqlInstances:
       - type: POSTGRES_16
-        tier: db-f1-micro
+        tier: {{ postgres_tier }}
+        diskAutoresize: {{ disk_autoresize }}
         databases:
           - name: rekrutteringsbistand-stilling
   azure:
@@ -37,12 +38,12 @@ spec:
           - NAVident
           - azp_name
         groups:
-          - id: "67a06857-0028-4a90-bf4c-9c9a92c7d733"   # adGruppeModiaGenerellTilgang
-          - id: "0dba8374-bf36-4d89-bbba-662447d57b94"   # adGruppeJobbsøkerrettet
-          - id: "52bc2af7-38d1-468b-b68d-0f3a4de45af2"   # adGruppeArbeidsgiverrettet
-          - id: "a1749d9a-52e0-4116-bb9f-935c38f6c74a"   # adGruppeUtvikler
+          - id: {{ ad_gruppe_modia_generell_tilgang }}    # adGruppeModiaGenerellTilgang
+          - id: {{ ad_gruppe_jobbsokerrettet }}           # adGruppeJobbsøkerrettet
+          - id: {{ ad_gruppe_arbeidsgiverrettet }}        # adGruppeArbeidsgiverrettet
+          - id: {{ ad_gruppe_utvikler }}                  # adGruppeUtvikler
   kafka:
-    pool: nav-dev
+    pool: {{ kafka_pool }}
   secureLogs:
     enabled: true
   leaderElection: true
@@ -50,49 +51,40 @@ spec:
     inbound:
       rules:
         - application: vis-stilling
-          namespace: toi
-          cluster: dev-gcp
         - application: rekrutteringsbistand-stilling-indekser
-          cluster: dev-gcp
-        - application: rekrutteringsbistand-container
-          cluster: dev-gcp
         - application: rekrutteringsbistand
-          cluster: dev-gcp
         - application: rekrutteringsbistand-frontend
-          cluster: dev-gcp
         - application: rekrutteringsbistand-kandidat-api
-          cluster: dev-fss
+          cluster: {{ fss_cluster }}
         - application: rekrutteringsbistand-kandidatvarsel-api
         - application: toi-stilling-indekser
     outbound:
       external:
-        - host: pam-ad-api.intern.dev.nav.no
-        - host: rekrutteringsbistand-kandidat-api.dev-fss-pub.nais.io
-        - host: arbeidsmarked-dev.openai.azure.com
-          ports:
-            - port: 443
+        - host: {{ ad_api_host }}
+        - host: {{ rekrutteringsbistand_kandidat_api_host }}
+        - host: {{ arbeidsmarked_openai_host }}
   envFrom:
     - secret: openai-toi-rekrutteringsbistand-stilling
   env:
     - name: SPRING_PROFILES_ACTIVE
-      value: dev
+      value: {{ spring_profile }}
     - name: VIS_STILLING_AZP_NAME
-      value: "dev-gcp:toi:vis-stilling"
+      value: {{ vis_stilling_azp_name }}
     - name: KANDIDATVARSEL_AZP_NAME
-      value: "dev-gcp:toi:rekrutteringsbistand-kandidatvarsel-api"
+      value: {{ kandidatvarsel_azp_name }}
     - name: REKRUTTERINGSBISTAND_STILLING_INDEKSER_AZP_NAME
-      value: "dev-gcp:toi:rekrutteringsbistand-stilling-indekser"
+      value: {{ rekrutteringsbistand_stilling_indekser_azp_name }}
     - name: TOI_STILLING_INDEKSER_AZP_NAME
-      value: "dev-gcp:toi:toi-stilling-indekser"
+      value: {{ toi_stilling_indekser_azp_name }}
     - name: KAFKA_RAPID_TOPIC
       value: toi.rapid-1
     - name: KAFKA_CONSUMER_GROUP_ID
-      value: rekrutteringsbistand-stilling-rapidconsumer-1
+      value: {{ rekrutteringsbistand_stilling_group_id }}
     - name: KAFKA_RESET_POLICY
       value: "earliest"
     - name: AD_GRUPPE_JOBBSOKERRETTET
-      value: "0dba8374-bf36-4d89-bbba-662447d57b94"
+      value: {{ ad_gruppe_jobbsokerrettet }}
     - name: AD_GRUPPE_ARBEIDSGIVERRETTET
-      value: "52bc2af7-38d1-468b-b68d-0f3a4de45af2"
+      value: {{ ad_gruppe_arbeidsgiverrettet }}
     - name: AD_GRUPPE_UTVIKLER
-      value: "a1749d9a-52e0-4116-bb9f-935c38f6c74a"
+      value: {{ ad_gruppe_utvikler }}

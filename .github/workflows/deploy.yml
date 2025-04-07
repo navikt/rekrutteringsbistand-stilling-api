@@ -29,7 +29,7 @@ jobs:
   deploy-to-dev:
     name: Deploy to dev
     needs: test
-    if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/utvid_direktemeldtStilling_med_annonsenr'
+    if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/fikse_miljofiler'
     runs-on: ubuntu-latest
     outputs:
       image: ${{ steps.docker-build-push.outputs.image }}
@@ -57,7 +57,8 @@ jobs:
         env:
           CLUSTER: dev-gcp
           VAR: version=${{ steps.docker-build-push.outputs.image }}
-          RESOURCE: nais/dev-nais.yaml
+          RESOURCE: .nais/nais.yaml
+          VARS: .nais/nais-dev.yaml
 
   deploy-to-prod:
     name: Deploy to prod
@@ -70,7 +71,8 @@ jobs:
         env:
           CLUSTER: prod-gcp
           VAR: version=${{ needs.deploy-to-dev.outputs.image }}
-          RESOURCE: nais/prod-nais.yaml
+          RESOURCE: .nais/nais.yaml
+          VARS: .nais/nais-prod.yaml
 
   deploy-alerts-prod:
     name: Deploy alerts to prod
@@ -81,7 +83,7 @@ jobs:
       - uses: nais/deploy/actions/deploy@v2
         env:
           CLUSTER: prod-gcp
-          RESOURCE: nais/prod-alerts.yaml
+          RESOURCE: .nais/prod-alerts.yaml
 
   call-trivy-security-scan:
     needs: deploy-to-dev
