@@ -309,7 +309,18 @@ data class DirektemeldtStillingKategori(
     val name: String?,
     val description: String?,
     val parentId: Int?
-)
+) {
+    fun toKategori(): Kategori {
+        return Kategori(
+            id = null,
+            code = code,
+            categoryType = categoryType,
+            name = name,
+            description = description,
+            parentId = parentId
+        )
+    }
+}
 
 data class DirektemeldtStillingAdministration(
     val status: String?,
@@ -317,7 +328,18 @@ data class DirektemeldtStillingAdministration(
     val reportee: String?,
     val remarks: List<String> = ArrayList(),
     val navIdent: String?
-)
+) {
+    fun toAdministration(): Administration {
+        return Administration(
+            id = 0, // hvor kommer denne fra?
+            status = status,
+            comments = comments,
+            reportee = reportee,
+            remarks = remarks,
+            navIdent = navIdent
+        )
+    }
+}
 
 data class DirektemeldtStillingArbeidsgiver(
     val mediaList: List<Media> = ArrayList(),
@@ -331,7 +353,31 @@ data class DirektemeldtStillingArbeidsgiver(
     val publicName: String?,
     val orgform: String?,
     val employees: Int?
-)
+) {
+    fun toArbeidsgiver(): Arbeidsgiver {
+        return Arbeidsgiver(
+            id = null,
+            uuid = null,
+            created = null,
+            createdBy = null,
+            updated = null,
+            updatedBy = null,
+            mediaList = mediaList,
+            contactList = contactList,
+            location = location,
+            locationList = locationList,
+            properties = properties,
+            name = name,
+            orgnr = orgnr,
+            status = null,
+            parentOrgnr = parentOrgnr,
+            publicName = publicName,
+            deactivated = null,
+            orgform = orgform,
+            employees = employees
+        )
+    }
+}
 
 data class DirektemeldtStillingInnhold(
     val title: String,
@@ -365,7 +411,39 @@ data class DirektemeldtStilling(
     val sistEndretAv: String,
     val status: String,
     val annonseId: Long?
-)
+) {
+    fun toStilling(): Stilling {
+        return Stilling(
+            id = annonseId ?: 0,
+            uuid = stillingsId.toString(),
+            created = opprettet.toLocalDateTime(),
+            createdBy = opprettetAv,
+            updated = sistEndret.toLocalDateTime(),
+            updatedBy = sistEndretAv,
+            title = innhold.title,
+            status = status,
+            administration = innhold.administration?.toAdministration(),
+            mediaList = innhold.mediaList,
+            contactList = innhold.contactList,
+            privacy = innhold.privacy,
+            source = innhold.source,
+            medium = innhold.medium,
+            reference = innhold.reference,
+            published = innhold.published?.toLocalDateTime(),
+            expires = innhold.expires?.toLocalDateTime(),
+            employer = innhold.employer?.toArbeidsgiver(),
+            location = innhold.location,
+            locationList = innhold.locationList,
+            categoryList = innhold.categoryList.map { it.toKategori() },
+            properties = innhold.properties,
+            publishedByAdmin = innhold.publishedByAdmin,
+            businessName = innhold.businessName,
+            firstPublished = innhold.firstPublished,
+            deactivatedByExpiry = innhold.deactivatedByExpiry,
+            activationOnPublishingDate = innhold.activationOnPublishingDate
+        )
+    }
+}
 
 enum class Status {
     ACTIVE,

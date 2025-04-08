@@ -62,19 +62,23 @@ class DirektemeldtStillingRepository(private val namedJdbcTemplate: NamedParamet
         namedJdbcTemplate.query(sql, MapSqlParameterSource(params)) {rs -> if (rs.next()) rs.getLong("id") else null}
     }
 
-    fun hentDirektemeldtStilling(stillingsId: String) : DirektemeldtStilling {
+    fun hentDirektemeldtStilling(stillingsId: String) : DirektemeldtStilling? {
         val sql = "select id, stillingsid, innhold, opprettet, opprettet_av, sist_endret, sist_endret_av, status from $DIREKTEMELDT_STILLING_TABELL where $STILLINGSID=:stillingsid ::uuid"
         val params = mapOf("stillingsid" to stillingsId)
 
-        val direktemeldtStilling = namedJdbcTemplate.queryForObject(
+        val direktemeldtStilling = namedJdbcTemplate.query(
             sql, params, DirektemeldtStillingRowMapper()
         )
 
-        if(direktemeldtStilling == null) {
-            throw RuntimeException("Fant ikke direktemeldt stilling")
+        if (direktemeldtStilling.isEmpty()) {
+            log.warn("Fant ikke direktemeldt stilling med id: $stillingsId")
+            return null
         }
 
-        return direktemeldtStilling
+        if (direktemeldtStilling.size > 1) {
+            error("Fant mer enn en direktemeldt stilling med id: $stillingsId (antall: ${direktemeldtStilling.size})")
+        }
+        return direktemeldtStilling[0]
     }
 
     fun hentAlleDirektemeldteStillinger() : List<DirektemeldtStilling> {

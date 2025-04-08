@@ -68,11 +68,11 @@ class DirektemeldtStillingRepositoryTest {
         assertNotNull(hentetStilling1)
         assertNotNull(hentetStilling2)
 
-        assertEquals(hentetStilling1.stillingsId, direktemeldtStilling1.stillingsId)
-        assertEquals(hentetStilling2.stillingsId, direktemeldtStilling2.stillingsId)
+        assertEquals(hentetStilling1?.stillingsId, direktemeldtStilling1.stillingsId)
+        assertEquals(hentetStilling2?.stillingsId, direktemeldtStilling2.stillingsId)
 
-        assertEquals("testnss", hentetStilling1.innhold.title)
-        assertEquals("Stilling 2", hentetStilling2.innhold.title)
+        assertEquals("testnss", hentetStilling1?.innhold?.title)
+        assertEquals("Stilling 2", hentetStilling2?.innhold?.title)
     }
 
     @Test
