@@ -135,6 +135,7 @@ class StillingService(
         log.info("Oppdaterte stilling i databasen med uuid: ${dto.stilling.uuid}")
 
         val oppdatertStilling = arbeidsplassenKlient.oppdaterStilling(stilling, queryString)
+        log.info("Oppdaterte stilling hos Arbeidsplassen med uuid: ${dto.stilling.uuid}")
 
         return OppdaterRekrutteringsbistandStillingDto(
             stilling = oppdatertStilling,
@@ -167,6 +168,7 @@ class StillingService(
 
     @Transactional
     fun lagreDirektemeldtStilling(stillingsId: String) {
+        log.info("Hent stilling fra Arbeidsplassen og lagre til databasen uuid: $stillingsId")
         val stilling = arbeidsplassenKlient.hentStilling(stillingsId, true)
 
         val direktemeldtStillingInnhold = stilling.toDirektemeldtStillingInnhold()
