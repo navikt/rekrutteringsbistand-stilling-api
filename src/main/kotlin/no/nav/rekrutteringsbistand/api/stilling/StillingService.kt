@@ -1,5 +1,10 @@
 package no.nav.rekrutteringsbistand.api.stilling
 
+import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.rekrutteringsbistand.AuditLogg
 import no.nav.rekrutteringsbistand.api.OppdaterRekrutteringsbistandStillingDto
 import no.nav.rekrutteringsbistand.api.RekrutteringsbistandStilling
@@ -41,11 +46,19 @@ class StillingService(
             )
         }
 
-        val stilling = stillingssokProxyClient.hentStilling(stillingsId)
-        log.info("Hentet stilling fra OpenSearch $stillingsId")
+        val objectMapper: ObjectMapper = jacksonObjectMapper().registerModule(JavaTimeModule())
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+            .disable(DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE)
+            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+            .setTimeZone(TimeZone.getTimeZone("Europe/Oslo"))
 
         val arbeidsplassenStilling = arbeidsplassenKlient.hentStilling(stillingsId, somSystembruker)
-        log.info("Hentet stilling fra Arbeidsplassen $stillingsId")
+        //log.info("Hentet stilling fra Arbeidsplassen $stillingsId")
+        log.info("Stilling $stillingsId fra arbeidsplassen ${objectMapper.writeValueAsString(arbeidsplassenStilling)}")
+
+        val stilling = stillingssokProxyClient.hentStilling(stillingsId) // TODO må ta inn somSystembruker, for vis-stilling
+        log.info("Hentet stilling fra OpenSearch $stillingsId")
+
         return RekrutteringsbistandStilling(
             stillingsinfo = stillingsinfo,
             stilling = stilling.copyMedBeregnetTitle(stillingsinfo?.stillingskategori)
