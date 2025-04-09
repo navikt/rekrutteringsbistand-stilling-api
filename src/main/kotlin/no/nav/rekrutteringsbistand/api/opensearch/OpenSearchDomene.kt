@@ -26,7 +26,7 @@ data class OpensSearchResponse(
         reference = _source.stilling.reference,
         published = if(_source.stilling.published.isNullOrBlank()) null else LocalDateTime.parse(_source.stilling.published),
         expires =  if(_source.stilling.expires.isNullOrBlank()) null else LocalDateTime.parse(_source.stilling.expires),
-        employer = _source.stilling.employer.toArbeidsgiver(),
+        employer = _source.stilling.employer?.toArbeidsgiver(),
         locationList = _source.stilling.locations.map(OpenSearchArbeidssted::toGeografi),
         categoryList = emptyList(), // Får aldri noen verdier her uansett fra ekstern-topicet
         publishedByAdmin = _source.stilling.publishedByAdmin,
@@ -44,7 +44,7 @@ data class OpensSearchResponse(
     data class OpenSearchStilling(
         val tittel: String?,
         val properties: Map<String, Any>,
-        val employer: Employer,
+        val employer: Employer?,
         val locations: List<OpenSearchArbeidssted>,
         val contacts: List<OpenSearchContact>,
         val uuid: String,
