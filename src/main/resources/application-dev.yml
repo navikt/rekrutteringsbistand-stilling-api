@@ -1,10 +1,13 @@
 scope:
   forarbeidsplassen: api://dev-gcp.teampam.pam-ad-api/.default
   kandidat-api: api://dev-fss.toi.rekrutteringsbistand-kandidat-api/.default
+  stillingssok-proxy: api://dev-gcp.toi.rekrutteringsbistand-stillingssok-proxy/.default
 
 external:
   pam-ad-api.url: https://pam-ad-api.intern.dev.nav.no/adapi
   kandidatliste-api.url: https://rekrutteringsbistand-kandidat-api.dev-fss-pub.nais.io/rekrutteringsbistand-kandidat-api/rest/veileder/stilling
+
+stillingssok-proxy.url: http://rekrutteringsbistand-stillingssok-proxy/stilling/_doc
 
 spring:
   datasource:

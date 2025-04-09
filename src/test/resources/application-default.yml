@@ -29,10 +29,13 @@ openai:
 scope:
   forarbeidsplassen: placeholder
   kandidat-api: placeholder
+  stillingssok-proxy: placeholder
 
 external:
   pam-ad-api.url: http://localhost:9934
   kandidatliste-api.url: http://localhost:8766/rekrutteringsbistand-kandidat-api/rest/veileder/stilling
+
+stillingssok-proxy.url: http://localhost:9937/stilling/_doc
 
 rekrutteringsbistand.stilling.indekser.azp-name: local:toi:stilling-indekser
 vis-stilling.azp-name: local:toi:vis-stilling

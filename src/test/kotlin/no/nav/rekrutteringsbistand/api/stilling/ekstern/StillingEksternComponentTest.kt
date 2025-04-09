@@ -4,21 +4,24 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.github.tomakehurst.wiremock.client.WireMock.*
-import com.github.tomakehurst.wiremock.junit.WireMockRule
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration
+import com.github.tomakehurst.wiremock.junit5.WireMockExtension
 import no.nav.rekrutteringsbistand.api.TestRepository
 import no.nav.rekrutteringsbistand.api.Testdata.enStilling
 import no.nav.rekrutteringsbistand.api.Testdata.styrk
 import no.nav.rekrutteringsbistand.api.config.MockLogin
 import no.nav.rekrutteringsbistand.api.mockAzureObo
+import no.nav.rekrutteringsbistand.api.opensearch.StillingssokProxyClient
 import no.nav.rekrutteringsbistand.api.stilling.Kategori
 import no.nav.rekrutteringsbistand.api.stilling.Stilling
 import no.nav.rekrutteringsbistand.api.stillingsinfo.*
 import no.nav.rekrutteringsbistand.api.support.toMultiValueMap
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.After
-import org.junit.Rule
-import org.junit.Test
-import org.junit.runner.RunWith
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.extension.RegisterExtension
+import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.context.SpringBootTest
@@ -28,24 +31,29 @@ import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders.*
 import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
-import org.springframework.test.context.junit4.SpringRunner
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import java.util.*
 
-@RunWith(SpringRunner::class)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 internal class StillingEksternComponentTest {
 
     @Value("\${vis-stilling.azp-name}")
     private val uriTilVisStilling: String = "uriTilVisStilling"
 
-    @get:Rule
-    val wiremock = WireMockRule(9934)
+    companion object {
+        @JvmStatic
+        @RegisterExtension
+        val wiremockAzure: WireMockExtension = WireMockExtension.newInstance()
+            .options(WireMockConfiguration.options().port(9954))
+            .build()
 
-    @get:Rule
-    val wiremockKandidatliste = WireMockRule(8766)
-
-    @get:Rule
-    val wiremockAzure = WireMockRule(9954)
+        @JvmStatic
+        @RegisterExtension
+        val wiremock: WireMockExtension = WireMockExtension.newInstance()
+            .options(WireMockConfiguration.options().port(9934))
+            .build()
+    }
 
     @Autowired
     lateinit var mockLogin: MockLogin
@@ -63,11 +71,14 @@ internal class StillingEksternComponentTest {
     @Autowired
     lateinit var testRepository: TestRepository
 
+    @MockitoBean
+    lateinit var stillingssokProxyClient: StillingssokProxyClient
+
     val objectMapper = ObjectMapper()
         .registerModule(JavaTimeModule())
         .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
-    @After
+    @AfterEach
     fun tearDown() {
         testRepository.slettAlt()
     }
@@ -78,6 +89,8 @@ internal class StillingEksternComponentTest {
         mockUtenAuthorization("/b2b/api/v1/ads/${stilling.uuid}", stilling)
         mockAzureObo(wiremockAzure)
         val token = mockLogin.hentAzureAdMaskinTilMaskinToken(uriTilVisStilling)
+
+        whenever(stillingssokProxyClient.hentStilling(stilling.uuid)).thenReturn(stilling)
 
         restTemplate.exchange(
             "$localBaseUrl/rekrutteringsbistand/ekstern/api/v1/stilling/${stilling.uuid}",
@@ -144,6 +157,8 @@ internal class StillingEksternComponentTest {
         mockUtenAuthorization("/b2b/api/v1/ads/${stilling.uuid}", stilling)
         mockAzureObo(wiremockAzure)
         val token = mockLogin.hentAzureAdMaskinTilMaskinToken(uriTilVisStilling)
+
+        whenever(stillingssokProxyClient.hentStilling(stilling.uuid)).thenReturn(stilling)
 
         restTemplate.exchange(
             "$localBaseUrl/rekrutteringsbistand/ekstern/api/v1/stilling/${stilling.uuid}",

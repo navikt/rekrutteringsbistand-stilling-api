@@ -7,6 +7,7 @@ import no.nav.rekrutteringsbistand.api.arbeidsplassen.ArbeidsplassenKlient
 import no.nav.rekrutteringsbistand.api.arbeidsplassen.OpprettStillingDto
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
 import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteKlient
+import no.nav.rekrutteringsbistand.api.opensearch.StillingssokProxyClient
 import no.nav.rekrutteringsbistand.api.stillingsinfo.*
 import no.nav.rekrutteringsbistand.api.support.log
 import org.springframework.stereotype.Service
@@ -23,7 +24,8 @@ class StillingService(
     val tokenUtils: TokenUtils,
     val kandidatlisteKlient: KandidatlisteKlient,
     val arbeidsplassenKlient: ArbeidsplassenKlient,
-    val direktemeldtStillingRepository: DirektemeldtStillingRepository
+    val direktemeldtStillingRepository: DirektemeldtStillingRepository,
+    val stillingssokProxyClient: StillingssokProxyClient
 ) {
     fun hentRekrutteringsbistandStilling(
         stillingsId: String,
@@ -39,7 +41,10 @@ class StillingService(
             )
         }
 
-        val stilling = arbeidsplassenKlient.hentStilling(stillingsId, somSystembruker)
+        val stilling = stillingssokProxyClient.hentStilling(stillingsId)
+        log.info("Hentet stilling fra OpenSearch $stillingsId")
+
+        val arbeidsplassenStilling = arbeidsplassenKlient.hentStilling(stillingsId, somSystembruker)
         log.info("Hentet stilling fra Arbeidsplassen $stillingsId")
         return RekrutteringsbistandStilling(
             stillingsinfo = stillingsinfo,
