@@ -625,6 +625,7 @@ object Testdata {
         				"workday": [
         					"Ukedager"
         				],
+                        "keywords": null,
         				"jobtitle": "Fylkesbarnevernsjef",
         				"positioncount": 1,
         				"engagementtype": "Fast",

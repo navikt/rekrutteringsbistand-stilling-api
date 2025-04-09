@@ -8,7 +8,7 @@ data class OpensSearchResponse(
 ) {
     fun toStilling(): Stilling = Stilling(
         title = _source.stilling.tittel ?: "Stilling uten valgt jobbtittel",
-        properties = _source.stilling.properties.mapValues { it.value.toString() },
+        properties = _source.stilling.properties.mapValues { if(it.value == null) "null" else it.value.toString() },
         businessName = _source.stilling.businessName,
         id = _source.stilling.annonsenr.toLong(),
         uuid = _source.stilling.uuid,
@@ -43,7 +43,7 @@ data class OpensSearchResponse(
 
     data class OpenSearchStilling(
         val tittel: String?,
-        val properties: Map<String, Any>,
+        val properties: Map<String, Any?>,
         val employer: Employer?,
         val locations: List<OpenSearchArbeidssted>,
         val contacts: List<OpenSearchContact>,
