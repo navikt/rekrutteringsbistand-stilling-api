@@ -51,5 +51,10 @@ class StillingssokProxyClientTest {
         val stilling = stillingssokProxyClient.hentStilling("4f7417d0-8678-4b75-9536-ec94cc4aa5bf")
 
         assertEquals("4f7417d0-8678-4b75-9536-ec94cc4aa5bf", stilling.uuid)
+        val expected = """
+           ["Dagtid","Kveld"]
+        """.trimIndent()
+
+        assertEquals(expected, stilling.properties["workhours"])
     }
 }

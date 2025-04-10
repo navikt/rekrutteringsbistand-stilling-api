@@ -52,6 +52,6 @@ class StillingssokProxyClient(
 
         val opensSearchResponse = objectMapper.readValue(response.body(), OpensSearchResponse::class.java)
 
-        return opensSearchResponse.toStilling()
+        return opensSearchResponse.toStilling(objectMapper)
     }
 }

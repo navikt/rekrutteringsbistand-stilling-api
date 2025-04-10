@@ -1,14 +1,21 @@
 package no.nav.rekrutteringsbistand.api.opensearch
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import no.nav.rekrutteringsbistand.api.stilling.*
 import java.time.LocalDateTime
 
 data class OpensSearchResponse(
     val _source: Source
 ) {
-    fun toStilling(): Stilling = Stilling(
+    fun toStilling(objectMapper: ObjectMapper): Stilling = Stilling(
         title = _source.stilling.tittel ?: "Stilling uten valgt jobbtittel",
-        properties = _source.stilling.properties.mapValues { if(it.value == null) "null" else it.value.toString() },
+        properties = _source.stilling.properties.mapValues {
+            when(val value = it.value) {
+                null -> "null"
+                is List<*> -> objectMapper.writeValueAsString(value)
+                else -> value.toString()
+            }
+        },
         businessName = _source.stilling.businessName,
         id = _source.stilling.annonsenr.toLong(),
         uuid = _source.stilling.uuid,
@@ -139,10 +146,6 @@ data class OpensSearchResponse(
             employees = null
         )
     }
-
-    data class Properties(
-        val applicationdue: String?
-    )
 
     data class OpenSearchArbeidssted(
         val address: String?,

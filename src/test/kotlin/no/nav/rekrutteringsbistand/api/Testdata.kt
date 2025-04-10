@@ -619,8 +619,9 @@ object Testdata {
         				"extent": "Heltid",
         				"employerhomepage": "https://nettsted",
         				"workhours": [
-        					"Dagtid"
-        				],
+					        "Dagtid",
+					        "Kveld"
+				        ],
         				"applicationdue": "Snarest",
         				"workday": [
         					"Ukedager"
