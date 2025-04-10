@@ -11,9 +11,11 @@ import no.nav.rekrutteringsbistand.api.stillingsinfo.*
 import no.nav.rekrutteringsbistand.api.support.log
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.Duration
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
+import java.time.temporal.ChronoUnit
 import java.util.*
 
 
@@ -191,7 +193,7 @@ class StillingService(
     }
 
     private fun logDiff(dbStilling: DirektemeldtStilling, arbeidsplassenStilling: Stilling, stillingsId: String) {
-        loggHvisDiff(dbStilling.annonseId, arbeidsplassenStilling.id, "annonseId", stillingsId)
+//        loggHvisDiff(dbStilling.annonseId, arbeidsplassenStilling.id, "annonseId", stillingsId) // todo: denne gir alltid diff nå - finn en løsning for å beholde id'en
         loggHvisDiff(dbStilling.stillingsId.toString(), arbeidsplassenStilling.uuid, "uuid", stillingsId)
         loggHvisDiff(dbStilling.status, arbeidsplassenStilling.status, "status", stillingsId)
         loggHvisDiff(dbStilling.sistEndretAv, arbeidsplassenStilling.updatedBy, "sistEndretAv", stillingsId)
@@ -202,7 +204,7 @@ class StillingService(
         loggHvisDiff(dbStilling.innhold.privacy, arbeidsplassenStilling.privacy, "privacy", stillingsId)
         loggHvisDiff(dbStilling.innhold.reference, arbeidsplassenStilling.reference, "reference", stillingsId)
         loggHvisDiff(dbStilling.innhold.expires?.toLocalDateTime(), arbeidsplassenStilling.expires, "expires", stillingsId)
-        loggHvisDiff(dbStilling.innhold.published?.toLocalDateTime(), arbeidsplassenStilling.published, "published", stillingsId)
+        loggHvisDiffMerEnn5min(dbStilling.innhold.published?.toLocalDateTime(), arbeidsplassenStilling.published, "published", stillingsId)
         loggHvisDiff(dbStilling.innhold.locationList.size, arbeidsplassenStilling.locationList.size, "locationList.size", stillingsId)
         if (dbStilling.innhold.locationList.isNotEmpty() && arbeidsplassenStilling.locationList.isNotEmpty()) {
             loggHvisDiff(dbStilling.innhold.locationList[0], arbeidsplassenStilling.locationList[0], "locationList.size[0]", stillingsId)
@@ -241,6 +243,20 @@ class StillingService(
             log.info("Diff i 'properties.$propertyName' (db: ${dbProperties[propertyName]} / arbeidsplassen: ${arbeidsplassenProperties[propertyName]}) $stillingsId")
         }
     }
+
+    fun loggHvisDiffMerEnn5min(db: LocalDateTime?, arbeidsplassen: LocalDateTime?, propertyName: String, stillingsId: String) {
+        if (db != arbeidsplassen) {
+            if (db != null && arbeidsplassen != null) {
+                val minutesBetween = Duration.between(db, arbeidsplassen).toMinutes()
+                if (minutesBetween > 5) {
+                    log.info("Diff i '$propertyName' of more than 5 minutes (db: $db / arbeidsplassen: $arbeidsplassen) $stillingsId")
+                }
+            } else {
+                log.info("Diff i '$propertyName' (db: $db / arbeidsplassen: $arbeidsplassen) $stillingsId")
+            }
+        }
+    }
+
 
     fun hentDirektemeldtStilling(stillingsId: String): DirektemeldtStilling {
         return direktemeldtStillingRepository.hentDirektemeldtStilling(stillingsId) ?: throw RuntimeException("Fant ikke direktemeldt stilling $stillingsId")
