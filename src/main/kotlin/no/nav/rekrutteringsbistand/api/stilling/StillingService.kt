@@ -112,6 +112,7 @@ class StillingService(
         dto: OppdaterRekrutteringsbistandStillingDto,
         queryString: String?
     ): OppdaterRekrutteringsbistandStillingDto {
+        log.info("Oppdaterer stilling med uuid: ${dto.stilling.uuid}")
         loggEventuellOvertagelse(dto)
 
         val id = Stillingsid(dto.stilling.uuid)
@@ -119,7 +120,8 @@ class StillingService(
 
         val stilling = dto.stilling.copyMedBeregnetTitle(
             stillingskategori = eksisterendeStillingsinfo?.stillingskategori
-        )
+        ).copy(updated = LocalDateTime.now(ZoneId.of("Europe/Oslo")))
+
 
         // TODO: oppdater stilling i db
         direktemeldtStillingRepository.lagreDirektemeldtStilling(
