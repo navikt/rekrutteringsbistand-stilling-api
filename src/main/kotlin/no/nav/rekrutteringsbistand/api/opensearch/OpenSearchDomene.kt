@@ -29,11 +29,11 @@ data class OpensSearchResponse(
         expires =  if(_source.stilling.expires.isNullOrBlank()) null else LocalDateTime.parse(_source.stilling.expires),
         employer = _source.stilling.employer?.toArbeidsgiver(),
         locationList = _source.stilling.locations.map(OpenSearchArbeidssted::toGeografi),
-        categoryList = emptyList(), // Får aldri noen verdier her uansett fra ekstern-topicet
+        categoryList = emptyList(), // Får aldri noen verdier her fra ekstern-topicet
         publishedByAdmin = _source.stilling.publishedByAdmin,
-        firstPublished = null, // Todo, må denne settes?
+        firstPublished = null,
         deactivatedByExpiry = _source.stilling.deactivatedByExpiry,
-        activationOnPublishingDate = null, // Todo, må denne settes?
+        activationOnPublishingDate = null,
         location = null,
     )
 
