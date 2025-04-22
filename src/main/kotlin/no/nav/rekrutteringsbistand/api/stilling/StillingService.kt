@@ -56,7 +56,7 @@ class StillingService(
         //log.info("Hentet stilling fra Arbeidsplassen $stillingsId")
         log.info("Stilling $stillingsId fra arbeidsplassen ${objectMapper.writeValueAsString(arbeidsplassenStilling)}")
 
-        val stilling = stillingssokProxyClient.hentStilling(stillingsId) // TODO må ta inn somSystembruker, for vis-stilling
+        val stilling = stillingssokProxyClient.hentStilling(stillingsId, somSystembruker)
         log.info("Hentet stilling fra OpenSearch $stillingsId")
 
         return RekrutteringsbistandStilling(

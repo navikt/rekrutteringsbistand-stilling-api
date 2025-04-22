@@ -33,8 +33,12 @@ class StillingssokProxyClient(
         .followRedirects(HttpClient.Redirect.ALWAYS)
         .build()
 
-    fun hentStilling(stillingsId: String): Stilling {
-        val token = tokenUtils.hentOBOToken(stillingssokProxyScope)
+    fun hentStilling(stillingsId: String, somSystembruker: Boolean = false): Stilling {
+        val token = if(somSystembruker) {
+            tokenUtils.hentSystemToken(stillingssokProxyScope)
+        } else {
+            tokenUtils.hentOBOToken(stillingssokProxyScope)
+        }
 
         val request = HttpRequest.newBuilder()
             .headers("Authorization", "Bearer $token")

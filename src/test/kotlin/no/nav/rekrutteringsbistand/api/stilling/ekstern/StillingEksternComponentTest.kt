@@ -90,7 +90,7 @@ internal class StillingEksternComponentTest {
         mockAzureObo(wiremockAzure)
         val token = mockLogin.hentAzureAdMaskinTilMaskinToken(uriTilVisStilling)
 
-        whenever(stillingssokProxyClient.hentStilling(stilling.uuid)).thenReturn(stilling)
+        whenever(stillingssokProxyClient.hentStilling(stilling.uuid, true)).thenReturn(stilling)
 
         restTemplate.exchange(
             "$localBaseUrl/rekrutteringsbistand/ekstern/api/v1/stilling/${stilling.uuid}",
@@ -158,7 +158,7 @@ internal class StillingEksternComponentTest {
         mockAzureObo(wiremockAzure)
         val token = mockLogin.hentAzureAdMaskinTilMaskinToken(uriTilVisStilling)
 
-        whenever(stillingssokProxyClient.hentStilling(stilling.uuid)).thenReturn(stilling)
+        whenever(stillingssokProxyClient.hentStilling(stilling.uuid, true)).thenReturn(stilling)
 
         restTemplate.exchange(
             "$localBaseUrl/rekrutteringsbistand/ekstern/api/v1/stilling/${stilling.uuid}",
