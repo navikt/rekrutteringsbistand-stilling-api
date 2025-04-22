@@ -86,7 +86,7 @@ data class Stilling(
             medium = medium,
             reference = reference,
             published = published?.atZone(ZoneId.of("Europe/Oslo")),
-            expires = expires?.atZone(ZoneId.of("Europe/Oslo")) ?: LocalDateTime.now().plusDays(DEFAULT_EXPIRY_DAYS).atZone(ZoneId.of("Europe/Oslo")),
+            expires = hentExpiresMedDefaultVerdiOmIkkeOppgitt(),
             employer = employer?.toDirektemeldtStillingArbeidsgiver(),
             location = location,
             locationList = locationList,
@@ -117,6 +117,25 @@ data class Stilling(
             categoryList.hentTittel(kontekstForLoggmelding = "stillingsId $uuid opprettet $created")
         else
             title
+
+    private fun hentExpiresMedDefaultVerdiOmIkkeOppgitt(): ZonedDateTime {
+        if (expires != null) {
+            return expires.atZone(ZoneId.of("Europe/Oslo"))
+        }
+
+        // Sett expires lik søknadsfrist om den er oppgitt
+        val applicationDue = properties["applicationdue"]
+        if (!applicationDue.isNullOrBlank() && applicationDue.trim().uppercase() != "SNAREST") {
+            try {
+                return LocalDateTime.parse(applicationDue).atZone(ZoneId.of("Europe/Oslo"))
+            } catch (e: Exception) {
+                // Ignore
+            }
+        }
+
+        // Bruk default utløpsdato
+        return LocalDateTime.now().plusDays(DEFAULT_EXPIRY_DAYS).atZone(ZoneId.of("Europe/Oslo"))
+    }
 
     private fun erDirektemeldt(): Boolean = source == "DIR"
 }
