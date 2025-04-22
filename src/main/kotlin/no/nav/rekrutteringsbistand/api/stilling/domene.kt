@@ -42,6 +42,10 @@ data class Stilling(
     val deactivatedByExpiry: Boolean?,
     val activationOnPublishingDate: Boolean?
 ) {
+    companion object {
+        private const val DEFAULT_EXPIRY_DAYS: Long = 30
+    }
+
     fun toKopiertStilling(tokenUtils: TokenUtils): no.nav.rekrutteringsbistand.api.arbeidsplassen.OpprettStillingDto {
         val nyTittel = categoryList.hentTittel("kopi av stillingsId $uuid som ble opprettet $created")
 
@@ -82,7 +86,7 @@ data class Stilling(
             medium = medium,
             reference = reference,
             published = published?.atZone(ZoneId.of("Europe/Oslo")),
-            expires = expires?.atZone(ZoneId.of("Europe/Oslo")),
+            expires = expires?.atZone(ZoneId.of("Europe/Oslo")) ?: LocalDateTime.now().plusDays(DEFAULT_EXPIRY_DAYS).atZone(ZoneId.of("Europe/Oslo")),
             employer = employer?.toDirektemeldtStillingArbeidsgiver(),
             location = location,
             locationList = locationList,
