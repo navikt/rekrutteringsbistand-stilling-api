@@ -95,7 +95,7 @@ class DirektemeldtStillingRepository(private val namedJdbcTemplate: NamedParamet
     }
 
     fun hentAlleDirektemeldteStillinger() : List<DirektemeldtStilling> {
-        val sql = "select $STILLINGSID, $INNHOLD, $OPPRETTET, $OPPRETTET_AV, $SIST_ENDRET, $SIST_ENDRET_AV, $STATUS from $DIREKTEMELDT_STILLING_TABELL"
+        val sql = "select $STILLINGSID, $INNHOLD, $OPPRETTET, $OPPRETTET_AV, $SIST_ENDRET, $SIST_ENDRET_AV, $STATUS, $PUBLISERT, $PUBLISERT_AV_ADMIN, $ADMIN_STATUS, $UTLØPSDATO, $VERSJON from $DIREKTEMELDT_STILLING_TABELL"
         return namedJdbcTemplate.query(sql, DirektemeldtStillingRowMapper()).filterNotNull()
     }
 
