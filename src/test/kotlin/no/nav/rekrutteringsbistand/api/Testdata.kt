@@ -177,8 +177,6 @@ object Testdata {
             source = "DIR",
             medium = "DIR",
             reference = UUID.randomUUID().toString(),
-            published = publishedFor3DagerSiden,
-            expires = ZonedDateTime.now(ZoneId.of("Europe/Oslo")).minusDays(1),
             employer = DirektemeldtStillingArbeidsgiver(
                 name = "Arbeidsgiver 2",
                 mediaList = listOf(),
@@ -196,7 +194,6 @@ object Testdata {
             locationList = listOf(),
             categoryList = listOf(),
             properties = mapOf(),
-            publishedByAdmin = publishedFor3DagerSiden.toString(),
             businessName = "Bedrift no. 2",
             firstPublished = true,
             deactivatedByExpiry = false,
@@ -207,7 +204,11 @@ object Testdata {
         sistEndret = ZonedDateTime.now(ZoneId.of("Europe/Oslo")),
         sistEndretAv = enVeileder.navIdent,
         status = "ACTIVE",
-        annonseId = 1
+        annonseId = 1,
+        utløpsdato = ZonedDateTime.now(ZoneId.of("Europe/Oslo")).minusDays(1),
+        publisert = publishedFor3DagerSiden,
+        publisertAvAdmin = publishedFor3DagerSiden.toString(),
+        adminStatus = "DONE",
     )
 
     val stillingerSomSkalDeaktiveres = listOf(
@@ -228,8 +229,6 @@ object Testdata {
                 source = "DIR",
                 medium = "DIR",
                 reference = UUID.randomUUID().toString(),
-                published = publishedFor3DagerSiden,
-                expires = ZonedDateTime.now(ZoneId.of("Europe/Oslo")).minusDays(1),
                 employer = DirektemeldtStillingArbeidsgiver(
                     name = "Arbeidsgiver 1",
                     mediaList = listOf(),
@@ -247,7 +246,6 @@ object Testdata {
                 locationList = listOf(),
                 categoryList = listOf(),
                 properties = mapOf(),
-                publishedByAdmin = publishedFor3DagerSiden.toString(),
                 businessName = "Bedriften",
                 firstPublished = true,
                 deactivatedByExpiry = false,
@@ -258,7 +256,11 @@ object Testdata {
             sistEndret = ZonedDateTime.now(ZoneId.of("Europe/Oslo")),
             sistEndretAv = enVeileder.navIdent,
             status = "ACTIVE",
-            annonseId = 2
+            annonseId = 2,
+            utløpsdato = ZonedDateTime.now(ZoneId.of("Europe/Oslo")).minusDays(1),
+            publisert = publishedFor3DagerSiden,
+            publisertAvAdmin = publishedFor3DagerSiden.toString(),
+            adminStatus = "DONE"
         ),
         DirektemeldtStilling(
             stillingsId = UUID.randomUUID(),
@@ -277,8 +279,6 @@ object Testdata {
                 source = "DIR",
                 medium = "DIR",
                 reference = UUID.randomUUID().toString(),
-                published = publishedFor3DagerSiden,
-                expires = ZonedDateTime.now(ZoneId.of("Europe/Oslo")).minusDays(1),
                 employer = DirektemeldtStillingArbeidsgiver(
                     name = "Arbeidsgiver 2",
                     mediaList = listOf(),
@@ -296,7 +296,6 @@ object Testdata {
                 locationList = listOf(),
                 categoryList = listOf(),
                 properties = mapOf(),
-                publishedByAdmin = publishedFor3DagerSiden.toString(),
                 businessName = "Bedrift no. 2",
                 firstPublished = true,
                 deactivatedByExpiry = false,
@@ -307,7 +306,11 @@ object Testdata {
             sistEndret = ZonedDateTime.now(ZoneId.of("Europe/Oslo")),
             sistEndretAv = enVeileder.navIdent,
             status = "ACTIVE",
-            annonseId = 3
+            annonseId = 3,
+            utløpsdato = ZonedDateTime.now(ZoneId.of("Europe/Oslo")).minusDays(1),
+            publisert = publishedFor3DagerSiden,
+            publisertAvAdmin = publishedFor3DagerSiden.toString(),
+            adminStatus = "DONE"
         ),
         DirektemeldtStilling(
             stillingsId = UUID.randomUUID(),
@@ -326,8 +329,6 @@ object Testdata {
                 source = "DIR",
                 medium = "DIR",
                 reference = UUID.randomUUID().toString(),
-                published = publishedFor3DagerSiden,
-                expires = ZonedDateTime.now(ZoneId.of("Europe/Oslo")).minusDays(1),
                 employer = DirektemeldtStillingArbeidsgiver(
                     name = "Arbeidsgiver 4",
                     mediaList = listOf(),
@@ -345,7 +346,6 @@ object Testdata {
                 locationList = listOf(),
                 categoryList = listOf(),
                 properties = mapOf(),
-                publishedByAdmin = publishedFor3DagerSiden.toString(),
                 businessName = "Bedrift no. 4",
                 firstPublished = true,
                 deactivatedByExpiry = false,
@@ -356,7 +356,11 @@ object Testdata {
             sistEndret = ZonedDateTime.now(ZoneId.of("Europe/Oslo")),
             sistEndretAv = enVeileder.navIdent,
             status = "ACTIVE",
-            annonseId = 4
+            annonseId = 4,
+            utløpsdato = publishedFor3DagerSiden,
+            publisert = ZonedDateTime.now(ZoneId.of("Europe/Oslo")).minusDays(1),
+            publisertAvAdmin = publishedFor3DagerSiden.toString(),
+            adminStatus = "PENDING"
         )
     )
 
@@ -377,8 +381,6 @@ object Testdata {
             source = "DIR",
             medium = "DIR",
             reference = UUID.randomUUID().toString(),
-            published = publishedFor3DagerSiden,
-            expires = ZonedDateTime.now(ZoneId.of("Europe/Oslo")).plusDays(3),
             employer = DirektemeldtStillingArbeidsgiver(
                 name = "Arbeidsgiver 4",
                 mediaList = listOf(),
@@ -396,7 +398,6 @@ object Testdata {
             locationList = listOf(),
             categoryList = listOf(),
             properties = mapOf(),
-            publishedByAdmin = publishedFor3DagerSiden.toString(),
             businessName = "Bedrift no. 4",
             firstPublished = true,
             deactivatedByExpiry = false,
@@ -407,7 +408,11 @@ object Testdata {
         sistEndret = ZonedDateTime.now(ZoneId.of("Europe/Oslo")),
         sistEndretAv = enVeileder.navIdent,
         status = "ACTIVE",
-        annonseId = 5
+        annonseId = 5,
+        utløpsdato = ZonedDateTime.now(ZoneId.of("Europe/Oslo")).plusDays(3),
+        publisert = publishedFor3DagerSiden,
+        publisertAvAdmin = publishedFor3DagerSiden.toString(),
+        adminStatus = "PENDING"
     )
 
 
@@ -429,8 +434,6 @@ object Testdata {
                 source = "DIR",
                 medium = "DIR",
                 reference = UUID.randomUUID().toString(),
-                published = publishedFor2TimerSiden,
-                expires = ZonedDateTime.now(ZoneId.of("Europe/Oslo")).plusDays(10),
                 employer = DirektemeldtStillingArbeidsgiver(
                     name = "Arbeidsgiver 1",
                     mediaList = listOf(),
@@ -448,7 +451,6 @@ object Testdata {
                 locationList = listOf(),
                 categoryList = listOf(),
                 properties = mapOf(),
-                publishedByAdmin = publishedFor2TimerSiden.toString(),
                 businessName = "Bedriften",
                 firstPublished = true,
                 deactivatedByExpiry = false,
@@ -459,7 +461,11 @@ object Testdata {
             sistEndret = ZonedDateTime.now(ZoneId.of("Europe/Oslo")),
             sistEndretAv = enVeileder.navIdent,
             status = "INACTIVE",
-            annonseId = 6
+            annonseId = 6,
+            utløpsdato = ZonedDateTime.now(ZoneId.of("Europe/Oslo")).plusDays(10),
+            publisert = publishedFor2TimerSiden,
+            publisertAvAdmin = publishedFor2TimerSiden.toString(),
+            adminStatus = "DONE"
         ),
         DirektemeldtStilling(
             stillingsId = UUID.randomUUID(),
@@ -478,8 +484,6 @@ object Testdata {
                 source = "DIR",
                 medium = "DIR",
                 reference = UUID.randomUUID().toString(),
-                published = publishedFor2TimerSiden,
-                expires = ZonedDateTime.now(ZoneId.of("Europe/Oslo")).plusDays(10),
                 employer = DirektemeldtStillingArbeidsgiver(
                     name = "Arbeidsgiver 2",
                     mediaList = listOf(),
@@ -497,7 +501,6 @@ object Testdata {
                 locationList = listOf(),
                 categoryList = listOf(),
                 properties = mapOf(),
-                publishedByAdmin = publishedFor2TimerSiden.toString(),
                 businessName = "Bedrift no. 2",
                 firstPublished = true,
                 deactivatedByExpiry = false,
@@ -508,7 +511,11 @@ object Testdata {
             sistEndret = ZonedDateTime.now(ZoneId.of("Europe/Oslo")),
             sistEndretAv = enVeileder.navIdent,
             status = "INACTIVE",
-            annonseId = 7
+            annonseId = 7,
+            utløpsdato = ZonedDateTime.now(ZoneId.of("Europe/Oslo")).plusDays(10),
+            publisert = publishedFor2TimerSiden,
+            publisertAvAdmin = publishedFor2TimerSiden.toString(),
+            adminStatus = "DONE"
         )
     )
 
@@ -529,8 +536,6 @@ object Testdata {
             source = "DIR",
             medium = "DIR",
             reference = UUID.randomUUID().toString(),
-            published = publishedFor2TimerSiden,
-            expires = ZonedDateTime.now(ZoneId.of("Europe/Oslo")).plusDays(10),
             employer = DirektemeldtStillingArbeidsgiver(
                 name = "Arbeidsgiver 2",
                 mediaList = listOf(),
@@ -548,7 +553,6 @@ object Testdata {
             locationList = listOf(),
             categoryList = listOf(),
             properties = mapOf(),
-            publishedByAdmin = publishedFor2TimerSiden.toString(),
             businessName = "Bedrift no. 2",
             firstPublished = true,
             deactivatedByExpiry = false,
@@ -559,7 +563,11 @@ object Testdata {
         sistEndret = ZonedDateTime.now(ZoneId.of("Europe/Oslo")),
         sistEndretAv = enVeileder.navIdent,
         status = "INACTIVE",
-        annonseId = 8
+        annonseId = 8,
+        utløpsdato = ZonedDateTime.now(ZoneId.of("Europe/Oslo")).plusDays(10),
+        publisert = publishedFor2TimerSiden,
+        publisertAvAdmin = publishedFor2TimerSiden.toString(),
+        adminStatus = "PENDING"
     )
 
     val esResponse = """ 

@@ -17,9 +17,11 @@ import no.nav.rekrutteringsbistand.api.stillingsinfo.*
 import no.nav.rekrutteringsbistand.api.support.log
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.Duration
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
+import java.time.temporal.ChronoUnit
 import java.util.*
 
 
@@ -82,13 +84,17 @@ class StillingService(
         direktemeldtStillingRepository.lagreDirektemeldtStilling(
             DirektemeldtStilling(
                 stillingsId = stillingsId.verdi,
-                innhold = opprettStilling.toDirektemeldtStillingInnhold(stillingsId, opprettet),
+                innhold = opprettStilling.toDirektemeldtStillingInnhold(stillingsId),
                 opprettet = opprettet,
                 opprettetAv = opprettStilling.createdBy,
                 sistEndretAv = opprettStilling.updatedBy,
                 sistEndret = opprettet,
                 status = "INACTIVE",
-                annonseId = null
+                annonseId = null,
+                utløpsdato = null,
+                publisert = opprettet,
+                publisertAvAdmin = null,
+                adminStatus = opprettStilling.administration.status
             )
         )
         log.info("Opprettet stilling i databasen med uuid: ${opprettetStillingArbeidsplassen.uuid}")
@@ -128,6 +134,7 @@ class StillingService(
         dto: OppdaterRekrutteringsbistandStillingDto,
         queryString: String?
     ): OppdaterRekrutteringsbistandStillingDto {
+        log.info("Oppdaterer stilling med uuid: ${dto.stilling.uuid}")
         loggEventuellOvertagelse(dto)
 
         val id = Stillingsid(dto.stilling.uuid)
@@ -135,7 +142,8 @@ class StillingService(
 
         val stilling = dto.stilling.copyMedBeregnetTitle(
             stillingskategori = eksisterendeStillingsinfo?.stillingskategori
-        )
+        ).copy(updated = LocalDateTime.now(ZoneId.of("Europe/Oslo")))
+
 
         // TODO: oppdater stilling i db
         direktemeldtStillingRepository.lagreDirektemeldtStilling(
@@ -147,12 +155,18 @@ class StillingService(
                 sistEndretAv = stilling.updatedBy,
                 sistEndret = stilling.updated.atZone(ZoneId.of("Europe/Oslo")),
                 status = stilling.status,
-                annonseId = dto.stilling.id
+                annonseId = dto.stilling.id,
+                utløpsdato = dto.stilling.hentExpiresMedDefaultVerdiOmIkkeOppgitt(),
+                publisert = dto.stilling.published?.atZone(ZoneId.of("Europe/Oslo")),
+                publisertAvAdmin = dto.stilling.publishedByAdmin,
+                adminStatus = dto.stilling.administration?.status
             )
         )
         log.info("Oppdaterte stilling i databasen med uuid: ${dto.stilling.uuid}")
 
-        val oppdatertStilling = arbeidsplassenKlient.oppdaterStilling(stilling, queryString)
+        // Hent stilling før den oppdateres, da det er en OptimisticLocking strategi på 'updated' feltet hos Arbeidsplassen
+        val existerendeStilling = arbeidsplassenKlient.hentStilling(dto.stilling.uuid)
+        val oppdatertStilling = arbeidsplassenKlient.oppdaterStilling(stilling.copy(updated = existerendeStilling.updated), queryString)
         log.info("Oppdaterte stilling hos Arbeidsplassen med uuid: ${dto.stilling.uuid}")
 
         return OppdaterRekrutteringsbistandStillingDto(
@@ -187,22 +201,96 @@ class StillingService(
     @Transactional
     fun lagreDirektemeldtStilling(stillingsId: String) {
         log.info("Hent stilling fra Arbeidsplassen og lagre til databasen uuid: $stillingsId")
-        val stilling = arbeidsplassenKlient.hentStilling(stillingsId, true)
+        val arbeidsplassenStilling = arbeidsplassenKlient.hentStilling(stillingsId, true)
 
-        val direktemeldtStillingInnhold = stilling.toDirektemeldtStillingInnhold()
+        direktemeldtStillingRepository.hentDirektemeldtStilling(stillingsId)?.let { dbStilling ->
+            logDiff(dbStilling, arbeidsplassenStilling, stillingsId)
+        }
+
+        val direktemeldtStillingInnhold = arbeidsplassenStilling.toDirektemeldtStillingInnhold()
 
         val direktemeldtStilling = DirektemeldtStilling(
             UUID.fromString(stillingsId),
             direktemeldtStillingInnhold,
-            opprettet = stilling.created.atZone(ZoneId.of("Europe/Oslo")),
-            opprettetAv = stilling.createdBy,
-            sistEndretAv = stilling.updatedBy,
-            sistEndret = stilling.updated.atZone(ZoneId.of("Europe/Oslo")),
-            status = stilling.status,
-            annonseId = null
+            opprettet = arbeidsplassenStilling.created.atZone(ZoneId.of("Europe/Oslo")),
+            opprettetAv = arbeidsplassenStilling.createdBy,
+            sistEndretAv = arbeidsplassenStilling.updatedBy,
+            sistEndret = arbeidsplassenStilling.updated.atZone(ZoneId.of("Europe/Oslo")),
+            status = arbeidsplassenStilling.status,
+            annonseId = null,
+            utløpsdato = arbeidsplassenStilling.hentExpiresMedDefaultVerdiOmIkkeOppgitt(),
+            publisert = arbeidsplassenStilling.published?.atZone(ZoneId.of("Europe/Oslo")),
+            publisertAvAdmin = arbeidsplassenStilling.publishedByAdmin,
+            adminStatus = arbeidsplassenStilling.administration?.status
         )
         direktemeldtStillingRepository.lagreDirektemeldtStilling(direktemeldtStilling)
     }
+
+    private fun logDiff(dbStilling: DirektemeldtStilling, arbeidsplassenStilling: Stilling, stillingsId: String) {
+//        loggHvisDiff(dbStilling.annonseId, arbeidsplassenStilling.id, "annonseId", stillingsId) // todo: denne gir alltid diff nå - finn en løsning for å beholde id'en
+        loggHvisDiff(dbStilling.stillingsId.toString(), arbeidsplassenStilling.uuid, "uuid", stillingsId)
+        loggHvisDiff(dbStilling.status, arbeidsplassenStilling.status, "status", stillingsId)
+        loggHvisDiff(dbStilling.sistEndretAv, arbeidsplassenStilling.updatedBy, "sistEndretAv", stillingsId)
+        loggHvisDiff(dbStilling.opprettetAv, arbeidsplassenStilling.createdBy, "opprettetAv", stillingsId)
+        loggHvisDiff(dbStilling.innhold.source, arbeidsplassenStilling.source, "source", stillingsId)
+        loggHvisDiff(dbStilling.innhold.title, arbeidsplassenStilling.title, "title", stillingsId)
+        loggHvisDiff(dbStilling.innhold.medium, arbeidsplassenStilling.medium, "medium", stillingsId)
+        loggHvisDiff(dbStilling.innhold.privacy, arbeidsplassenStilling.privacy, "privacy", stillingsId)
+        loggHvisDiff(dbStilling.innhold.reference, arbeidsplassenStilling.reference, "reference", stillingsId)
+        loggHvisDiff(dbStilling.utløpsdato?.toLocalDateTime(), arbeidsplassenStilling.expires, "expires", stillingsId)
+        loggHvisDiffMerEnn5min(dbStilling.publisert?.toLocalDateTime(), arbeidsplassenStilling.published, "published", stillingsId)
+        loggHvisDiff(dbStilling.innhold.locationList.size, arbeidsplassenStilling.locationList.size, "locationList.size", stillingsId)
+        if (dbStilling.innhold.locationList.isNotEmpty() && arbeidsplassenStilling.locationList.isNotEmpty()) {
+            loggHvisDiff(dbStilling.innhold.locationList[0], arbeidsplassenStilling.locationList[0], "locationList.size[0]", stillingsId)
+        }
+        loggHvisDiff(dbStilling.innhold.contactList.size, arbeidsplassenStilling.contactList.size, "locationList.size", stillingsId)
+        loggHvisDiff(dbStilling.innhold.mediaList.size, arbeidsplassenStilling.mediaList.size, "locationList.size", stillingsId)
+        loggHvisDiff(dbStilling.innhold.administration?.status, arbeidsplassenStilling.administration?.status, "administration.status", stillingsId)
+        loggHvisDiff(dbStilling.innhold.administration?.remarks, arbeidsplassenStilling.administration?.remarks, "administration.remarks", stillingsId)
+        loggHvisDiff(dbStilling.innhold.employer?.name, arbeidsplassenStilling.employer?.name, "employer.name", stillingsId)
+        loggHvisDiff(dbStilling.innhold.employer?.orgnr, arbeidsplassenStilling.employer?.orgnr, "employer.orgnr", stillingsId)
+        loggHvisDiff(dbStilling.innhold.employer?.employees, arbeidsplassenStilling.employer?.employees, "employer.employees", stillingsId)
+        loggHvisDiff(dbStilling.innhold.properties, arbeidsplassenStilling.properties, "extent", stillingsId)
+        loggHvisDiff(dbStilling.innhold.properties, arbeidsplassenStilling.properties, "workday", stillingsId)
+        loggHvisDiff(dbStilling.innhold.properties, arbeidsplassenStilling.properties, "positioncount", stillingsId)
+        loggHvisDiff(dbStilling.innhold.properties, arbeidsplassenStilling.properties, "engagementtype", stillingsId)
+        loggHvisDiff(dbStilling.innhold.properties, arbeidsplassenStilling.properties, "starttime", stillingsId)
+        loggHvisDiff(dbStilling.innhold.properties, arbeidsplassenStilling.properties, "employerdescription", stillingsId)
+        loggHvisDiff(dbStilling.innhold.properties, arbeidsplassenStilling.properties, "remote", stillingsId)
+        loggHvisDiff(dbStilling.innhold.properties, arbeidsplassenStilling.properties, "employer", stillingsId)
+        loggHvisDiff(dbStilling.innhold.properties, arbeidsplassenStilling.properties, "sector", stillingsId)
+        loggHvisDiff(dbStilling.innhold.properties, arbeidsplassenStilling.properties, "workhours", stillingsId)
+        loggHvisDiff(dbStilling.innhold.properties, arbeidsplassenStilling.properties, "applicationdue", stillingsId)
+        loggHvisDiff(dbStilling.innhold.properties, arbeidsplassenStilling.properties, "jobtitle", stillingsId)
+        loggHvisDiff(dbStilling.innhold.properties, arbeidsplassenStilling.properties, "jobarrangement", stillingsId)
+        loggHvisDiff(dbStilling.innhold.properties, arbeidsplassenStilling.properties, "adtext", stillingsId)
+    }
+
+    fun loggHvisDiff(db: Any?, arbeidsplassen: Any?, propertyName: String, stillingsId: String) {
+        if (db != arbeidsplassen) {
+            log.info("Diff i '$propertyName' (db: $db / arbeidsplassen: $arbeidsplassen) $stillingsId")
+        }
+    }
+
+    fun loggHvisDiff(dbProperties: Map<String, String>, arbeidsplassenProperties: Map<String, String>, propertyName: String, stillingsId: String) {
+        if (dbProperties[propertyName] != arbeidsplassenProperties[propertyName]) {
+            log.info("Diff i 'properties.$propertyName' (db: ${dbProperties[propertyName]} / arbeidsplassen: ${arbeidsplassenProperties[propertyName]}) $stillingsId")
+        }
+    }
+
+    fun loggHvisDiffMerEnn5min(db: LocalDateTime?, arbeidsplassen: LocalDateTime?, propertyName: String, stillingsId: String) {
+        if (db != arbeidsplassen) {
+            if (db != null && arbeidsplassen != null) {
+                val minutesBetween = Duration.between(db, arbeidsplassen).toMinutes()
+                if (minutesBetween > 5) {
+                    log.info("Diff i '$propertyName' of more than 5 minutes (db: $db / arbeidsplassen: $arbeidsplassen) $stillingsId")
+                }
+            } else {
+                log.info("Diff i '$propertyName' (db: $db / arbeidsplassen: $arbeidsplassen) $stillingsId")
+            }
+        }
+    }
+
 
     fun hentDirektemeldtStilling(stillingsId: String): DirektemeldtStilling {
         return direktemeldtStillingRepository.hentDirektemeldtStilling(stillingsId) ?: throw RuntimeException("Fant ikke direktemeldt stilling $stillingsId")

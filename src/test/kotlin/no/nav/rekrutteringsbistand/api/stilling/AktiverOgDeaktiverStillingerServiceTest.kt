@@ -48,9 +48,12 @@ class AktiverStillingerServiceTest {
 
     @Test
     fun `Skal kalle lagreDirektemeldtStilling stilling med status ACTIVE`() {
-        val stilling = enDirektemeldtStilling.copy(status = Status.INACTIVE.toString(),
-            innhold = enDirektemeldtStilling.innhold.copy(published = publishedFor2TimerSiden, expires = ZonedDateTime.now(
-                ZoneId.of("Europe/Oslo")).plusDays(10), publishedByAdmin = publishedFor2TimerSiden.toString()))
+        val stilling = enDirektemeldtStilling.copy(
+            status = Status.INACTIVE.toString(),
+            publisert = publishedFor2TimerSiden,
+            utløpsdato = ZonedDateTime.now(ZoneId.of("Europe/Oslo")).plusDays(10),
+            publisertAvAdmin = publishedFor2TimerSiden.toString()
+        )
 
         whenever(direktemeldtStillingRepository.hentStillingerForDeaktivering()).thenReturn(listOf())
         whenever(direktemeldtStillingRepository.hentStillingerForAktivering()).thenReturn(listOf(stilling))
