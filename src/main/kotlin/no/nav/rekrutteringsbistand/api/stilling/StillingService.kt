@@ -139,7 +139,11 @@ class StillingService(
             sistEndretAv = stilling.updatedBy,
             sistEndret = stilling.updated.atZone(ZoneId.of("Europe/Oslo")),
             status = stilling.status,
-            annonseId = null
+            annonseId = null,
+            utløpsdato = stilling.expires?.atZone(ZoneId.of("Europe/Oslo")),
+            publisert = stilling.published?.atZone(ZoneId.of("Europe/Oslo")),
+            publisertAvAdmin = stilling.publishedByAdmin,
+            adminStatus = stilling.administration?.status
         )
         direktemeldtStillingRepository.lagreDirektemeldtStilling(direktemeldtStilling)
     }

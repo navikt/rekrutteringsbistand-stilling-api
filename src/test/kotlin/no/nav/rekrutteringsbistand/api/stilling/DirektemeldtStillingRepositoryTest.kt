@@ -47,7 +47,11 @@ class DirektemeldtStillingRepositoryTest {
             sistEndretAv = stilling.updatedBy,
             sistEndret = ZonedDateTime.now(ZoneId.of("Europe/Oslo")),
             status = stilling.status,
-            annonseId = 1
+            annonseId = 1,
+            utløpsdato = ZonedDateTime.now(ZoneId.of("Europe/Oslo")).plusDays(3),
+            publisert = ZonedDateTime.now(ZoneId.of("Europe/Oslo")),
+            publisertAvAdmin = ZonedDateTime.now(ZoneId.of("Europe/Oslo")).toString(),
+            adminStatus = "DONE"
         )
         val direktemeldtStilling2 = DirektemeldtStilling(
             UUID.fromString(stilling2.uuid),
@@ -57,7 +61,11 @@ class DirektemeldtStillingRepositoryTest {
             sistEndretAv = stilling2.createdBy,
             sistEndret = ZonedDateTime.now(ZoneId.of("Europe/Oslo")),
             status = stilling2.status,
-            annonseId = 2
+            annonseId = 2,
+            utløpsdato = ZonedDateTime.now(ZoneId.of("Europe/Oslo")).plusDays(3),
+            publisert = ZonedDateTime.now(ZoneId.of("Europe/Oslo")),
+            publisertAvAdmin = ZonedDateTime.now(ZoneId.of("Europe/Oslo")).toString(),
+            adminStatus = "DONE"
         )
         repository.lagreDirektemeldtStilling(direktemeldtStilling1)
         repository.lagreDirektemeldtStilling(direktemeldtStilling2)
@@ -112,7 +120,7 @@ class DirektemeldtStillingRepositoryTest {
 
     @Test
     fun `Skal ikke finne noen stillinger hvis det ikke er noen som skal deaktiveres`() {
-        val stilling = enDirektemeldtStilling.copy(innhold = enDirektemeldtStilling.innhold.copy(expires = ZonedDateTime.now(ZoneId.of("Europe/Oslo")).plusDays(10)))
+        val stilling = enDirektemeldtStilling.copy(utløpsdato = ZonedDateTime.now(ZoneId.of("Europe/Oslo")).plusDays(10))
 
         repository.lagreDirektemeldtStilling(stilling)
 
@@ -123,7 +131,7 @@ class DirektemeldtStillingRepositoryTest {
 
     @Test
     fun `Skal ikke finne noen stillinger hvis det ikke er noen som skal aktiveres`() {
-        val stilling = enDirektemeldtStilling.copy(innhold = enDirektemeldtStilling.innhold.copy(expires = ZonedDateTime.now(ZoneId.of("Europe/Oslo")).plusDays(10)))
+        val stilling = enDirektemeldtStilling.copy(utløpsdato = ZonedDateTime.now(ZoneId.of("Europe/Oslo")).plusDays(10))
 
         repository.lagreDirektemeldtStilling(stilling)
 
