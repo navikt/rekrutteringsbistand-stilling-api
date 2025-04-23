@@ -66,13 +66,17 @@ class StillingService(
         direktemeldtStillingRepository.lagreDirektemeldtStilling(
             DirektemeldtStilling(
                 stillingsId = stillingsId.verdi,
-                innhold = opprettStilling.toDirektemeldtStillingInnhold(stillingsId, opprettet),
+                innhold = opprettStilling.toDirektemeldtStillingInnhold(stillingsId),
                 opprettet = opprettet,
                 opprettetAv = opprettStilling.createdBy,
                 sistEndretAv = opprettStilling.updatedBy,
                 sistEndret = opprettet,
                 status = "INACTIVE",
-                annonseId = null
+                annonseId = null,
+                utløpsdato = null,
+                publisert = opprettet,
+                publisertAvAdmin = null,
+                adminStatus = opprettStilling.administration.status
             )
         )
         log.info("Opprettet stilling i databasen med uuid: ${opprettetStillingArbeidsplassen.uuid}")
@@ -133,7 +137,11 @@ class StillingService(
                 sistEndretAv = stilling.updatedBy,
                 sistEndret = stilling.updated.atZone(ZoneId.of("Europe/Oslo")),
                 status = stilling.status,
-                annonseId = dto.stilling.id
+                annonseId = dto.stilling.id,
+                utløpsdato = dto.stilling.hentExpiresMedDefaultVerdiOmIkkeOppgitt(),
+                publisert = dto.stilling.published?.atZone(ZoneId.of("Europe/Oslo")),
+                publisertAvAdmin = dto.stilling.publishedByAdmin,
+                adminStatus = dto.stilling.administration?.status
             )
         )
         log.info("Oppdaterte stilling i databasen med uuid: ${dto.stilling.uuid}")
@@ -191,7 +199,11 @@ class StillingService(
             sistEndretAv = arbeidsplassenStilling.updatedBy,
             sistEndret = arbeidsplassenStilling.updated.atZone(ZoneId.of("Europe/Oslo")),
             status = arbeidsplassenStilling.status,
-            annonseId = null
+            annonseId = null,
+            utløpsdato = arbeidsplassenStilling.hentExpiresMedDefaultVerdiOmIkkeOppgitt(),
+            publisert = arbeidsplassenStilling.published?.atZone(ZoneId.of("Europe/Oslo")),
+            publisertAvAdmin = arbeidsplassenStilling.publishedByAdmin,
+            adminStatus = arbeidsplassenStilling.administration?.status
         )
         direktemeldtStillingRepository.lagreDirektemeldtStilling(direktemeldtStilling)
     }
@@ -207,8 +219,8 @@ class StillingService(
         loggHvisDiff(dbStilling.innhold.medium, arbeidsplassenStilling.medium, "medium", stillingsId)
         loggHvisDiff(dbStilling.innhold.privacy, arbeidsplassenStilling.privacy, "privacy", stillingsId)
         loggHvisDiff(dbStilling.innhold.reference, arbeidsplassenStilling.reference, "reference", stillingsId)
-        loggHvisDiff(dbStilling.innhold.expires?.toLocalDateTime(), arbeidsplassenStilling.expires, "expires", stillingsId)
-        loggHvisDiffMerEnn5min(dbStilling.innhold.published?.toLocalDateTime(), arbeidsplassenStilling.published, "published", stillingsId)
+        loggHvisDiff(dbStilling.utløpsdato?.toLocalDateTime(), arbeidsplassenStilling.expires, "expires", stillingsId)
+        loggHvisDiffMerEnn5min(dbStilling.publisert?.toLocalDateTime(), arbeidsplassenStilling.published, "published", stillingsId)
         loggHvisDiff(dbStilling.innhold.locationList.size, arbeidsplassenStilling.locationList.size, "locationList.size", stillingsId)
         if (dbStilling.innhold.locationList.isNotEmpty() && arbeidsplassenStilling.locationList.isNotEmpty()) {
             loggHvisDiff(dbStilling.innhold.locationList[0], arbeidsplassenStilling.locationList[0], "locationList.size[0]", stillingsId)

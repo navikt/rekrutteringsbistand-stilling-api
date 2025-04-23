@@ -3,7 +3,6 @@ package no.nav.rekrutteringsbistand.api.arbeidsplassen
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
 import no.nav.rekrutteringsbistand.api.stilling.*
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsid
-import java.time.ZonedDateTime
 import java.util.HashMap
 
 data class OpprettStillingDto(
@@ -39,7 +38,7 @@ data class OpprettStillingDto(
         ),
     )
 
-     fun toDirektemeldtStillingInnhold(stillingsId: Stillingsid, opprettet: ZonedDateTime): DirektemeldtStillingInnhold {
+     fun toDirektemeldtStillingInnhold(stillingsId: Stillingsid): DirektemeldtStillingInnhold {
         return DirektemeldtStillingInnhold(
             title = title,
             administration = administration.let {
@@ -57,14 +56,11 @@ data class OpprettStillingDto(
             source = source,
             medium = medium,
             reference = stillingsId.asString(),
-            published = opprettet,
-            expires = null,
             employer = employer?.toDirektemeldtStillingArbeidsgiver(),
             location = null,
             locationList = locationList ?: emptyList(),
             categoryList = categoryList?.map { it.toDirektemeldtStillingKategori() } ?: emptyList(),
             properties = properties ?: emptyMap(),
-            publishedByAdmin = null, 
             businessName = businessName,
             firstPublished = firstPublished,
             deactivatedByExpiry = deactivatedByExpiry,

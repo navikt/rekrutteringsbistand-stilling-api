@@ -85,14 +85,11 @@ data class Stilling(
             source = source,
             medium = medium,
             reference = reference,
-            published = published?.atZone(ZoneId.of("Europe/Oslo")),
-            expires = hentExpiresMedDefaultVerdiOmIkkeOppgitt(),
             employer = employer?.toDirektemeldtStillingArbeidsgiver(),
             location = location,
             locationList = locationList,
             categoryList = categoryList.map { it.toDirektemeldtStillingKategori() },
             properties = properties,
-            publishedByAdmin = publishedByAdmin,
             businessName = businessName,
             firstPublished = firstPublished,
             deactivatedByExpiry = deactivatedByExpiry,
@@ -118,7 +115,7 @@ data class Stilling(
         else
             title
 
-    private fun hentExpiresMedDefaultVerdiOmIkkeOppgitt(): ZonedDateTime {
+    fun hentExpiresMedDefaultVerdiOmIkkeOppgitt(): ZonedDateTime {
         if (expires != null) {
             return expires.atZone(ZoneId.of("Europe/Oslo"))
         }
@@ -411,14 +408,11 @@ data class DirektemeldtStillingInnhold(
     val source: String?,
     val medium: String?,
     val reference: String?,
-    val published: ZonedDateTime?,
-    val expires: ZonedDateTime?,
     val employer: DirektemeldtStillingArbeidsgiver?,
     val location: Geografi?,
     val locationList: List<Geografi> = ArrayList(),
     val categoryList: List<DirektemeldtStillingKategori> = ArrayList(),
     val properties: Map<String, String> = HashMap(),
-    val publishedByAdmin: String?,
     val businessName: String?,
     val firstPublished: Boolean?,
     val deactivatedByExpiry: Boolean?,
@@ -433,7 +427,12 @@ data class DirektemeldtStilling(
     val sistEndret: ZonedDateTime,
     val sistEndretAv: String,
     val status: String,
-    val annonseId: Long?
+    val annonseId: Long?,
+    val versjon: Int = 1,
+    val utløpsdato: ZonedDateTime? = null,
+    val publisert: ZonedDateTime? = null,
+    val publisertAvAdmin: String?,
+    val adminStatus: String?
 ) {
     fun toStilling(): Stilling {
         return Stilling(
@@ -452,14 +451,14 @@ data class DirektemeldtStilling(
             source = innhold.source,
             medium = innhold.medium,
             reference = innhold.reference,
-            published = innhold.published?.toLocalDateTime(),
-            expires = innhold.expires?.toLocalDateTime(),
+            published = publisert?.toLocalDateTime(),
+            expires = utløpsdato?.toLocalDateTime(),
             employer = innhold.employer?.toArbeidsgiver(),
             location = innhold.location,
             locationList = innhold.locationList,
             categoryList = innhold.categoryList.map { it.toKategori() },
             properties = innhold.properties,
-            publishedByAdmin = innhold.publishedByAdmin,
+            publishedByAdmin = publisertAvAdmin,
             businessName = innhold.businessName,
             firstPublished = innhold.firstPublished,
             deactivatedByExpiry = innhold.deactivatedByExpiry,
