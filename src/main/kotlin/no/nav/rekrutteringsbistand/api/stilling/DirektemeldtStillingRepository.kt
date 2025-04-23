@@ -80,8 +80,8 @@ class DirektemeldtStillingRepository(private val namedJdbcTemplate: NamedParamet
     }
 
     fun hentDirektemeldtStilling(stillingsId: String) : DirektemeldtStilling {
-        val sql = "select $ID, $STILLINGSID, $INNHOLD, $OPPRETTET, $OPPRETTET_AV, $SIST_ENDRET, $SIST_ENDRET_AV, $STATUS, $PUBLISERT, $PUBLISERT_AV_ADMIN, $ADMIN_STATUS, $UTLØPSDATO, $VERSJON from $DIREKTEMELDT_STILLING_TABELL where $STILLINGSID=:stillingsid ::uuid"
-        val params = mapOf("stillingsid" to stillingsId)
+        val sql = "select $ID, $STILLINGSID, $INNHOLD, $OPPRETTET, $OPPRETTET_AV, $SIST_ENDRET, $SIST_ENDRET_AV, $STATUS, $PUBLISERT, $PUBLISERT_AV_ADMIN, $ADMIN_STATUS, $UTLØPSDATO, $VERSJON from $DIREKTEMELDT_STILLING_TABELL where $STILLINGSID=:stillingsid"
+        val params = mapOf("stillingsid" to UUID.fromString(stillingsId))
 
         val direktemeldtStilling = namedJdbcTemplate.queryForObject(
             sql, params, DirektemeldtStillingRowMapper()
