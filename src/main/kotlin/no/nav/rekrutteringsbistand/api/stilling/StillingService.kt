@@ -79,22 +79,27 @@ class StillingService(
         log.info("Opprettet stilling hos Arbeidsplassen med uuid: ${opprettetStillingArbeidsplassen.uuid}")
         val stillingsId = Stillingsid(opprettetStillingArbeidsplassen.uuid)
 
+        var stilling = opprettStilling
+        if(opprettStilling.medium == null) {
+            stilling = stilling.copy(medium = "DIR")
+        }
+
         // Opprett stilling i db med samme uuid som arbeidsplassen
         val opprettet = ZonedDateTime.of(LocalDateTime.now(), ZoneId.of("Europe/Oslo"))
         direktemeldtStillingRepository.lagreDirektemeldtStilling(
             DirektemeldtStilling(
                 stillingsId = stillingsId.verdi,
-                innhold = opprettStilling.toDirektemeldtStillingInnhold(stillingsId),
+                innhold = stilling.toDirektemeldtStillingInnhold(stillingsId),
                 opprettet = opprettet,
-                opprettetAv = opprettStilling.createdBy,
-                sistEndretAv = opprettStilling.updatedBy,
+                opprettetAv = stilling.createdBy,
+                sistEndretAv = stilling.updatedBy,
                 sistEndret = opprettet,
                 status = "INACTIVE",
                 annonseId = null,
                 utløpsdato = if (stillingskategori == Stillingskategori.FORMIDLING) opprettet else LocalDateTime.now().plusDays(DEFAULT_EXPIRY_DAYS).atZone(ZoneId.of("Europe/Oslo")),
                 publisert = opprettet,
                 publisertAvAdmin = null,
-                adminStatus = opprettStilling.administration.status
+                adminStatus = stilling.administration.status
             )
         )
         log.info("Opprettet stilling i databasen med uuid: ${opprettetStillingArbeidsplassen.uuid}")
