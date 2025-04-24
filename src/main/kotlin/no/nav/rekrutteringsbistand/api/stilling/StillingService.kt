@@ -91,7 +91,7 @@ class StillingService(
                 sistEndret = opprettet,
                 status = "INACTIVE",
                 annonseId = null,
-                utløpsdato = LocalDateTime.now().plusDays(DEFAULT_EXPIRY_DAYS).atZone(ZoneId.of("Europe/Oslo")),
+                utløpsdato = if (stillingskategori == Stillingskategori.FORMIDLING) opprettet else LocalDateTime.now().plusDays(DEFAULT_EXPIRY_DAYS).atZone(ZoneId.of("Europe/Oslo")),
                 publisert = opprettet,
                 publisertAvAdmin = null,
                 adminStatus = opprettStilling.administration.status
