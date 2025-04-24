@@ -13,6 +13,7 @@ import no.nav.rekrutteringsbistand.api.arbeidsplassen.OpprettStillingDto
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
 import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteKlient
 import no.nav.rekrutteringsbistand.api.opensearch.StillingssokProxyClient
+import no.nav.rekrutteringsbistand.api.stilling.Stilling.Companion.DEFAULT_EXPIRY_DAYS
 import no.nav.rekrutteringsbistand.api.stillingsinfo.*
 import no.nav.rekrutteringsbistand.api.support.log
 import org.springframework.stereotype.Service
@@ -21,7 +22,6 @@ import java.time.Duration
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
-import java.time.temporal.ChronoUnit
 import java.util.*
 
 
@@ -91,7 +91,7 @@ class StillingService(
                 sistEndret = opprettet,
                 status = "INACTIVE",
                 annonseId = null,
-                utløpsdato = null,
+                utløpsdato = LocalDateTime.now().plusDays(DEFAULT_EXPIRY_DAYS).atZone(ZoneId.of("Europe/Oslo")),
                 publisert = opprettet,
                 publisertAvAdmin = null,
                 adminStatus = opprettStilling.administration.status

@@ -43,7 +43,7 @@ data class Stilling(
     val activationOnPublishingDate: Boolean?
 ) {
     companion object {
-        private const val DEFAULT_EXPIRY_DAYS: Long = 30
+        const val DEFAULT_EXPIRY_DAYS: Long = 30
     }
 
     fun toKopiertStilling(tokenUtils: TokenUtils): no.nav.rekrutteringsbistand.api.arbeidsplassen.OpprettStillingDto {
