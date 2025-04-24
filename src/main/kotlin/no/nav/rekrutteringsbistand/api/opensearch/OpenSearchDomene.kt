@@ -9,7 +9,13 @@ data class OpensSearchResponse(
 ) {
     fun toStilling(objectMapper: ObjectMapper): Stilling = Stilling(
         title = _source.stilling.tittel ?: "Stilling uten valgt jobbtittel",
-        properties = _source.stilling.properties.mapValues { objectMapper.writeValueAsString(it.value) },
+        properties = _source.stilling.properties.mapValues {
+            when(val value = it.value) {
+                null -> "null"
+                is List<*> -> objectMapper.writeValueAsString(value)
+                else -> value.toString()
+            }
+        },
         businessName = _source.stilling.businessName,
         id = _source.stilling.annonsenr.toLong(),
         uuid = _source.stilling.uuid,
