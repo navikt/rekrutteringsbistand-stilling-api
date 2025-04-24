@@ -15,7 +15,7 @@ data class OpprettStillingDto(
 
     val mediaList: List<Media>? = ArrayList(),
     val contactList: List<Contact>? = ArrayList(),
-    val medium: String? = null,
+    val medium: String? = "DIR",
     val employer: Arbeidsgiver? = null,
     val locationList: List<Geografi>? = ArrayList(),
     val categoryList: List<Kategori>? = ArrayList(),
