@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsid
 import no.nav.rekrutteringsbistand.api.support.log
 import org.springframework.jdbc.core.RowMapper
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
@@ -86,6 +87,10 @@ class DirektemeldtStillingRepository(private val namedJdbcTemplate: NamedParamet
 
         namedJdbcTemplate.query(sql, MapSqlParameterSource(params)) {rs -> if (rs.next()) rs.getLong("id") else null}
     }
+
+     fun hentDirektemeldtStilling(stillingsId: Stillingsid) : DirektemeldtStilling? {
+         return hentDirektemeldtStilling(stillingsId.asString())
+     }
 
     fun hentDirektemeldtStilling(stillingsId: String) : DirektemeldtStilling? {
         val sql = "select $ID, $STILLINGSID, $INNHOLD, $OPPRETTET, $OPPRETTET_AV, $SIST_ENDRET, $SIST_ENDRET_AV, $STATUS, $PUBLISERT, $PUBLISERT_AV_ADMIN, $ADMIN_STATUS, $UTLØPSDATO, $VERSJON from $DIREKTEMELDT_STILLING_TABELL where $STILLINGSID=:stillingsid"
