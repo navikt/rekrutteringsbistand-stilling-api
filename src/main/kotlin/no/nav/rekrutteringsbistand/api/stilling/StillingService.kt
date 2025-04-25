@@ -55,7 +55,6 @@ class StillingService(
             .setTimeZone(TimeZone.getTimeZone("Europe/Oslo"))
 
         val arbeidsplassenStilling = arbeidsplassenKlient.hentStilling(stillingsId, somSystembruker)
-        //log.info("Hentet stilling fra Arbeidsplassen $stillingsId")
         log.info("Stilling $stillingsId fra arbeidsplassen ${objectMapper.writeValueAsString(arbeidsplassenStilling)}")
 
         val stilling = stillingssokProxyClient.hentStilling(stillingsId, somSystembruker)
@@ -211,24 +210,26 @@ class StillingService(
         direktemeldtStillingRepository.hentDirektemeldtStilling(stillingsId)?.let { dbStilling ->
             logDiff(dbStilling, arbeidsplassenStilling, stillingsId)
         }
-
-        val direktemeldtStillingInnhold = arbeidsplassenStilling.toDirektemeldtStillingInnhold()
-
-        val direktemeldtStilling = DirektemeldtStilling(
-            UUID.fromString(stillingsId),
-            direktemeldtStillingInnhold,
-            opprettet = arbeidsplassenStilling.created.atZone(ZoneId.of("Europe/Oslo")),
-            opprettetAv = arbeidsplassenStilling.createdBy,
-            sistEndretAv = arbeidsplassenStilling.updatedBy,
-            sistEndret = arbeidsplassenStilling.updated.atZone(ZoneId.of("Europe/Oslo")),
-            status = arbeidsplassenStilling.status,
-            annonseId = null,
-            utløpsdato = arbeidsplassenStilling.hentExpiresMedDefaultVerdiOmIkkeOppgitt(),
-            publisert = arbeidsplassenStilling.published?.atZone(ZoneId.of("Europe/Oslo")),
-            publisertAvAdmin = arbeidsplassenStilling.publishedByAdmin,
-            adminStatus = arbeidsplassenStilling.administration?.status
-        )
-        direktemeldtStillingRepository.lagreDirektemeldtStilling(direktemeldtStilling)
+        val finnesStilling = direktemeldtStillingRepository.hentDirektemeldtStilling(stillingsId)
+        if(finnesStilling == null) {
+            log.warn("Stilling $stillingsId finnes ikke i databasen")
+            val direktemeldtStillingInnhold = arbeidsplassenStilling.toDirektemeldtStillingInnhold()
+            val direktemeldtStilling = DirektemeldtStilling(
+                UUID.fromString(stillingsId),
+                direktemeldtStillingInnhold,
+                opprettet = arbeidsplassenStilling.created.atZone(ZoneId.of("Europe/Oslo")),
+                opprettetAv = arbeidsplassenStilling.createdBy,
+                sistEndretAv = arbeidsplassenStilling.updatedBy,
+                sistEndret = arbeidsplassenStilling.updated.atZone(ZoneId.of("Europe/Oslo")),
+                status = arbeidsplassenStilling.status,
+                annonseId = null,
+                utløpsdato = arbeidsplassenStilling.hentExpiresMedDefaultVerdiOmIkkeOppgitt(),
+                publisert = arbeidsplassenStilling.published?.atZone(ZoneId.of("Europe/Oslo")),
+                publisertAvAdmin = arbeidsplassenStilling.publishedByAdmin,
+                adminStatus = arbeidsplassenStilling.administration?.status
+            )
+            direktemeldtStillingRepository.lagreDirektemeldtStilling(direktemeldtStilling)
+        }
     }
 
     private fun logDiff(dbStilling: DirektemeldtStilling, arbeidsplassenStilling: Stilling, stillingsId: String) {
