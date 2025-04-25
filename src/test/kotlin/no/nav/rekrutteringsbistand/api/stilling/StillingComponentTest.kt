@@ -424,7 +424,7 @@ internal class StillingComponentTest {
             HttpEntity(dto),
             OppdaterRekrutteringsbistandStillingDto::class.java
         ).body!!.also {
-            assertThat(it.stilling).isEqualTo(rekrutteringsbistandStilling.stilling)
+            assertThat(it.stilling).isEqualTo(rekrutteringsbistandStilling.stilling.copy(id = it.stilling.id, updated = it.stilling.updated)) // ignorer id og updated
             assertThat(it.stillingsinfoid).isEqualTo(stillingsinfo.stillingsinfoid.asString())
         }
     }
@@ -453,7 +453,7 @@ internal class StillingComponentTest {
             ), OppdaterRekrutteringsbistandStillingDto::class.java
         ).body.also {
             assertThat(it!!.stilling.uuid).isNotEmpty
-            assertThat(it.stilling).isEqualTo(rekrutteringsbistandStilling.stilling)
+            assertThat(it.stilling).isEqualTo(rekrutteringsbistandStilling.stilling.copy(id = it.stilling.id, updated = it.stilling.updated)) // ignorer id og updated
             assertThat(it.stillingsinfoid).isEqualTo(rekrutteringsbistandStilling.stillingsinfo?.stillingsinfoid)
         }
     }
