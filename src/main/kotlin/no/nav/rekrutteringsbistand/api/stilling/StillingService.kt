@@ -102,6 +102,7 @@ class StillingService(
             )
         )
         log.info("Opprettet stilling i databasen med uuid: ${opprettetStillingArbeidsplassen.uuid}")
+        val direktemeldtStillingFraDb = direktemeldtStillingRepository.hentDirektemeldtStilling(stillingsId)!!
 
         stillingsinfoService.opprettStillingsinfo(
             stillingsId = stillingsId,
@@ -111,7 +112,7 @@ class StillingService(
         val stillingsinfo = stillingsinfoService.hentStillingsinfo(opprettetStillingArbeidsplassen)
 
         return RekrutteringsbistandStilling(
-            stilling = opprettetStillingArbeidsplassen,
+            stilling = direktemeldtStillingFraDb.toStilling(),
             stillingsinfo = stillingsinfo?.asStillingsinfoDto()
         ).also {
             kandidatlisteKlient.sendStillingOppdatert(it)
@@ -167,6 +168,7 @@ class StillingService(
             )
         )
         log.info("Oppdaterte stilling i databasen med uuid: ${dto.stilling.uuid}")
+        val direktemeldtStillingFraDb = direktemeldtStillingRepository.hentDirektemeldtStilling(id.asString())!!
 
         // Hent stilling før den oppdateres, da det er en OptimisticLocking strategi på 'updated' feltet hos Arbeidsplassen
         val existerendeStilling = arbeidsplassenKlient.hentStilling(dto.stilling.uuid)
@@ -174,7 +176,7 @@ class StillingService(
         log.info("Oppdaterte stilling hos Arbeidsplassen med uuid: ${dto.stilling.uuid}")
 
         return OppdaterRekrutteringsbistandStillingDto(
-            stilling = oppdatertStilling,
+            stilling = direktemeldtStillingFraDb.toStilling(),
             stillingsinfoid = eksisterendeStillingsinfo?.stillingsinfoid?.asString()
         ).also {
             if (oppdatertStilling.source.equals("DIR", ignoreCase = false)) {
