@@ -199,6 +199,13 @@ class StillingService(
 
     fun slettRekrutteringsbistandStilling(stillingsId: String): Stilling {
         kandidatlisteKlient.varsleOmSlettetStilling(Stillingsid(stillingsId))
+
+        direktemeldtStillingRepository.hentDirektemeldtStilling(stillingsId)?.let { dbStilling ->
+            direktemeldtStillingRepository.lagreDirektemeldtStilling(dbStilling.copy(
+                status = "DELETED",
+                sistEndret = ZonedDateTime.now(ZoneId.of("Europe/Oslo"))))
+        }
+
         return arbeidsplassenKlient.slettStilling(stillingsId)
     }
 
