@@ -245,7 +245,6 @@ class StillingService(
 //        loggHvisDiff(dbStilling.annonseId, arbeidsplassenStilling.id, "annonseId", stillingsId) // todo: denne gir alltid diff nå - finn en løsning for å beholde id'en
         loggHvisDiff(dbStilling.stillingsId.toString(), arbeidsplassenStilling.uuid, "uuid", stillingsId)
         loggHvisDiff(dbStilling.status, arbeidsplassenStilling.status, "status", stillingsId)
-        loggHvisDiff(dbStilling.sistEndretAv, arbeidsplassenStilling.updatedBy, "sistEndretAv", stillingsId)
         loggHvisDiff(dbStilling.opprettetAv, arbeidsplassenStilling.createdBy, "opprettetAv", stillingsId)
         loggHvisDiff(dbStilling.innhold.source, arbeidsplassenStilling.source, "source", stillingsId)
         loggHvisDiff(dbStilling.innhold.title, arbeidsplassenStilling.title, "title", stillingsId)
