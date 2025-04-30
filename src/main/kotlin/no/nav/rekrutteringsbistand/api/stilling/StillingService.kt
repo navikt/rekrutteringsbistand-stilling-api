@@ -251,7 +251,7 @@ class StillingService(
         loggHvisDiff(dbStilling.innhold.medium, arbeidsplassenStilling.medium, "medium", stillingsId)
         loggHvisDiff(dbStilling.innhold.privacy, arbeidsplassenStilling.privacy, "privacy", stillingsId)
         loggHvisDiff(dbStilling.innhold.reference, arbeidsplassenStilling.reference, "reference", stillingsId)
-        loggHvisDiff(dbStilling.utløpsdato?.toLocalDateTime(), arbeidsplassenStilling.expires, "expires", stillingsId)
+        loggHvisDiffMerEnn5min(dbStilling.utløpsdato?.toLocalDateTime(), arbeidsplassenStilling.expires, "expires", stillingsId)
         loggHvisDiffMerEnn5min(dbStilling.publisert?.toLocalDateTime(), arbeidsplassenStilling.published, "published", stillingsId)
         loggHvisDiff(dbStilling.innhold.locationList.size, arbeidsplassenStilling.locationList.size, "locationList.size", stillingsId)
         if (dbStilling.innhold.locationList.isNotEmpty() && arbeidsplassenStilling.locationList.isNotEmpty()) {
