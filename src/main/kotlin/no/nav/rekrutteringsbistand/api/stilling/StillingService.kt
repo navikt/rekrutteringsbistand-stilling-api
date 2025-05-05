@@ -287,6 +287,9 @@ class StillingService(
     }
 
     fun loggHvisDiff(dbProperties: Map<String, String>, arbeidsplassenProperties: Map<String, String>, propertyName: String, stillingsId: String) {
+        if (dbProperties[propertyName] == null && arbeidsplassenProperties[propertyName] == "[]") {
+            return // Ingen diff
+        }
         if (dbProperties[propertyName] != arbeidsplassenProperties[propertyName]) {
             log.info("Diff i 'properties.$propertyName' (db: ${dbProperties[propertyName]} / arbeidsplassen: ${arbeidsplassenProperties[propertyName]}) $stillingsId")
         }
