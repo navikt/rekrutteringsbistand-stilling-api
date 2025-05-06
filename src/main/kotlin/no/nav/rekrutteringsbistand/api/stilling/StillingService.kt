@@ -145,9 +145,14 @@ class StillingService(
         val id = Stillingsid(dto.stilling.uuid)
         val eksisterendeStillingsinfo: Stillingsinfo? = stillingsinfoService.hentForStilling(id)
 
+        var publishedByAdmin: String? = null
+        if(dto.stilling.firstPublished != null && dto.stilling.firstPublished && dto.stilling.publishedByAdmin == null) {
+            publishedByAdmin = LocalDateTime.now(ZoneId.of("Europe/Oslo")).toString()
+        }
+
         val stilling = dto.stilling.copyMedBeregnetTitle(
             stillingskategori = eksisterendeStillingsinfo?.stillingskategori
-        ).copy(updated = LocalDateTime.now(ZoneId.of("Europe/Oslo")))
+        ).copy(updated = LocalDateTime.now(ZoneId.of("Europe/Oslo")), publishedByAdmin = publishedByAdmin)
 
 
         // TODO: oppdater stilling i db
