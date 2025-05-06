@@ -145,8 +145,8 @@ class StillingService(
         val id = Stillingsid(dto.stilling.uuid)
         val eksisterendeStillingsinfo: Stillingsinfo? = stillingsinfoService.hentForStilling(id)
 
-        var publishedByAdmin: String? = null
-        if(dto.stilling.firstPublished != null && dto.stilling.firstPublished && dto.stilling.publishedByAdmin == null) {
+        var publishedByAdmin: String? = dto.stilling.publishedByAdmin
+        if(dto.stilling.firstPublished != null && dto.stilling.firstPublished && publishedByAdmin == null) {
             publishedByAdmin = LocalDateTime.now(ZoneId.of("Europe/Oslo")).toString()
         }
 
@@ -168,7 +168,7 @@ class StillingService(
                 annonseId = dto.stilling.id,
                 utløpsdato = dto.stilling.hentExpiresMedDefaultVerdiOmIkkeOppgitt(),
                 publisert = dto.stilling.published?.atZone(ZoneId.of("Europe/Oslo")),
-                publisertAvAdmin = dto.stilling.publishedByAdmin,
+                publisertAvAdmin = publishedByAdmin,
                 adminStatus = dto.stilling.administration?.status
             )
         )
