@@ -101,7 +101,7 @@ class DirektemeldtStillingRepository(private val namedJdbcTemplate: NamedParamet
         )
 
         if (direktemeldtStilling.isEmpty()) {
-            log.warn("Fant ikke direktemeldt stilling med id: $stillingsId")
+            log.info("Fant ikke direktemeldt stilling med id: $stillingsId. Det kan være en ekstern stilling.")
             return null
         }
 

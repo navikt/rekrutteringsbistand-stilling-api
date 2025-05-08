@@ -262,13 +262,16 @@ class StillingService(
         if (dbStilling.innhold.locationList.isNotEmpty() && arbeidsplassenStilling.locationList.isNotEmpty()) {
             loggHvisDiff(dbStilling.innhold.locationList[0], arbeidsplassenStilling.locationList[0], "locationList.size[0]", stillingsId)
         }
-        loggHvisDiff(dbStilling.innhold.contactList.size, arbeidsplassenStilling.contactList.size, "locationList.size", stillingsId)
-        loggHvisDiff(dbStilling.innhold.mediaList.size, arbeidsplassenStilling.mediaList.size, "locationList.size", stillingsId)
+        loggHvisDiff(dbStilling.innhold.businessName, arbeidsplassenStilling.businessName, "businessName", stillingsId)
+        loggHvisDiff(dbStilling.innhold.firstPublished, arbeidsplassenStilling.firstPublished, "firstPublished", stillingsId)
+        loggHvisDiff(dbStilling.innhold.contactList.size, arbeidsplassenStilling.contactList.size, "contactList.size", stillingsId)
+        loggHvisDiff(dbStilling.innhold.mediaList.size, arbeidsplassenStilling.mediaList.size, "mediaList.size", stillingsId)
         loggHvisDiff(dbStilling.innhold.administration?.status, arbeidsplassenStilling.administration?.status, "administration.status", stillingsId)
         loggHvisDiff(dbStilling.innhold.administration?.remarks, arbeidsplassenStilling.administration?.remarks, "administration.remarks", stillingsId)
         loggHvisDiff(dbStilling.innhold.employer?.name, arbeidsplassenStilling.employer?.name, "employer.name", stillingsId)
         loggHvisDiff(dbStilling.innhold.employer?.orgnr, arbeidsplassenStilling.employer?.orgnr, "employer.orgnr", stillingsId)
         loggHvisDiff(dbStilling.innhold.employer?.employees, arbeidsplassenStilling.employer?.employees, "employer.employees", stillingsId)
+        loggHvisDiff(dbStilling.innhold.employer?.location, arbeidsplassenStilling.employer?.location, "employer.location", stillingsId)
         loggHvisDiff(dbStilling.innhold.properties, arbeidsplassenStilling.properties, "extent", stillingsId)
         loggHvisDiff(dbStilling.innhold.properties, arbeidsplassenStilling.properties, "workday", stillingsId)
         loggHvisDiff(dbStilling.innhold.properties, arbeidsplassenStilling.properties, "positioncount", stillingsId)
@@ -283,6 +286,8 @@ class StillingService(
         loggHvisDiff(dbStilling.innhold.properties, arbeidsplassenStilling.properties, "jobtitle", stillingsId)
         loggHvisDiff(dbStilling.innhold.properties, arbeidsplassenStilling.properties, "jobarrangement", stillingsId)
         loggHvisDiff(dbStilling.innhold.properties, arbeidsplassenStilling.properties, "adtext", stillingsId)
+        loggHvisDiff(dbStilling.innhold.properties, arbeidsplassenStilling.properties, "tags", stillingsId)
+        loggHvisDiff(dbStilling.innhold.properties, arbeidsplassenStilling.properties, "jobpercentage", stillingsId)
     }
 
     fun loggHvisDiff(db: Any?, arbeidsplassen: Any?, propertyName: String, stillingsId: String) {
