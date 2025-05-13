@@ -61,6 +61,8 @@ spec:
     outbound:
       rules:
         - application: rekrutteringsbistand-stillingssok-proxy
+        - application: pam-geografi
+          namespace: teampam
       external:
         - host: {{ ad_api_host }}
         - host: {{ rekrutteringsbistand_kandidat_api_host }}

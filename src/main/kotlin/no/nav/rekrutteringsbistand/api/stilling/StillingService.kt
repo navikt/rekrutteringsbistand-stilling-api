@@ -11,6 +11,7 @@ import no.nav.rekrutteringsbistand.api.RekrutteringsbistandStilling
 import no.nav.rekrutteringsbistand.api.arbeidsplassen.ArbeidsplassenKlient
 import no.nav.rekrutteringsbistand.api.arbeidsplassen.OpprettStillingDto
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
+import no.nav.rekrutteringsbistand.api.geografi.GeografiService
 import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteKlient
 import no.nav.rekrutteringsbistand.api.opensearch.StillingssokProxyClient
 import no.nav.rekrutteringsbistand.api.stilling.Stilling.Companion.DEFAULT_EXPIRY_DAYS
@@ -32,7 +33,8 @@ class StillingService(
     val kandidatlisteKlient: KandidatlisteKlient,
     val arbeidsplassenKlient: ArbeidsplassenKlient,
     val direktemeldtStillingRepository: DirektemeldtStillingRepository,
-    val stillingssokProxyClient: StillingssokProxyClient
+    val stillingssokProxyClient: StillingssokProxyClient,
+    val geografiService: GeografiService
 ) {
     fun hentRekrutteringsbistandStilling(
         stillingsId: String,
@@ -74,12 +76,14 @@ class StillingService(
     }
 
     private fun opprettStilling(opprettStilling: OpprettStillingDto, stillingskategori: Stillingskategori): RekrutteringsbistandStilling {
-        val opprettetStillingArbeidsplassen = arbeidsplassenKlient.opprettStilling(opprettStilling)
+        val populertGeografi = populerMedManglendeFylke(opprettStilling.employer?.location)
+        var stilling = opprettStilling.copy(employer = opprettStilling.employer?.copy(location = populertGeografi))
+
+        val opprettetStillingArbeidsplassen = arbeidsplassenKlient.opprettStilling(stilling)
         log.info("Opprettet stilling hos Arbeidsplassen med uuid: ${opprettetStillingArbeidsplassen.uuid}")
         val stillingsId = Stillingsid(opprettetStillingArbeidsplassen.uuid)
 
-        var stilling = opprettStilling
-        if(opprettStilling.medium == null) {
+        if(stilling.medium == null) {
             stilling = stilling.copy(medium = "DIR")
         }
 
@@ -325,5 +329,17 @@ class StillingService(
 
     fun hentAlleDirektemeldteStillinger(): List<DirektemeldtStilling> {
         return direktemeldtStillingRepository.hentAlleDirektemeldteStillinger()
+    }
+
+    fun populerMedManglendeFylke(geografi: Geografi?) : Geografi? {
+        if(geografi == null) {
+            return null
+        }
+
+        if(geografi.county.isNullOrBlank() && !geografi.municipalCode.isNullOrBlank()) {
+            val fylke = geografiService.finnFylke(geografi.municipalCode)
+            return geografi.copy(county = fylke)
+        }
+        return geografi
     }
 }
