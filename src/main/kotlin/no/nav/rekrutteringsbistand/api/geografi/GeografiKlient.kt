@@ -33,6 +33,7 @@ class GeografiKlient(
     @Cacheable("postdata")
     fun hentAllePostdata(): List<PostDataDTO> {
         val url = "$geografiUrl/postdata"
+        log.info("Henter all postdata fra url $url")
         val callId = "rekrutteringsbistand-stilling-api-" + UUID.randomUUID().toString()
 
         val request = HttpRequest.newBuilder()
