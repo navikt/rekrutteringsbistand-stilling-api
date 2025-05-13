@@ -18,7 +18,7 @@ import java.util.*
 
 @Component
 class GeografiKlient(
-    @Value("\${geografi.url}") private val url: String,
+    @Value("\${geografi.url}") private val geografiUrl: String,
 ) {
     val objectMapper: ObjectMapper = jacksonObjectMapper().registerModule(JavaTimeModule())
         .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
@@ -32,6 +32,7 @@ class GeografiKlient(
 
     @Cacheable("postdata")
     fun hentAllePostdata(): List<PostDataDTO> {
+        val url = "$geografiUrl/postdata"
         val callId = "rekrutteringsbistand-stilling-api-" + UUID.randomUUID().toString()
 
         val request = HttpRequest.newBuilder()
