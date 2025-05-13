@@ -61,9 +61,6 @@ data class Stilling(
             categoryList = categoryList,
             properties = properties,
             businessName = businessName,
-            firstPublished = firstPublished,
-            deactivatedByExpiry = deactivatedByExpiry,
-            activationOnPublishingDate = activationOnPublishingDate,
         )
     }
 
