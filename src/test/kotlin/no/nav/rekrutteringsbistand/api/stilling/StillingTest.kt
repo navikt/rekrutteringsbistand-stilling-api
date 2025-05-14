@@ -1,5 +1,6 @@
 package no.nav.rekrutteringsbistand.api.stilling
 
+import no.nav.rekrutteringsbistand.api.Testdata.enOpprettetStilling
 import no.nav.rekrutteringsbistand.api.Testdata.enStilling
 import no.nav.rekrutteringsbistand.api.Testdata.enVeileder
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
@@ -40,5 +41,13 @@ class StillingTest {
         assertThat(kopiertStilling.deactivatedByExpiry).isEqualTo(stilling.deactivatedByExpiry)
         assertThat(kopiertStilling.categoryList).isEqualTo(stilling.categoryList)
         assertThat(kopiertStilling.activationOnPublishingDate).isEqualTo(stilling.activationOnPublishingDate)
+    }
+
+    @Test
+    fun `Fjern tomme property verdier`() {
+        val stilling = enOpprettetStilling.copy(properties = mapOf("key1" to "[]", "key2" to "", "key3" to "value4"))
+        val direktemeldtStillingInnhold = stilling.toDirektemeldtStillingInnhold()
+        assertThat(direktemeldtStillingInnhold.properties.size).isEqualTo(1)
+        assertThat(direktemeldtStillingInnhold.properties["key3"] == "value4").isTrue
     }
 }

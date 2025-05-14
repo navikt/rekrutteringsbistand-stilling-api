@@ -23,9 +23,9 @@ object Testdata {
     val enStilling = Stilling(
         id = 1000,
         uuid = UUID.randomUUID().toString(),
-        created = LocalDateTime.now(),
+        created = LocalDateTime.now().withNano(0),
         createdBy = "nss-admin",
-        updated = LocalDateTime.now(),
+        updated = LocalDateTime.now().withNano(0),
         updatedBy = "nss-admin",
         title = "testnss",
         status = "ACTIVE",
@@ -33,8 +33,8 @@ object Testdata {
         source = "ASS",
         medium = "ASS",
         reference = UUID.randomUUID().toString(),
-        published = LocalDateTime.now(),
-        expires = LocalDateTime.now(),
+        published = LocalDateTime.now().withNano(0),
+        expires = LocalDateTime.now().withNano(0),
         employer = null,
         administration = null,
         location = null,
@@ -569,4 +569,110 @@ object Testdata {
         publisertAvAdmin = publishedFor2TimerSiden.toString(),
         adminStatus = "PENDING"
     )
+
+    val esResponse = """ 
+        {
+        	"_index": "stilling_5",
+        	"_type": "_doc",
+        	"_id": "4f7417d0-8678-4b75-9536-ec94cc4aa5bf",
+        	"_version": 3,
+        	"_seq_no": 294384,
+        	"_primary_term": 1,
+        	"found": true,
+        	"_source": {
+        		"stilling": {
+        			"uuid": "4f7417d0-8678-4b75-9536-ec94cc4aa5bf",
+        			"annonsenr": "958754",
+        			"status": "INACTIVE",
+        			"privacy": "INTERNAL_NOT_SHOWN",
+        			"published": "2024-10-23T01:00:00",
+        			"publishedByAdmin": "2024-09-29T22:33:19.397287",
+        			"expires": "2024-10-23T01:00:00",
+        			"created": "2024-09-29T12:53:26.419561",
+        			"updated": "2024-10-24T00:00:00.554003",
+        			"employer": {
+        				"name": "ORDKNAPP BLOMSTRETE TIGER AS",
+        				"publicName": "ORDKNAPP BLOMSTRETE TIGER AS",
+        				"orgnr": "312113341",
+        				"parentOrgnr": "311185268",
+        				"orgform": "BEDR"
+        			},
+        			"categories": [],
+        			"source": "DIR",
+        			"medium": "DIR",
+        			"businessName": "ORDKNAPP BLOMSTRETE TIGER AS",
+        			"locations": [
+        				{
+        					"address": null,
+        					"postalCode": null,
+        					"city": null,
+        					"county": "TRØNDELAG",
+        					"countyCode": "50",
+        					"municipal": "LEKA",
+        					"municipalCode": "5052",
+        					"latitue": null,
+        					"longitude": null,
+        					"country": "NORGE"
+        				}
+        			],
+        			"reference": "4f7417d0-8678-4b75-9536-ec94cc4aa5bf",
+        			"administration": {
+        				"status": "DONE",
+        				"remarks": [],
+        				"comments": "",
+        				"reportee": "F_Z993141 E_Z993141",
+        				"navIdent": "Z993141"
+        			},
+        			"properties": {
+        				"extent": "Heltid",
+        				"employerhomepage": "https://nettsted",
+        				"workhours": [
+					        "Dagtid",
+					        "Kveld"
+				        ],
+        				"applicationdue": "Snarest",
+        				"workday": [
+        					"Ukedager"
+        				],
+                        "keywords": null,
+        				"jobtitle": "Fylkesbarnevernsjef",
+        				"positioncount": 1,
+        				"engagementtype": "Fast",
+        				"classification_styrk08_score": 0.9506593453694958,
+        				"employerdescription": "<p>om bedriften</p>",
+        				"jobarrangement": "Skift",
+        				"adtext": "<p>tekst</p>",
+        				"classification_styrk08_code": 1341,
+        				"searchtags": [
+        					{
+        						"label": "Fylkesbarnevernsjef",
+        						"score": 1
+        					}
+        				],
+        				"classification_esco_code": "http://data.europa.eu/esco/isco/c1341",
+        				"classification_input_source": "jobtitle",
+        				"sector": "Privat"
+        			},
+        			"contacts": [
+        				{
+        					"name": "Test",
+        					"role": "",
+        					"title": "test",
+        					"email": "test@test.test",
+        					"phone": "222222222"
+        				}
+        			],
+        			"tittel": "Fylkesbarnevernsjef"
+        		},
+        		"stillingsinfo": {
+        			"eierNavident": null,
+        			"eierNavn": null,
+        			"notat": null,
+        			"stillingsid": "4f7417d0-8678-4b75-9536-ec94cc4aa5bf",
+        			"stillingsinfoid": "4f877d02-c527-4630-9156-ba75ee8856db",
+        			"stillingskategori": "STILLING"
+        		}
+        	}
+        }
+    """.trimIndent()
 }

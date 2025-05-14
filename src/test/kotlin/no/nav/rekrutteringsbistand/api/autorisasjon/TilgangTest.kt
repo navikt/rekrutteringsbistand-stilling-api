@@ -7,8 +7,6 @@ import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.options
 import org.mockito.kotlin.whenever
-import io.ktor.http.*
-import io.ktor.utils.io.core.*
 import no.nav.rekrutteringsbistand.api.OppdaterRekrutteringsbistandStillingDto
 import no.nav.rekrutteringsbistand.api.TestRepository
 import no.nav.rekrutteringsbistand.api.Testdata
@@ -27,41 +25,36 @@ import no.nav.rekrutteringsbistand.api.stillingsinfo.indekser.BulkStillingsinfoI
 import no.nav.rekrutteringsbistand.api.support.toMultiValueMap
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.assertj.core.api.Assertions
-import org.junit.Test
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
-import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.http.*
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.http.HttpMethod
-import org.springframework.test.context.junit4.SpringRunner
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.reactive.server.StatusAssertions
 import org.springframework.test.web.reactive.server.WebTestClient
-import java.util.*
 
 private val objectMapper: ObjectMapper =
     ObjectMapper().registerModule(JavaTimeModule()).disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
 private const val navIdent = "C12345"
 
-@RunWith(SpringRunner::class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class TilgangTest {
-
 
     @LocalServerPort
     var port = 0
@@ -72,10 +65,10 @@ class TilgangTest {
     @Autowired
     private lateinit var webClient: WebTestClient
 
-    @MockBean
+    @MockitoBean
     private lateinit var kandidatlisteKlient: KandidatlisteKlient
 
-    @MockBean
+    @MockitoBean
     private lateinit var azureKlient: AzureKlient
 
     @Autowired
@@ -283,6 +276,7 @@ private class Kall(private val webClient: WebTestClient, private val mockLogin: 
             val stilling = Testdata.enStilling
             stubber.mockHentStilling(stilling)
             stubber.mockArbeidsplassenKlientOpprettStilling()
+            stubber.mockHentStillingOpenSearch(stilling)
             post(
                 "$stillingPath/kopier/${stilling.uuid}",
                 rolle
@@ -299,15 +293,9 @@ private class Kall(private val webClient: WebTestClient, private val mockLogin: 
         val hentStillingMedUuid: EndepunktHandler = { rolle ->
             val stilling = Testdata.enStilling
             stubber.mockHentStilling(stilling)
+            stubber.mockHentStillingOpenSearch(stilling)
             get(
                 "$stillingPath/${stilling.uuid}",
-                rolle
-            )
-        }
-        val hentStillingMedAnnonsenr: EndepunktHandler = { rolle ->
-            stubber.mockHentStillingMedAnnonseNr()
-            get(
-                "$stillingPath/annonsenr/123456",
                 rolle
             )
         }
@@ -477,16 +465,21 @@ private class Stubber(
 
     private val wireMock: WireMockServer = WireMockServer(options().port(9934))
 
+    private val wireMockStillingssokProxyClient: WireMockServer = WireMockServer(options().port(9937))
+
     init {
         wireMock.start()
+        wireMockStillingssokProxyClient.start()
     }
 
     fun close() {
         wireMock.stop()
+        wireMockStillingssokProxyClient.stop()
     }
 
     fun resetAll() {
         wireMock.resetAll()
+        wireMockStillingssokProxyClient.resetAll()
     }
 
     fun mockArbeidsplassenKlientOpprettStilling() {
@@ -498,6 +491,19 @@ private class Stubber(
                     WireMock.aResponse().withStatus(200).withHeader(HttpHeaders.CONNECTION, "close") // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                         .withBody(objectMapper.writeValueAsString(Testdata.enOpprettetStilling))
+                )
+        )
+    }
+
+    fun mockHentStillingOpenSearch(stilling: Stilling) {
+        wireMockStillingssokProxyClient.stubFor(
+            WireMock.get(WireMock.urlPathMatching("/stilling/_doc/${stilling.uuid}"))
+                .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
+                .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE)).withHeader(AUTHORIZATION, WireMock.matching("Bearer .*"))
+                .willReturn(
+                    WireMock.aResponse().withStatus(200).withHeader(HttpHeaders.CONNECTION, "close") // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBody(Testdata.esResponse)
                 )
         )
     }

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsid
 import no.nav.rekrutteringsbistand.api.support.log
 import org.springframework.jdbc.core.RowMapper
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
@@ -69,29 +70,55 @@ class DirektemeldtStillingRepository(private val namedJdbcTemplate: NamedParamet
             "sist_endret" to Timestamp.from(direktemeldtStilling.sistEndret.toInstant()),
             "sist_endret_av" to direktemeldtStilling.sistEndretAv,
             "status" to direktemeldtStilling.status,
-            "publisert" to Timestamp.from(direktemeldtStilling.publisert?.toInstant()),
+            "publisert" to if(direktemeldtStilling.publisert != null) {
+                try {
+                    Timestamp.from(direktemeldtStilling.publisert.toInstant())
+                } catch (e: Exception) {
+                    log.warn("Feil ved konvertering av publisert dato til timestamp: ${direktemeldtStilling.publisert} med melding: ${e.message}, stillingsId: ${direktemeldtStilling.stillingsId}")
+                    null
+                }
+            } else {
+                null
+            },
             "publisert_av_admin" to direktemeldtStilling.publisertAvAdmin,
             "admin_status" to direktemeldtStilling.adminStatus,
-            "utløpsdato" to Timestamp.from(direktemeldtStilling.utløpsdato?.toInstant()),
+            "utløpsdato" to if(direktemeldtStilling.utløpsdato != null) {
+                try {
+                    Timestamp.from(direktemeldtStilling.utløpsdato.toInstant())
+                } catch (e: Exception) {
+                    log.warn("Feil ved konvertering av utløpsdato til timestamp: ${direktemeldtStilling.utløpsdato} med melding: ${e.message}, stillingsId: ${direktemeldtStilling.stillingsId}")
+                    null
+                }
+            } else {
+                null
+            },
             "versjon" to direktemeldtStilling.versjon
         )
 
         namedJdbcTemplate.query(sql, MapSqlParameterSource(params)) {rs -> if (rs.next()) rs.getLong("id") else null}
     }
 
-    fun hentDirektemeldtStilling(stillingsId: String) : DirektemeldtStilling {
+     fun hentDirektemeldtStilling(stillingsId: Stillingsid) : DirektemeldtStilling? {
+         return hentDirektemeldtStilling(stillingsId.asString())
+     }
+
+    fun hentDirektemeldtStilling(stillingsId: String) : DirektemeldtStilling? {
         val sql = "select $ID, $STILLINGSID, $INNHOLD, $OPPRETTET, $OPPRETTET_AV, $SIST_ENDRET, $SIST_ENDRET_AV, $STATUS, $PUBLISERT, $PUBLISERT_AV_ADMIN, $ADMIN_STATUS, $UTLØPSDATO, $VERSJON from $DIREKTEMELDT_STILLING_TABELL where $STILLINGSID=:stillingsid"
         val params = mapOf("stillingsid" to UUID.fromString(stillingsId))
 
-        val direktemeldtStilling = namedJdbcTemplate.queryForObject(
+        val direktemeldtStilling = namedJdbcTemplate.query(
             sql, params, DirektemeldtStillingRowMapper()
         )
 
-        if(direktemeldtStilling == null) {
-            throw RuntimeException("Fant ikke direktemeldt stilling")
+        if (direktemeldtStilling.isEmpty()) {
+            log.info("Fant ikke direktemeldt stilling med id: $stillingsId. Det kan være en ekstern stilling.")
+            return null
         }
 
-        return direktemeldtStilling
+        if (direktemeldtStilling.size > 1) {
+            error("Fant mer enn en direktemeldt stilling med id: $stillingsId (antall: ${direktemeldtStilling.size})")
+        }
+        return direktemeldtStilling[0]
     }
 
     fun hentAlleDirektemeldteStillinger() : List<DirektemeldtStilling> {

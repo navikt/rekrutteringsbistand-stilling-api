@@ -25,7 +25,7 @@
         <kotlin.version>2.1.0</kotlin.version>
         <logstash-logback-encoder.version>8.0</logstash-logback-encoder.version>
         <logback-syslog4j.version>1.0.0</logback-syslog4j.version>
-        <wiremock.version>3.10.0</wiremock.version>
+        <wiremock.version>3.12.1</wiremock.version>
         <jackson-module-kotlin.version>2.18.2</jackson-module-kotlin.version>
         <token-validation.version>5.0.14</token-validation.version>
         <resilience4j.version>2.3.0</resilience4j.version>
@@ -42,6 +42,7 @@
         <rapids-and-rivers-api.version>2025.01.10-08.49-9e6f64ad</rapids-and-rivers-api.version>
         <rapids-and-rivers-kafka.version>2024.12.18-11.39-73f8eecb</rapids-and-rivers-kafka.version>
         <awaitility.version>4.3.0</awaitility.version>
+        <caffeine.version>3.2.0</caffeine.version>
         <!-- Tredjeparts -->
         <!--kotlin.version>2.0.20</kotlin.version-->
     </properties>
@@ -93,6 +94,15 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-cache</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
+            <version>${caffeine.version}</version>
         </dependency>
         <dependency>
             <groupId>io.github.resilience4j</groupId>

@@ -10,7 +10,7 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.github.tomakehurst.wiremock.http.Fault
 import com.github.tomakehurst.wiremock.http.Fault.CONNECTION_RESET_BY_PEER
 import com.github.tomakehurst.wiremock.http.RequestMethod
-import com.github.tomakehurst.wiremock.junit.WireMockRule
+import com.github.tomakehurst.wiremock.junit5.WireMockExtension
 import com.github.tomakehurst.wiremock.matching.EqualToPattern
 import com.github.tomakehurst.wiremock.matching.MatchesJsonPathPattern
 import com.github.tomakehurst.wiremock.matching.RequestPatternBuilder
@@ -28,14 +28,16 @@ import no.nav.rekrutteringsbistand.api.Testdata.enStillingsinfo
 import no.nav.rekrutteringsbistand.api.Testdata.enStillingsinfoUtenEier
 import no.nav.rekrutteringsbistand.api.config.MockLogin
 import no.nav.rekrutteringsbistand.api.mockAzureObo
+import no.nav.rekrutteringsbistand.api.opensearch.StillingssokProxyClient
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsid
 import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoRepository
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingskategori
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.*
+import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Assertions.fail
-import org.junit.runner.RunWith
+import org.junit.jupiter.api.extension.RegisterExtension
+import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.client.TestRestTemplate
@@ -46,26 +48,38 @@ import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatus.OK
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
-import org.springframework.test.context.junit4.SpringRunner
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import java.util.*
 
-@RunWith(SpringRunner::class)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
     properties = arrayOf("external.pam-ad-api.url=http://localhost:9935")
 )
 internal class StillingComponentTest {
 
-    @get:Rule
-    val wiremockPamAdApi = WireMockRule(
-        WireMockConfiguration.options().port(9935).notifier(Slf4jNotifier(true))
-    )
+    companion object {
+        @JvmStatic
+        @RegisterExtension
+        val wiremockAzure: WireMockExtension = WireMockExtension.newInstance()
+            .options(WireMockConfiguration.options().port(9954))
+            .build()
 
-    @get:Rule
-    val wiremockKandidatliste = WireMockRule(8766)
+        @JvmStatic
+        @RegisterExtension
+        val wiremockPamAdApi: WireMockExtension = WireMockExtension.newInstance()
+            .options(WireMockConfiguration.options().port(9935).notifier(Slf4jNotifier(true)))
+            .build()
 
-    @get:Rule
-    val wiremockAzure = WireMockRule(9954)
+        @JvmStatic
+        @RegisterExtension
+        val wiremockKandidatliste: WireMockExtension = WireMockExtension.newInstance()
+            .options(WireMockConfiguration.options().port(8766))
+            .build()
+    }
+
+    @MockitoBean
+    lateinit var stillingssokProxyClient: StillingssokProxyClient
 
     @LocalServerPort
     private var port = 0
@@ -86,7 +100,7 @@ internal class StillingComponentTest {
     private val objectMapper: ObjectMapper =
         ObjectMapper().registerModule(JavaTimeModule()).disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
-    @Before
+    @BeforeEach
     fun before() {
         mockLogin.leggAzureVeilederTokenPåAlleRequests(restTemplate)
     }
@@ -96,6 +110,8 @@ internal class StillingComponentTest {
         val stilling = enStilling
         mockUtenAuthorization("/b2b/api/v1/ads/${stilling.uuid}", stilling)
         mockAzureObo(wiremockAzure)
+
+        whenever(stillingssokProxyClient.hentStilling(stilling.uuid)).thenReturn(stilling)
 
         restTemplate.getForObject(
             "$localBaseUrl/rekrutteringsbistandstilling/${stilling.uuid}", RekrutteringsbistandStilling::class.java
@@ -113,6 +129,7 @@ internal class StillingComponentTest {
 
         mockUtenAuthorization("/b2b/api/v1/ads/${stilling.uuid}", stilling)
         mockAzureObo(wiremockAzure)
+        whenever(stillingssokProxyClient.hentStilling(stilling.uuid)).thenReturn(stilling)
 
         repository.opprett(stillingsinfo)
 
@@ -131,6 +148,7 @@ internal class StillingComponentTest {
         val urlPath = "/b2b/api/v1/ads/$stillingsId"
         mockPamAdApiError(urlPath, httpResponseStatus = 500)
         mockAzureObo(wiremockAzure)
+        whenever(stillingssokProxyClient.hentStilling(stillingsId)).thenReturn(null)
 
         val responseEntity = restTemplate.getForEntity(
             "$localBaseUrl/rekrutteringsbistandstilling/$stillingsId", String::class.java
@@ -141,7 +159,7 @@ internal class StillingComponentTest {
     }
 
     @Test
-    @Ignore("Denne er grønn lokalt men rød på Github")
+    @Disabled("Denne er grønn lokalt men rød på Github")
     fun `GET mot en rekrutteringsbistandstilling skal føre til retries gitt nettverkshikke ved kall på Arbeidsplassen`() {
         val stillingsId = UUID.randomUUID().toString()
         val urlPath = "/b2b/api/v1/ads/$stillingsId"
@@ -162,6 +180,8 @@ internal class StillingComponentTest {
         val urlPath = "/b2b/api/v1/ads/$stillingsId"
         mockPamAdApiError(urlPath, httpResponseStatus = 400)
         mockAzureObo(wiremockAzure)
+
+        whenever(stillingssokProxyClient.hentStilling(stillingsId)).thenReturn(null)
 
         val responseEntity = restTemplate.getForEntity(
             "$localBaseUrl/rekrutteringsbistandstilling/$stillingsId", String::class.java
@@ -220,6 +240,7 @@ internal class StillingComponentTest {
         mockPamAdApi(HttpMethod.POST, "/api/v1/ads", enOpprettetStilling)
         mockKandidatlisteOppdatering()
         mockAzureObo(wiremockAzure)
+        whenever(stillingssokProxyClient.hentStilling(eksisterendeStillingsId.toString())).thenReturn(eksisterendeStillingMedStyrk)
 
         restTemplate.postForObject(
             "$localBaseUrl/rekrutteringsbistandstilling/kopier/$eksisterendeStillingsId",
@@ -350,7 +371,7 @@ internal class StillingComponentTest {
         restTemplate.exchange(
             "$localBaseUrl/rekrutteringsbistandstilling", HttpMethod.PUT, HttpEntity(dto), String::class.java
         ).also {
-            assertThat(it.statusCodeValue).isEqualTo(500)
+            assertThat(it.statusCode.value()).isEqualTo(500)
         }
     }
 
@@ -371,7 +392,7 @@ internal class StillingComponentTest {
         restTemplate.exchange(
             "$localBaseUrl/rekrutteringsbistandstilling", HttpMethod.PUT, HttpEntity(dto), String::class.java
         ).also {
-            assertThat(it.statusCodeValue).isEqualTo(500)
+            assertThat(it.statusCode.value()).isEqualTo(500)
         }
     }
 
@@ -403,7 +424,7 @@ internal class StillingComponentTest {
             HttpEntity(dto),
             OppdaterRekrutteringsbistandStillingDto::class.java
         ).body!!.also {
-            assertThat(it.stilling).isEqualTo(rekrutteringsbistandStilling.stilling)
+            assertThat(it.stilling).isEqualTo(rekrutteringsbistandStilling.stilling.copy(id = it.stilling.id, updated = it.stilling.updated)) // ignorer id og updated
             assertThat(it.stillingsinfoid).isEqualTo(stillingsinfo.stillingsinfoid.asString())
         }
     }
@@ -432,7 +453,7 @@ internal class StillingComponentTest {
             ), OppdaterRekrutteringsbistandStillingDto::class.java
         ).body.also {
             assertThat(it!!.stilling.uuid).isNotEmpty
-            assertThat(it.stilling).isEqualTo(rekrutteringsbistandStilling.stilling)
+            assertThat(it.stilling).isEqualTo(rekrutteringsbistandStilling.stilling.copy(id = it.stilling.id, updated = it.stilling.updated)) // ignorer id og updated
             assertThat(it.stillingsinfoid).isEqualTo(rekrutteringsbistandStilling.stillingsinfo?.stillingsinfoid)
         }
     }
@@ -657,7 +678,7 @@ internal class StillingComponentTest {
         )
     }
 
-    @After
+    @AfterEach
     fun after() {
         testRepository.slettAlt()
     }

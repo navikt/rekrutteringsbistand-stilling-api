@@ -60,8 +60,12 @@ class StillingPopulator(
 }
 
 
-private fun isoStringTilNorskTidssone(isoString: String): ZonedDateTime {
-    return ZonedDateTime.of(LocalDateTime.parse(isoString), ZoneId.of("Europe/Oslo"))
+private fun isoStringTilNorskTidssone(isoString: String): ZonedDateTime? {
+    return try {
+        ZonedDateTime.of(LocalDateTime.parse(isoString), ZoneId.of("Europe/Oslo"))
+    } catch (e: Exception) {
+        null;
+    }
 }
 
 private fun parseAntallStillinger(stilling: no.nav.rekrutteringsbistand.api.stilling.Stilling): Int {

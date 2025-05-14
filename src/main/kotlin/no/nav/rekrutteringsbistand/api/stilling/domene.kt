@@ -42,6 +42,10 @@ data class Stilling(
     val deactivatedByExpiry: Boolean?,
     val activationOnPublishingDate: Boolean?
 ) {
+    companion object {
+        const val DEFAULT_EXPIRY_DAYS: Long = 30
+    }
+
     fun toKopiertStilling(tokenUtils: TokenUtils): no.nav.rekrutteringsbistand.api.arbeidsplassen.OpprettStillingDto {
         val nyTittel = categoryList.hentTittel("kopi av stillingsId $uuid som ble opprettet $created")
 
@@ -57,9 +61,6 @@ data class Stilling(
             categoryList = categoryList,
             properties = properties,
             businessName = businessName,
-            firstPublished = firstPublished,
-            deactivatedByExpiry = deactivatedByExpiry,
-            activationOnPublishingDate = activationOnPublishingDate,
         )
     }
 
@@ -85,7 +86,7 @@ data class Stilling(
             location = location,
             locationList = locationList,
             categoryList = categoryList.map { it.toDirektemeldtStillingKategori() },
-            properties = properties,
+            properties = properties.filterValues { !it.isNullOrBlank() && it != "[]" }, // fjern tomme verdier
             businessName = businessName,
             firstPublished = firstPublished,
             deactivatedByExpiry = deactivatedByExpiry,
@@ -110,6 +111,25 @@ data class Stilling(
             categoryList.hentTittel(kontekstForLoggmelding = "stillingsId $uuid opprettet $created")
         else
             title
+
+    fun hentExpiresMedDefaultVerdiOmIkkeOppgitt(): ZonedDateTime {
+        if (expires != null) {
+            return expires.atZone(ZoneId.of("Europe/Oslo"))
+        }
+
+        // Sett expires lik søknadsfrist om den er oppgitt
+        val applicationDue = properties["applicationdue"]
+        if (!applicationDue.isNullOrBlank() && applicationDue.trim().uppercase() != "SNAREST") {
+            try {
+                return LocalDateTime.parse(applicationDue).atZone(ZoneId.of("Europe/Oslo"))
+            } catch (e: Exception) {
+                // Ignore
+            }
+        }
+
+        // Bruk default utløpsdato
+        return LocalDateTime.now().plusDays(DEFAULT_EXPIRY_DAYS).atZone(ZoneId.of("Europe/Oslo"))
+    }
 
     private fun erDirektemeldt(): Boolean = source == "DIR"
 }
@@ -306,7 +326,18 @@ data class DirektemeldtStillingKategori(
     val name: String?,
     val description: String?,
     val parentId: Int?
-)
+) {
+    fun toKategori(): Kategori {
+        return Kategori(
+            id = null,
+            code = code,
+            categoryType = categoryType,
+            name = name,
+            description = description,
+            parentId = parentId
+        )
+    }
+}
 
 data class DirektemeldtStillingAdministration(
     val status: String?,
@@ -314,7 +345,18 @@ data class DirektemeldtStillingAdministration(
     val reportee: String?,
     val remarks: List<String> = ArrayList(),
     val navIdent: String?
-)
+) {
+    fun toAdministration(): Administration {
+        return Administration(
+            id = 0,
+            status = status,
+            comments = comments,
+            reportee = reportee,
+            remarks = remarks,
+            navIdent = navIdent
+        )
+    }
+}
 
 data class DirektemeldtStillingArbeidsgiver(
     val mediaList: List<Media> = ArrayList(),
@@ -328,7 +370,31 @@ data class DirektemeldtStillingArbeidsgiver(
     val publicName: String?,
     val orgform: String?,
     val employees: Int?
-)
+) {
+    fun toArbeidsgiver(): Arbeidsgiver {
+        return Arbeidsgiver(
+            id = null,
+            uuid = null,
+            created = null,
+            createdBy = null,
+            updated = null,
+            updatedBy = null,
+            mediaList = mediaList,
+            contactList = contactList,
+            location = location,
+            locationList = locationList,
+            properties = properties,
+            name = name,
+            orgnr = orgnr,
+            status = null,
+            parentOrgnr = parentOrgnr,
+            publicName = publicName,
+            deactivated = null,
+            orgform = orgform,
+            employees = employees
+        )
+    }
+}
 
 data class DirektemeldtStillingInnhold(
     val title: String,
@@ -364,7 +430,39 @@ data class DirektemeldtStilling(
     val publisert: ZonedDateTime? = null,
     val publisertAvAdmin: String?,
     val adminStatus: String?
-)
+) {
+    fun toStilling(): Stilling {
+        return Stilling(
+            id = annonseId ?: 0,
+            uuid = stillingsId.toString(),
+            created = opprettet.toLocalDateTime(),
+            createdBy = opprettetAv,
+            updated = sistEndret.toLocalDateTime(),
+            updatedBy = sistEndretAv,
+            title = innhold.title,
+            status = status,
+            administration = innhold.administration?.toAdministration(),
+            mediaList = innhold.mediaList,
+            contactList = innhold.contactList,
+            privacy = innhold.privacy,
+            source = innhold.source,
+            medium = innhold.medium,
+            reference = innhold.reference,
+            published = publisert?.toLocalDateTime(),
+            expires = utløpsdato?.toLocalDateTime(),
+            employer = innhold.employer?.toArbeidsgiver(),
+            location = innhold.location,
+            locationList = innhold.locationList,
+            categoryList = innhold.categoryList.map { it.toKategori() },
+            properties = innhold.properties,
+            publishedByAdmin = publisertAvAdmin,
+            businessName = innhold.businessName,
+            firstPublished = innhold.firstPublished,
+            deactivatedByExpiry = innhold.deactivatedByExpiry,
+            activationOnPublishingDate = innhold.activationOnPublishingDate
+        )
+    }
+}
 
 enum class Status {
     ACTIVE,
