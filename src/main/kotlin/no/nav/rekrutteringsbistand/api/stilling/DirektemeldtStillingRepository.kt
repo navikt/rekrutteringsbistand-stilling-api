@@ -71,14 +71,24 @@ class DirektemeldtStillingRepository(private val namedJdbcTemplate: NamedParamet
             "sist_endret_av" to direktemeldtStilling.sistEndretAv,
             "status" to direktemeldtStilling.status,
             "publisert" to if(direktemeldtStilling.publisert != null) {
-                Timestamp.from(direktemeldtStilling.publisert.toInstant())
+                try {
+                    Timestamp.from(direktemeldtStilling.publisert.toInstant())
+                } catch (e: Exception) {
+                    log.warn("Feil ved konvertering av publisert dato til timestamp: ${direktemeldtStilling.publisert} med melding: ${e.message}, stillingsId: ${direktemeldtStilling.stillingsId}")
+                    null
+                }
             } else {
                 null
             },
             "publisert_av_admin" to direktemeldtStilling.publisertAvAdmin,
             "admin_status" to direktemeldtStilling.adminStatus,
             "utløpsdato" to if(direktemeldtStilling.utløpsdato != null) {
-                Timestamp.from(direktemeldtStilling.utløpsdato.toInstant())
+                try {
+                    Timestamp.from(direktemeldtStilling.utløpsdato.toInstant())
+                } catch (e: Exception) {
+                    log.warn("Feil ved konvertering av utløpsdato til timestamp: ${direktemeldtStilling.utløpsdato} med melding: ${e.message}, stillingsId: ${direktemeldtStilling.stillingsId}")
+                    null
+                }
             } else {
                 null
             },

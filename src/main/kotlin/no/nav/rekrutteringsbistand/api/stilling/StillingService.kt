@@ -158,8 +158,6 @@ class StillingService(
             stillingskategori = eksisterendeStillingsinfo?.stillingskategori
         ).copy(updated = LocalDateTime.now(ZoneId.of("Europe/Oslo")), publishedByAdmin = publishedByAdmin)
 
-
-        // TODO: oppdater stilling i db
         direktemeldtStillingRepository.lagreDirektemeldtStilling(
             DirektemeldtStilling(
                 stillingsId = id.verdi,
@@ -251,7 +249,6 @@ class StillingService(
     }
 
     private fun logDiff(dbStilling: DirektemeldtStilling, arbeidsplassenStilling: Stilling, stillingsId: String) {
-//        loggHvisDiff(dbStilling.annonseId, arbeidsplassenStilling.id, "annonseId", stillingsId) // todo: denne gir alltid diff nå - finn en løsning for å beholde id'en
         loggHvisDiff(dbStilling.stillingsId.toString(), arbeidsplassenStilling.uuid, "uuid", stillingsId)
         loggHvisDiff(dbStilling.status, arbeidsplassenStilling.status, "status", stillingsId)
         loggHvisDiff(dbStilling.opprettetAv, arbeidsplassenStilling.createdBy, "opprettetAv", stillingsId)

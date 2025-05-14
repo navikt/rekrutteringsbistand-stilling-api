@@ -22,7 +22,7 @@ class GeografiServiceTest {
         geografiService = GeografiService(geografiKlient)    }
 
     @Test
-    fun `Test at fylke blir returert hvis kommunenr finnes`() {
+    fun `Test at fylke blir returnert hvis kommunenr finnes`() {
 
         val postData = listOf(
             PostDataDTO(

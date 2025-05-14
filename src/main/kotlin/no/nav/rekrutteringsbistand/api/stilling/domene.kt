@@ -348,7 +348,7 @@ data class DirektemeldtStillingAdministration(
 ) {
     fun toAdministration(): Administration {
         return Administration(
-            id = 0, // hvor kommer denne fra?
+            id = 0,
             status = status,
             comments = comments,
             reportee = reportee,
