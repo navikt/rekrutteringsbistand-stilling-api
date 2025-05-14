@@ -50,14 +50,7 @@ class StillingService(
             )
         }
 
-        val objectMapper: ObjectMapper = jacksonObjectMapper().registerModule(JavaTimeModule())
-            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-            .disable(DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE)
-            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-            .setTimeZone(TimeZone.getTimeZone("Europe/Oslo"))
-
-        val arbeidsplassenStilling = arbeidsplassenKlient.hentStilling(stillingsId, somSystembruker)
-        log.info("Stilling $stillingsId fra arbeidsplassen ${objectMapper.writeValueAsString(arbeidsplassenStilling)}")
+        arbeidsplassenKlient.hentStilling(stillingsId, somSystembruker)
 
         val stilling = stillingssokProxyClient.hentStilling(stillingsId, somSystembruker)
         log.info("Hentet stilling fra OpenSearch $stillingsId")
