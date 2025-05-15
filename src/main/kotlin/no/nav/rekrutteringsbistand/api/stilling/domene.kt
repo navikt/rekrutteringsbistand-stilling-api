@@ -295,9 +295,9 @@ data class OpprettStillingDto(
     val categoryList: List<Kategori>? = ArrayList(),
     val properties: Map<String, String>? = HashMap(),
     val businessName: String? = null,
-    val firstPublished: Boolean? = null,
-    val deactivatedByExpiry: Boolean? = null,
-    val activationOnPublishingDate: Boolean? = null
+    val firstPublished: Boolean? = false,
+    val deactivatedByExpiry: Boolean? = false,
+    val activationOnPublishingDate: Boolean? = false
 ) {
     fun toArbeidsplassenDto(title: String) = no.nav.rekrutteringsbistand.api.arbeidsplassen.OpprettStillingDto(
         title = title,
