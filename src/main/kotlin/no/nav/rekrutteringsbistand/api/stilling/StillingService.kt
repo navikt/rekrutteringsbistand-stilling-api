@@ -1,10 +1,5 @@
 package no.nav.rekrutteringsbistand.api.stilling
 
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.rekrutteringsbistand.AuditLogg
 import no.nav.rekrutteringsbistand.api.OppdaterRekrutteringsbistandStillingDto
 import no.nav.rekrutteringsbistand.api.RekrutteringsbistandStilling
@@ -69,7 +64,7 @@ class StillingService(
     }
 
     private fun opprettStilling(opprettStilling: OpprettStillingDto, stillingskategori: Stillingskategori): RekrutteringsbistandStilling {
-        val populertGeografi = populerMedManglendeFylke(opprettStilling.employer?.location)
+        val populertGeografi = populerGeografi(opprettStilling.employer?.location)
         var stilling = opprettStilling.copy(employer = opprettStilling.employer?.copy(location = populertGeografi))
 
         val opprettetStillingArbeidsplassen = arbeidsplassenKlient.opprettStilling(stilling)
@@ -147,9 +142,10 @@ class StillingService(
             publishedByAdmin = LocalDateTime.now(ZoneId.of("Europe/Oslo")).toString()
         }
 
+        val populertLocationList = populerLocationList(dto.stilling.locationList)
         val stilling = dto.stilling.copyMedBeregnetTitle(
             stillingskategori = eksisterendeStillingsinfo?.stillingskategori
-        ).copy(updated = LocalDateTime.now(ZoneId.of("Europe/Oslo")), publishedByAdmin = publishedByAdmin)
+        ).copy(updated = LocalDateTime.now(ZoneId.of("Europe/Oslo")), publishedByAdmin = publishedByAdmin, locationList = populertLocationList)
 
         direktemeldtStillingRepository.lagreDirektemeldtStilling(
             DirektemeldtStilling(
@@ -321,14 +317,46 @@ class StillingService(
         return direktemeldtStillingRepository.hentAlleDirektemeldteStillinger()
     }
 
-    fun populerMedManglendeFylke(geografi: Geografi?) : Geografi? {
+    fun populerLocationList(locationList: List<Geografi>): List<Geografi> {
+        return locationList.mapNotNull { geografi -> populerGeografi(geografi) }
+    }
+
+    fun populerGeografi(geografi: Geografi?): Geografi? {
         if(geografi == null) {
             return null
         }
 
-        if(geografi.county.isNullOrBlank() && !geografi.municipalCode.isNullOrBlank()) {
-            val fylke = geografiService.finnFylke(geografi.municipalCode)
-            return geografi.copy(county = fylke)
+        if (!geografi.postalCode.isNullOrBlank()) {
+            val postdata = geografiService.finnPostdata(geografi.postalCode)
+            if (postdata != null) {
+                return geografi.copy(
+                    municipal = postdata.kommune.navn,
+                    county = postdata.fylke.navn,
+                    municipalCode = postdata.kommune.kommunenummer,
+                    country = "NORGE",
+                    city = postdata.by
+                )
+            }
+        }
+
+        val postDataFraKommune = geografiService.finnPostdataFraKommune(geografi.municipalCode, geografi.municipal)
+        if(postDataFraKommune != null) {
+            return geografi.copy(
+                municipalCode = postDataFraKommune.kommune.kommunenummer,
+                municipal = postDataFraKommune.kommune.navn,
+                county = postDataFraKommune.fylke.navn,
+                country = "NORGE",
+            )
+        }
+
+        if(!geografi.county.isNullOrBlank()) {
+            val fylke = geografiService.finnFylke(geografi.county)
+            if (fylke != null) {
+                return geografi.copy(
+                    county = fylke,
+                    country = "NORGE"
+                )
+            }
         }
         return geografi
     }
