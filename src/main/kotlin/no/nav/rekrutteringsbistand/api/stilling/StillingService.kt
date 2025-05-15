@@ -264,7 +264,6 @@ class StillingService(
         loggHvisDiff(dbStilling.innhold.administration?.remarks, arbeidsplassenStilling.administration?.remarks, "administration.remarks", stillingsId)
         loggHvisDiff(dbStilling.innhold.employer?.name, arbeidsplassenStilling.employer?.name, "employer.name", stillingsId)
         loggHvisDiff(dbStilling.innhold.employer?.orgnr, arbeidsplassenStilling.employer?.orgnr, "employer.orgnr", stillingsId)
-        loggHvisDiff(dbStilling.innhold.employer?.employees, arbeidsplassenStilling.employer?.employees, "employer.employees", stillingsId)
         loggHvisDiff(dbStilling.innhold.employer?.location, arbeidsplassenStilling.employer?.location, "employer.location", stillingsId)
         loggHvisDiff(dbStilling.innhold.properties, arbeidsplassenStilling.properties, "extent", stillingsId)
         loggHvisDiff(dbStilling.innhold.properties, arbeidsplassenStilling.properties, "workday", stillingsId)
