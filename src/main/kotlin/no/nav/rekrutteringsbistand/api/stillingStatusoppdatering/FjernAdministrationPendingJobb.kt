@@ -16,7 +16,7 @@ class FjernAdministrationPendingJobb(
     private val leaderElection: LeaderElection
 ) {
 
-    @Scheduled(cron = "0 30 * * * *") // TODO: Endre til kun en gang om dagen etter at jeg har testet ferdig
+    @Scheduled(cron = "0 35 * * * *") // TODO: Endre til kun en gang om dagen etter at jeg har testet ferdig
     fun aktiverOgDeaktiverStillingerJobb() {
         // Sjekker om det er leader, slik at jobben kun kjører på en pod
         if (leaderElection.isLeader()) {
