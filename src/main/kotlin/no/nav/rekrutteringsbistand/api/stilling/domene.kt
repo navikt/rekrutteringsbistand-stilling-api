@@ -476,4 +476,16 @@ enum class Status {
         return name
     }
 }
+enum class AdminStatus {
+    RECEIVED,
+    PENDING,
+    APPROVED,
+    REJECTED,
+    STOPPED,
+    DONE;
+
+    override fun toString(): String {
+        return name
+    }
+}
 

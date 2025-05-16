@@ -10,6 +10,7 @@ import no.nav.rekrutteringsbistand.api.Testdata.stillingerSomSkalDeaktiveres
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
@@ -145,5 +146,44 @@ class DirektemeldtStillingRepositoryTest {
         val direktemeldteStillinger = repository.hentAlleDirektemeldteStillinger()
 
         assertEquals(0, direktemeldteStillinger.size)
+    }
+
+    @Test
+    fun `hentUtgåtteStillingerFor6mndSidenSomErPending skal finne en stilling med utløpsdato over 6mnd`() {
+        val stilling = enDirektemeldtStilling.copy(
+            adminStatus = "PENDING",
+            utløpsdato = ZonedDateTime.now(ZoneId.of("Europe/Oslo")).minusMonths(6)
+        )
+        repository.lagreDirektemeldtStilling(stilling)
+
+        val søkeresultat = repository.hentUtgåtteStillingerFor6mndSidenSomErPending()
+        assertEquals(1, søkeresultat.size)
+    }
+
+    @Test
+    fun `hentUtgåtteStillingerFor6mndSidenSomErPending skal ikke finne stillinger med utløpsdato nyere en 6mnd eller andre statuser en DONE`() {
+        val stillingerSomIkkeSkalGiTreff = listOf(
+            enDirektemeldtStilling.copy(
+                adminStatus = "PENDING",
+                utløpsdato = ZonedDateTime.now(ZoneId.of("Europe/Oslo")).minusMonths(6).plusDays(1)
+            ),
+            enDirektemeldtStilling.copy(
+                adminStatus = "PENDING",
+                utløpsdato = ZonedDateTime.now(ZoneId.of("Europe/Oslo"))
+            ),
+            enDirektemeldtStilling.copy(
+                adminStatus = "DONE",
+                utløpsdato = ZonedDateTime.now(ZoneId.of("Europe/Oslo")).minusMonths(6)
+            ),
+            enDirektemeldtStilling.copy(
+                adminStatus = "REJECTED",
+                utløpsdato = ZonedDateTime.now(ZoneId.of("Europe/Oslo")).minusMonths(6)
+            ),
+        )
+        stillingerSomIkkeSkalGiTreff.forEach {
+            repository.lagreDirektemeldtStilling(it)
+        }
+
+        assertTrue(repository.hentUtgåtteStillingerFor6mndSidenSomErPending().isEmpty())
     }
 }

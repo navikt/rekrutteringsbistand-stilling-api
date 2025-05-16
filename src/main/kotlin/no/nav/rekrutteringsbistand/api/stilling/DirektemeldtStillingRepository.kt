@@ -165,6 +165,22 @@ class DirektemeldtStillingRepository(private val namedJdbcTemplate: NamedParamet
         ).filterNotNull()
     }
 
+
+    fun hentUtgåtteStillingerFor6mndSidenSomErPending(): List<DirektemeldtStilling> {
+        val sql = """
+            select $ID, $STILLINGSID, $INNHOLD, $OPPRETTET, $OPPRETTET_AV, $SIST_ENDRET, $SIST_ENDRET_AV, $STATUS, $PUBLISERT, $PUBLISERT_AV_ADMIN, $ADMIN_STATUS, $UTLØPSDATO, $VERSJON
+            from
+                $DIREKTEMELDT_STILLING_TABELL
+            where
+                $ADMIN_STATUS = '${AdminStatus.PENDING}'
+                and $UTLØPSDATO <  now() - interval '6 month'
+        """.trimIndent()
+
+        return namedJdbcTemplate.query(
+            sql, DirektemeldtStillingRowMapper()
+        ).filterNotNull()
+    }
+
     class DirektemeldtStillingRowMapper : RowMapper<DirektemeldtStilling?> {
         @Throws(SQLException::class)
         override fun mapRow(rs: ResultSet, rowNum: Int): DirektemeldtStilling {
