@@ -58,10 +58,10 @@ class GeografiServiceTest {
 
 
     @Test
-    fun `Test at fylke blir returnert hvis kommunenr finnes`() {
+    fun `Test at fylke blir returnert hvis fylke finnes`() {
         whenever(geografiKlient.hentAllePostdata()).thenReturn(postData)
 
-        val fylke = geografiService.finnFylke("1201")
+        val fylke = geografiService.finnFylke("hordaland")
 
         assertEquals("HORDALAND", fylke)
     }
