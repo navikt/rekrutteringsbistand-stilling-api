@@ -17,4 +17,28 @@ class GeografiService(
         }
         return fylke
     }
+
+    fun finnPostdata(postnummer: String): PostDataDTO? {
+        val postdata = geografiKlient.hentAllePostdata()
+
+        val postdataDTO = postdata.find { it.postkode == postnummer }
+
+        if (postdataDTO == null) {
+            log.warn("Fant ikke postdata for $postnummer")
+        }
+        return postdataDTO
+    }
+
+    fun finnPostdataFraKommune(kommunenummer: String?, kommuneNavn: String?): PostDataDTO? {
+        val postdata = geografiKlient.hentAllePostdata()
+
+        if(!kommunenummer.isNullOrBlank()) {
+            return postdata.find { it.kommune.kommunenummer == kommunenummer }
+        }
+
+        if(!kommuneNavn.isNullOrBlank()) {
+            return postdata.find { it.kommune.navn == kommuneNavn.uppercase() }
+        }
+        return null
+    }
 }
