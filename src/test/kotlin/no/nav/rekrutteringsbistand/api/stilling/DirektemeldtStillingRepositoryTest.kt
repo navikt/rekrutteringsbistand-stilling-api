@@ -152,7 +152,7 @@ class DirektemeldtStillingRepositoryTest {
     fun `hentUtgåtteStillingerFor6mndSidenSomErPending skal finne en stilling med utløpsdato over 6mnd`() {
         val stilling = enDirektemeldtStilling.copy(
             adminStatus = "PENDING",
-            utløpsdato = ZonedDateTime.now(ZoneId.of("Europe/Oslo")).minusMonths(6)
+            utløpsdato = ZonedDateTime.now(ZoneId.of("Europe/Oslo")).minusMonths(6).minusDays(1)
         )
         repository.lagreDirektemeldtStilling(stilling)
 
