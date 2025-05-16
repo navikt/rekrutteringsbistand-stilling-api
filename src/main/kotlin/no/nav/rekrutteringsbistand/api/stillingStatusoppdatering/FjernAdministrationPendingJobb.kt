@@ -16,7 +16,7 @@ class FjernAdministrationPendingJobb(
     private val leaderElection: LeaderElection
 ) {
 
-    @Scheduled(cron = "0 35 * * * *") // TODO: Endre til kun en gang om dagen etter at jeg har testet ferdig
+    @Scheduled(cron = "0 10 * * * *") // TODO: Endre til kun en gang om dagen etter at jeg har testet ferdig
     fun aktiverOgDeaktiverStillingerJobb() {
         // Sjekker om det er leader, slik at jobben kun kjører på en pod
         if (leaderElection.isLeader()) {
@@ -25,14 +25,14 @@ class FjernAdministrationPendingJobb(
             log.info("Fant ${stillingerSomSkalSettesTilDone.size} stillinger som skal settes til Done")
 
             // TODO: Kommenter inn når spørringen over er verifisert
-//            stillingerSomSkalSettesTilDone.forEach {
-//                val stillingNyAdminStatus = it.copy(
-//                    adminStatus = AdminStatus.DONE.toString(),
-//                    sistEndret = ZonedDateTime.now(ZoneId.of("Europe/Oslo"))
-//                )
-//                direktemeldtStillingRepository.lagreDirektemeldtStilling(stillingNyAdminStatus)
-//                log.info("Satt AdminStatus DONE for ${it.stillingsId}")
-//            }
+            stillingerSomSkalSettesTilDone.forEach {
+                val stillingNyAdminStatus = it.copy(
+                    adminStatus = AdminStatus.DONE.toString(),
+                    sistEndret = ZonedDateTime.now(ZoneId.of("Europe/Oslo"))
+                )
+                direktemeldtStillingRepository.lagreDirektemeldtStilling(stillingNyAdminStatus)
+                log.info("Satt AdminStatus DONE for ${it.stillingsId} pga eldre en 6mnd")
+            }
         }
     }
 }
