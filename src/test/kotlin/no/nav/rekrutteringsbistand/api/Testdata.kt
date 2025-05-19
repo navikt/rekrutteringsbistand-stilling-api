@@ -165,7 +165,6 @@ object Testdata {
         innhold = DirektemeldtStillingInnhold(
             title = "Stilling 2",
             administration = DirektemeldtStillingAdministration(
-                status = "DONE",
                 comments = "",
                 reportee = enVeileder.displayName,
                 remarks = listOf(),
@@ -217,7 +216,6 @@ object Testdata {
             innhold = DirektemeldtStillingInnhold(
                 title = "Stilling 1",
                 administration = DirektemeldtStillingAdministration(
-                    status = "DONE",
                     comments = "",
                     reportee = enVeileder.displayName,
                     remarks = listOf(),
@@ -267,7 +265,6 @@ object Testdata {
             innhold = DirektemeldtStillingInnhold(
                 title = "Stilling 2",
                 administration = DirektemeldtStillingAdministration(
-                    status = "DONE",
                     comments = "",
                     reportee = enVeileder.displayName,
                     remarks = listOf(),
@@ -317,7 +314,6 @@ object Testdata {
             innhold = DirektemeldtStillingInnhold(
                 title = "Stilling 3",
                 administration = DirektemeldtStillingAdministration(
-                    status = "PENDING",
                     comments = "",
                     reportee = enVeileder.displayName,
                     remarks = listOf(),
@@ -369,7 +365,6 @@ object Testdata {
         innhold = DirektemeldtStillingInnhold(
             title = "Stilling 6",
             administration = DirektemeldtStillingAdministration(
-                status = "PENDING",
                 comments = "",
                 reportee = enVeileder.displayName,
                 remarks = listOf(),
@@ -422,7 +417,6 @@ object Testdata {
             innhold = DirektemeldtStillingInnhold(
                 title = "Stilling 4",
                 administration = DirektemeldtStillingAdministration(
-                    status = "DONE",
                     comments = "",
                     reportee = enVeileder.displayName,
                     remarks = listOf(),
@@ -472,7 +466,6 @@ object Testdata {
             innhold = DirektemeldtStillingInnhold(
                 title = "Stilling 12",
                 administration = DirektemeldtStillingAdministration(
-                    status = "DONE",
                     comments = "",
                     reportee = enVeileder.displayName,
                     remarks = listOf(),
@@ -524,7 +517,6 @@ object Testdata {
         innhold = DirektemeldtStillingInnhold(
             title = "Stilling 3",
             administration = DirektemeldtStillingAdministration(
-                status = "PENDING",
                 comments = "",
                 reportee = enVeileder.displayName,
                 remarks = listOf(),
