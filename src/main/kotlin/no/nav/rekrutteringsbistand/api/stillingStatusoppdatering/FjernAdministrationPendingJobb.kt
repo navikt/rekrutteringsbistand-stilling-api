@@ -17,7 +17,7 @@ class FjernAdministrationPendingJobb(
 ) {
 
     @Scheduled(cron = "0 30 0 * * *")
-    fun aktiverOgDeaktiverStillingerJobb() {
+    fun fjernAdministrationPendingJobb() {
         // Sjekker om det er leader, slik at jobben kun kjører på en pod
         if (leaderElection.isLeader()) {
             log.info("Startet jobb for å sette Adminstatus til DONE")
