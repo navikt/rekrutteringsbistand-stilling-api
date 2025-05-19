@@ -137,6 +137,8 @@ class StillingService(
         val id = Stillingsid(dto.stilling.uuid)
         val eksisterendeStillingsinfo: Stillingsinfo? = stillingsinfoService.hentForStilling(id)
 
+        val eksisterendeStilling = direktemeldtStillingRepository.hentDirektemeldtStilling(id)
+
         var publishedByAdmin: String? = dto.stilling.publishedByAdmin
         if(dto.stilling.firstPublished != null && dto.stilling.firstPublished && publishedByAdmin == null) {
             publishedByAdmin = LocalDateTime.now(ZoneId.of("Europe/Oslo")).toString()
@@ -156,7 +158,7 @@ class StillingService(
                 sistEndretAv = stilling.updatedBy,
                 sistEndret = stilling.updated.atZone(ZoneId.of("Europe/Oslo")),
                 status = stilling.status,
-                annonseId = dto.stilling.id,
+                annonseId = eksisterendeStilling?.annonseId ?: dto.stilling.id,
                 utløpsdato = dto.stilling.hentExpiresMedDefaultVerdiOmIkkeOppgitt(),
                 publisert = dto.stilling.published?.atZone(ZoneId.of("Europe/Oslo")),
                 publisertAvAdmin = publishedByAdmin,
