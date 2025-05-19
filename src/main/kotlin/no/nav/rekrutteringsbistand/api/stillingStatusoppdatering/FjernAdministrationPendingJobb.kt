@@ -28,7 +28,6 @@ class FjernAdministrationPendingJobb(
                 val stillingNyAdminStatus = it.copy(
                     adminStatus = AdminStatus.DONE.toString(),
                     sistEndret = ZonedDateTime.now(ZoneId.of("Europe/Oslo")),
-                    innhold = it.innhold.copy(administration = it.innhold.administration?.copy(status = AdminStatus.DONE.toString())),
                 )
                 direktemeldtStillingRepository.lagreDirektemeldtStilling(stillingNyAdminStatus)
                 log.info("Satt AdminStatus DONE for ${it.stillingsId} pga eldre enn 6mnd")

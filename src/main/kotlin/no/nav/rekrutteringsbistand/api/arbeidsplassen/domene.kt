@@ -44,7 +44,6 @@ data class OpprettStillingDto(
             title = title,
             administration = administration.let {
                 DirektemeldtStillingAdministration(
-                    status = it.status,
                     comments = null,
                     reportee = it.reportee,
                     navIdent = it.navIdent,

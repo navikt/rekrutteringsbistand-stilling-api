@@ -31,11 +31,11 @@ class AktiverOgDeaktiverStillingerService(
         stillingerForDeaktivering.forEach {
             log.info("Sjekker stilling ${it.stillingsId} med publisert ${it.publisert} og expires ${it.utløpsdato}")
 
-            if(it.innhold.administration?.status != Status.DONE.toString()) {
+            if(it.adminStatus != Status.DONE.toString()) {
                 // Setter administration til done for hvis den ikke er det og har utløpt
                 val stillingNyStatus = it.copy(status = Status.INACTIVE.toString(),
                     sistEndret = ZonedDateTime.now(ZoneId.of("Europe/Oslo")),
-                    innhold = it.innhold.copy(administration = it.innhold.administration?.copy(status = Status.DONE.toString())))
+                    adminStatus = Status.DONE.toString())
                 direktemeldtStillingRepository.lagreDirektemeldtStilling(stillingNyStatus)
             } else {
                 val stillingNyStatus = it.copy(status = Status.INACTIVE.toString(), sistEndret = ZonedDateTime.now(ZoneId.of("Europe/Oslo")))

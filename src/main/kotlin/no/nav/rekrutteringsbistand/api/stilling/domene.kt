@@ -69,7 +69,6 @@ data class Stilling(
             title = title,
             administration = administration?.let {
                 DirektemeldtStillingAdministration(
-                    status = it.status,
                     comments = it.comments,
                     reportee = it.reportee,
                     navIdent = it.navIdent,
@@ -340,16 +339,15 @@ data class DirektemeldtStillingKategori(
 }
 
 data class DirektemeldtStillingAdministration(
-    val status: String?,
     val comments: String?,
     val reportee: String?,
     val remarks: List<String> = ArrayList(),
     val navIdent: String?
 ) {
-    fun toAdministration(): Administration {
+    fun toAdministration(adminStatus: String): Administration {
         return Administration(
             id = 0,
-            status = status,
+            status = adminStatus,
             comments = comments,
             reportee = reportee,
             remarks = remarks,
@@ -441,7 +439,7 @@ data class DirektemeldtStilling(
             updatedBy = sistEndretAv,
             title = innhold.title,
             status = status,
-            administration = innhold.administration?.toAdministration(),
+            administration = innhold.administration?.toAdministration(adminStatus ?: ""),
             mediaList = innhold.mediaList,
             contactList = innhold.contactList,
             privacy = innhold.privacy,
