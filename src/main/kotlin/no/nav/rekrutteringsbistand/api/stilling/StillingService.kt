@@ -36,16 +36,16 @@ class StillingService(
         somSystembruker: Boolean = false
     ): RekrutteringsbistandStilling {
         val stillingsinfo = stillingsinfoService.hentForStilling(Stillingsid(stillingsId))?.asStillingsinfoDto()
+        val arbeidsplassenStilling = arbeidsplassenKlient.hentStilling(stillingsId, somSystembruker)
 
         direktemeldtStillingRepository.hentDirektemeldtStilling(stillingsId)?.let { direktemeldtStilling ->
             log.info("Hentet stilling fra databasen $stillingsId")
             return RekrutteringsbistandStilling(
-                stilling = direktemeldtStilling.toStilling(),
+                stilling = direktemeldtStilling.toStilling().copy(id = arbeidsplassenStilling.id),
                 stillingsinfo = stillingsinfo
             )
         }
 
-        arbeidsplassenKlient.hentStilling(stillingsId, somSystembruker)
 
         val stilling = stillingssokProxyClient.hentStilling(stillingsId, somSystembruker)
         log.info("Hentet stilling fra OpenSearch $stillingsId")
@@ -104,7 +104,7 @@ class StillingService(
         val stillingsinfo = stillingsinfoService.hentStillingsinfo(opprettetStillingArbeidsplassen)
 
         return RekrutteringsbistandStilling(
-            stilling = direktemeldtStillingFraDb.toStilling(),
+            stilling = direktemeldtStillingFraDb.toStilling().copy(id = opprettetStillingArbeidsplassen.id),
             stillingsinfo = stillingsinfo?.asStillingsinfoDto()
         ).also {
             kandidatlisteKlient.sendStillingOppdatert(it)
@@ -172,7 +172,7 @@ class StillingService(
         log.info("Oppdaterte stilling hos Arbeidsplassen med uuid: ${dto.stilling.uuid}")
 
         return OppdaterRekrutteringsbistandStillingDto(
-            stilling = direktemeldtStillingFraDb.toStilling(),
+            stilling = direktemeldtStillingFraDb.toStilling().copy(id = oppdatertStilling.id),
             stillingsinfoid = eksisterendeStillingsinfo?.stillingsinfoid?.asString()
         ).also {
             if (oppdatertStilling.source.equals("DIR", ignoreCase = false)) {
