@@ -22,7 +22,7 @@ class StillingsinfoRepository(
                 EIER_NAVN to stillingsinfo.eier?.navn,
                 NOTAT to null,
                 STILLINGSKATEGORI to stillingsinfo.stillingskategori?.name,
-                EIER_NAVKONTOR_ENHETID to stillingsinfo.eierNavKontorEnhetId,
+                EIER_NAVKONTOR_ENHETID to stillingsinfo.eier?.navKontorEnhetId,
             )
         )
     }
@@ -39,11 +39,21 @@ class StillingsinfoRepository(
 
     fun oppdaterEier(stillingsinfoId: Stillingsinfoid, nyEier: Eier?) =
         namedJdbcTemplate.update(
-            "update $STILLINGSINFO set $EIER_NAVIDENT=:eier_navident, $EIER_NAVN=:eier_navn where $STILLINGSINFOID=:stillingsinfoid",
+            "update $STILLINGSINFO set $EIER_NAVIDENT=:eier_navident, $EIER_NAVN=:eier_navn, $EIER_NAVKONTOR_ENHETID=:eier_navkontor_enhetid where $STILLINGSINFOID=:stillingsinfoid",
             mapOf(
                 "stillingsinfoid" to stillingsinfoId.asString(),
                 "eier_navident" to nyEier?.navident,
-                "eier_navn" to nyEier?.navn
+                "eier_navn" to nyEier?.navn,
+                "eier_navkontor_enhetid" to nyEier?.navKontorEnhetId,
+            )
+        )
+
+    fun oppdaterNavKontorEnhetId(stillingsinfoId: Stillingsinfoid, navKontorEnhetId: String) =
+        namedJdbcTemplate.update(
+            "update $STILLINGSINFO set $EIER_NAVKONTOR_ENHETID=:eier_navkontor_enhetid where $STILLINGSINFOID=:stillingsinfoid",
+            mapOf(
+                "stillingsinfoid" to stillingsinfoId.asString(),
+                "eier_navkontor_enhetid" to navKontorEnhetId,
             )
         )
 

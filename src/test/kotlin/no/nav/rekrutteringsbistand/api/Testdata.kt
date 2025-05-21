@@ -63,6 +63,8 @@ object Testdata {
     fun enOpprettRekrutteringsbistandstillingDtoMedKategori(kategori: Stillingskategori) = OpprettRekrutteringsbistandstillingDto(
         stilling = enOpprettStillingDto,
         kategori = kategori,
+        eierNavn = "Clark Kent",
+        eierNavident = "C12345",
         eierNavKontorEnhetId = "1234",
     )
 
@@ -118,15 +120,15 @@ object Testdata {
     val enStillingsinfo = Stillingsinfo(
         stillingsinfoid = Stillingsinfoid(UUID.randomUUID()),
         stillingsid = Stillingsid(enStilling.uuid),
-        eier = Eier(navident = enVeileder.navIdent, navn = enVeileder.displayName),
+        eier = Eier(navident = enVeileder.navIdent, navn = enVeileder.displayName, navKontorEnhetId = "1234"),
         stillingskategori = null,
-        eierNavKontorEnhetId = "1234"
     )
 
     val enStillingsinfoInboundDto = StillingsinfoInboundDto(
         stillingsid = enStilling.uuid,
         eierNavident = enVeileder.navIdent,
-        eierNavn = enVeileder.displayName
+        eierNavn = enVeileder.displayName,
+        eierNavKontorEnhetId = "1234",
     )
 
     val enStillingsinfoUtenEier = Stillingsinfo(
@@ -134,20 +136,18 @@ object Testdata {
         stillingsid = Stillingsid(enStilling.uuid),
         eier = null,
         stillingskategori = null,
-        eierNavKontorEnhetId = "1234",
     )
 
     val enAnnenStillingsinfo = Stillingsinfo(
         stillingsinfoid = Stillingsinfoid(UUID.randomUUID()),
         stillingsid = Stillingsid(enAnnenStilling.uuid),
-        eier = Eier(navident = enVeileder.navIdent, navn = enVeileder.displayName),
+        eier = Eier(navident = enVeileder.navIdent, navn = enVeileder.displayName, navKontorEnhetId = "1234"),
         stillingskategori = null,
-        eierNavKontorEnhetId = "1234",
     )
 
     val enStillingsinfoOppdatering = OppdaterEier(
         stillingsinfoid = enStillingsinfo.stillingsinfoid,
-        eier = Eier(navident = enVeileder.navIdent, navn = enVeileder.displayName)
+        eier = Eier(navident = enVeileder.navIdent, navn = enVeileder.displayName, navKontorEnhetId = "1234"),
     )
 
     val enRekrutteringsbistandStilling = RekrutteringsbistandStilling(

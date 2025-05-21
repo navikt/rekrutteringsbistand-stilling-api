@@ -152,7 +152,6 @@ internal class StillingEksternComponentTest {
             stillingsid = Stillingsid(stilling.uuid),
             eier = null,
             stillingskategori = stillingskategori,
-            eierNavKontorEnhetId = "1234",
         )
         repository.opprett(stillingsinfo)
         mockUtenAuthorization("/b2b/api/v1/ads/${stilling.uuid}", stilling)

@@ -13,5 +13,6 @@ data class RekrutteringsbistandStilling(
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class OppdaterRekrutteringsbistandStillingDto(
     val stillingsinfoid: String?,
-    val stilling: Stilling
+    val stilling: Stilling,
+    val eierNavKontorEnhetId: String?,
 )

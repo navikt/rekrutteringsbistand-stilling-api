@@ -325,7 +325,11 @@ private class Kall(private val webClient: WebTestClient, private val mockLogin: 
             return put(
                 stillingPath,
                 rolle,
-                OppdaterRekrutteringsbistandStillingDto(stillingsInfo.stillingsinfoid.asString(), stilling)
+                OppdaterRekrutteringsbistandStillingDto(
+                    stillingsinfoid = stillingsInfo.stillingsinfoid.asString(),
+                    stilling = stilling,
+                    eierNavKontorEnhetId = stillingsInfo.eier?.navKontorEnhetId
+                )
             )
         }
     }
@@ -339,7 +343,7 @@ private class Kall(private val webClient: WebTestClient, private val mockLogin: 
             put(
                 stillingInfoPath,
                 rolle,
-                StillingsinfoInboundDto(stilling.uuid, "A123456", "Test Testesen")
+                StillingsinfoInboundDto(stilling.uuid, "A123456", "Test Testesen", "1234")
             )
         }
     }
@@ -607,7 +611,7 @@ private class Stubber(
     fun mockStillingsInfo(stillingsId: String, stillingskategori: Stillingskategori) {
         stillingsinfoRepository.opprett(Stillingsinfo(
             Stillingsinfoid.ny(),
-            Stillingsid(stillingsId), null, stillingskategori, null
+            Stillingsid(stillingsId), null, stillingskategori
         ))
     }
 }

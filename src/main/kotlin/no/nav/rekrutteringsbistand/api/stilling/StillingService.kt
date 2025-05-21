@@ -60,6 +60,8 @@ class StillingService(
         return opprettStilling(
             opprettStilling = opprettDto.stilling.toArbeidsplassenDto(title = "Ny stilling"),
             stillingskategori = opprettDto.kategori,
+            eierNavident = opprettDto.eierNavident,
+            eierNavn = opprettDto.eierNavn,
             eierNavKontorEnhetId = opprettDto.eierNavKontorEnhetId,
         )
     }
@@ -67,7 +69,9 @@ class StillingService(
     private fun opprettStilling(
         opprettStilling: OpprettStillingDto,
         stillingskategori: Stillingskategori,
-        eierNavKontorEnhetId: String?
+        eierNavident: String?,
+        eierNavn: String?,
+        eierNavKontorEnhetId: String?,
     ): RekrutteringsbistandStilling {
         val populertGeografi = populerGeografi(opprettStilling.employer?.location)
         var stilling = opprettStilling.copy(employer = opprettStilling.employer?.copy(location = populertGeografi))
@@ -104,6 +108,8 @@ class StillingService(
         stillingsinfoService.opprettStillingsinfo(
             stillingsId = stillingsId,
             stillingskategori = stillingskategori,
+            eierNavident = eierNavident,
+            eierNavn = eierNavn,
             eierNavKontorEnhetId = eierNavKontorEnhetId,
         )
 
@@ -126,9 +132,10 @@ class StillingService(
             opprettStilling = kopi,
             stillingskategori = kategoriMedDefault(eksisterendeRekrutteringsbistandStilling.stillingsinfo),
             eierNavKontorEnhetId = eksisterendeRekrutteringsbistandStilling.stillingsinfo?.eierNavKontorEnhetId,
+            eierNavident = eksisterendeRekrutteringsbistandStilling.stillingsinfo?.eierNavident,
+            eierNavn = eksisterendeRekrutteringsbistandStilling.stillingsinfo?.eierNavn,
         )
     }
-
 
     fun kategoriMedDefault(stillingsInfo: StillingsinfoDto?) =
         if (stillingsInfo?.stillingskategori == null) Stillingskategori.STILLING else stillingsInfo.stillingskategori
@@ -143,6 +150,14 @@ class StillingService(
 
         val id = Stillingsid(dto.stilling.uuid)
         val eksisterendeStillingsinfo: Stillingsinfo? = stillingsinfoService.hentForStilling(id)
+        if (eksisterendeStillingsinfo != null && dto.eierNavKontorEnhetId != null) {
+            stillingsinfoService.endreNavKontor(
+                stillingsinfoId = eksisterendeStillingsinfo.stillingsinfoid,
+                navKontorEnhetId = dto.eierNavKontorEnhetId,
+            )
+        } else if (eksisterendeStillingsinfo == null) {
+            log.info("Fant ikke stillingsinfo for stilling med id ved en oppdatering: ${dto.stilling.uuid}")
+        }
 
         val eksisterendeStilling = direktemeldtStillingRepository.hentDirektemeldtStilling(id)
 
@@ -182,7 +197,8 @@ class StillingService(
 
         return OppdaterRekrutteringsbistandStillingDto(
             stilling = direktemeldtStillingFraDb.toStilling().copy(id = oppdatertStilling.id),
-            stillingsinfoid = eksisterendeStillingsinfo?.stillingsinfoid?.asString()
+            stillingsinfoid = eksisterendeStillingsinfo?.stillingsinfoid?.asString(),
+            eierNavKontorEnhetId = eksisterendeStillingsinfo?.eier?.navKontorEnhetId,
         ).also {
             if (oppdatertStilling.source.equals("DIR", ignoreCase = false)) {
                 kandidatlisteKlient.sendStillingOppdatert(

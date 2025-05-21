@@ -272,6 +272,8 @@ data class Page<T>(
 
 data class OpprettRekrutteringsbistandstillingDto(
     val kategori: Stillingskategori,
+    val eierNavident: String?,
+    val eierNavn: String?,
     val eierNavKontorEnhetId: String?,
     val stilling: OpprettStillingDto,
 )

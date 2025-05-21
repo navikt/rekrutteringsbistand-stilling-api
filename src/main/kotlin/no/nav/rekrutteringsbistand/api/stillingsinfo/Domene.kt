@@ -8,15 +8,14 @@ data class Stillingsinfo(
     val stillingsid: Stillingsid,
     val eier: Eier?,
     val stillingskategori: Stillingskategori? = Stillingskategori.STILLING,
-    val eierNavKontorEnhetId: String?
 ) {
     fun asStillingsinfoDto() = StillingsinfoDto(
         stillingsid = this.stillingsid.asString(),
         stillingsinfoid = this.stillingsinfoid.toString(),
         eierNavident = this.eier?.navident,
         eierNavn = this.eier?.navn,
+        eierNavKontorEnhetId = this.eier?.navKontorEnhetId,
         stillingskategori = this.stillingskategori,
-        eierNavKontorEnhetId = this.eierNavKontorEnhetId,
     )
 
     companion object {
@@ -26,10 +25,10 @@ data class Stillingsinfo(
                 stillingsid = Stillingsid(verdi = rs.getString("stillingsid")),
                 eier = if (rs.getString("eier_navident") == null) null else Eier(
                     navident = rs.getString("eier_navident"),
-                    navn = rs.getString("eier_navn")
+                    navn = rs.getString("eier_navn"),
+                    navKontorEnhetId = rs.getString("eier_navkontor_enhetid"),
                 ),
                 stillingskategori = Stillingskategori.fraDatabase(rs.getString("stillingskategori")),
-                eierNavKontorEnhetId = rs.getString("eier_navkontor_enhetid"),
             )
     }
 }
@@ -55,7 +54,7 @@ data class Stillingsid(val verdi: UUID) {
     override fun toString(): String = asString()
 }
 
-data class Eier(val navident: String?, val navn: String?)
+data class Eier(val navident: String?, val navn: String?, val navKontorEnhetId: String?)
 
 data class StillingsinfoDto(
     val stillingsid: String,

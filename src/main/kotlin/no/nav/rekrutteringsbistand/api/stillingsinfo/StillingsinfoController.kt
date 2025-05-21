@@ -30,7 +30,7 @@ class StillingsinfoController(
         val forrigeEier = forrigeStillingsinfo?.eier?.navident
 
         AuditLogg.loggOvertattStilling(navIdent = dto.eierNavident, forrigeEier=forrigeEier, stillingsid=dto.stillingsid)
-        val nyEier = Eier(dto.eierNavident, dto.eierNavn)
+        val nyEier = Eier(dto.eierNavident, dto.eierNavn, dto.eierNavKontorEnhetId)
         val oppdatertStillingsinfo =
             service.overtaEierskapForEksternStillingOgKandidatliste(stillingsId = stillingsid, nyEier = nyEier)
 
@@ -41,5 +41,6 @@ class StillingsinfoController(
 data class StillingsinfoInboundDto(
     val stillingsid: String,
     val eierNavident: String,
-    val eierNavn: String
+    val eierNavn: String,
+    val eierNavKontorEnhetId: String?,
 )

@@ -58,7 +58,7 @@ class StillingPopulatorTest {
         val stillingensPubliseringstidspunkt = LocalDateTime.now().truncatedTo(ChronoUnit.MILLIS)
 
         val stillingsinfoid = Stillingsinfoid(UUID.randomUUID())
-        val eier = Eier("AB123456", "Navnesen")
+        val eier = Eier("AB123456", "Navnesen", "1234")
         val stillingskategori = Stillingskategori.STILLING
         val stillingsinfoDto = StillingsinfoDto(stillingsId.asString(), stillingsinfoid.asString(), eier.navident, eier.navn, stillingskategori, "1234")
 
@@ -147,7 +147,7 @@ class StillingPopulatorTest {
         val stillingsId = Stillingsid(UUID.randomUUID())
 
         val stillingsinfoid = Stillingsinfoid(UUID.randomUUID())
-        val eier = Eier("AB123456", "Navnesen")
+        val eier = Eier("AB123456", "Navnesen", "1234")
         val stillingskategori = Stillingskategori.STILLING
         val stillingsinfoDto = StillingsinfoDto(stillingsId.asString(), stillingsinfoid.asString(), eier.navident, eier.navn, stillingskategori, "1234")
 
@@ -200,7 +200,7 @@ class StillingPopulatorTest {
         val stillingsId = Stillingsid(UUID.randomUUID())
 
         val stillingsinfoid = Stillingsinfoid(UUID.randomUUID())
-        val eier = Eier("AB123456", "Navnesen")
+        val eier = Eier("AB123456", "Navnesen", "1234")
         val stillingskategori = Stillingskategori.STILLING
         val stillingsinfoDto = StillingsinfoDto(stillingsId.asString(), stillingsinfoid.asString(), eier.navident, eier.navn, stillingskategori, "1234")
 
@@ -254,7 +254,7 @@ class StillingPopulatorTest {
         val stillingsId = Stillingsid(UUID.randomUUID())
 
         val stillingsinfoid = Stillingsinfoid(UUID.randomUUID())
-        val eier = Eier("AB123456", "Navnesen")
+        val eier = Eier("AB123456", "Navnesen", "1234")
         val stillingskategori = Stillingskategori.STILLING
         val stillingsinfoDto = StillingsinfoDto(stillingsId.asString(), stillingsinfoid.asString(), eier.navident, eier.navn, stillingskategori, "1234")
 

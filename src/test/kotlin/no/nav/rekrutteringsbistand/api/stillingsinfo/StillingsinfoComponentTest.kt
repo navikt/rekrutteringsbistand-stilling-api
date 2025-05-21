@@ -123,12 +123,13 @@ class StillingsinfoComponentTest {
 
     @Test
     fun `Når vi prøver å endre eier og kall mot kandidat-api feiler så skal ingen endringer ha blitt lagret`() {
-        val stillingsinfo = enStillingsinfo.copy(eier = Eier("Y111111", "Et Navn"))
+        val stillingsinfo = enStillingsinfo.copy(eier = Eier("Y111111", "Et Navn", navKontorEnhetId = "1234"))
         repository.opprett(stillingsinfo)
         val endringDto = StillingsinfoInboundDto(
             stillingsid = stillingsinfo.stillingsid.asString(),
             eierNavident = "X998877",
-            eierNavn = "Helt Annet Navn"
+            eierNavn = "Helt Annet Navn",
+            eierNavKontorEnhetId = "1234",
         )
         mockAzureObo(wiremockAzure)
         `when`(kandidatlisteKlient.sendStillingOppdatert(enRekrutteringsbistandStilling)).thenThrow(RuntimeException::class.java)
@@ -153,7 +154,8 @@ class StillingsinfoComponentTest {
         val endringDto = StillingsinfoInboundDto(
             stillingsid = stillingsinfoDerEierErNull.stillingsid.asString(),
             eierNavident = "X998877",
-            eierNavn = "Helt Annet Navn"
+            eierNavn = "Helt Annet Navn",
+            eierNavKontorEnhetId = "1234",
         )
         val rekrutteringsbistandStilling =
             enRekrutteringsbistandStilling.copy(stillingsinfo = stillingsinfoDerEierErNull.asStillingsinfoDto())
@@ -174,7 +176,7 @@ class StillingsinfoComponentTest {
     @Test
     fun `Når vi prøver å endre eier på en formidlingsstilling skal vi returnere 403 Forbidden`() {
         val stillingsinfoForFormidlingsstilling = enStillingsinfo.copy(
-            eier = Eier(navident = "A123456", navn = "En veileder"),
+            eier = Eier(navident = "A123456", navn = "En veileder", navKontorEnhetId = "1234"),
             stillingskategori = Stillingskategori.FORMIDLING
         )
 
@@ -183,7 +185,8 @@ class StillingsinfoComponentTest {
         val endringDto = StillingsinfoInboundDto(
             stillingsid = stillingsinfoForFormidlingsstilling.stillingsid.asString(),
             eierNavident = "X998877",
-            eierNavn = "Helt Annet Navn"
+            eierNavn = "Helt Annet Navn",
+            eierNavKontorEnhetId = "1234",
         )
 
         val respons = restTemplate.exchange(
