@@ -7,14 +7,16 @@ data class Stillingsinfo(
     val stillingsinfoid: Stillingsinfoid,
     val stillingsid: Stillingsid,
     val eier: Eier?,
-    val stillingskategori: Stillingskategori? = Stillingskategori.STILLING
+    val stillingskategori: Stillingskategori? = Stillingskategori.STILLING,
+    val eierNavKontorEnhetId: String?
 ) {
     fun asStillingsinfoDto() = StillingsinfoDto(
         stillingsid = this.stillingsid.asString(),
         stillingsinfoid = this.stillingsinfoid.toString(),
         eierNavident = this.eier?.navident,
         eierNavn = this.eier?.navn,
-        stillingskategori = this.stillingskategori
+        stillingskategori = this.stillingskategori,
+        eierNavKontorEnhetId = this.eierNavKontorEnhetId,
     )
 
     companion object {
@@ -26,7 +28,8 @@ data class Stillingsinfo(
                     navident = rs.getString("eier_navident"),
                     navn = rs.getString("eier_navn")
                 ),
-                stillingskategori = Stillingskategori.fraDatabase(rs.getString("stillingskategori"))
+                stillingskategori = Stillingskategori.fraDatabase(rs.getString("stillingskategori")),
+                eierNavKontorEnhetId = rs.getString("eier_navkontor_enhetid"),
             )
     }
 }
@@ -59,7 +62,8 @@ data class StillingsinfoDto(
     val stillingsinfoid: String,
     val eierNavident: String?,
     val eierNavn: String?,
-    val stillingskategori: Stillingskategori?
+    val stillingskategori: Stillingskategori?,
+    val eierNavKontorEnhetId: String?,
 )
 
 enum class Stillingskategori {

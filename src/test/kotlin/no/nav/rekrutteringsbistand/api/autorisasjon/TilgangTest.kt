@@ -605,8 +605,9 @@ private class Stubber(
     }
 
     fun mockStillingsInfo(stillingsId: String, stillingskategori: Stillingskategori) {
-        stillingsinfoRepository.opprett(Stillingsinfo(Stillingsinfoid.ny(),
-            Stillingsid(stillingsId),null, stillingskategori
+        stillingsinfoRepository.opprett(Stillingsinfo(
+            Stillingsinfoid.ny(),
+            Stillingsid(stillingsId), null, stillingskategori, null
         ))
     }
 }

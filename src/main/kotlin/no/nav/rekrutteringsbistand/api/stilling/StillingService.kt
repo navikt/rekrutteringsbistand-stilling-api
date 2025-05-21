@@ -60,10 +60,15 @@ class StillingService(
         return opprettStilling(
             opprettStilling = opprettDto.stilling.toArbeidsplassenDto(title = "Ny stilling"),
             stillingskategori = opprettDto.kategori,
+            eierNavKontorEnhetId = opprettDto.eierNavKontorEnhetId,
         )
     }
 
-    private fun opprettStilling(opprettStilling: OpprettStillingDto, stillingskategori: Stillingskategori): RekrutteringsbistandStilling {
+    private fun opprettStilling(
+        opprettStilling: OpprettStillingDto,
+        stillingskategori: Stillingskategori,
+        eierNavKontorEnhetId: String?
+    ): RekrutteringsbistandStilling {
         val populertGeografi = populerGeografi(opprettStilling.employer?.location)
         var stilling = opprettStilling.copy(employer = opprettStilling.employer?.copy(location = populertGeografi))
 
@@ -98,7 +103,8 @@ class StillingService(
 
         stillingsinfoService.opprettStillingsinfo(
             stillingsId = stillingsId,
-            stillingskategori = stillingskategori
+            stillingskategori = stillingskategori,
+            eierNavKontorEnhetId = eierNavKontorEnhetId,
         )
 
         val stillingsinfo = stillingsinfoService.hentStillingsinfo(opprettetStillingArbeidsplassen)
@@ -117,8 +123,9 @@ class StillingService(
         val kopi = eksisterendeStilling.toKopiertStilling(tokenUtils)
 
         return opprettStilling(
-            kopi,
-            kategoriMedDefault(eksisterendeRekrutteringsbistandStilling.stillingsinfo)
+            opprettStilling = kopi,
+            stillingskategori = kategoriMedDefault(eksisterendeRekrutteringsbistandStilling.stillingsinfo),
+            eierNavKontorEnhetId = eksisterendeRekrutteringsbistandStilling.stillingsinfo?.eierNavKontorEnhetId,
         )
     }
 

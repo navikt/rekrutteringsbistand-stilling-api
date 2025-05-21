@@ -216,6 +216,7 @@ internal class StillingComponentTest {
             assertThat(it.stilling.privacy).isEqualTo(stilling.privacy)
 
             assertThat(it.stillingsinfo?.stillingskategori).isEqualTo(Stillingskategori.ARBEIDSTRENING)
+            assertThat(it.stillingsinfo?.eierNavKontorEnhetId).isEqualTo("1234")
         }
 
         wiremockPamAdApi.verify(

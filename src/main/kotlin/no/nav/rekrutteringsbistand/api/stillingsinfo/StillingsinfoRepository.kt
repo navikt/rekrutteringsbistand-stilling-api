@@ -21,13 +21,13 @@ class StillingsinfoRepository(
                 EIER_NAVIDENT to stillingsinfo.eier?.navident,
                 EIER_NAVN to stillingsinfo.eier?.navn,
                 NOTAT to null,
-                STILLINGSKATEGORI to stillingsinfo.stillingskategori?.name
+                STILLINGSKATEGORI to stillingsinfo.stillingskategori?.name,
+                EIER_NAVKONTOR_ENHETID to stillingsinfo.eierNavKontorEnhetId,
             )
         )
     }
 
     fun slett(stillingsid: Stillingsid) = slett(stillingsid.asString())
-
 
     fun slett(stillingsid: String) =
         namedJdbcTemplate.update(
@@ -75,5 +75,6 @@ class StillingsinfoRepository(
         const val EIER_NAVN = "eier_navn"
         const val NOTAT = "notat"
         const val STILLINGSKATEGORI = "stillingskategori"
+        const val EIER_NAVKONTOR_ENHETID = "eier_navkontor_enhetid"
     }
 }

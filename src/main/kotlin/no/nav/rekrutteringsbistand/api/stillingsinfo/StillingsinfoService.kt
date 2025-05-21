@@ -31,7 +31,8 @@ class StillingsinfoService(
         val stillingsinfoMedNyEier = opprinneligStillingsinfo?.copy(eier = nyEier) ?: Stillingsinfo(
             stillingsinfoid = Stillingsinfoid(UUID.randomUUID()),
             stillingsid = stillingsId,
-            eier = nyEier
+            eier = nyEier,
+            eierNavKontorEnhetId = null, // TODO: Send inn nytt navkontor
         )
 
         opprinneligStillingsinfo?.let { repo.oppdaterEier(it.stillingsinfoid, nyEier) } ?: repo.opprett(stillingsinfoMedNyEier)
@@ -71,13 +72,18 @@ class StillingsinfoService(
         repo.opprett(stillingsinfo)
     }
 
-    fun opprettStillingsinfo(stillingsId: Stillingsid, stillingskategori: Stillingskategori) {
+    fun opprettStillingsinfo(
+        stillingsId: Stillingsid,
+        stillingskategori: Stillingskategori,
+        eierNavKontorEnhetId: String?
+    ) {
         repo.opprett(
             Stillingsinfo(
                 stillingsinfoid = Stillingsinfoid.ny(),
                 stillingsid = stillingsId,
                 eier = null,
-                stillingskategori = stillingskategori
+                stillingskategori = stillingskategori,
+                eierNavKontorEnhetId = eierNavKontorEnhetId,
             )
         )
     }

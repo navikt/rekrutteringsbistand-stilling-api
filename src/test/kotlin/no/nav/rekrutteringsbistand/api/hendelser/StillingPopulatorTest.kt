@@ -60,7 +60,7 @@ class StillingPopulatorTest {
         val stillingsinfoid = Stillingsinfoid(UUID.randomUUID())
         val eier = Eier("AB123456", "Navnesen")
         val stillingskategori = Stillingskategori.STILLING
-        val stillingsinfoDto = StillingsinfoDto(stillingsId.asString(), stillingsinfoid.asString(), eier.navident, eier.navn, stillingskategori)
+        val stillingsinfoDto = StillingsinfoDto(stillingsId.asString(), stillingsinfoid.asString(), eier.navident, eier.navn, stillingskategori, "1234")
 
         Mockito.`when`(stillingService.hentRekrutteringsbistandStilling(stillingsId.toString(), somSystembruker = true))
             .thenReturn(
@@ -149,7 +149,7 @@ class StillingPopulatorTest {
         val stillingsinfoid = Stillingsinfoid(UUID.randomUUID())
         val eier = Eier("AB123456", "Navnesen")
         val stillingskategori = Stillingskategori.STILLING
-        val stillingsinfoDto = StillingsinfoDto(stillingsId.asString(), stillingsinfoid.asString(), eier.navident, eier.navn, stillingskategori)
+        val stillingsinfoDto = StillingsinfoDto(stillingsId.asString(), stillingsinfoid.asString(), eier.navident, eier.navn, stillingskategori, "1234")
 
 
         Mockito.`when`(stillingService.hentRekrutteringsbistandStilling(stillingsId.toString(), somSystembruker = true))
@@ -202,7 +202,7 @@ class StillingPopulatorTest {
         val stillingsinfoid = Stillingsinfoid(UUID.randomUUID())
         val eier = Eier("AB123456", "Navnesen")
         val stillingskategori = Stillingskategori.STILLING
-        val stillingsinfoDto = StillingsinfoDto(stillingsId.asString(), stillingsinfoid.asString(), eier.navident, eier.navn, stillingskategori)
+        val stillingsinfoDto = StillingsinfoDto(stillingsId.asString(), stillingsinfoid.asString(), eier.navident, eier.navn, stillingskategori, "1234")
 
 
         Mockito.`when`(stillingService.hentRekrutteringsbistandStilling(stillingsId.toString(), somSystembruker = true))
@@ -256,7 +256,7 @@ class StillingPopulatorTest {
         val stillingsinfoid = Stillingsinfoid(UUID.randomUUID())
         val eier = Eier("AB123456", "Navnesen")
         val stillingskategori = Stillingskategori.STILLING
-        val stillingsinfoDto = StillingsinfoDto(stillingsId.asString(), stillingsinfoid.asString(), eier.navident, eier.navn, stillingskategori)
+        val stillingsinfoDto = StillingsinfoDto(stillingsId.asString(), stillingsinfoid.asString(), eier.navident, eier.navn, stillingskategori, "1234")
 
 
         Mockito.`when`(stillingService.hentRekrutteringsbistandStilling(stillingsId.toString(), somSystembruker = true))

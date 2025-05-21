@@ -62,7 +62,8 @@ object Testdata {
 
     fun enOpprettRekrutteringsbistandstillingDtoMedKategori(kategori: Stillingskategori) = OpprettRekrutteringsbistandstillingDto(
         stilling = enOpprettStillingDto,
-        kategori = kategori
+        kategori = kategori,
+        eierNavKontorEnhetId = "1234",
     )
 
     val enOpprettetStilling = Stilling(
@@ -116,9 +117,10 @@ object Testdata {
 
     val enStillingsinfo = Stillingsinfo(
         stillingsinfoid = Stillingsinfoid(UUID.randomUUID()),
-        eier = Eier(navident = enVeileder.navIdent, navn = enVeileder.displayName),
         stillingsid = Stillingsid(enStilling.uuid),
-        stillingskategori = null
+        eier = Eier(navident = enVeileder.navIdent, navn = enVeileder.displayName),
+        stillingskategori = null,
+        eierNavKontorEnhetId = "1234"
     )
 
     val enStillingsinfoInboundDto = StillingsinfoInboundDto(
@@ -129,16 +131,18 @@ object Testdata {
 
     val enStillingsinfoUtenEier = Stillingsinfo(
         stillingsinfoid = Stillingsinfoid(UUID.randomUUID()),
-        eier = null,
         stillingsid = Stillingsid(enStilling.uuid),
-        stillingskategori = null
+        eier = null,
+        stillingskategori = null,
+        eierNavKontorEnhetId = "1234",
     )
 
     val enAnnenStillingsinfo = Stillingsinfo(
         stillingsinfoid = Stillingsinfoid(UUID.randomUUID()),
-        eier = Eier(navident = enVeileder.navIdent, navn = enVeileder.displayName),
         stillingsid = Stillingsid(enAnnenStilling.uuid),
-        stillingskategori = null
+        eier = Eier(navident = enVeileder.navIdent, navn = enVeileder.displayName),
+        stillingskategori = null,
+        eierNavKontorEnhetId = "1234",
     )
 
     val enStillingsinfoOppdatering = OppdaterEier(
