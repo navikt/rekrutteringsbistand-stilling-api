@@ -273,7 +273,7 @@ internal class StillingComponentTest {
         mockPamAdApi(HttpMethod.PUT, "/api/v1/ads/${stilling.uuid}", stilling)
 
         val dto = OppdaterRekrutteringsbistandStillingDto(
-            stillingsinfoid = stillingsinfo.stillingsinfoid.asString(), stilling = stilling, eierNavKontorEnhetId = "1234"
+            stillingsinfoid = stillingsinfo.stillingsinfoid.asString(), stilling = stilling, stillingsinfo = stillingsinfo.asStillingsinfoDto()
         )
 
         restTemplate.exchange(
@@ -305,7 +305,7 @@ internal class StillingComponentTest {
         val dto = OppdaterRekrutteringsbistandStillingDto(
             stillingsinfoid = stillingsinfo.stillingsinfoid.asString(),
             stilling = stilling,
-            eierNavKontorEnhetId = "1234",
+            stillingsinfo = stillingsinfo.asStillingsinfoDto(),
         )
 
         restTemplate.exchange(
@@ -339,7 +339,7 @@ internal class StillingComponentTest {
         val dto = OppdaterRekrutteringsbistandStillingDto(
             stillingsinfoid = stillingsinfo.stillingsinfoid.asString(),
             stilling = stilling,
-            eierNavKontorEnhetId = "1234",
+            stillingsinfo = stillingsinfo.asStillingsinfoDto(),
         )
 
         restTemplate.exchange(
@@ -372,7 +372,7 @@ internal class StillingComponentTest {
         val dto = OppdaterRekrutteringsbistandStillingDto(
             stillingsinfoid = stillingsinfo.stillingsinfoid.asString(),
             stilling = stilling,
-            eierNavKontorEnhetId = "1234"
+            stillingsinfo = stillingsinfo.asStillingsinfoDto(),
         )
 
         restTemplate.exchange(
@@ -395,7 +395,7 @@ internal class StillingComponentTest {
         val dto = OppdaterRekrutteringsbistandStillingDto(
             stillingsinfoid = stillingsinfo.stillingsinfoid.asString(),
             stilling = stilling,
-            eierNavKontorEnhetId = "1234",
+            stillingsinfo = stillingsinfo.asStillingsinfoDto(),
         )
 
         restTemplate.exchange(
@@ -425,7 +425,7 @@ internal class StillingComponentTest {
         val dto = OppdaterRekrutteringsbistandStillingDto(
             stillingsinfoid = stillingsinfo.stillingsinfoid.asString(),
             stilling = rekrutteringsbistandStilling.stilling,
-            eierNavKontorEnhetId = "1234",
+            stillingsinfo = stillingsinfo.asStillingsinfoDto(),
         )
 
         restTemplate.exchange(
@@ -459,7 +459,7 @@ internal class StillingComponentTest {
                 OppdaterRekrutteringsbistandStillingDto(
                     stillingsinfoid = rekrutteringsbistandStilling.stillingsinfo?.stillingsinfoid,
                     stilling = rekrutteringsbistandStilling.stilling,
-                    eierNavKontorEnhetId = "1234",
+                    stillingsinfo = null,
                 )
             ), OppdaterRekrutteringsbistandStillingDto::class.java
         ).body.also {

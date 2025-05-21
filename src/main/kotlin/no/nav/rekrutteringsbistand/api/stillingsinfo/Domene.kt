@@ -1,5 +1,6 @@
 package no.nav.rekrutteringsbistand.api.stillingsinfo
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import java.sql.ResultSet
 import java.util.*
 
@@ -56,6 +57,7 @@ data class Stillingsid(val verdi: UUID) {
 
 data class Eier(val navident: String?, val navn: String?, val navKontorEnhetId: String?)
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class StillingsinfoDto(
     val stillingsid: String,
     val stillingsinfoid: String,

@@ -328,7 +328,7 @@ private class Kall(private val webClient: WebTestClient, private val mockLogin: 
                 OppdaterRekrutteringsbistandStillingDto(
                     stillingsinfoid = stillingsInfo.stillingsinfoid.asString(),
                     stilling = stilling,
-                    eierNavKontorEnhetId = stillingsInfo.eier?.navKontorEnhetId
+                    stillingsinfo = stillingsInfo.asStillingsinfoDto()
                 )
             )
         }

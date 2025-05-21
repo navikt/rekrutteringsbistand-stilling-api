@@ -150,10 +150,10 @@ class StillingService(
 
         val id = Stillingsid(dto.stilling.uuid)
         val eksisterendeStillingsinfo: Stillingsinfo? = stillingsinfoService.hentForStilling(id)
-        if (eksisterendeStillingsinfo != null && dto.eierNavKontorEnhetId != null) {
+        if (eksisterendeStillingsinfo != null && dto.stillingsinfo?.eierNavKontorEnhetId != null) {
             stillingsinfoService.endreNavKontor(
                 stillingsinfoId = eksisterendeStillingsinfo.stillingsinfoid,
-                navKontorEnhetId = dto.eierNavKontorEnhetId,
+                navKontorEnhetId = dto.stillingsinfo.eierNavKontorEnhetId,
             )
         } else if (eksisterendeStillingsinfo == null) {
             log.info("Fant ikke stillingsinfo for stilling med id ved en oppdatering: ${dto.stilling.uuid}")
@@ -193,12 +193,13 @@ class StillingService(
         // Hent stilling før den oppdateres, da det er en OptimisticLocking strategi på 'updated' feltet hos Arbeidsplassen
         val existerendeStilling = arbeidsplassenKlient.hentStilling(dto.stilling.uuid)
         val oppdatertStilling = arbeidsplassenKlient.oppdaterStilling(stilling.copy(updated = existerendeStilling.updated), queryString)
+        val oppdatertStillingsinfo: Stillingsinfo? = stillingsinfoService.hentForStilling(id)
         log.info("Oppdaterte stilling hos Arbeidsplassen med uuid: ${dto.stilling.uuid}")
 
         return OppdaterRekrutteringsbistandStillingDto(
             stilling = direktemeldtStillingFraDb.toStilling().copy(id = oppdatertStilling.id),
             stillingsinfoid = eksisterendeStillingsinfo?.stillingsinfoid?.asString(),
-            eierNavKontorEnhetId = eksisterendeStillingsinfo?.eier?.navKontorEnhetId,
+            stillingsinfo = oppdatertStillingsinfo?.asStillingsinfoDto(),
         ).also {
             if (oppdatertStilling.source.equals("DIR", ignoreCase = false)) {
                 kandidatlisteKlient.sendStillingOppdatert(
