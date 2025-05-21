@@ -170,7 +170,7 @@ class StillingsinfoComponentTest {
 
         assertThat(respons.statusCodeValue).isEqualTo(500)
         val lagretStillingsinfo = repository.hentForStilling(stillingsinfoDerEierErNull.stillingsid)
-        assertThat(lagretStillingsinfo!!.eier).isNull()
+        assertThat(lagretStillingsinfo!!.eier?.navident).isNull()
     }
 
     @Test

@@ -23,7 +23,7 @@ data class Stillingsinfo(
             Stillingsinfo(
                 stillingsinfoid = Stillingsinfoid(verdi = rs.getString("stillingsinfoid")),
                 stillingsid = Stillingsid(verdi = rs.getString("stillingsid")),
-                eier = if (rs.getString("eier_navident") == null) null else Eier(
+                eier = Eier(
                     navident = rs.getString("eier_navident"),
                     navn = rs.getString("eier_navn"),
                     navKontorEnhetId = rs.getString("eier_navkontor_enhetid"),
