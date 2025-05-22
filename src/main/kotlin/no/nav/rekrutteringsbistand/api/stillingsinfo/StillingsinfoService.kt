@@ -23,7 +23,6 @@ class StillingsinfoService(
     fun overtaEierskapForEksternStillingOgKandidatliste(stillingsId: Stillingsid, nyEier: Eier): Stillingsinfo {
         val opprinneligStillingsinfo = repo.hentForStilling(stillingsId)
 
-
         if (opprinneligStillingsinfo?.stillingskategori == Stillingskategori.FORMIDLING) {
             throw ResponseStatusException(HttpStatus.FORBIDDEN, "Kan ikke endre eier på formidlingsstillinger")
         }
@@ -31,7 +30,7 @@ class StillingsinfoService(
         val stillingsinfoMedNyEier = opprinneligStillingsinfo?.copy(eier = nyEier) ?: Stillingsinfo(
             stillingsinfoid = Stillingsinfoid(UUID.randomUUID()),
             stillingsid = stillingsId,
-            eier = nyEier
+            eier = nyEier,
         )
 
         opprinneligStillingsinfo?.let { repo.oppdaterEier(it.stillingsinfoid, nyEier) } ?: repo.opprett(stillingsinfoMedNyEier)
@@ -71,13 +70,27 @@ class StillingsinfoService(
         repo.opprett(stillingsinfo)
     }
 
-    fun opprettStillingsinfo(stillingsId: Stillingsid, stillingskategori: Stillingskategori) {
+    fun endreNavKontor(stillingsinfoId: Stillingsinfoid, navKontorEnhetId: String) {
+        repo.oppdaterNavKontorEnhetId(stillingsinfoId, navKontorEnhetId)
+    }
+
+    fun opprettStillingsinfo(
+        stillingsId: Stillingsid,
+        stillingskategori: Stillingskategori,
+        eierNavident: String?,
+        eierNavn: String?,
+        eierNavKontorEnhetId: String?
+    ) {
         repo.opprett(
             Stillingsinfo(
                 stillingsinfoid = Stillingsinfoid.ny(),
                 stillingsid = stillingsId,
-                eier = null,
-                stillingskategori = stillingskategori
+                eier = Eier(
+                    navident = eierNavident,
+                    navn = eierNavn,
+                    navKontorEnhetId = eierNavKontorEnhetId
+                ),
+                stillingskategori = stillingskategori,
             )
         )
     }

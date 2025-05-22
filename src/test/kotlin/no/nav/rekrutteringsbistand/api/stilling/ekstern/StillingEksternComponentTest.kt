@@ -148,10 +148,10 @@ internal class StillingEksternComponentTest {
     ) {
         val stilling = enStilling.copy(title = arbeidsplassentittel, categoryList = categoryList, source = source)
         val stillingsinfo = Stillingsinfo(
-            stillingsid = Stillingsid(stilling.uuid),
             stillingsinfoid = Stillingsinfoid(UUID.randomUUID()),
+            stillingsid = Stillingsid(stilling.uuid),
+            eier = null,
             stillingskategori = stillingskategori,
-            eier = null
         )
         repository.opprett(stillingsinfo)
         mockUtenAuthorization("/b2b/api/v1/ads/${stilling.uuid}", stilling)

@@ -74,7 +74,7 @@ private fun parseAntallStillinger(stilling: no.nav.rekrutteringsbistand.api.stil
 }
 
 fun StillingsinfoDto.tilStillingsinfoIHendelse() =
-    StillingsinfoIHendelse(stillingsinfoid, stillingsid, Eier(eierNavident, eierNavn), stillingskategori)
+    StillingsinfoIHendelse(stillingsinfoid, stillingsid, Eier(eierNavident, eierNavn, eierNavKontorEnhetId), stillingskategori)
 
 data class StillingsinfoIHendelse(
     val stillingsinfoid: String,

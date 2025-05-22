@@ -21,13 +21,13 @@ class StillingsinfoRepository(
                 EIER_NAVIDENT to stillingsinfo.eier?.navident,
                 EIER_NAVN to stillingsinfo.eier?.navn,
                 NOTAT to null,
-                STILLINGSKATEGORI to stillingsinfo.stillingskategori?.name
+                STILLINGSKATEGORI to stillingsinfo.stillingskategori?.name,
+                EIER_NAVKONTOR_ENHETID to stillingsinfo.eier?.navKontorEnhetId,
             )
         )
     }
 
     fun slett(stillingsid: Stillingsid) = slett(stillingsid.asString())
-
 
     fun slett(stillingsid: String) =
         namedJdbcTemplate.update(
@@ -39,11 +39,21 @@ class StillingsinfoRepository(
 
     fun oppdaterEier(stillingsinfoId: Stillingsinfoid, nyEier: Eier?) =
         namedJdbcTemplate.update(
-            "update $STILLINGSINFO set $EIER_NAVIDENT=:eier_navident, $EIER_NAVN=:eier_navn where $STILLINGSINFOID=:stillingsinfoid",
+            "update $STILLINGSINFO set $EIER_NAVIDENT=:eier_navident, $EIER_NAVN=:eier_navn, $EIER_NAVKONTOR_ENHETID=:eier_navkontor_enhetid where $STILLINGSINFOID=:stillingsinfoid",
             mapOf(
                 "stillingsinfoid" to stillingsinfoId.asString(),
                 "eier_navident" to nyEier?.navident,
-                "eier_navn" to nyEier?.navn
+                "eier_navn" to nyEier?.navn,
+                "eier_navkontor_enhetid" to nyEier?.navKontorEnhetId,
+            )
+        )
+
+    fun oppdaterNavKontorEnhetId(stillingsinfoId: Stillingsinfoid, navKontorEnhetId: String) =
+        namedJdbcTemplate.update(
+            "update $STILLINGSINFO set $EIER_NAVKONTOR_ENHETID=:eier_navkontor_enhetid where $STILLINGSINFOID=:stillingsinfoid",
+            mapOf(
+                "stillingsinfoid" to stillingsinfoId.asString(),
+                "eier_navkontor_enhetid" to navKontorEnhetId,
             )
         )
 
@@ -75,5 +85,6 @@ class StillingsinfoRepository(
         const val EIER_NAVN = "eier_navn"
         const val NOTAT = "notat"
         const val STILLINGSKATEGORI = "stillingskategori"
+        const val EIER_NAVKONTOR_ENHETID = "eier_navkontor_enhetid"
     }
 }

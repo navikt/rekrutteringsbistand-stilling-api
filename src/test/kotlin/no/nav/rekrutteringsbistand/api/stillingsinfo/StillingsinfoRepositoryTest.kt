@@ -61,6 +61,16 @@ class StillingsinfoRepositoryTest {
         assertThat(endretRekrutteringsbistand.eier?.navn).isEqualTo(enStillingsinfoOppdatering.eier.navn)
     }
 
+    @Test
+    fun `Skal kunne oppdatere navKontorEnhetId `() {
+        repository.opprett(tilLagring)
+        val nyKontorId = "nytt kontor"
+        repository.oppdaterNavKontorEnhetId(enStillingsinfoOppdatering.stillingsinfoid, nyKontorId)
+
+        val endretRekrutteringsbistand = repository.hentForStilling(tilLagring.stillingsid) ?: fail("Testsetup")
+        assertThat(endretRekrutteringsbistand.eier?.navKontorEnhetId).isEqualTo(nyKontorId)
+    }
+
     @After
     fun cleanUp() {
         testRepository.slettAlt()

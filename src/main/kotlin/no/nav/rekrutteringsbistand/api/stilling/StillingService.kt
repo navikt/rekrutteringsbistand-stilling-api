@@ -60,10 +60,19 @@ class StillingService(
         return opprettStilling(
             opprettStilling = opprettDto.stilling.toArbeidsplassenDto(title = "Ny stilling"),
             stillingskategori = opprettDto.kategori,
+            eierNavident = opprettDto.eierNavident,
+            eierNavn = opprettDto.eierNavn,
+            eierNavKontorEnhetId = opprettDto.eierNavKontorEnhetId,
         )
     }
 
-    private fun opprettStilling(opprettStilling: OpprettStillingDto, stillingskategori: Stillingskategori): RekrutteringsbistandStilling {
+    private fun opprettStilling(
+        opprettStilling: OpprettStillingDto,
+        stillingskategori: Stillingskategori,
+        eierNavident: String?,
+        eierNavn: String?,
+        eierNavKontorEnhetId: String?,
+    ): RekrutteringsbistandStilling {
         val populertGeografi = populerGeografi(opprettStilling.employer?.location)
         var stilling = opprettStilling.copy(employer = opprettStilling.employer?.copy(location = populertGeografi))
 
@@ -98,7 +107,10 @@ class StillingService(
 
         stillingsinfoService.opprettStillingsinfo(
             stillingsId = stillingsId,
-            stillingskategori = stillingskategori
+            stillingskategori = stillingskategori,
+            eierNavident = eierNavident,
+            eierNavn = eierNavn,
+            eierNavKontorEnhetId = eierNavKontorEnhetId,
         )
 
         val stillingsinfo = stillingsinfoService.hentStillingsinfo(opprettetStillingArbeidsplassen)
@@ -117,11 +129,13 @@ class StillingService(
         val kopi = eksisterendeStilling.toKopiertStilling(tokenUtils)
 
         return opprettStilling(
-            kopi,
-            kategoriMedDefault(eksisterendeRekrutteringsbistandStilling.stillingsinfo)
+            opprettStilling = kopi,
+            stillingskategori = kategoriMedDefault(eksisterendeRekrutteringsbistandStilling.stillingsinfo),
+            eierNavKontorEnhetId = eksisterendeRekrutteringsbistandStilling.stillingsinfo?.eierNavKontorEnhetId,
+            eierNavident = eksisterendeRekrutteringsbistandStilling.stillingsinfo?.eierNavident,
+            eierNavn = eksisterendeRekrutteringsbistandStilling.stillingsinfo?.eierNavn,
         )
     }
-
 
     fun kategoriMedDefault(stillingsInfo: StillingsinfoDto?) =
         if (stillingsInfo?.stillingskategori == null) Stillingskategori.STILLING else stillingsInfo.stillingskategori
@@ -136,6 +150,14 @@ class StillingService(
 
         val id = Stillingsid(dto.stilling.uuid)
         val eksisterendeStillingsinfo: Stillingsinfo? = stillingsinfoService.hentForStilling(id)
+        if (eksisterendeStillingsinfo != null && dto.stillingsinfo?.eierNavKontorEnhetId != null) {
+            stillingsinfoService.endreNavKontor(
+                stillingsinfoId = eksisterendeStillingsinfo.stillingsinfoid,
+                navKontorEnhetId = dto.stillingsinfo.eierNavKontorEnhetId,
+            )
+        } else if (eksisterendeStillingsinfo == null) {
+            log.info("Fant ikke stillingsinfo for stilling med id ved en oppdatering: ${dto.stilling.uuid}")
+        }
 
         val eksisterendeStilling = direktemeldtStillingRepository.hentDirektemeldtStilling(id)
 
@@ -171,11 +193,13 @@ class StillingService(
         // Hent stilling før den oppdateres, da det er en OptimisticLocking strategi på 'updated' feltet hos Arbeidsplassen
         val existerendeStilling = arbeidsplassenKlient.hentStilling(dto.stilling.uuid)
         val oppdatertStilling = arbeidsplassenKlient.oppdaterStilling(stilling.copy(updated = existerendeStilling.updated), queryString)
+        val oppdatertStillingsinfo: Stillingsinfo? = stillingsinfoService.hentForStilling(id)
         log.info("Oppdaterte stilling hos Arbeidsplassen med uuid: ${dto.stilling.uuid}")
 
         return OppdaterRekrutteringsbistandStillingDto(
             stilling = direktemeldtStillingFraDb.toStilling().copy(id = oppdatertStilling.id),
-            stillingsinfoid = eksisterendeStillingsinfo?.stillingsinfoid?.asString()
+            stillingsinfoid = eksisterendeStillingsinfo?.stillingsinfoid?.asString(),
+            stillingsinfo = oppdatertStillingsinfo?.asStillingsinfoDto(),
         ).also {
             if (oppdatertStilling.source.equals("DIR", ignoreCase = false)) {
                 kandidatlisteKlient.sendStillingOppdatert(

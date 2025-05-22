@@ -271,10 +271,12 @@ data class Page<T>(
 )
 
 data class OpprettRekrutteringsbistandstillingDto(
+    val kategori: Stillingskategori,
+    val eierNavident: String?,
+    val eierNavn: String?,
+    val eierNavKontorEnhetId: String?,
     val stilling: OpprettStillingDto,
-    val kategori: Stillingskategori
 )
-
 
 // TODO: denne klassen ble duplisert fra arbeidsplassen-domenet, og inneholder kanskje
 //  properties som ikke blir sendt fra frontend, og som derfor kan slettes.
