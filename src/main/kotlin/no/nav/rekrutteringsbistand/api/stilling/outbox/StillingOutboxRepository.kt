@@ -27,7 +27,7 @@ class StillingOutboxRepository(private val namedJdbcTemplate: NamedParameterJdbc
             select id, stillingsid, event_name
             from stilling_outbox
             where prosessert is null
-            order by opprettet asc
+            order by opprettet
         """.trimIndent()
 
         return namedJdbcTemplate.query(sql) { rs, _ ->
