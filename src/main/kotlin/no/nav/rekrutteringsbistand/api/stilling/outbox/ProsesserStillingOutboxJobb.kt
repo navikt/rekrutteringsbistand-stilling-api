@@ -35,6 +35,8 @@ class ProsesserStillingOutboxJobb(
                     packet["stillingsId"] = direktemeldtStilling.stillingsId
                     packet["direktemeldtStilling"] = direktemeldtStilling
                     rapidApplikasjon.publish(Stillingsid(direktemeldtStilling.stillingsId), packet)
+
+                    stillingOutboxRepository.settSomProsessert(it.id)
                 }
             }
         }
