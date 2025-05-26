@@ -34,7 +34,7 @@ class StillingOutboxRepository(private val namedJdbcTemplate: NamedParameterJdbc
             StillingOutboxMelding(
                 id = rs.getLong("id"),
                 stillingsId = UUID.fromString(rs.getString("stillingsid")),
-                eventName = EventName.valueOf(rs.getString("event_name"))
+                eventName = EventName.fromString(rs.getString("event_name"))
             )
         }
     }
