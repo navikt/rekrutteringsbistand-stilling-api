@@ -1,19 +1,18 @@
 package no.nav.rekrutteringsbistand.api.stilling.indekser
 
-import com.fasterxml.jackson.databind.node.JsonNodeFactory
-import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import no.nav.rekrutteringsbistand.api.autorisasjon.AuthorizedPartyUtils
-import no.nav.rekrutteringsbistand.api.hendelser.RapidApplikasjon
 import no.nav.rekrutteringsbistand.api.stilling.StillingService
-import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoService
-import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsid
-import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoDto
+import no.nav.rekrutteringsbistand.api.stilling.outbox.StillingOutboxService
+import no.nav.rekrutteringsbistand.api.stilling.outbox.EventName
+import no.nav.rekrutteringsbistand.api.support.log
 import no.nav.security.token.support.core.api.Protected
+import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import no.nav.rekrutteringsbistand.api.support.log
-import no.nav.security.token.support.core.api.Unprotected
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
 import java.util.*
 import kotlin.concurrent.thread
 
@@ -22,8 +21,7 @@ import kotlin.concurrent.thread
 class StillingIndekserController(
     val authorizedPartyUtils: AuthorizedPartyUtils,
     val stillingService: StillingService,
-    val rapidApplikasjon: RapidApplikasjon,
-    val stillingsinfoService: StillingsinfoService
+    val stillingOutboxService: StillingOutboxService,
 ) {
 
     @PostMapping("/stillinger")
@@ -37,16 +35,12 @@ class StillingIndekserController(
             val stillinger = stillingService.hentAlleDirektemeldteStillinger()
 
             stillinger.forEach { stilling ->
-
-                val packet = JsonMessage.newMessage(eventName = "direktemeldtStillingRepubliser")
-                val stillingsinfo = stillingsinfoService.hentForStilling(stillingId = Stillingsid(stilling.stillingsId))?.asStillingsinfoDto()
-
-                packet["stillingsinfo"] = stillingsinfo ?: JsonNodeFactory.instance.nullNode()
-                packet["stillingsId"] = stilling.stillingsId
-                packet["direktemeldtStilling"] = stilling
-                rapidApplikasjon.publish(Stillingsid(stilling.stillingsId), packet)
+                stillingOutboxService.lagreMeldingIOutbox(
+                    stillingsId = stilling.stillingsId,
+                    eventName = EventName.REINDEKSER_DIREKTEMELDT_STILLING
+                )
             }
-            log.info("${stillinger.size} stillinger er lagt på rapid")
+            log.info("${stillinger.size} stillinger er lagret i outboxen")
         }
 
         log.info("Mottatt forespørsel om å legge stillinger på rapid")
@@ -62,16 +56,12 @@ class StillingIndekserController(
         } catch (e: Exception) {
             return ResponseEntity("Fikk ikke til å konvertere til uuid", HttpStatus.BAD_REQUEST)
         }
-        val packet = JsonMessage.newMessage(eventName = "direktemeldtStillingRepubliser")
 
-        val stillingsinfoDto: StillingsinfoDto? = stillingsinfoService.hentForStilling(stillingId = Stillingsid(uuid))?.asStillingsinfoDto()
+        stillingOutboxService.lagreMeldingIOutbox(
+            stillingsId = uuid,
+            eventName = EventName.REINDEKSER_DIREKTEMELDT_STILLING
+        )
 
-        packet["stillingsinfo"] = stillingsinfoDto ?: JsonNodeFactory.instance.nullNode()
-        packet["stillingsId"] = uuid.toString()
-        packet["direktemeldtStilling"] = stillingService.hentDirektemeldtStilling(uuid.toString())
-
-        rapidApplikasjon.publish(Stillingsid(uuid), packet)
-
-        return ResponseEntity.ok("Stilling $uuid er lagt på rapid")
+        return ResponseEntity.ok("Stilling $uuid er lagret i outboxen")
     }
 }
