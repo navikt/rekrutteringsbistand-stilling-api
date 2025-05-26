@@ -4,6 +4,7 @@ import no.nav.rekrutteringsbistand.api.Testdata.enDirektemeldtStilling
 import no.nav.rekrutteringsbistand.api.config.MockLogin
 import no.nav.rekrutteringsbistand.api.stilling.StillingService
 import no.nav.rekrutteringsbistand.api.stilling.outbox.StillingOutboxService
+import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -18,6 +19,7 @@ import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
@@ -69,7 +71,9 @@ class StillingIndekserControllerTest {
 
         val response = HttpClient.newBuilder().build().send(request, HttpResponse.BodyHandlers.ofString())
 
-        verify(stillingOutboxService, times(2)).lagreMeldingIOutbox(idCaptor.capture(), any())
+        await().atMost(3, TimeUnit.SECONDS).untilAsserted {
+            verify(stillingOutboxService, times(2)).lagreMeldingIOutbox(idCaptor.capture(), any())
+        }
 
         val capturedId = idCaptor.firstValue
         assertEquals(enDirektemeldtStilling.stillingsId, capturedId)
