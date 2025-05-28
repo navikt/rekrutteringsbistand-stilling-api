@@ -92,3 +92,9 @@ spec:
       value: {{ ad_gruppe_arbeidsgiverrettet }}
     - name: AD_GRUPPE_UTVIKLER
       value: {{ ad_gruppe_utvikler }}
+  observability:
+    logging:
+      destinations:
+        - id: loki
+        - id: elastic
+      enabled: true
