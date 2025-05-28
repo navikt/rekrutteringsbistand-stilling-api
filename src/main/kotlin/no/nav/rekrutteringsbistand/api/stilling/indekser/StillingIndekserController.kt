@@ -1,6 +1,8 @@
 package no.nav.rekrutteringsbistand.api.stilling.indekser
 
+import no.nav.rekrutteringsbistand.api.arbeidsplassen.ArbeidsplassenKlient
 import no.nav.rekrutteringsbistand.api.autorisasjon.AuthorizedPartyUtils
+import no.nav.rekrutteringsbistand.api.stilling.DirektemeldtStillingRepository
 import no.nav.rekrutteringsbistand.api.stilling.StillingService
 import no.nav.rekrutteringsbistand.api.stilling.outbox.StillingOutboxService
 import no.nav.rekrutteringsbistand.api.stilling.outbox.EventName
@@ -22,7 +24,10 @@ class StillingIndekserController(
     val authorizedPartyUtils: AuthorizedPartyUtils,
     val stillingService: StillingService,
     val stillingOutboxService: StillingOutboxService,
-) {
+    val direktemeldtStillingRepository: DirektemeldtStillingRepository,
+    val arbeidsplassenKlient: ArbeidsplassenKlient,
+
+    ) {
 
     @PostMapping("/stillinger")
     @Protected
@@ -63,5 +68,19 @@ class StillingIndekserController(
         )
 
         return ResponseEntity.ok("Stilling $uuid er lagret i outboxen")
+    }
+
+    @PostMapping("/annonsenr")
+    @Unprotected
+    fun leggTilAnnonsenr(): ResponseEntity<String> {
+        val stillinger = direktemeldtStillingRepository.hentStillingerUtenAnnonsenr()
+
+        log.info("Skal legge til annonsenr for ${stillinger.size} stillinger")
+        stillinger.forEach { stilling ->
+            val arbeidsplassenStilling = arbeidsplassenKlient.hentStilling(stilling.stillingsId.toString(), true)
+
+            direktemeldtStillingRepository.lagreDirektemeldtStilling(stilling.copy(annonsenr = arbeidsplassenStilling.id.toString()))
+        }
+        return ResponseEntity.ok("Annonsenr lagt til for ${stillinger.size} stillinger")
     }
 }

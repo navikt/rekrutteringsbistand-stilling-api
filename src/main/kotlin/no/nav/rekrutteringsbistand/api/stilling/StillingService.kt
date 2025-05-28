@@ -46,7 +46,6 @@ class StillingService(
             )
         }
 
-
         val stilling = stillingssokProxyClient.hentStilling(stillingsId, somSystembruker)
         log.info("Hentet stilling fra OpenSearch $stillingsId")
 
@@ -95,7 +94,7 @@ class StillingService(
                 sistEndretAv = stilling.updatedBy,
                 sistEndret = opprettet,
                 status = "INACTIVE",
-                annonseId = null,
+                annonsenr = opprettetStillingArbeidsplassen.id.toString(),
                 utløpsdato = if (stillingskategori == Stillingskategori.FORMIDLING) opprettet else LocalDateTime.now().plusDays(DEFAULT_EXPIRY_DAYS).atZone(ZoneId.of("Europe/Oslo")),
                 publisert = opprettet,
                 publisertAvAdmin = null,
@@ -159,8 +158,6 @@ class StillingService(
             log.info("Fant ikke stillingsinfo for stilling med id ved en oppdatering: ${dto.stilling.uuid}")
         }
 
-        val eksisterendeStilling = direktemeldtStillingService.hentDirektemeldtStilling(id)
-
         var publishedByAdmin: String? = dto.stilling.publishedByAdmin
         if(dto.stilling.firstPublished != null && dto.stilling.firstPublished && publishedByAdmin == null) {
             publishedByAdmin = LocalDateTime.now(ZoneId.of("Europe/Oslo")).toString()
@@ -180,11 +177,11 @@ class StillingService(
                 sistEndretAv = stilling.updatedBy,
                 sistEndret = stilling.updated.atZone(ZoneId.of("Europe/Oslo")),
                 status = stilling.status,
-                annonseId = eksisterendeStilling?.annonseId ?: dto.stilling.id,
+                annonsenr = dto.stilling.id.toString(),
                 utløpsdato = dto.stilling.hentExpiresMedDefaultVerdiOmIkkeOppgitt(),
                 publisert = dto.stilling.published?.atZone(ZoneId.of("Europe/Oslo")),
                 publisertAvAdmin = publishedByAdmin,
-                adminStatus = dto.stilling.administration?.status
+                adminStatus = dto.stilling.administration?.status,
             )
         )
         log.info("Oppdaterte stilling i databasen med uuid: ${dto.stilling.uuid}")
@@ -253,7 +250,7 @@ class StillingService(
                 sistEndretAv = arbeidsplassenStilling.updatedBy,
                 sistEndret = arbeidsplassenStilling.updated.atZone(ZoneId.of("Europe/Oslo")),
                 status = arbeidsplassenStilling.status,
-                annonseId = null,
+                annonsenr = arbeidsplassenStilling.id.toString(),
                 utløpsdato = arbeidsplassenStilling.hentExpiresMedDefaultVerdiOmIkkeOppgitt(),
                 publisert = arbeidsplassenStilling.published?.atZone(ZoneId.of("Europe/Oslo")),
                 publisertAvAdmin = arbeidsplassenStilling.publishedByAdmin,
