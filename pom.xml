@@ -43,6 +43,7 @@
         <rapids-and-rivers-kafka.version>2024.12.18-11.39-73f8eecb</rapids-and-rivers-kafka.version>
         <awaitility.version>4.3.0</awaitility.version>
         <caffeine.version>3.2.0</caffeine.version>
+        <opentelemetry-logback.version>2.16.0-alpha</opentelemetry-logback.version>
         <!-- Tredjeparts -->
         <!--kotlin.version>2.0.20</kotlin.version-->
     </properties>
@@ -147,6 +148,13 @@
             <artifactId>postgresql</artifactId>
             <version>${testcontainers.version}</version>
             <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>io.opentelemetry.instrumentation</groupId>
+            <artifactId>opentelemetry-logback-mdc-1.0</artifactId>
+            <version>${opentelemetry-logback.version}</version>
+            <scope>runtime</scope>
         </dependency>
 
         <!-- JSON-logging -->
