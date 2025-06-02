@@ -2,6 +2,8 @@ package no.nav.rekrutteringsbistand.api.opensearch
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import no.nav.rekrutteringsbistand.api.stilling.*
+import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.ZonedDateTime
 
 data class OpensSearchResponse(
@@ -44,8 +46,14 @@ data class OpensSearchResponse(
     )
 
     fun konverterDato(dato: String): ZonedDateTime {
-        return try {
-            ZonedDateTime.parse(dato)
+        try {
+            return LocalDateTime.parse(dato).atZone(ZoneId.of("Europe/Oslo"))
+        } catch (e: Exception) {
+            // ignorer for å støtte flere formater av datoer
+        }
+
+        try {
+            return ZonedDateTime.parse(dato)
         } catch (e: Exception) {
             throw RuntimeException("Greide ikke konvertere dato til zonedDateTime: $dato", e)
         }
