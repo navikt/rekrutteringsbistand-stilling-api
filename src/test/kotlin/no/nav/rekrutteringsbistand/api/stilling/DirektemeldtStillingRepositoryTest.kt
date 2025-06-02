@@ -186,4 +186,13 @@ class DirektemeldtStillingRepositoryTest {
 
         assertTrue(repository.hentUtgåtteStillingerFor6mndSidenSomErPending().isEmpty())
     }
+
+    @Test
+    fun `hentStillingerUtenAnnonsenr skal ikke gi feil`() {
+        repository.lagreDirektemeldtStilling(enDirektemeldtStilling.copy(annonsenr = null))
+
+        val result = repository.hentStillingerUtenAnnonsenr()
+
+        assertTrue(result.isNotEmpty())
+    }
 }

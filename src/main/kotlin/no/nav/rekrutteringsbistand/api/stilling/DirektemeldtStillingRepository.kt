@@ -191,6 +191,7 @@ class DirektemeldtStillingRepository(private val namedJdbcTemplate: NamedParamet
                 $DIREKTEMELDT_STILLING_TABELL
             where 
                 $ANNONSENR is null
+            LIMIT 5000
         """.trimIndent()
 
         return namedJdbcTemplate.query(
