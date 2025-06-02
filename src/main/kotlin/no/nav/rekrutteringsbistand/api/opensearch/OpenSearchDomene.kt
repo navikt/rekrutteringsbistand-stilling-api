@@ -49,7 +49,7 @@ data class OpensSearchResponse(
         try {
             return LocalDateTime.parse(dato).atZone(ZoneId.of("Europe/Oslo"))
         } catch (e: Exception) {
-            // ignorer for å støtte flere formater av datoer
+            // ignorer for å støtte flere datoformater
         }
 
         try {
