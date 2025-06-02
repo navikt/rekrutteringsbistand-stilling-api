@@ -184,22 +184,6 @@ class DirektemeldtStillingRepository(private val namedJdbcTemplate: NamedParamet
         ).filterNotNull()
     }
 
-    fun hentStillingerUtenAnnonsenr(): List<DirektemeldtStilling> {
-        val sql = """
-               select $ID, $STILLINGSID, $INNHOLD, $OPPRETTET, $OPPRETTET_AV, $SIST_ENDRET, $SIST_ENDRET_AV, $STATUS, $PUBLISERT, $PUBLISERT_AV_ADMIN, $ADMIN_STATUS, $UTLØPSDATO, $VERSJON, $ANNONSENR
-            from
-                $DIREKTEMELDT_STILLING_TABELL
-            where 
-                $ANNONSENR is null
-            LIMIT 5000
-        """.trimIndent()
-
-        return namedJdbcTemplate.query(
-            sql, DirektemeldtStillingRowMapper()
-        ).filterNotNull()
-    }
-
-
     class DirektemeldtStillingRowMapper : RowMapper<DirektemeldtStilling?> {
         @Throws(SQLException::class)
         override fun mapRow(rs: ResultSet, rowNum: Int): DirektemeldtStilling {
