@@ -14,7 +14,7 @@ class AnnonsenrJobb(
     private val leaderElection: LeaderElection,
 ) {
 
-    @Scheduled(fixedDelay = 60000) // Kjør hver 60. sekund
+    @Scheduled(fixedDelay = 300000) // Hvert 5. minutt
     fun settAnnonsenr() {
         if (leaderElection.isLeader()) {
             val stillinger = direktemeldtStillingRepository.hentStillingerUtenAnnonsenr()
