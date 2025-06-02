@@ -2,10 +2,8 @@ package no.nav.rekrutteringsbistand.api.stilling.indekser
 
 import no.nav.rekrutteringsbistand.api.Testdata.enDirektemeldtStilling
 import no.nav.rekrutteringsbistand.api.config.MockLogin
-import no.nav.rekrutteringsbistand.api.hendelser.RapidApplikasjon
 import no.nav.rekrutteringsbistand.api.stilling.StillingService
-import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsid
-import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoService
+import no.nav.rekrutteringsbistand.api.stilling.outbox.StillingOutboxService
 import org.awaitility.Awaitility.await
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -20,8 +18,8 @@ import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
+import java.util.*
 import java.util.concurrent.TimeUnit
-import java.util.UUID
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
@@ -36,15 +34,12 @@ class StillingIndekserControllerTest {
     lateinit var stillingService: StillingService
 
     @MockitoBean
-    lateinit var stillingsinfoService: StillingsinfoService
-
-    @MockitoBean
-    lateinit var rapidApp: RapidApplikasjon
+    lateinit var stillingOutboxService: StillingOutboxService
 
     @Autowired
     lateinit var mockLogin: MockLogin
 
-    val idCaptor = argumentCaptor<Stillingsid>()
+    val idCaptor = argumentCaptor<UUID>()
 
     @BeforeEach
     fun setup() {
@@ -66,8 +61,6 @@ class StillingIndekserControllerTest {
             )
         )
 
-        whenever(stillingsinfoService.hentForStilling(any())).thenReturn(null)
-
         val token = mockLogin.hentAzureAdMaskinTilMaskinToken("local:toi:toi-stilling-indekser")
 
         val request = HttpRequest.newBuilder()
@@ -79,14 +72,14 @@ class StillingIndekserControllerTest {
         val response = HttpClient.newBuilder().build().send(request, HttpResponse.BodyHandlers.ofString())
 
         await().atMost(3, TimeUnit.SECONDS).untilAsserted {
-            verify(rapidApp, times(2)).publish(idCaptor.capture(), any())
+            verify(stillingOutboxService, times(2)).lagreMeldingIOutbox(idCaptor.capture(), any())
         }
 
         val capturedId = idCaptor.firstValue
-        assertEquals(enDirektemeldtStilling.stillingsId, capturedId.verdi)
+        assertEquals(enDirektemeldtStilling.stillingsId, capturedId)
 
         val capturedId2 = idCaptor.secondValue
-        assertEquals(direktemeldtStilling2.stillingsId, capturedId2.verdi)
+        assertEquals(direktemeldtStilling2.stillingsId, capturedId2)
 
         assertEquals(200, response.statusCode())
     }
@@ -103,10 +96,11 @@ class StillingIndekserControllerTest {
 
         val response = HttpClient.newBuilder().build().send(request, HttpResponse.BodyHandlers.ofString())
 
-        verify(rapidApp).publish(idCaptor.capture(), any())
+        verify(stillingOutboxService).lagreMeldingIOutbox(idCaptor.capture(), any())
+
 
         val capturedId = idCaptor.firstValue
-        assertEquals(enDirektemeldtStilling.stillingsId, capturedId.verdi)
+        assertEquals(enDirektemeldtStilling.stillingsId, capturedId)
         assertEquals(200, response.statusCode() )
     }
 }

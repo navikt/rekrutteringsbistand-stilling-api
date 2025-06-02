@@ -1,7 +1,7 @@
 package no.nav.rekrutteringsbistand.api.stillingStatusoppdatering
 
 import no.nav.rekrutteringsbistand.api.stilling.AdminStatus
-import no.nav.rekrutteringsbistand.api.stilling.DirektemeldtStillingRepository
+import no.nav.rekrutteringsbistand.api.stilling.DirektemeldtStillingService
 import no.nav.rekrutteringsbistand.api.support.config.LeaderElection
 import no.nav.rekrutteringsbistand.api.support.log
 import org.springframework.scheduling.annotation.Scheduled
@@ -12,7 +12,7 @@ import java.time.ZonedDateTime
 
 @Service
 class FjernAdministrationPendingJobb(
-    private val direktemeldtStillingRepository: DirektemeldtStillingRepository,
+    private val direktemeldtStillingService: DirektemeldtStillingService,
     private val leaderElection: LeaderElection
 ) {
 
@@ -21,7 +21,7 @@ class FjernAdministrationPendingJobb(
         // Sjekker om det er leader, slik at jobben kun kjører på en pod
         if (leaderElection.isLeader()) {
             log.info("Startet jobb for å sette Adminstatus til DONE")
-            val stillingerSomSkalSettesTilDone = direktemeldtStillingRepository.hentUtgåtteStillingerFor6mndSidenSomErPending()
+            val stillingerSomSkalSettesTilDone = direktemeldtStillingService.hentUtgåtteStillingerFor6mndSidenSomErPending()
             log.info("Fant ${stillingerSomSkalSettesTilDone.size} stillinger som skal settes til AdminStatus DONE")
 
             stillingerSomSkalSettesTilDone.forEach {
@@ -29,7 +29,7 @@ class FjernAdministrationPendingJobb(
                     adminStatus = AdminStatus.DONE.toString(),
                     sistEndret = ZonedDateTime.now(ZoneId.of("Europe/Oslo")),
                 )
-                direktemeldtStillingRepository.lagreDirektemeldtStilling(stillingNyAdminStatus)
+                direktemeldtStillingService.lagreDirektemeldtStilling(stillingNyAdminStatus)
                 log.info("Satt AdminStatus DONE for ${it.stillingsId} pga eldre enn 6mnd")
             }
         }

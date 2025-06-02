@@ -29,7 +29,7 @@ class StillingServiceTest {
     @Mock
     lateinit var arbeidsplassenKlient: ArbeidsplassenKlient
     @Mock
-    lateinit var direktemeldtStillingRepository: DirektemeldtStillingRepository
+    lateinit var direktemeldtStillingService: DirektemeldtStillingService
     @Mock
     lateinit var stillingssokProxyClient: StillingssokProxyClient
     @Mock
@@ -45,7 +45,7 @@ class StillingServiceTest {
             tokenUtils,
             kandidatlisteKlient,
             arbeidsplassenKlient,
-            direktemeldtStillingRepository,
+            direktemeldtStillingService,
             stillingssokProxyClient,
             geografiService
         )

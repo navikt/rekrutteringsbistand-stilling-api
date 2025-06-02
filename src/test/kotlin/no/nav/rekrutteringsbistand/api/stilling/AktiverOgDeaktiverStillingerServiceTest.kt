@@ -20,7 +20,7 @@ import java.time.ZonedDateTime
 class AktiverStillingerServiceTest {
 
     @Mock
-    lateinit var direktemeldtStillingRepository: DirektemeldtStillingRepository
+    lateinit var direktemeldtStillingService: DirektemeldtStillingService
 
     lateinit var aktiverOgDeaktiverStillingerService: AktiverOgDeaktiverStillingerService
 
@@ -28,19 +28,19 @@ class AktiverStillingerServiceTest {
 
     @BeforeEach
     fun setUp() {
-        aktiverOgDeaktiverStillingerService = AktiverOgDeaktiverStillingerService(direktemeldtStillingRepository)
+        aktiverOgDeaktiverStillingerService = AktiverOgDeaktiverStillingerService(direktemeldtStillingService)
     }
 
     @Test
     fun `Skal kalle lagreDirektemeldtStilling stilling med status INACTIVE`() {
         val stilling = enDirektemeldtStilling
 
-        whenever(direktemeldtStillingRepository.hentStillingerForDeaktivering()).thenReturn(listOf(stilling))
-        whenever(direktemeldtStillingRepository.hentStillingerForAktivering()).thenReturn(listOf())
+        whenever(direktemeldtStillingService.hentStillingerForDeaktivering()).thenReturn(listOf(stilling))
+        whenever(direktemeldtStillingService.hentStillingerForAktivering()).thenReturn(listOf())
 
         aktiverOgDeaktiverStillingerService.deaktiverStillinger()
 
-        verify(direktemeldtStillingRepository).lagreDirektemeldtStilling(stillingCaptor.capture())
+        verify(direktemeldtStillingService).lagreDirektemeldtStilling(stillingCaptor.capture())
         val capturedStilling = stillingCaptor.firstValue
 
         assertEquals(Status.INACTIVE.toString(), capturedStilling.status)
@@ -55,12 +55,12 @@ class AktiverStillingerServiceTest {
             publisertAvAdmin = publishedFor2TimerSiden.toString()
         )
 
-        whenever(direktemeldtStillingRepository.hentStillingerForDeaktivering()).thenReturn(listOf())
-        whenever(direktemeldtStillingRepository.hentStillingerForAktivering()).thenReturn(listOf(stilling))
+        whenever(direktemeldtStillingService.hentStillingerForDeaktivering()).thenReturn(listOf())
+        whenever(direktemeldtStillingService.hentStillingerForAktivering()).thenReturn(listOf(stilling))
 
         aktiverOgDeaktiverStillingerService.aktiverStillinger()
 
-        verify(direktemeldtStillingRepository).lagreDirektemeldtStilling(stillingCaptor.capture())
+        verify(direktemeldtStillingService).lagreDirektemeldtStilling(stillingCaptor.capture())
         val capturedStilling = stillingCaptor.firstValue
 
         assertEquals(Status.ACTIVE.toString(), capturedStilling.status)

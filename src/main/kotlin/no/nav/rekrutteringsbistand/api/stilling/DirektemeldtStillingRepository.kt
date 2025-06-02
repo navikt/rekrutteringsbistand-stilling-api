@@ -39,6 +39,7 @@ class DirektemeldtStillingRepository(private val namedJdbcTemplate: NamedParamet
         const val UTLØPSDATO = "utlopsdato"
         const val ID = "id"
         const val VERSJON = "versjon"
+        const val ANNONSENR = "annonsenr"
         const val DIREKTEMELDT_STILLING_TABELL = "direktemeldt_stilling"
     }
 
@@ -46,8 +47,8 @@ class DirektemeldtStillingRepository(private val namedJdbcTemplate: NamedParamet
         log.info("Lagrer direktemeldt stilling med uuid: ${direktemeldtStilling.stillingsId}")
 
         val sql = """
-          insert into $DIREKTEMELDT_STILLING_TABELL ($STILLINGSID, $INNHOLD, $OPPRETTET, $OPPRETTET_AV, $SIST_ENDRET, $SIST_ENDRET_AV, $STATUS, $PUBLISERT, $PUBLISERT_AV_ADMIN, $ADMIN_STATUS, $UTLØPSDATO, $VERSJON)
-            values(:stillingsid, :innhold ::jsonb, :opprettet, :opprettet_av, :sist_endret, :sist_endret_av, :status, :publisert, :publisert_av_admin, :admin_status, :utløpsdato, :versjon)
+          insert into $DIREKTEMELDT_STILLING_TABELL ($STILLINGSID, $INNHOLD, $OPPRETTET, $OPPRETTET_AV, $SIST_ENDRET, $SIST_ENDRET_AV, $STATUS, $PUBLISERT, $PUBLISERT_AV_ADMIN, $ADMIN_STATUS, $UTLØPSDATO, $VERSJON, $ANNONSENR)
+            values(:stillingsid, :innhold ::jsonb, :opprettet, :opprettet_av, :sist_endret, :sist_endret_av, :status, :publisert, :publisert_av_admin, :admin_status, :utløpsdato, :versjon, :annonsenr)
             on conflict($STILLINGSID) do update 
             set $SIST_ENDRET_AV=:sist_endret_av, 
                 $INNHOLD=:innhold ::jsonb,
@@ -57,7 +58,8 @@ class DirektemeldtStillingRepository(private val namedJdbcTemplate: NamedParamet
                 $PUBLISERT_AV_ADMIN=:publisert_av_admin,
                 $ADMIN_STATUS=:admin_status,
                 $UTLØPSDATO=:utløpsdato,
-                $VERSJON=:versjon + 1
+                $VERSJON=:versjon + 1,
+                $ANNONSENR=:annonsenr
             
             returning id   
         """.trimIndent()
@@ -92,7 +94,8 @@ class DirektemeldtStillingRepository(private val namedJdbcTemplate: NamedParamet
             } else {
                 null
             },
-            "versjon" to direktemeldtStilling.versjon
+            "versjon" to direktemeldtStilling.versjon,
+            "annonsenr" to direktemeldtStilling.annonsenr,
         )
 
         namedJdbcTemplate.query(sql, MapSqlParameterSource(params)) {rs -> if (rs.next()) rs.getLong("id") else null}
@@ -103,7 +106,7 @@ class DirektemeldtStillingRepository(private val namedJdbcTemplate: NamedParamet
      }
 
     fun hentDirektemeldtStilling(stillingsId: String) : DirektemeldtStilling? {
-        val sql = "select $ID, $STILLINGSID, $INNHOLD, $OPPRETTET, $OPPRETTET_AV, $SIST_ENDRET, $SIST_ENDRET_AV, $STATUS, $PUBLISERT, $PUBLISERT_AV_ADMIN, $ADMIN_STATUS, $UTLØPSDATO, $VERSJON from $DIREKTEMELDT_STILLING_TABELL where $STILLINGSID=:stillingsid"
+        val sql = "select $ID, $STILLINGSID, $INNHOLD, $OPPRETTET, $OPPRETTET_AV, $SIST_ENDRET, $SIST_ENDRET_AV, $STATUS, $PUBLISERT, $PUBLISERT_AV_ADMIN, $ADMIN_STATUS, $UTLØPSDATO, $VERSJON, $ANNONSENR from $DIREKTEMELDT_STILLING_TABELL where $STILLINGSID=:stillingsid"
         val params = mapOf("stillingsid" to UUID.fromString(stillingsId))
 
         val direktemeldtStilling = namedJdbcTemplate.query(
@@ -122,14 +125,14 @@ class DirektemeldtStillingRepository(private val namedJdbcTemplate: NamedParamet
     }
 
     fun hentAlleDirektemeldteStillinger() : List<DirektemeldtStilling> {
-        val sql = "select $STILLINGSID, $INNHOLD, $OPPRETTET, $OPPRETTET_AV, $SIST_ENDRET, $SIST_ENDRET_AV, $STATUS, $PUBLISERT, $PUBLISERT_AV_ADMIN, $ADMIN_STATUS, $UTLØPSDATO, $VERSJON from $DIREKTEMELDT_STILLING_TABELL"
+        val sql = "select $ID, $STILLINGSID, $INNHOLD, $OPPRETTET, $OPPRETTET_AV, $SIST_ENDRET, $SIST_ENDRET_AV, $STATUS, $PUBLISERT, $PUBLISERT_AV_ADMIN, $ADMIN_STATUS, $UTLØPSDATO, $VERSJON, $ANNONSENR from $DIREKTEMELDT_STILLING_TABELL"
         return namedJdbcTemplate.query(sql, DirektemeldtStillingRowMapper()).filterNotNull()
     }
 
     fun hentStillingerForAktivering() : List<DirektemeldtStilling> {
         // Henter alle stillinger som har status INACTIVE og hvor publisert er i løpet av de siste 24 timer, utløpsdato er fram i tid, admmin_status er DONE og publisert_av_admin er satt
         val sql = """
-          select $ID, $STILLINGSID, $INNHOLD, $OPPRETTET, $OPPRETTET_AV, $SIST_ENDRET, $SIST_ENDRET_AV, $STATUS, $PUBLISERT, $PUBLISERT_AV_ADMIN, $ADMIN_STATUS, $UTLØPSDATO, $VERSJON
+          select $ID, $STILLINGSID, $INNHOLD, $OPPRETTET, $OPPRETTET_AV, $SIST_ENDRET, $SIST_ENDRET_AV, $STATUS, $PUBLISERT, $PUBLISERT_AV_ADMIN, $ADMIN_STATUS, $UTLØPSDATO, $VERSJON, $ANNONSENR
           from
               $DIREKTEMELDT_STILLING_TABELL
           where
@@ -152,7 +155,7 @@ class DirektemeldtStillingRepository(private val namedJdbcTemplate: NamedParamet
     fun hentStillingerForDeaktivering(): List<DirektemeldtStilling> {
         // Henter alle direktemeldte stillinger som har status ACTIVE og hvor utløpsdato er før dagens dato
         val sql = """
-            select $ID, $STILLINGSID, $INNHOLD, $OPPRETTET, $OPPRETTET_AV, $SIST_ENDRET, $SIST_ENDRET_AV, $STATUS, $PUBLISERT, $PUBLISERT_AV_ADMIN, $ADMIN_STATUS, $UTLØPSDATO, $VERSJON
+            select $ID, $STILLINGSID, $INNHOLD, $OPPRETTET, $OPPRETTET_AV, $SIST_ENDRET, $SIST_ENDRET_AV, $STATUS, $PUBLISERT, $PUBLISERT_AV_ADMIN, $ADMIN_STATUS, $UTLØPSDATO, $VERSJON, $ANNONSENR
             from
                 $DIREKTEMELDT_STILLING_TABELL
             where
@@ -168,7 +171,7 @@ class DirektemeldtStillingRepository(private val namedJdbcTemplate: NamedParamet
 
     fun hentUtgåtteStillingerFor6mndSidenSomErPending(): List<DirektemeldtStilling> {
         val sql = """
-            select $ID, $STILLINGSID, $INNHOLD, $OPPRETTET, $OPPRETTET_AV, $SIST_ENDRET, $SIST_ENDRET_AV, $STATUS, $PUBLISERT, $PUBLISERT_AV_ADMIN, $ADMIN_STATUS, $UTLØPSDATO, $VERSJON
+            select $ID, $STILLINGSID, $INNHOLD, $OPPRETTET, $OPPRETTET_AV, $SIST_ENDRET, $SIST_ENDRET_AV, $STATUS, $PUBLISERT, $PUBLISERT_AV_ADMIN, $ADMIN_STATUS, $UTLØPSDATO, $VERSJON, $ANNONSENR
             from
                 $DIREKTEMELDT_STILLING_TABELL
             where
@@ -181,6 +184,21 @@ class DirektemeldtStillingRepository(private val namedJdbcTemplate: NamedParamet
         ).filterNotNull()
     }
 
+    fun hentStillingerUtenAnnonsenr(): List<DirektemeldtStilling> {
+        val sql = """
+               select $ID, $STILLINGSID, $INNHOLD, $OPPRETTET, $OPPRETTET_AV, $SIST_ENDRET, $SIST_ENDRET_AV, $STATUS, $PUBLISERT, $PUBLISERT_AV_ADMIN, $ADMIN_STATUS, $UTLØPSDATO, $VERSJON, $ANNONSENR
+            from
+                $DIREKTEMELDT_STILLING_TABELL
+            where 
+                $ANNONSENR is null
+        """.trimIndent()
+
+        return namedJdbcTemplate.query(
+            sql, DirektemeldtStillingRowMapper()
+        ).filterNotNull()
+    }
+
+
     class DirektemeldtStillingRowMapper : RowMapper<DirektemeldtStilling?> {
         @Throws(SQLException::class)
         override fun mapRow(rs: ResultSet, rowNum: Int): DirektemeldtStilling {
@@ -192,7 +210,7 @@ class DirektemeldtStillingRepository(private val namedJdbcTemplate: NamedParamet
                 sistEndret = rs.getTimestamp("sist_endret").toInstant().atZone(ZoneId.of("Europe/Oslo")),
                 sistEndretAv = rs.getString("sist_endret_av"),
                 status = rs.getString("status"),
-                annonseId = rs.getLong("id"),
+                annonsenr = rs.getString("annonsenr"),
                 versjon = rs.getInt("versjon"),
                 utløpsdato = rs.getTimestamp("utlopsdato")?.toInstant()?.atZone(ZoneId.of("Europe/Oslo")),
                 publisert = rs.getTimestamp("publisert")?.toInstant()?.atZone(ZoneId.of("Europe/Oslo")),
