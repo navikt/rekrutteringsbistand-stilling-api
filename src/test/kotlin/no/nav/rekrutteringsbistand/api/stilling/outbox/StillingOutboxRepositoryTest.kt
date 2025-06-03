@@ -29,7 +29,7 @@ class StillingOutboxRepositoryTest {
         val uuid = UUID.randomUUID()
         stillingOutboxRepository.lagreMeldingIOutbox(uuid, EventName.INDEKSER_DIREKTEMELDT_STILLING)
 
-        val uprosesserteStillinger = stillingOutboxRepository.finnUprossesertMeldinger()
+        val uprosesserteStillinger = stillingOutboxRepository.finnBatchMedUprossesertMeldinger()
 
         assertEquals(1, uprosesserteStillinger.size)
 

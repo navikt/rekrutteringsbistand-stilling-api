@@ -22,7 +22,7 @@ class ProsesserStillingOutboxJobb(
     @Scheduled(fixedDelay = 10000)
     fun prosesserStillingOutboxJobb() {
         if(leaderElection.isLeader()) {
-            val uprosesserteStillinger = stillingOutboxRepository.finnUprossesertMeldinger()
+            val uprosesserteStillinger = stillingOutboxRepository.finnBatchMedUprossesertMeldinger()
 
             uprosesserteStillinger.forEach {
                 val direktemeldtStilling = direktemeldtStillingService.hentDirektemeldtStilling(it.stillingsId.toString())

@@ -22,12 +22,13 @@ class StillingOutboxRepository(private val namedJdbcTemplate: NamedParameterJdbc
         namedJdbcTemplate.update(sql, MapSqlParameterSource(params))
     }
 
-    fun finnUprossesertMeldinger(): List<StillingOutboxMelding> {
+    fun finnBatchMedUprossesertMeldinger(): List<StillingOutboxMelding> {
         val sql = """
             select id, stillingsid, event_name
             from stilling_outbox
             where prosessert is null
             order by opprettet
+            limit 1000
         """.trimIndent()
 
         return namedJdbcTemplate.query(sql) { rs, _ ->

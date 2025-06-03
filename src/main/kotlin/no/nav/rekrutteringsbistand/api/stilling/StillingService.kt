@@ -334,8 +334,8 @@ class StillingService(
         return direktemeldtStillingService.hentDirektemeldtStilling(stillingsId) ?: throw RuntimeException("Fant ikke direktemeldt stilling $stillingsId")
     }
 
-    fun hentAlleDirektemeldteStillinger(): List<DirektemeldtStilling> {
-        return direktemeldtStillingService.hentAlleDirektemeldteStillinger()
+    fun hentAlleStillingsIder(): List<UUID> {
+        return direktemeldtStillingService.hentAlleStillingsIder()
     }
 
     fun populerLocationList(locationList: List<Geografi>): List<Geografi> {

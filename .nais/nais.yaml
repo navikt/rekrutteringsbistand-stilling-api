@@ -19,6 +19,13 @@ spec:
   replicas:
     max: {{ max_replicas }}
     min: {{ min_replicas }}
+  resources:
+    limits:
+      cpu: 500m
+      memory: 1024Mi
+    requests:
+      cpu: 100m
+      memory: 512Mi
   prometheus:
     enabled: true
     path: /internal/actuator/prometheus

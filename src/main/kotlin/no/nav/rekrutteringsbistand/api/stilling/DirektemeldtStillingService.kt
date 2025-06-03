@@ -4,6 +4,7 @@ import no.nav.rekrutteringsbistand.api.stilling.outbox.StillingOutboxService
 import no.nav.rekrutteringsbistand.api.stilling.outbox.EventName
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsid
 import org.springframework.stereotype.Service
+import java.util.UUID
 
 @Service
 class DirektemeldtStillingService(
@@ -27,8 +28,8 @@ class DirektemeldtStillingService(
         return hentDirektemeldtStilling(stillingsId.asString())
     }
 
-    fun hentAlleDirektemeldteStillinger(): List<DirektemeldtStilling> {
-        return direktemeldtStillingRepository.hentAlleDirektemeldteStillinger()
+    fun hentAlleStillingsIder(): List<UUID> {
+        return direktemeldtStillingRepository.hentAlleStillingsIder()
     }
 
     fun hentStillingerForAktivering(): List<DirektemeldtStilling> {
