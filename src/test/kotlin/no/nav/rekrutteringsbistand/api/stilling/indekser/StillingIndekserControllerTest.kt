@@ -54,10 +54,10 @@ class StillingIndekserControllerTest {
             innhold = enDirektemeldtStilling.innhold.copy(title = "Dette er en stilling")
         )
 
-        whenever(stillingService.hentAlleDirektemeldteStillinger()).thenReturn(
+        whenever(stillingService.hentAlleStillingsIder()).thenReturn(
             listOf(
-                direktemeldtStilling,
-                direktemeldtStilling2
+                direktemeldtStilling.stillingsId,
+                direktemeldtStilling2.stillingsId
             )
         )
 

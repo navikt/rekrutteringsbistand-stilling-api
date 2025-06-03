@@ -24,28 +24,25 @@ class StillingIndekserController(
     val authorizedPartyUtils: AuthorizedPartyUtils,
     val stillingService: StillingService,
     val stillingOutboxService: StillingOutboxService,
-    val direktemeldtStillingRepository: DirektemeldtStillingRepository,
-    val arbeidsplassenKlient: ArbeidsplassenKlient,
-
     ) {
 
     @PostMapping("/stillinger")
-    @Protected
+    @Unprotected
     fun reindekserAlleStillinger(): ResponseEntity<String> {
         if (!authorizedPartyUtils.kallKommerFraStillingIndekser()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
         }
 
         thread {
-            val stillinger = stillingService.hentAlleDirektemeldteStillinger()
+            val stillingsIder = stillingService.hentAlleStillingsIder()
 
-            stillinger.forEach { stilling ->
+            stillingsIder.forEach { id ->
                 stillingOutboxService.lagreMeldingIOutbox(
-                    stillingsId = stilling.stillingsId,
+                    stillingsId = id,
                     eventName = EventName.REINDEKSER_DIREKTEMELDT_STILLING
                 )
             }
-            log.info("${stillinger.size} stillinger er lagret i outboxen")
+            log.info("${stillingsIder.size} stillinger er lagret i outboxen")
         }
 
         log.info("Mottatt forespørsel om å legge stillinger på rapid")

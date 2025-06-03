@@ -124,9 +124,11 @@ class DirektemeldtStillingRepository(private val namedJdbcTemplate: NamedParamet
         return direktemeldtStilling[0]
     }
 
-    fun hentAlleDirektemeldteStillinger() : List<DirektemeldtStilling> {
-        val sql = "select $ID, $STILLINGSID, $INNHOLD, $OPPRETTET, $OPPRETTET_AV, $SIST_ENDRET, $SIST_ENDRET_AV, $STATUS, $PUBLISERT, $PUBLISERT_AV_ADMIN, $ADMIN_STATUS, $UTLØPSDATO, $VERSJON, $ANNONSENR from $DIREKTEMELDT_STILLING_TABELL"
-        return namedJdbcTemplate.query(sql, DirektemeldtStillingRowMapper()).filterNotNull()
+    fun hentAlleStillingsIder() : List<UUID> {
+        val sql = "select $STILLINGSID from $DIREKTEMELDT_STILLING_TABELL"
+        return namedJdbcTemplate.query(sql) { rs, _ ->
+            rs.getObject("stillingsid", UUID::class.java)
+        }.filterNotNull()
     }
 
     fun hentStillingerForAktivering() : List<DirektemeldtStilling> {

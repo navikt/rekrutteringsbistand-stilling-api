@@ -143,9 +143,20 @@ class DirektemeldtStillingRepositoryTest {
 
     @Test
     fun `Skal returnere tom liste hvis det ikke er noen direktemeldte stillinger i tabellen`() {
-        val direktemeldteStillinger = repository.hentAlleDirektemeldteStillinger()
+        val direktemeldteStillinger = repository.hentAlleStillingsIder()
 
         assertEquals(0, direktemeldteStillinger.size)
+    }
+
+    @Test
+    fun `Skal returnere en liste med UUID-er hvis det er direktemeldte stillinger i tabellen`() {
+        val stilling = enDirektemeldtStilling.copy(stillingsId = UUID.randomUUID())
+        repository.lagreDirektemeldtStilling(stilling)
+
+        val direktemeldteStillinger = repository.hentAlleStillingsIder()
+
+        assertEquals(1, direktemeldteStillinger.size)
+        assertEquals(stilling.stillingsId, direktemeldteStillinger[0])
     }
 
     @Test
