@@ -7,6 +7,7 @@ import no.nav.rekrutteringsbistand.api.stilling.DirektemeldtStillingService
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsid
 import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoService
 import no.nav.rekrutteringsbistand.api.support.config.LeaderElection
+import no.nav.rekrutteringsbistand.api.support.log
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 
@@ -24,22 +25,26 @@ class ProsesserStillingOutboxJobb(
         if(leaderElection.isLeader()) {
             val uprosesserteStillinger = stillingOutboxRepository.finnBatchMedUprossesertMeldinger()
 
-            uprosesserteStillinger.forEach {
-                val direktemeldtStilling = direktemeldtStillingService.hentDirektemeldtStilling(it.stillingsId.toString())
+            if(uprosesserteStillinger.isNotEmpty()) {
+                log.info("Prosesserer ${uprosesserteStillinger.size} stillinger i outbox")
 
-                if(direktemeldtStilling != null) {
-                    val stillingsinfo = stillingsinfoService.hentForStilling(stillingId = Stillingsid(direktemeldtStilling.stillingsId))?.asStillingsinfoDto()
+                uprosesserteStillinger.forEach {
+                    val direktemeldtStilling = direktemeldtStillingService.hentDirektemeldtStilling(it.stillingsId.toString())
 
-                    val packet = JsonMessage.newMessage(eventName = it.eventName.toString())
-                    packet["stillingsinfo"] = stillingsinfo ?: JsonNodeFactory.instance.nullNode()
-                    packet["stillingsId"] = direktemeldtStilling.stillingsId
-                    packet["direktemeldtStilling"] = direktemeldtStilling
-                    rapidApplikasjon.publish(Stillingsid(direktemeldtStilling.stillingsId), packet)
+                    if(direktemeldtStilling != null) {
+                        val stillingsinfo = stillingsinfoService.hentForStilling(stillingId = Stillingsid(direktemeldtStilling.stillingsId))?.asStillingsinfoDto()
 
-                    stillingOutboxRepository.settSomProsessert(it.id)
+                        val packet = JsonMessage.newMessage(eventName = it.eventName.toString())
+                        packet["stillingsinfo"] = stillingsinfo ?: JsonNodeFactory.instance.nullNode()
+                        packet["stillingsId"] = direktemeldtStilling.stillingsId
+                        packet["direktemeldtStilling"] = direktemeldtStilling
+                        rapidApplikasjon.publish(Stillingsid(direktemeldtStilling.stillingsId), packet)
+
+                        stillingOutboxRepository.settSomProsessert(it.id)
+                    }
                 }
+                log.info("Sendt ${uprosesserteStillinger.size} stillinger på rapid")
             }
         }
     }
 }
-
