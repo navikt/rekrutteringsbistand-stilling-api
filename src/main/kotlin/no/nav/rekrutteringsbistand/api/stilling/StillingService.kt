@@ -36,12 +36,11 @@ class StillingService(
         somSystembruker: Boolean = false
     ): RekrutteringsbistandStilling {
         val stillingsinfo = stillingsinfoService.hentForStilling(Stillingsid(stillingsId))?.asStillingsinfoDto()
-        val arbeidsplassenStilling = arbeidsplassenKlient.hentStilling(stillingsId, somSystembruker)
 
         direktemeldtStillingService.hentDirektemeldtStilling(stillingsId)?.let { direktemeldtStilling ->
             log.info("Hentet stilling fra databasen $stillingsId")
             return RekrutteringsbistandStilling(
-                stilling = direktemeldtStilling.toStilling().copy(id = arbeidsplassenStilling.id),
+                stilling = direktemeldtStilling.toStilling(),
                 stillingsinfo = stillingsinfo
             )
         }

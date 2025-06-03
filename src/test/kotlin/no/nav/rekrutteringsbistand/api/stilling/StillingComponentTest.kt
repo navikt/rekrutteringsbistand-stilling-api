@@ -141,23 +141,6 @@ internal class StillingComponentTest {
         }
     }
 
-
-    @Test
-    fun `GET mot en rekrutteringsbistandstilling skal føre til retries gitt server-error fra Arbeidsplassen`() {
-        val stillingsId = UUID.randomUUID().toString()
-        val urlPath = "/b2b/api/v1/ads/$stillingsId"
-        mockPamAdApiError(urlPath, httpResponseStatus = 500)
-        mockAzureObo(wiremockAzure)
-        whenever(stillingssokProxyClient.hentStilling(stillingsId)).thenReturn(null)
-
-        val responseEntity = restTemplate.getForEntity(
-            "$localBaseUrl/rekrutteringsbistandstilling/$stillingsId", String::class.java
-        )
-
-        assertTrue(responseEntity.statusCode.is5xxServerError)
-        wiremockPamAdApi.verify(3, getRequestedFor(urlPathMatching(urlPath)))
-    }
-
     @Test
     @Disabled("Denne er grønn lokalt men rød på Github")
     fun `GET mot en rekrutteringsbistandstilling skal føre til retries gitt nettverkshikke ved kall på Arbeidsplassen`() {
@@ -172,23 +155,6 @@ internal class StillingComponentTest {
 
         assertTrue(responseEntity.statusCode.is5xxServerError)
         wiremockPamAdApi.verify(3, getRequestedFor(urlPathMatching(urlPath)))
-    }
-
-    @Test
-    fun `GET mot en rekrutteringsbistandstilling skal ikke føre til retries gitt client-error ved kall på Arbeidsplassen`() {
-        val stillingsId = UUID.randomUUID().toString()
-        val urlPath = "/b2b/api/v1/ads/$stillingsId"
-        mockPamAdApiError(urlPath, httpResponseStatus = 400)
-        mockAzureObo(wiremockAzure)
-
-        whenever(stillingssokProxyClient.hentStilling(stillingsId)).thenReturn(null)
-
-        val responseEntity = restTemplate.getForEntity(
-            "$localBaseUrl/rekrutteringsbistandstilling/$stillingsId", String::class.java
-        )
-
-        assertTrue(responseEntity.statusCode.is4xxClientError)
-        wiremockPamAdApi.verify(1, getRequestedFor(urlPathMatching(urlPath)))
     }
 
     @Test
