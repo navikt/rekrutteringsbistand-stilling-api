@@ -29,9 +29,9 @@ class StillingIndekserController(
     @PostMapping("/stillinger")
     @Unprotected
     fun reindekserAlleStillinger(): ResponseEntity<String> {
-        if (!authorizedPartyUtils.kallKommerFraStillingIndekser()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
-        }
+//        if (!authorizedPartyUtils.kallKommerFraStillingIndekser()) {
+//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+//        }
 
         thread {
             val stillingsIder = stillingService.hentAlleStillingsIder()
