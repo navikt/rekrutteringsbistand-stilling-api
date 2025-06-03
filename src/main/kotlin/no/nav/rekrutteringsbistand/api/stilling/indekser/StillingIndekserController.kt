@@ -24,13 +24,10 @@ class StillingIndekserController(
     val authorizedPartyUtils: AuthorizedPartyUtils,
     val stillingService: StillingService,
     val stillingOutboxService: StillingOutboxService,
-    val direktemeldtStillingRepository: DirektemeldtStillingRepository,
-    val arbeidsplassenKlient: ArbeidsplassenKlient,
-
     ) {
 
     @PostMapping("/stillinger")
-    @Protected
+    @Unprotected
     fun reindekserAlleStillinger(): ResponseEntity<String> {
         if (!authorizedPartyUtils.kallKommerFraStillingIndekser()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
