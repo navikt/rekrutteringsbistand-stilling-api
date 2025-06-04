@@ -12,10 +12,10 @@ spec:
     - {{ ingress }}
   liveness:
     path: /internal/actuator/health
-    initialDelay: 60
+    initialDelay: 70
   readiness:
     path: /internal/actuator/health
-    initialDelay: 60
+    initialDelay: 70
   replicas:
     max: {{ max_replicas }}
     min: {{ min_replicas }}

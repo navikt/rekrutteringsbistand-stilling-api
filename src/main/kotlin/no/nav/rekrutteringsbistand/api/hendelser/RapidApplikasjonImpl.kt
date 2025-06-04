@@ -28,7 +28,7 @@ class RapidApplikasjonImpl constructor(
     init {
         try {
             rapidsConnection = RapidApplication.create(environment.toMap())
-            log.info("RapidApplikasjonImpl constructed with context: $context, environment: $environment, stillingService: $stillingService")
+            log.info("RapidApplikasjonImpl har blitt initialisert")
         } catch (e: Exception) {
             log.error("Exception in RapidApplikasjonImpl constructor", e)
             throw e
