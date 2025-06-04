@@ -154,7 +154,6 @@
             <groupId>io.opentelemetry.instrumentation</groupId>
             <artifactId>opentelemetry-logback-mdc-1.0</artifactId>
             <version>${opentelemetry-logback.version}</version>
-            <scope>runtime</scope>
         </dependency>
 
         <!-- JSON-logging -->
