@@ -3,6 +3,8 @@ package no.nav.rekrutteringsbistand.api.opensearch
 import com.fasterxml.jackson.databind.ObjectMapper
 import no.nav.rekrutteringsbistand.api.stilling.*
 import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.ZonedDateTime
 
 data class OpensSearchResponse(
     val _source: Source
@@ -19,9 +21,9 @@ data class OpensSearchResponse(
         businessName = _source.stilling.businessName,
         id = _source.stilling.annonsenr.toLong(),
         uuid = _source.stilling.uuid,
-        created = LocalDateTime.parse(_source.stilling.created),
+        created = konverterDato(_source.stilling.created),
         createdBy = "",
-        updated = LocalDateTime.parse(_source.stilling.updated),
+        updated = konverterDato(_source.stilling.updated),
         updatedBy = "",
         status = _source.stilling.status,
         administration = _source.stilling.administration.toAdministration(),
@@ -31,8 +33,8 @@ data class OpensSearchResponse(
         source = _source.stilling.source,
         medium = _source.stilling.medium,
         reference = _source.stilling.reference,
-        published = if(_source.stilling.published.isNullOrBlank()) null else LocalDateTime.parse(_source.stilling.published),
-        expires =  if(_source.stilling.expires.isNullOrBlank()) null else LocalDateTime.parse(_source.stilling.expires),
+        published = if(_source.stilling.published.isNullOrBlank()) null else konverterDato(_source.stilling.published),
+        expires =  if(_source.stilling.expires.isNullOrBlank()) null else konverterDato(_source.stilling.expires),
         employer = _source.stilling.employer?.toArbeidsgiver(),
         locationList = _source.stilling.locations.map(OpenSearchArbeidssted::toGeografi),
         categoryList = emptyList(), // Får aldri noen verdier her fra ekstern-topicet
@@ -42,6 +44,20 @@ data class OpensSearchResponse(
         activationOnPublishingDate = null,
         location = null,
     )
+
+    fun konverterDato(dato: String): LocalDateTime {
+        try {
+            return LocalDateTime.parse(dato)
+        } catch (e: Exception) {
+            // ignorer for å støtte flere datoformater
+        }
+
+        try {
+            return ZonedDateTime.parse(dato).toLocalDateTime()
+        } catch (e: Exception) {
+            throw RuntimeException("Greide ikke konvertere dato til zonedDateTime: $dato", e)
+        }
+    }
 
      data class Source(
          val stilling: OpenSearchStilling,

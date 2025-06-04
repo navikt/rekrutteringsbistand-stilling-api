@@ -27,7 +27,7 @@ class StillingService(
     val tokenUtils: TokenUtils,
     val kandidatlisteKlient: KandidatlisteKlient,
     val arbeidsplassenKlient: ArbeidsplassenKlient,
-    val direktemeldtStillingRepository: DirektemeldtStillingRepository,
+    val direktemeldtStillingService: DirektemeldtStillingService,
     val stillingssokProxyClient: StillingssokProxyClient,
     val geografiService: GeografiService
 ) {
@@ -36,16 +36,14 @@ class StillingService(
         somSystembruker: Boolean = false
     ): RekrutteringsbistandStilling {
         val stillingsinfo = stillingsinfoService.hentForStilling(Stillingsid(stillingsId))?.asStillingsinfoDto()
-        val arbeidsplassenStilling = arbeidsplassenKlient.hentStilling(stillingsId, somSystembruker)
 
-        direktemeldtStillingRepository.hentDirektemeldtStilling(stillingsId)?.let { direktemeldtStilling ->
+        direktemeldtStillingService.hentDirektemeldtStilling(stillingsId)?.let { direktemeldtStilling ->
             log.info("Hentet stilling fra databasen $stillingsId")
             return RekrutteringsbistandStilling(
-                stilling = direktemeldtStilling.toStilling().copy(id = arbeidsplassenStilling.id),
+                stilling = direktemeldtStilling.toStilling(),
                 stillingsinfo = stillingsinfo
             )
         }
-
 
         val stilling = stillingssokProxyClient.hentStilling(stillingsId, somSystembruker)
         log.info("Hentet stilling fra OpenSearch $stillingsId")
@@ -86,7 +84,7 @@ class StillingService(
 
         // Opprett stilling i db med samme uuid som arbeidsplassen
         val opprettet = ZonedDateTime.of(LocalDateTime.now(), ZoneId.of("Europe/Oslo"))
-        direktemeldtStillingRepository.lagreDirektemeldtStilling(
+        direktemeldtStillingService.lagreDirektemeldtStilling(
             DirektemeldtStilling(
                 stillingsId = stillingsId.verdi,
                 innhold = stilling.toDirektemeldtStillingInnhold(stillingsId),
@@ -95,7 +93,7 @@ class StillingService(
                 sistEndretAv = stilling.updatedBy,
                 sistEndret = opprettet,
                 status = "INACTIVE",
-                annonseId = null,
+                annonsenr = opprettetStillingArbeidsplassen.id.toString(),
                 utløpsdato = if (stillingskategori == Stillingskategori.FORMIDLING) opprettet else LocalDateTime.now().plusDays(DEFAULT_EXPIRY_DAYS).atZone(ZoneId.of("Europe/Oslo")),
                 publisert = opprettet,
                 publisertAvAdmin = null,
@@ -103,7 +101,7 @@ class StillingService(
             )
         )
         log.info("Opprettet stilling i databasen med uuid: ${opprettetStillingArbeidsplassen.uuid}")
-        val direktemeldtStillingFraDb = direktemeldtStillingRepository.hentDirektemeldtStilling(stillingsId)!!
+        val direktemeldtStillingFraDb = direktemeldtStillingService.hentDirektemeldtStilling(stillingsId)!!
 
         stillingsinfoService.opprettStillingsinfo(
             stillingsId = stillingsId,
@@ -159,8 +157,6 @@ class StillingService(
             log.info("Fant ikke stillingsinfo for stilling med id ved en oppdatering: ${dto.stilling.uuid}")
         }
 
-        val eksisterendeStilling = direktemeldtStillingRepository.hentDirektemeldtStilling(id)
-
         var publishedByAdmin: String? = dto.stilling.publishedByAdmin
         if(dto.stilling.firstPublished != null && dto.stilling.firstPublished && publishedByAdmin == null) {
             publishedByAdmin = LocalDateTime.now(ZoneId.of("Europe/Oslo")).toString()
@@ -171,7 +167,7 @@ class StillingService(
             stillingskategori = eksisterendeStillingsinfo?.stillingskategori
         ).copy(updated = LocalDateTime.now(ZoneId.of("Europe/Oslo")), publishedByAdmin = publishedByAdmin, locationList = populertLocationList)
 
-        direktemeldtStillingRepository.lagreDirektemeldtStilling(
+        direktemeldtStillingService.lagreDirektemeldtStilling(
             DirektemeldtStilling(
                 stillingsId = id.verdi,
                 innhold = stilling.toDirektemeldtStillingInnhold(),
@@ -180,15 +176,15 @@ class StillingService(
                 sistEndretAv = stilling.updatedBy,
                 sistEndret = stilling.updated.atZone(ZoneId.of("Europe/Oslo")),
                 status = stilling.status,
-                annonseId = eksisterendeStilling?.annonseId ?: dto.stilling.id,
+                annonsenr = dto.stilling.id.toString(),
                 utløpsdato = dto.stilling.hentExpiresMedDefaultVerdiOmIkkeOppgitt(),
                 publisert = dto.stilling.published?.atZone(ZoneId.of("Europe/Oslo")),
                 publisertAvAdmin = publishedByAdmin,
-                adminStatus = dto.stilling.administration?.status
+                adminStatus = dto.stilling.administration?.status,
             )
         )
         log.info("Oppdaterte stilling i databasen med uuid: ${dto.stilling.uuid}")
-        val direktemeldtStillingFraDb = direktemeldtStillingRepository.hentDirektemeldtStilling(id.asString())!!
+        val direktemeldtStillingFraDb = direktemeldtStillingService.hentDirektemeldtStilling(id.asString())!!
 
         // Hent stilling før den oppdateres, da det er en OptimisticLocking strategi på 'updated' feltet hos Arbeidsplassen
         val existerendeStilling = arbeidsplassenKlient.hentStilling(dto.stilling.uuid)
@@ -224,8 +220,8 @@ class StillingService(
     fun slettRekrutteringsbistandStilling(stillingsId: String): Stilling {
         kandidatlisteKlient.varsleOmSlettetStilling(Stillingsid(stillingsId))
 
-        direktemeldtStillingRepository.hentDirektemeldtStilling(stillingsId)?.let { dbStilling ->
-            direktemeldtStillingRepository.lagreDirektemeldtStilling(dbStilling.copy(
+        direktemeldtStillingService.hentDirektemeldtStilling(stillingsId)?.let { dbStilling ->
+            direktemeldtStillingService.lagreDirektemeldtStilling(dbStilling.copy(
                 status = "DELETED",
                 sistEndret = ZonedDateTime.now(ZoneId.of("Europe/Oslo"))))
         }
@@ -238,10 +234,10 @@ class StillingService(
         log.info("Hent stilling fra Arbeidsplassen og lagre til databasen uuid: $stillingsId")
         val arbeidsplassenStilling = arbeidsplassenKlient.hentStilling(stillingsId, true)
 
-        direktemeldtStillingRepository.hentDirektemeldtStilling(stillingsId)?.let { dbStilling ->
+        direktemeldtStillingService.hentDirektemeldtStilling(stillingsId)?.let { dbStilling ->
             logDiff(dbStilling, arbeidsplassenStilling, stillingsId)
         }
-        val finnesStilling = direktemeldtStillingRepository.hentDirektemeldtStilling(stillingsId)
+        val finnesStilling = direktemeldtStillingService.hentDirektemeldtStilling(stillingsId)
         if(finnesStilling == null) {
             log.warn("Stilling $stillingsId finnes ikke i databasen")
             val direktemeldtStillingInnhold = arbeidsplassenStilling.toDirektemeldtStillingInnhold()
@@ -253,13 +249,13 @@ class StillingService(
                 sistEndretAv = arbeidsplassenStilling.updatedBy,
                 sistEndret = arbeidsplassenStilling.updated.atZone(ZoneId.of("Europe/Oslo")),
                 status = arbeidsplassenStilling.status,
-                annonseId = null,
+                annonsenr = arbeidsplassenStilling.id.toString(),
                 utløpsdato = arbeidsplassenStilling.hentExpiresMedDefaultVerdiOmIkkeOppgitt(),
                 publisert = arbeidsplassenStilling.published?.atZone(ZoneId.of("Europe/Oslo")),
                 publisertAvAdmin = arbeidsplassenStilling.publishedByAdmin,
                 adminStatus = arbeidsplassenStilling.administration?.status
             )
-            direktemeldtStillingRepository.lagreDirektemeldtStilling(direktemeldtStilling)
+            direktemeldtStillingService.lagreDirektemeldtStilling(direktemeldtStilling)
         }
     }
 
@@ -335,11 +331,11 @@ class StillingService(
 
 
     fun hentDirektemeldtStilling(stillingsId: String): DirektemeldtStilling {
-        return direktemeldtStillingRepository.hentDirektemeldtStilling(stillingsId) ?: throw RuntimeException("Fant ikke direktemeldt stilling $stillingsId")
+        return direktemeldtStillingService.hentDirektemeldtStilling(stillingsId) ?: throw RuntimeException("Fant ikke direktemeldt stilling $stillingsId")
     }
 
-    fun hentAlleDirektemeldteStillinger(): List<DirektemeldtStilling> {
-        return direktemeldtStillingRepository.hentAlleDirektemeldteStillinger()
+    fun hentAlleStillingsIder(): List<UUID> {
+        return direktemeldtStillingService.hentAlleStillingsIder()
     }
 
     fun populerLocationList(locationList: List<Geografi>): List<Geografi> {

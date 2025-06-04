@@ -48,7 +48,7 @@ class DirektemeldtStillingRepositoryTest {
             sistEndretAv = stilling.updatedBy,
             sistEndret = ZonedDateTime.now(ZoneId.of("Europe/Oslo")),
             status = stilling.status,
-            annonseId = 1,
+            annonsenr = "1",
             utløpsdato = ZonedDateTime.now(ZoneId.of("Europe/Oslo")).plusDays(3),
             publisert = ZonedDateTime.now(ZoneId.of("Europe/Oslo")),
             publisertAvAdmin = ZonedDateTime.now(ZoneId.of("Europe/Oslo")).toString(),
@@ -62,7 +62,7 @@ class DirektemeldtStillingRepositoryTest {
             sistEndretAv = stilling2.createdBy,
             sistEndret = ZonedDateTime.now(ZoneId.of("Europe/Oslo")),
             status = stilling2.status,
-            annonseId = 2,
+            annonsenr = "2",
             utløpsdato = ZonedDateTime.now(ZoneId.of("Europe/Oslo")).plusDays(3),
             publisert = ZonedDateTime.now(ZoneId.of("Europe/Oslo")),
             publisertAvAdmin = ZonedDateTime.now(ZoneId.of("Europe/Oslo")).toString(),
@@ -143,9 +143,20 @@ class DirektemeldtStillingRepositoryTest {
 
     @Test
     fun `Skal returnere tom liste hvis det ikke er noen direktemeldte stillinger i tabellen`() {
-        val direktemeldteStillinger = repository.hentAlleDirektemeldteStillinger()
+        val direktemeldteStillinger = repository.hentAlleStillingsIder()
 
         assertEquals(0, direktemeldteStillinger.size)
+    }
+
+    @Test
+    fun `Skal returnere en liste med UUID-er hvis det er direktemeldte stillinger i tabellen`() {
+        val stilling = enDirektemeldtStilling.copy(stillingsId = UUID.randomUUID())
+        repository.lagreDirektemeldtStilling(stilling)
+
+        val direktemeldteStillinger = repository.hentAlleStillingsIder()
+
+        assertEquals(1, direktemeldteStillinger.size)
+        assertEquals(stilling.stillingsId, direktemeldteStillinger[0])
     }
 
     @Test

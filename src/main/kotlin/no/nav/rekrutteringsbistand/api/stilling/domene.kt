@@ -424,7 +424,7 @@ data class DirektemeldtStilling(
     val sistEndret: ZonedDateTime,
     val sistEndretAv: String,
     val status: String,
-    val annonseId: Long?,
+    val annonsenr: String,
     val versjon: Int = 1,
     val utløpsdato: ZonedDateTime? = null,
     val publisert: ZonedDateTime? = null,
@@ -433,7 +433,7 @@ data class DirektemeldtStilling(
 ) {
     fun toStilling(): Stilling {
         return Stilling(
-            id = annonseId ?: 0,
+            id = annonsenr.toLong(),
             uuid = stillingsId.toString(),
             created = opprettet.toLocalDateTime(),
             createdBy = opprettetAv,

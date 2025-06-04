@@ -1,6 +1,6 @@
 package no.nav.rekrutteringsbistand.api.stillingStatusoppdatering
 
-import no.nav.rekrutteringsbistand.api.stilling.DirektemeldtStillingRepository
+import no.nav.rekrutteringsbistand.api.stilling.DirektemeldtStillingService
 import no.nav.rekrutteringsbistand.api.stilling.Status
 import no.nav.rekrutteringsbistand.api.support.log
 import org.springframework.stereotype.Service
@@ -10,23 +10,23 @@ import java.time.ZonedDateTime
 
 @Service
 class AktiverOgDeaktiverStillingerService(
-    val direktemeldtStillingRepository: DirektemeldtStillingRepository
+    val direktemeldtStillingService: DirektemeldtStillingService
 ) {
 
     @Transactional
     fun aktiverStillinger() {
-        val stillingerForAktivering = direktemeldtStillingRepository.hentStillingerForAktivering()
+        val stillingerForAktivering = direktemeldtStillingService.hentStillingerForAktivering()
         log.info("Fant ${stillingerForAktivering.size} stillinger for aktivering")
 
         stillingerForAktivering.forEach {
             val stillingNyStatus = it.copy(status = Status.ACTIVE.toString(), sistEndret = ZonedDateTime.now(ZoneId.of("Europe/Oslo")))
-            direktemeldtStillingRepository.lagreDirektemeldtStilling(stillingNyStatus)
+            direktemeldtStillingService.lagreDirektemeldtStilling(stillingNyStatus)
         }
     }
 
     @Transactional
     fun deaktiverStillinger() {
-        val stillingerForDeaktivering  = direktemeldtStillingRepository.hentStillingerForDeaktivering()
+        val stillingerForDeaktivering  = direktemeldtStillingService.hentStillingerForDeaktivering()
         log.info("Fant ${stillingerForDeaktivering.size} stillinger for deaktivering")
         stillingerForDeaktivering.forEach {
             log.info("Sjekker stilling ${it.stillingsId} med publisert ${it.publisert} og expires ${it.utløpsdato}")
@@ -36,10 +36,10 @@ class AktiverOgDeaktiverStillingerService(
                 val stillingNyStatus = it.copy(status = Status.INACTIVE.toString(),
                     sistEndret = ZonedDateTime.now(ZoneId.of("Europe/Oslo")),
                     adminStatus = Status.DONE.toString())
-                direktemeldtStillingRepository.lagreDirektemeldtStilling(stillingNyStatus)
+                direktemeldtStillingService.lagreDirektemeldtStilling(stillingNyStatus)
             } else {
                 val stillingNyStatus = it.copy(status = Status.INACTIVE.toString(), sistEndret = ZonedDateTime.now(ZoneId.of("Europe/Oslo")))
-                direktemeldtStillingRepository.lagreDirektemeldtStilling(stillingNyStatus)
+                direktemeldtStillingService.lagreDirektemeldtStilling(stillingNyStatus)
             }
         }
     }
