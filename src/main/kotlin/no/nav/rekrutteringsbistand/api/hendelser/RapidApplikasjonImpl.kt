@@ -23,16 +23,17 @@ class RapidApplikasjonImpl constructor(
     private val stillingService: StillingService
 ) : Runnable, RapidApplikasjon {
 
+    private lateinit var rapidsConnection: RapidsConnection
+
     init {
         try {
+            rapidsConnection = RapidApplication.create(environment.toMap())
             log.info("RapidApplikasjonImpl constructed with context: $context, environment: $environment, stillingService: $stillingService")
         } catch (e: Exception) {
             log.error("Exception in RapidApplikasjonImpl constructor", e)
             throw e
         }
     }
-
-    private val rapidsConnection = RapidApplication.create(environment.toMap())
 
     companion object {
         fun <T: RapidsConnection> T.registrerLyttere(
@@ -60,3 +61,4 @@ private fun Environment.toMap() = if (this is AbstractEnvironment)
     this.propertySources.filterIsInstance<MapPropertySource>()
         .flatMap { it.source.map { (key, value) -> key to value.toString() } }.toMap()
 else emptyMap<String, String>()
+
