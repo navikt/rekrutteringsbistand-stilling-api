@@ -5,7 +5,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.rekrutteringsbistand.api.stilling.StillingService
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsid
-import org.springframework.beans.factory.annotation.Autowired
+import no.nav.rekrutteringsbistand.api.support.log
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Profile
@@ -17,11 +17,20 @@ import org.springframework.stereotype.Component
 
 @Profile("!test")
 @Component
-class RapidApplikasjonImpl(
-    @Autowired private val context: ApplicationContext,
-    @Autowired private val environment: Environment,
-    @Autowired private val stillingService: StillingService,
-    ): Runnable, RapidApplikasjon {
+class RapidApplikasjonImpl constructor(
+    private val context: ApplicationContext,
+    private val environment: Environment,
+    private val stillingService: StillingService
+) : Runnable, RapidApplikasjon {
+
+    init {
+        try {
+            log.info("RapidApplikasjonImpl constructed with context: $context, environment: $environment, stillingService: $stillingService")
+        } catch (e: Exception) {
+            log.error("Exception in RapidApplikasjonImpl constructor", e)
+            throw e
+        }
+    }
 
     private val rapidsConnection = RapidApplication.create(environment.toMap())
 
