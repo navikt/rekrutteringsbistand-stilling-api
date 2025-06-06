@@ -27,7 +27,7 @@ class StillingOutboxRepository(private val namedJdbcTemplate: NamedParameterJdbc
             select id, stillingsid, event_name
             from stilling_outbox
             where prosessert is null
-            order by opprettet
+            order by case when event_name = 'indekserDirektemeldtStilling' then 1 else 2 end, opprettet
             limit 1000
         """.trimIndent()
 

@@ -38,4 +38,18 @@ class StillingOutboxRepositoryTest {
         assertEquals(EventName.INDEKSER_DIREKTEMELDT_STILLING, stillingOutboxMelding.eventName)
         assertEquals(uuid, stillingOutboxMelding.stillingsId)
     }
+
+    @Test
+    fun `Skal hente indekser-eventer før reindekser-eventer`() {
+        stillingOutboxRepository.lagreMeldingIOutbox(UUID.randomUUID(), EventName.REINDEKSER_DIREKTEMELDT_STILLING)
+        stillingOutboxRepository.lagreMeldingIOutbox(UUID.randomUUID(), EventName.REINDEKSER_DIREKTEMELDT_STILLING)
+        stillingOutboxRepository.lagreMeldingIOutbox(UUID.randomUUID(), EventName.REINDEKSER_DIREKTEMELDT_STILLING)
+        stillingOutboxRepository.lagreMeldingIOutbox(UUID.randomUUID(), EventName.REINDEKSER_DIREKTEMELDT_STILLING)
+        stillingOutboxRepository.lagreMeldingIOutbox(UUID.randomUUID(), EventName.INDEKSER_DIREKTEMELDT_STILLING)
+
+        val uprosesserteStillinger = stillingOutboxRepository.finnBatchMedUprossesertMeldinger()
+
+        assertEquals(5, uprosesserteStillinger.size)
+        assertEquals(uprosesserteStillinger.first().eventName, EventName.INDEKSER_DIREKTEMELDT_STILLING)
+    }
 }
