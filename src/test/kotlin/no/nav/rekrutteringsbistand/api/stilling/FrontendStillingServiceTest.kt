@@ -19,7 +19,7 @@ import org.springframework.boot.test.context.SpringBootTest
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
-class StillingServiceTest {
+class FrontendStillingServiceTest {
     @Mock
     lateinit var stillingsinfoService: StillingsinfoService
     @Mock

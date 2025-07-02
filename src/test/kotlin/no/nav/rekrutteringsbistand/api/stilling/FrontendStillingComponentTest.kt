@@ -56,7 +56,7 @@ import java.util.*
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
     properties = arrayOf("external.pam-ad-api.url=http://localhost:9935")
 )
-internal class StillingComponentTest {
+internal class FrontendStillingComponentTest {
 
     companion object {
         @JvmStatic
@@ -446,7 +446,7 @@ internal class StillingComponentTest {
             "$localBaseUrl/rekrutteringsbistandstilling/${slettetStilling.uuid}",
             HttpMethod.DELETE,
             HttpEntity(null, null),
-            Stilling::class.java
+            FrontendStilling::class.java
         ).also {
             val stilling = it.body
             assertThat(stilling?.title).isEqualTo(slettetStilling.title)
@@ -473,7 +473,7 @@ internal class StillingComponentTest {
             "$localBaseUrl/rekrutteringsbistandstilling/${slettetStilling.uuid}",
             HttpMethod.DELETE,
             HttpEntity(null, null),
-            Stilling::class.java
+            FrontendStilling::class.java
         ).also {
             val stilling = it.body
             assertThat(stilling?.title).isEqualTo(slettetStilling.title)
@@ -501,7 +501,7 @@ internal class StillingComponentTest {
             "$localBaseUrl/rekrutteringsbistandstilling/${enStilling.uuid}",
             HttpMethod.DELETE,
             null,
-            Stilling::class.java
+            FrontendStilling::class.java
         ).also {
             assertThat(it.statusCode).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
         }
@@ -525,7 +525,7 @@ internal class StillingComponentTest {
             "$localBaseUrl/rekrutteringsbistandstilling/${slettetStilling.uuid}",
             HttpMethod.DELETE,
             HttpEntity(null, null),
-            Stilling::class.java
+            FrontendStilling::class.java
         ).also {
             val stillingIRespons = it.body!!
             assertThat(it.statusCode == OK)

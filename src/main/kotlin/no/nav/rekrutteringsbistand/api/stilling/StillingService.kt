@@ -9,7 +9,7 @@ import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
 import no.nav.rekrutteringsbistand.api.geografi.GeografiService
 import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteKlient
 import no.nav.rekrutteringsbistand.api.opensearch.StillingssokProxyClient
-import no.nav.rekrutteringsbistand.api.stilling.Stilling.Companion.DEFAULT_EXPIRY_DAYS
+import no.nav.rekrutteringsbistand.api.stilling.FrontendStilling.Companion.DEFAULT_EXPIRY_DAYS
 import no.nav.rekrutteringsbistand.api.stillingsinfo.*
 import no.nav.rekrutteringsbistand.api.support.log
 import org.springframework.stereotype.Service
@@ -178,7 +178,7 @@ class StillingService(
                 sistEndretAv = stilling.updatedBy,
                 sistEndret = stilling.updated.atZone(ZoneId.of("Europe/Oslo")),
                 status = stilling.status,
-                annonsenr = dto.stilling.id.toString(),
+                annonsenr = dto.stilling.annonsenr,
                 utløpsdato = dto.stilling.hentExpiresMedDefaultVerdiOmIkkeOppgitt(),
                 publisert = dto.stilling.published?.atZone(ZoneId.of("Europe/Oslo")),
                 publisertAvAdmin = publishedByAdmin,
@@ -219,7 +219,7 @@ class StillingService(
         }
     }
 
-    fun slettRekrutteringsbistandStilling(stillingsId: String): Stilling {
+    fun slettRekrutteringsbistandStilling(stillingsId: String): FrontendStilling {
         kandidatlisteKlient.varsleOmSlettetStilling(Stillingsid(stillingsId))
 
         direktemeldtStillingService.hentDirektemeldtStilling(stillingsId)?.let { dbStilling ->
@@ -261,7 +261,7 @@ class StillingService(
         }
     }
 
-    private fun logDiff(dbStilling: DirektemeldtStilling, arbeidsplassenStilling: Stilling, stillingsId: String) {
+    private fun logDiff(dbStilling: DirektemeldtStilling, arbeidsplassenStilling: FrontendStilling, stillingsId: String) {
         loggHvisDiff(dbStilling.stillingsId.toString(), arbeidsplassenStilling.uuid, "uuid", stillingsId)
         loggHvisDiff(dbStilling.status, arbeidsplassenStilling.status, "status", stillingsId)
         loggHvisDiff(dbStilling.opprettetAv, arbeidsplassenStilling.createdBy, "opprettetAv", stillingsId)

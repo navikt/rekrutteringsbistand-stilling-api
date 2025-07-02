@@ -13,7 +13,7 @@ import java.time.ZonedDateTime
 import java.util.*
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class Stilling(
+data class FrontendStilling(
     val id: Long,
     val annonsenr: String = "",
     val uuid: String,
@@ -127,7 +127,7 @@ data class Stilling(
         )
     }
 
-    fun copyMedBeregnetTitle(stillingskategori: Stillingskategori?): Stilling =
+    fun copyMedBeregnetTitle(stillingskategori: Stillingskategori?): FrontendStilling =
         when (stillingskategori) {
             Stillingskategori.JOBBMESSE ->
                 this.copy(title = "Invitasjon til jobbmesse")
@@ -465,8 +465,8 @@ data class DirektemeldtStilling(
     val publisertAvAdmin: String?,
     val adminStatus: String?
 ) {
-    fun toStilling(arbeidsplassenAnnonsenr: Long): Stilling {
-        return Stilling(
+    fun toStilling(arbeidsplassenAnnonsenr: Long): FrontendStilling {
+        return FrontendStilling(
             id = arbeidsplassenAnnonsenr,
             annonsenr = annonsenr,
             uuid = stillingsId.toString(),

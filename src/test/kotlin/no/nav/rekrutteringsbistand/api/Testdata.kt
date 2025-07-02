@@ -20,7 +20,7 @@ object Testdata {
     private val styrkTittel = "Byggeleder"
     val styrk = Kategori(2148934, styrkCode, "STYRK08NAV", styrkTittel, null, null)
 
-    val enStilling = Stilling(
+    val enStilling = FrontendStilling(
         id = 1000,
         uuid = UUID.randomUUID().toString(),
         annonsenr = "1000",
@@ -69,7 +69,7 @@ object Testdata {
         eierNavKontorEnhetId = "1234",
     )
 
-    val enOpprettetStilling = Stilling(
+    val enOpprettetStilling = FrontendStilling(
         title = "Ny stilling",
         createdBy = "pam-rekrutteringsbistand",
         updatedBy = "pam-rekrutteringsbistand",

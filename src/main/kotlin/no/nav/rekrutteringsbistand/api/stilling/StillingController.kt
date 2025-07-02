@@ -54,7 +54,7 @@ class StillingController(private val stillingsinfoService: StillingsinfoService,
     }
 
     @DeleteMapping("/rekrutteringsbistandstilling/{stillingsId}")
-    fun slettRekrutteringsbistandStilling(@PathVariable(value = "stillingsId") stillingsId: String): ResponseEntity<Stilling> {
+    fun slettRekrutteringsbistandStilling(@PathVariable(value = "stillingsId") stillingsId: String): ResponseEntity<FrontendStilling> {
         tokenUtils.hentInnloggetVeileder().validerMinstEnAvRollene(Rolle.ARBEIDSGIVERRETTET)
         val slettetStilling = stillingService.slettRekrutteringsbistandStilling(stillingsId)
         return ok(slettetStilling)

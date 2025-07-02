@@ -4,7 +4,7 @@ import io.micrometer.core.instrument.Metrics
 import io.micrometer.core.instrument.Timer
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
 import no.nav.rekrutteringsbistand.api.stilling.Page
-import no.nav.rekrutteringsbistand.api.stilling.Stilling
+import no.nav.rekrutteringsbistand.api.stilling.FrontendStilling
 import no.nav.rekrutteringsbistand.api.support.config.ExternalConfiguration
 import no.nav.rekrutteringsbistand.api.support.log
 import no.nav.rekrutteringsbistand.api.support.rest.RetrySpringRestTemplate.retry
@@ -23,7 +23,6 @@ import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.util.UriComponentsBuilder
 import java.io.EOFException
 import java.time.Duration
-import java.util.*
 
 
 @Component
@@ -98,16 +97,16 @@ class ArbeidsplassenKlient(
             log.info("Trigget resending av stillingsmelding fra Arbeidsplassen for stilling $stillingsid")
         }
 
-    fun hentStillingBasertPåUUID(uuid: String): Stilling? =
+    fun hentStillingBasertPåUUID(uuid: String): FrontendStilling? =
         timer("rekrutteringsbistand.stilling.arbeidsplassen.hentStillingBasertPåUUID.kall.tid") {
             val url = UriComponentsBuilder.fromHttpUrl("${hentBaseUrl()}/b2b/api/v1/ads").query("uuid=${uuid}")
                 .build()
                 .toString()
             try {
-                val response: ResponseEntity<Page<Stilling>> = restTemplate.exchange(url,
+                val response: ResponseEntity<Page<FrontendStilling>> = restTemplate.exchange(url,
                     HttpMethod.GET,
                     HttpEntity(null, httpHeadersSomSystembruker()),
-                    object : ParameterizedTypeReference<Page<Stilling>>() {})
+                    object : ParameterizedTypeReference<Page<FrontendStilling>>() {})
                 return@timer response.body?.content?.firstOrNull() ?: throw kunneIkkeTolkeBodyException()
 
             } catch (e: RestClientResponseException) {
@@ -125,13 +124,13 @@ class ArbeidsplassenKlient(
             }
         }
 
-    fun opprettStilling(stilling: OpprettStillingDto): Stilling =
+    fun opprettStilling(stilling: OpprettStillingDto): FrontendStilling =
         timer("rekrutteringsbistand.stilling.arbeidsplassen.opprettStilling.kall.tid") {
             val url = "${hentBaseUrl()}/api/v1/ads?classify=true"
 
             try {
                 val response = restTemplate.exchange(
-                    url, HttpMethod.POST, HttpEntity(stilling, httpHeaders()), Stilling::class.java
+                    url, HttpMethod.POST, HttpEntity(stilling, httpHeaders()), FrontendStilling::class.java
                 )
                 return@timer response.body ?: throw kunneIkkeTolkeBodyException()
 
@@ -158,13 +157,13 @@ class ArbeidsplassenKlient(
             }
         }
 
-    fun slettStilling(stillingsId: String): Stilling =
+    fun slettStilling(stillingsId: String): FrontendStilling =
         timer("rekrutteringsbistand.stilling.arbeidsplassen.slettStilling.kall.tid") {
             val url = "${hentBaseUrl()}/api/v1/ads/$stillingsId"
 
             try {
                 val response = restTemplate.exchange(
-                    url, HttpMethod.DELETE, HttpEntity(null, httpHeaders()), Stilling::class.java
+                    url, HttpMethod.DELETE, HttpEntity(null, httpHeaders()), FrontendStilling::class.java
                 )
                 return@timer response.body ?: throw kunneIkkeTolkeBodyException()
             } catch (e: UnknownContentTypeException) {

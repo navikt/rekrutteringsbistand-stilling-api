@@ -36,7 +36,7 @@ data class ArbeidsplassenStillingDto(
     val deactivatedByExpiry: Boolean?,
     val activationOnPublishingDate: Boolean?
 ) {
-    fun toStilling() = Stilling(
+    fun toStilling() = FrontendStilling(
         id = id,
         uuid = uuid,
         annonsenr = "",
