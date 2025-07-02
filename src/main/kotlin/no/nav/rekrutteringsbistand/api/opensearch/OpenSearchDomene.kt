@@ -20,6 +20,7 @@ data class OpensSearchResponse(
         },
         businessName = _source.stilling.businessName,
         id = _source.stilling.annonsenr.toLong(),
+        annonsenr = _source.stilling.annonsenr,
         uuid = _source.stilling.uuid,
         created = konverterDato(_source.stilling.created),
         createdBy = "",

@@ -20,6 +20,10 @@ class DirektemeldtStillingService(
         )
     }
 
+    fun settAnnonsenrFraDbId(stillingsId: String) {
+        direktemeldtStillingRepository.settAnnonsenrFraDbId(stillingsId)
+    }
+
     fun hentDirektemeldtStilling(stillingsId: String): DirektemeldtStilling? {
         return direktemeldtStillingRepository.hentDirektemeldtStilling(stillingsId)
     }

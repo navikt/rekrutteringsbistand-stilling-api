@@ -36,11 +36,12 @@ class StillingService(
         somSystembruker: Boolean = false
     ): RekrutteringsbistandStilling {
         val stillingsinfo = stillingsinfoService.hentForStilling(Stillingsid(stillingsId))?.asStillingsinfoDto()
+        val arbeidsplassenStilling = arbeidsplassenKlient.hentStilling(stillingsId, somSystembruker)
 
         direktemeldtStillingService.hentDirektemeldtStilling(stillingsId)?.let { direktemeldtStilling ->
             log.info("Hentet stilling fra databasen $stillingsId")
             return RekrutteringsbistandStilling(
-                stilling = direktemeldtStilling.toStilling(),
+                stilling = direktemeldtStilling.toStilling(arbeidsplassenStilling.id),
                 stillingsinfo = stillingsinfo
             )
         }
@@ -93,7 +94,7 @@ class StillingService(
                 sistEndretAv = stilling.updatedBy,
                 sistEndret = opprettet,
                 status = "INACTIVE",
-                annonsenr = opprettetStillingArbeidsplassen.id.toString(),
+                annonsenr = stillingsId.verdi.toString(),
                 utløpsdato = if (stillingskategori == Stillingskategori.FORMIDLING) opprettet else LocalDateTime.now().plusDays(DEFAULT_EXPIRY_DAYS).atZone(ZoneId.of("Europe/Oslo")),
                 publisert = opprettet,
                 publisertAvAdmin = null,
@@ -101,6 +102,7 @@ class StillingService(
             )
         )
         log.info("Opprettet stilling i databasen med uuid: ${opprettetStillingArbeidsplassen.uuid}")
+        direktemeldtStillingService.settAnnonsenrFraDbId(stillingsId.asString())
         val direktemeldtStillingFraDb = direktemeldtStillingService.hentDirektemeldtStilling(stillingsId)!!
 
         stillingsinfoService.opprettStillingsinfo(
@@ -114,7 +116,7 @@ class StillingService(
         val stillingsinfo = stillingsinfoService.hentStillingsinfo(opprettetStillingArbeidsplassen)
 
         return RekrutteringsbistandStilling(
-            stilling = direktemeldtStillingFraDb.toStilling().copy(id = opprettetStillingArbeidsplassen.id),
+            stilling = direktemeldtStillingFraDb.toStilling(opprettetStillingArbeidsplassen.id),
             stillingsinfo = stillingsinfo?.asStillingsinfoDto()
         ).also {
             kandidatlisteKlient.sendStillingOppdatert(it)
@@ -193,7 +195,7 @@ class StillingService(
         log.info("Oppdaterte stilling hos Arbeidsplassen med uuid: ${dto.stilling.uuid}")
 
         return OppdaterRekrutteringsbistandStillingDto(
-            stilling = direktemeldtStillingFraDb.toStilling().copy(id = oppdatertStilling.id),
+            stilling = direktemeldtStillingFraDb.toStilling(oppdatertStilling.id),
             stillingsinfoid = eksisterendeStillingsinfo?.stillingsinfoid?.asString(),
             stillingsinfo = oppdatertStillingsinfo?.asStillingsinfoDto(),
         ).also {

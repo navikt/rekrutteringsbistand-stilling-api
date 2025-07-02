@@ -14,6 +14,7 @@ import java.util.*
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Stilling(
     val id: Long,
+    val annonsenr: String,
     val uuid: String,
     val created: LocalDateTime,
     val createdBy: String,
@@ -431,9 +432,10 @@ data class DirektemeldtStilling(
     val publisertAvAdmin: String?,
     val adminStatus: String?
 ) {
-    fun toStilling(): Stilling {
+    fun toStilling(arbeidsplassenAnnonsenr: Long): Stilling {
         return Stilling(
-            id = annonsenr.toLong(),
+            id = arbeidsplassenAnnonsenr,
+            annonsenr = annonsenr,
             uuid = stillingsId.toString(),
             created = opprettet.toLocalDateTime(),
             createdBy = opprettetAv,

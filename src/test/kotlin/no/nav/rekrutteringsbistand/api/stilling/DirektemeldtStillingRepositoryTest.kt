@@ -197,4 +197,16 @@ class DirektemeldtStillingRepositoryTest {
 
         assertTrue(repository.hentUtgåtteStillingerFor6mndSidenSomErPending().isEmpty())
     }
+
+    @Test
+    fun `settAnnonsenrFraDbId skal oppdatere annonsenr for en direktemeldt stilling`() {
+        val stilling = enDirektemeldtStilling
+        repository.lagreDirektemeldtStilling(stilling)
+
+        repository.settAnnonsenrFraDbId(stilling.stillingsId.toString())
+
+        val oppdatertStilling = repository.hentDirektemeldtStilling(stilling.stillingsId.toString())
+        assertNotNull(oppdatertStilling)
+        assertTrue(oppdatertStilling?.annonsenr?.startsWith("R") ?: false)
+    }
 }

@@ -101,6 +101,17 @@ class DirektemeldtStillingRepository(private val namedJdbcTemplate: NamedParamet
         namedJdbcTemplate.query(sql, MapSqlParameterSource(params)) {rs -> if (rs.next()) rs.getLong("id") else null}
     }
 
+    fun settAnnonsenrFraDbId(stillingsId: String) {
+        log.info("Oppdaterer annonsenr for direktemeldt stilling med id: $stillingsId")
+
+        val sql = "update $DIREKTEMELDT_STILLING_TABELL set $ANNONSENR=(select 'R' || id from $DIREKTEMELDT_STILLING_TABELL where $STILLINGSID=:stillingsid) where $STILLINGSID=:stillingsid"
+        val params = mapOf(
+            "stillingsid" to UUID.fromString(stillingsId),
+        )
+
+        namedJdbcTemplate.update(sql, params)
+    }
+
      fun hentDirektemeldtStilling(stillingsId: Stillingsid) : DirektemeldtStilling? {
          return hentDirektemeldtStilling(stillingsId.asString())
      }

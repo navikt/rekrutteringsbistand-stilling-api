@@ -23,6 +23,7 @@ object Testdata {
     val enStilling = Stilling(
         id = 1000,
         uuid = UUID.randomUUID().toString(),
+        annonsenr = "1000",
         created = LocalDateTime.now().withNano(0),
         createdBy = "nss-admin",
         updated = LocalDateTime.now().withNano(0),
@@ -83,6 +84,7 @@ object Testdata {
             remarks = emptyList()
         ),
         id = 1000,
+        annonsenr = "1000",
         uuid = UUID.randomUUID().toString(),
         created = LocalDateTime.now(),
         updated = LocalDateTime.now(),
