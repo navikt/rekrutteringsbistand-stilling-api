@@ -14,7 +14,7 @@ import java.util.*
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Stilling(
     val id: Long,
-    val annonsenr: String,
+    val annonsenr: String = "",
     val uuid: String,
     val created: LocalDateTime,
     val createdBy: String,
