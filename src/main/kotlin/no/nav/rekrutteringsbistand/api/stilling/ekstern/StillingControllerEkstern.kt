@@ -66,7 +66,7 @@ class StillingControllerEkstern(
                         uuid = stilling.uuid,
                         source = stilling.source,
                         stillingskategori = rekrutteringsbistandStilling.stillingsinfo?.stillingskategori,
-                        annonsennr = stilling.annonsenr
+                        annonsenr = stilling.annonsenr
                 )
         )
     }
