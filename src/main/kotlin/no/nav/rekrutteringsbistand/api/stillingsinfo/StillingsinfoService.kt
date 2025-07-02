@@ -39,7 +39,7 @@ class StillingsinfoService(
             val stilling = arbeidsplassenKlient.hentStilling(stillingsId.asString(), false)
 
             val rekrutteringsbistandStilling = RekrutteringsbistandStilling(
-                stilling = stilling,
+                stilling = stilling.toStilling(),
                 stillingsinfo = stillingsinfoMedNyEier.asStillingsinfoDto()
             )
 

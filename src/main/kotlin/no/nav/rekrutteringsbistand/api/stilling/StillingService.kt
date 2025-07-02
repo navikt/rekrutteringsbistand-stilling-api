@@ -190,7 +190,7 @@ class StillingService(
 
         // Hent stilling før den oppdateres, da det er en OptimisticLocking strategi på 'updated' feltet hos Arbeidsplassen
         val existerendeStilling = arbeidsplassenKlient.hentStilling(dto.stilling.uuid)
-        val oppdatertStilling = arbeidsplassenKlient.oppdaterStilling(stilling.copy(updated = existerendeStilling.updated), queryString)
+        val oppdatertStilling = arbeidsplassenKlient.oppdaterStilling(stilling.toArbeidsplassenDto().copy(updated = existerendeStilling.updated), queryString)
         val oppdatertStillingsinfo: Stillingsinfo? = stillingsinfoService.hentForStilling(id)
         log.info("Oppdaterte stilling hos Arbeidsplassen med uuid: ${dto.stilling.uuid}")
 
@@ -202,7 +202,7 @@ class StillingService(
             if (oppdatertStilling.source.equals("DIR", ignoreCase = false)) {
                 kandidatlisteKlient.sendStillingOppdatert(
                     RekrutteringsbistandStilling(
-                        stilling = oppdatertStilling,
+                        stilling = oppdatertStilling.toStilling(),
                         stillingsinfo = eksisterendeStillingsinfo?.asStillingsinfoDto()
                     )
                 )
@@ -234,7 +234,7 @@ class StillingService(
     @Transactional
     fun lagreDirektemeldtStilling(stillingsId: String) {
         log.info("Hent stilling fra Arbeidsplassen og lagre til databasen uuid: $stillingsId")
-        val arbeidsplassenStilling = arbeidsplassenKlient.hentStilling(stillingsId, true)
+        val arbeidsplassenStilling = arbeidsplassenKlient.hentStilling(stillingsId, true).toStilling()
 
         direktemeldtStillingService.hentDirektemeldtStilling(stillingsId)?.let { dbStilling ->
             logDiff(dbStilling, arbeidsplassenStilling, stillingsId)

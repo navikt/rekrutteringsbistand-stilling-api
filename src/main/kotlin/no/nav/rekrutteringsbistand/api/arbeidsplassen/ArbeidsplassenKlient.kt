@@ -34,19 +34,19 @@ class ArbeidsplassenKlient(
     @Value("\${scope.forarbeidsplassen}") private val scopeMotArbeidsplassen: String
 ) {
 
-    fun hentStilling(stillingsId: String, somSystembruker: Boolean = false): Stilling {
+    fun hentStilling(stillingsId: String, somSystembruker: Boolean = false): ArbeidsplassenStillingDto {
         val url = "${hentBaseUrl()}/b2b/api/v1/ads/$stillingsId"
 
-        val hent: () -> ResponseEntity<Stilling> = {
+        val hent: () -> ResponseEntity<ArbeidsplassenStillingDto> = {
             restTemplate.exchange(
                 url,
                 HttpMethod.GET,
                 HttpEntity(null, if (somSystembruker) httpHeadersSomSystembruker() else httpHeaders()),
-                Stilling::class.java
+                ArbeidsplassenStillingDto::class.java
             )
         }
 
-        val hentMedFeilhåndtering: () -> Stilling = {
+        val hentMedFeilhåndtering: () -> ArbeidsplassenStillingDto = {
             try {
                 val respons = retry(hent)
                 respons.body ?: throw kunneIkkeTolkeBodyException()
@@ -140,7 +140,7 @@ class ArbeidsplassenKlient(
             }
         }
 
-    fun oppdaterStilling(stilling: Stilling, queryString: String?): Stilling =
+    fun oppdaterStilling(stilling: ArbeidsplassenStillingDto, queryString: String?): ArbeidsplassenStillingDto =
         timer("rekrutteringsbistand.stilling.arbeidsplassen.oppdaterStilling.kall.tid") {
             val url = "${hentBaseUrl()}/api/v1/ads/${stilling.uuid}"
 
@@ -149,7 +149,7 @@ class ArbeidsplassenKlient(
                     url + if (queryString != null) "?$queryString" else "",
                     HttpMethod.PUT,
                     HttpEntity(stilling, httpHeaders()),
-                    Stilling::class.java
+                    ArbeidsplassenStillingDto::class.java
                 )
                 return@timer response.body ?: throw kunneIkkeTolkeBodyException()
 
