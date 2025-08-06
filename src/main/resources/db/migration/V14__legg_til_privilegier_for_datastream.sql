@@ -1,22 +1,23 @@
 DO
 $$
     BEGIN
-        IF EXISTS(SELECT * FROM pg_roles WHERE rolname = 'bigquery_datastream') THEN
+        IF EXISTS
+            (SELECT 1 from pg_roles where rolname = 'rekrutteringsbistand-stilling-api')
+        THEN
             ALTER USER "rekrutteringsbistand-stilling-api" WITH REPLICATION;
-            CREATE PUBLICATION "ds_publication" FOR ALL TABLES;
-
-            ALTER DEFAULT PRIVILEGES IN SCHEMA PUBLIC GRANT SELECT ON TABLES TO "bigquery_datastream";
-            GRANT SELECT ON ALL TABLES IN SCHEMA PUBLIC TO "bigquery_datastream";
-            ALTER USER "bigquery_datastream" WITH REPLICATION;
         END IF;
     END
 $$;
-
 DO
 $$
     BEGIN
-        IF EXISTS(SELECT * FROM pg_roles WHERE rolname = 'bigquery_datastream') THEN
-            PERFORM PG_CREATE_LOGICAL_REPLICATION_SLOT('ds_replication', 'pgoutput');
+        IF EXISTS
+            (SELECT 1 from pg_roles where rolname = 'bigquery_datastream')
+        THEN
+            ALTER USER "bigquery_datastream" WITH REPLICATION;
+            ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO "bigquery_datastream";
+            GRANT USAGE ON SCHEMA public TO "bigquery_datastream";
+            GRANT SELECT ON ALL TABLES IN SCHEMA public TO "bigquery_datastream";
         END IF;
     END
-$$
+$$;
