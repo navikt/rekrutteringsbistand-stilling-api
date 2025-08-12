@@ -159,14 +159,14 @@ class ArbeidsplassenKlient(
 
     fun slettStilling(stillingsId: String): FrontendStilling =
         timer("rekrutteringsbistand.stilling.arbeidsplassen.slettStilling.kall.tid") {
-            try {
+            val uuid = try {
                 UUID.fromString(stillingsId)
             } catch (_: IllegalArgumentException) {
                 throw ResponseStatusException(
                     BAD_REQUEST, "Ugyldig stillingsId. Må være en gyldig UUID."
                 )
             }
-            val url = "${hentBaseUrl()}/api/v1/ads/$stillingsId"
+            val url = "${hentBaseUrl()}/api/v1/ads/$uuid"
 
             try {
                 val response = restTemplate.exchange(
