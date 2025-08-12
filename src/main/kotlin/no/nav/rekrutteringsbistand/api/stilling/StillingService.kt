@@ -220,6 +220,14 @@ class StillingService(
     }
 
     fun slettRekrutteringsbistandStilling(stillingsId: String): FrontendStilling {
+        try {
+            UUID.fromString(stillingsId)
+        } catch (_: IllegalArgumentException) {
+            throw ResponseStatusException(
+                BAD_REQUEST, "Ugyldig stillingsId. Må være en gyldig UUID."
+            )
+        }
+
         kandidatlisteKlient.varsleOmSlettetStilling(Stillingsid(stillingsId))
 
         direktemeldtStillingService.hentDirektemeldtStilling(stillingsId)?.let { dbStilling ->
