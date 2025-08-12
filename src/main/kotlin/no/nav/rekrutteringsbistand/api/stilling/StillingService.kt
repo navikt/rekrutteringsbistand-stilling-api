@@ -12,8 +12,10 @@ import no.nav.rekrutteringsbistand.api.opensearch.StillingssokProxyClient
 import no.nav.rekrutteringsbistand.api.stilling.FrontendStilling.Companion.DEFAULT_EXPIRY_DAYS
 import no.nav.rekrutteringsbistand.api.stillingsinfo.*
 import no.nav.rekrutteringsbistand.api.support.log
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.web.server.ResponseStatusException
 import java.time.Duration
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -224,7 +226,7 @@ class StillingService(
             UUID.fromString(stillingsId)
         } catch (_: IllegalArgumentException) {
             throw ResponseStatusException(
-                BAD_REQUEST, "Ugyldig stillingsId. Må være en gyldig UUID."
+                HttpStatus.BAD_REQUEST, "Ugyldig stillingsId. Må være en gyldig UUID."
             )
         }
 
