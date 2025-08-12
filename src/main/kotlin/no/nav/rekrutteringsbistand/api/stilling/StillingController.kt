@@ -14,7 +14,10 @@ import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsid
 import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoService
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingskategori
 import org.springframework.http.HttpStatus
+import org.springframework.http.HttpStatus.BAD_REQUEST
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.web.server.ResponseStatusException
+import java.util.UUID
 
 
 @RestController
@@ -56,6 +59,13 @@ class StillingController(private val stillingsinfoService: StillingsinfoService,
     @DeleteMapping("/rekrutteringsbistandstilling/{stillingsId}")
     fun slettRekrutteringsbistandStilling(@PathVariable(value = "stillingsId") stillingsId: String): ResponseEntity<FrontendStilling> {
         tokenUtils.hentInnloggetVeileder().validerMinstEnAvRollene(Rolle.ARBEIDSGIVERRETTET)
+        try {
+            UUID.fromString(stillingsId)
+        } catch (_: IllegalArgumentException) {
+            throw ResponseStatusException(
+                BAD_REQUEST, "Ugyldig stillingsId. Må være en gyldig UUID."
+            )
+        }
         val slettetStilling = stillingService.slettRekrutteringsbistandStilling(stillingsId)
         return ok(slettetStilling)
     }

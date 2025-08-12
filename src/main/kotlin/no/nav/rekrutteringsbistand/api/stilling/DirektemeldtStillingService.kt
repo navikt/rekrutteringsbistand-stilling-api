@@ -22,6 +22,11 @@ class DirektemeldtStillingService(
 
     fun settAnnonsenrFraDbId(stillingsId: String) {
         direktemeldtStillingRepository.settAnnonsenrFraDbId(stillingsId)
+
+        stillingOutboxService.lagreMeldingIOutbox(
+            stillingsId = UUID.fromString(stillingsId),
+            eventName = EventName.INDEKSER_DIREKTEMELDT_STILLING
+        )
     }
 
     fun hentDirektemeldtStilling(stillingsId: String): DirektemeldtStilling? {
