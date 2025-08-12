@@ -23,6 +23,7 @@ import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.util.UriComponentsBuilder
 import java.io.EOFException
 import java.time.Duration
+import java.util.UUID
 
 @Component
 class ArbeidsplassenKlient(
@@ -158,6 +159,13 @@ class ArbeidsplassenKlient(
 
     fun slettStilling(stillingsId: String): FrontendStilling =
         timer("rekrutteringsbistand.stilling.arbeidsplassen.slettStilling.kall.tid") {
+            try {
+                UUID.fromString(stillingsId)
+            } catch (_: IllegalArgumentException) {
+                throw ResponseStatusException(
+                    BAD_REQUEST, "Ugyldig stillingsId. Må være en gyldig UUID."
+                )
+            }
             val url = "${hentBaseUrl()}/api/v1/ads/$stillingsId"
 
             try {
