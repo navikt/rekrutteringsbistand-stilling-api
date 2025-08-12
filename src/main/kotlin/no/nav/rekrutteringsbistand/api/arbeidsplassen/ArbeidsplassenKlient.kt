@@ -23,6 +23,7 @@ import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.util.UriComponentsBuilder
 import java.io.EOFException
 import java.time.Duration
+import java.util.UUID
 
 
 @Component
@@ -159,6 +160,14 @@ class ArbeidsplassenKlient(
 
     fun slettStilling(stillingsId: String): FrontendStilling =
         timer("rekrutteringsbistand.stilling.arbeidsplassen.slettStilling.kall.tid") {
+            try {
+                UUID.fromString(stillingsId)
+            } catch (_: IllegalArgumentException) {
+                throw ResponseStatusException(
+                    BAD_REQUEST, "Ugyldig stillingsId: $stillingsId. Må være en gyldig UUID."
+                )
+            }
+
             val url = "${hentBaseUrl()}/api/v1/ads/$stillingsId"
 
             try {
@@ -178,13 +187,13 @@ class ArbeidsplassenKlient(
     ): ResponseStatusException {
         val logMsg =
             "$melding. URL: $url, Status: ${exception.rawStatusCode}, Body: ${exception.responseBodyAsString}"
-        when (exception.rawStatusCode) {
+        when (exception.statusCode.value()) {
             NOT_FOUND.value() -> log.warn(logMsg, exception)
             PRECONDITION_FAILED.value() -> log.info(logMsg, exception)
             else -> log.error(logMsg, exception)
             // 412 får vi når noen prøver å endre en stilling, men en annen har endret stillingen samtidig. pam-ad sjekker “updated”-timestampen i databasen og sørger for at “updated”-timestampen som kommer inn ikke er eldre enn den som er lagret
         }
-        return ResponseStatusException(valueOf(exception.rawStatusCode), melding)
+        return ResponseStatusException(valueOf(exception.statusCode.value()), melding)
     }
 
     /**
