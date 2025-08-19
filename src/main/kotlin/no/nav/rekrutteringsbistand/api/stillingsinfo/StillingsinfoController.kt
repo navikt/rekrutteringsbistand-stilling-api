@@ -27,7 +27,7 @@ class StillingsinfoController(
     val direktemeldtStillingService: DirektemeldtStillingService,
     val tokenUtils: TokenUtils
 ) {
-    @PutMapping("stillingsinfo")
+    @PutMapping("/stillingsinfo")
     fun overtaEierskapForEksternStillingOgKandidatliste(
         @RequestBody dto: StillingsinfoInboundDto
     ): ResponseEntity<StillingsinfoDto> {
