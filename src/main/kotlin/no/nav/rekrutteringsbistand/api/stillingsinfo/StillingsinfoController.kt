@@ -1,24 +1,17 @@
 package no.nav.rekrutteringsbistand.api.stillingsinfo
 
 import no.nav.rekrutteringsbistand.AuditLogg
-import no.nav.rekrutteringsbistand.api.OppdaterRekrutteringsbistandStillingDto
 import no.nav.rekrutteringsbistand.api.autorisasjon.Rolle
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
-import no.nav.rekrutteringsbistand.api.hendelser.zonedDateTimeFormat
 import no.nav.rekrutteringsbistand.api.stilling.DirektemeldtStillingService
-import no.nav.rekrutteringsbistand.api.stilling.StillingService
 import no.nav.rekrutteringsbistand.api.support.log
-import no.nav.rekrutteringsbistand.api.support.secureLog
 import no.nav.security.token.support.core.api.Protected
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.server.ResponseStatusException
-import java.time.ZoneId
-import java.time.ZonedDateTime
 
 @RestController
 @Protected
@@ -48,7 +41,7 @@ class StillingsinfoController(
 
     @PutMapping("/overta-eierskap")
     fun overtaEierskapForStillingOgKandidatliste(
-        @RequestBody dto: StillingsinfoInboundDto, zoneId: ZoneId
+        @RequestBody dto: StillingsinfoInboundDto
     ): ResponseEntity<String> {
         tokenUtils.hentInnloggetVeileder().validerMinstEnAvRollene(Rolle.ARBEIDSGIVERRETTET)
         val stilling = direktemeldtStillingService.hentDirektemeldtStilling(dto.stillingsid)
