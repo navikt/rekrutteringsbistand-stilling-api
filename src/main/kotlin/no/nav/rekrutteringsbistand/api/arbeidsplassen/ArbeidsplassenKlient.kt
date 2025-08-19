@@ -92,8 +92,6 @@ class ArbeidsplassenKlient(
     fun triggResendingAvStillingsmeldingFraArbeidsplassen(stillingsid: String) =
         timer("rekrutteringsbistand.stilling.arbeidsplassen.triggResendingAvStillingsmeldingFraArbeidsplassen.kall.tid") {
             val stilling = hentStilling(stillingsid)
-            log.info("Stillings som sendes til pam-ad ved opprettelse av kandidatliste: $stilling")
-
             oppdaterStilling(stilling, null)
 
             log.info("Trigget resending av stillingsmelding fra Arbeidsplassen for stilling $stillingsid")
