@@ -1,5 +1,7 @@
 package no.nav.rekrutteringsbistand.api.stilling
 
+import no.nav.rekrutteringsbistand.api.RekrutteringsbistandStilling
+import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteKlient
 import no.nav.rekrutteringsbistand.api.stilling.outbox.StillingOutboxService
 import no.nav.rekrutteringsbistand.api.stilling.outbox.EventName
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsid
@@ -15,7 +17,8 @@ import java.util.UUID
 class DirektemeldtStillingService(
     private val direktemeldtStillingRepository: DirektemeldtStillingRepository,
     private val stillingsinfoService: StillingsinfoService,
-    private val stillingOutboxService: StillingOutboxService
+    private val stillingOutboxService: StillingOutboxService,
+    private val kandidatlisteKlient: KandidatlisteKlient
 ) {
     fun lagreDirektemeldtStilling(direktemeldtStilling: DirektemeldtStilling) {
         direktemeldtStillingRepository.lagreDirektemeldtStilling(direktemeldtStilling)
@@ -61,11 +64,19 @@ class DirektemeldtStillingService(
                 )
             )
         )
+
         lagreDirektemeldtStilling(oppdatertStilling)
         val forrigeStillingsinfo = stillingsinfoService.hentForStilling(Stillingsid(stilling.stillingsId))
 
         if(forrigeStillingsinfo?.stillingsinfoid != null && stillingsinfo.eierNavKontorEnhetId != null) {
             stillingsinfoService.endreNavKontor(stillingsinfoId = forrigeStillingsinfo.stillingsinfoid, navKontorEnhetId = stillingsinfo.eierNavKontorEnhetId)
         }
+        val stillingsinfo = stillingsinfoService.hentForStilling(Stillingsid(stilling.stillingsId))
+
+        val rekrutteringsbistandStilling = RekrutteringsbistandStilling(
+            stillingsinfo = stillingsinfo?.asStillingsinfoDto(),
+            stilling = oppdatertStilling.toStilling()
+        )
+        kandidatlisteKlient.sendStillingOppdatert(rekrutteringsbistandStilling)
     }
 }
