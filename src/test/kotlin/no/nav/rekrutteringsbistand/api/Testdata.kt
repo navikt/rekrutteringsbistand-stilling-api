@@ -3,6 +3,8 @@ package no.nav.rekrutteringsbistand.api
 import no.nav.rekrutteringsbistand.api.arbeidsplassen.OpprettStillingAdministrationDto
 import no.nav.rekrutteringsbistand.api.autorisasjon.InnloggetVeileder
 import no.nav.rekrutteringsbistand.api.autorisasjon.Rolle
+import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteDto
+import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteStillingDto
 import no.nav.rekrutteringsbistand.api.stilling.*
 import no.nav.rekrutteringsbistand.api.stillingsinfo.*
 import java.time.LocalDateTime
@@ -214,6 +216,11 @@ object Testdata {
         publisert = publishedFor3DagerSiden,
         publisertAvAdmin = publishedFor3DagerSiden.toString(),
         adminStatus = "DONE",
+    )
+
+    val enKandidatListeDto = KandidatlisteDto(
+        stillingsinfo = enStillingsinfo.asStillingsinfoDto(),
+        stilling = KandidatlisteStillingDto(enDirektemeldtStilling)
     )
 
     val stillingerSomSkalDeaktiveres = listOf(

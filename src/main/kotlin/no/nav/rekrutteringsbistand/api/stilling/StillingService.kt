@@ -7,7 +7,9 @@ import no.nav.rekrutteringsbistand.api.arbeidsplassen.ArbeidsplassenKlient
 import no.nav.rekrutteringsbistand.api.arbeidsplassen.OpprettStillingDto
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
 import no.nav.rekrutteringsbistand.api.geografi.GeografiService
+import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteDto
 import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteKlient
+import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteStillingDto
 import no.nav.rekrutteringsbistand.api.opensearch.StillingssokProxyClient
 import no.nav.rekrutteringsbistand.api.stilling.FrontendStilling.Companion.DEFAULT_EXPIRY_DAYS
 import no.nav.rekrutteringsbistand.api.stillingsinfo.*
@@ -121,7 +123,11 @@ class StillingService(
             stilling = direktemeldtStillingFraDb.toStilling(opprettetStillingArbeidsplassen.id),
             stillingsinfo = stillingsinfo?.asStillingsinfoDto()
         ).also {
-            kandidatlisteKlient.sendStillingOppdatert(it)
+            val kandidatListeDto = KandidatlisteDto(
+                stillingsinfo = stillingsinfo?.asStillingsinfoDto(),
+                stilling = KandidatlisteStillingDto(direktemeldtStillingFraDb)
+            )
+            kandidatlisteKlient.sendStillingOppdatert(kandidatListeDto)
         }
     }
 
@@ -202,12 +208,11 @@ class StillingService(
             stillingsinfo = oppdatertStillingsinfo?.asStillingsinfoDto(),
         ).also {
             if (oppdatertStilling.source.equals("DIR", ignoreCase = false)) {
-                kandidatlisteKlient.sendStillingOppdatert(
-                    RekrutteringsbistandStilling(
-                        stilling = oppdatertStilling.toStilling(),
-                        stillingsinfo = eksisterendeStillingsinfo?.asStillingsinfoDto()
-                    )
+                val kandidatListeDto = KandidatlisteDto(
+                    stillingsinfo = eksisterendeStillingsinfo?.asStillingsinfoDto(),
+                    stilling = KandidatlisteStillingDto(direktemeldtStillingFraDb)
                 )
+                kandidatlisteKlient.sendStillingOppdatert(kandidatListeDto)
             }
         }
     }

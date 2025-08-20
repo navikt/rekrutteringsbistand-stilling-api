@@ -24,7 +24,7 @@ class KandidatlisteKlient(
     private val scopeTilKandidatApi: String
 ) {
 
-    fun sendStillingOppdatert(stilling: RekrutteringsbistandStilling): ResponseEntity<Void> {
+    fun sendStillingOppdatert(stilling: KandidatlisteDto): ResponseEntity<Void> {
         val url = byggUrlTilPutEndepunkt()
         log.info("Oppdaterer kandidatliste, stillingsid: ${stilling.stilling.uuid}")
         return restTemplate.exchange(
