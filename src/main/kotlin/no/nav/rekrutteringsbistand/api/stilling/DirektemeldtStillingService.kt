@@ -1,15 +1,24 @@
 package no.nav.rekrutteringsbistand.api.stilling
 
+import no.nav.rekrutteringsbistand.api.RekrutteringsbistandStilling
+import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteKlient
 import no.nav.rekrutteringsbistand.api.stilling.outbox.StillingOutboxService
 import no.nav.rekrutteringsbistand.api.stilling.outbox.EventName
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsid
+import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoInboundDto
+import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoService
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
+import java.time.ZoneId
+import java.time.ZonedDateTime
 import java.util.UUID
 
 @Service
 class DirektemeldtStillingService(
     private val direktemeldtStillingRepository: DirektemeldtStillingRepository,
-    private val stillingOutboxService: StillingOutboxService
+    private val stillingsinfoService: StillingsinfoService,
+    private val stillingOutboxService: StillingOutboxService,
+    private val kandidatlisteKlient: KandidatlisteKlient
 ) {
     fun lagreDirektemeldtStilling(direktemeldtStilling: DirektemeldtStilling) {
         direktemeldtStillingRepository.lagreDirektemeldtStilling(direktemeldtStilling)
@@ -51,5 +60,32 @@ class DirektemeldtStillingService(
 
     fun hentUtgåtteStillingerFor6mndSidenSomErPending(): List<DirektemeldtStilling> {
         return direktemeldtStillingRepository.hentUtgåtteStillingerFor6mndSidenSomErPending()
+    }
+
+    @Transactional
+    fun overtaEierskapForStillingOgKandidatliste(stillingsinfo: StillingsinfoInboundDto, stilling: DirektemeldtStilling) {
+        val oppdatertStilling = stilling.copy(
+            sistEndret = ZonedDateTime.now(ZoneId.of("Europe/Oslo")),
+            innhold = stilling.innhold.copy(
+                administration = stilling.innhold.administration?.copy(
+                    navIdent = stillingsinfo.eierNavident,
+                    reportee = stillingsinfo.eierNavn
+                )
+            )
+        )
+
+        lagreDirektemeldtStilling(oppdatertStilling)
+        val forrigeStillingsinfo = stillingsinfoService.hentForStilling(Stillingsid(stilling.stillingsId))
+
+        if(forrigeStillingsinfo?.stillingsinfoid != null && stillingsinfo.eierNavKontorEnhetId != null) {
+            stillingsinfoService.endreNavKontor(stillingsinfoId = forrigeStillingsinfo.stillingsinfoid, navKontorEnhetId = stillingsinfo.eierNavKontorEnhetId)
+        }
+        val stillingsinfo = stillingsinfoService.hentForStilling(Stillingsid(stilling.stillingsId))
+
+        val rekrutteringsbistandStilling = RekrutteringsbistandStilling(
+            stillingsinfo = stillingsinfo?.asStillingsinfoDto(),
+            stilling = oppdatertStilling.toStilling()
+        )
+        kandidatlisteKlient.sendStillingOppdatert(rekrutteringsbistandStilling)
     }
 }
