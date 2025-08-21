@@ -1,6 +1,7 @@
 package no.nav.rekrutteringsbistand.api.stilling
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import no.nav.rekrutteringsbistand.api.arbeidsplassen.ArbeidsplassenStillingDto
 import no.nav.rekrutteringsbistand.api.arbeidsplassen.OpprettStillingAdministrationDto
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
 import no.nav.rekrutteringsbistand.api.stilling.Kategori.Companion.hentTittel
@@ -12,8 +13,9 @@ import java.time.ZonedDateTime
 import java.util.*
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class Stilling(
+data class FrontendStilling(
     val id: Long,
+    val annonsenr: String = "",
     val uuid: String,
     val created: LocalDateTime,
     val createdBy: String,
@@ -93,7 +95,39 @@ data class Stilling(
         )
     }
 
-    fun copyMedBeregnetTitle(stillingskategori: Stillingskategori?): Stilling =
+    fun toArbeidsplassenDto(): ArbeidsplassenStillingDto {
+        return ArbeidsplassenStillingDto(
+            title = title,
+            createdBy = createdBy,
+            updatedBy = updatedBy,
+            privacy = privacy,
+            source = source,
+            administration = administration,
+            mediaList = mediaList,
+            contactList = contactList,
+            medium = medium,
+            employer = employer,
+            locationList = locationList,
+            categoryList = categoryList,
+            properties = properties,
+            businessName = businessName,
+            firstPublished = firstPublished,
+            deactivatedByExpiry = deactivatedByExpiry,
+            activationOnPublishingDate = activationOnPublishingDate,
+            id = id,
+            uuid = uuid,
+            created = created,
+            updated = updated,
+            status = status,
+            reference = reference,
+            published = published,
+            expires = expires,
+            location = location,
+            publishedByAdmin = publishedByAdmin
+        )
+    }
+
+    fun copyMedBeregnetTitle(stillingskategori: Stillingskategori?): FrontendStilling =
         when (stillingskategori) {
             Stillingskategori.JOBBMESSE ->
                 this.copy(title = "Invitasjon til jobbmesse")
@@ -431,9 +465,10 @@ data class DirektemeldtStilling(
     val publisertAvAdmin: String?,
     val adminStatus: String?
 ) {
-    fun toStilling(): Stilling {
-        return Stilling(
-            id = annonsenr.toLong(),
+    fun toStilling(arbeidsplassenAnnonsenr: Long): FrontendStilling {
+        return FrontendStilling(
+            id = arbeidsplassenAnnonsenr,
+            annonsenr = annonsenr,
             uuid = stillingsId.toString(),
             created = opprettet.toLocalDateTime(),
             createdBy = opprettetAv,

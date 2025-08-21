@@ -3,13 +3,12 @@ package no.nav.rekrutteringsbistand.api.opensearch
 import com.fasterxml.jackson.databind.ObjectMapper
 import no.nav.rekrutteringsbistand.api.stilling.*
 import java.time.LocalDateTime
-import java.time.ZoneId
 import java.time.ZonedDateTime
 
 data class OpensSearchResponse(
     val _source: Source
 ) {
-    fun toStilling(objectMapper: ObjectMapper): Stilling = Stilling(
+    fun toStilling(objectMapper: ObjectMapper): FrontendStilling = FrontendStilling(
         title = _source.stilling.tittel ?: "Stilling uten valgt jobbtittel",
         properties = _source.stilling.properties.mapValues {
             when(val value = it.value) {
@@ -19,7 +18,8 @@ data class OpensSearchResponse(
             }
         },
         businessName = _source.stilling.businessName,
-        id = _source.stilling.annonsenr.toLong(),
+        id = _source.stilling.annonsenr.toLong(), // Ok siden det kun er eksterne stillinger som har id med bare tall
+        annonsenr = _source.stilling.annonsenr,
         uuid = _source.stilling.uuid,
         created = konverterDato(_source.stilling.created),
         createdBy = "",

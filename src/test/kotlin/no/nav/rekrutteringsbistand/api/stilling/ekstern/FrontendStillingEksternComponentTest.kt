@@ -13,7 +13,7 @@ import no.nav.rekrutteringsbistand.api.config.MockLogin
 import no.nav.rekrutteringsbistand.api.mockAzureObo
 import no.nav.rekrutteringsbistand.api.opensearch.StillingssokProxyClient
 import no.nav.rekrutteringsbistand.api.stilling.Kategori
-import no.nav.rekrutteringsbistand.api.stilling.Stilling
+import no.nav.rekrutteringsbistand.api.stilling.FrontendStilling
 import no.nav.rekrutteringsbistand.api.stillingsinfo.*
 import no.nav.rekrutteringsbistand.api.support.toMultiValueMap
 import org.assertj.core.api.Assertions.assertThat
@@ -36,7 +36,7 @@ import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-internal class StillingEksternComponentTest {
+internal class FrontendStillingEksternComponentTest {
 
     @Value("\${vis-stilling.azp-name}")
     private val uriTilVisStilling: String = "uriTilVisStilling"
@@ -192,10 +192,11 @@ internal class StillingEksternComponentTest {
         )
     }
 
-    private fun forventetStillingForPersonbruker(stilling: Stilling, stillingskategori: Stillingskategori?): StillingForPersonbruker {
+    private fun forventetStillingForPersonbruker(stilling: FrontendStilling, stillingskategori: Stillingskategori?): StillingForPersonbruker {
         require(stilling.employer == null) { "Testkode er ikke tilpasset at employer er noe annet enn null" }
         return StillingForPersonbruker(
             id = stilling.id,
+            annonsenr = stilling.annonsenr,
             updated = stilling.updated,
             title = stilling.title,
             medium = stilling.medium,

@@ -3,6 +3,8 @@ package no.nav.rekrutteringsbistand.api
 import no.nav.rekrutteringsbistand.api.arbeidsplassen.OpprettStillingAdministrationDto
 import no.nav.rekrutteringsbistand.api.autorisasjon.InnloggetVeileder
 import no.nav.rekrutteringsbistand.api.autorisasjon.Rolle
+import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteDto
+import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteStillingDto
 import no.nav.rekrutteringsbistand.api.stilling.*
 import no.nav.rekrutteringsbistand.api.stillingsinfo.*
 import java.time.LocalDateTime
@@ -20,9 +22,10 @@ object Testdata {
     private val styrkTittel = "Byggeleder"
     val styrk = Kategori(2148934, styrkCode, "STYRK08NAV", styrkTittel, null, null)
 
-    val enStilling = Stilling(
+    val enStilling = FrontendStilling(
         id = 1000,
         uuid = UUID.randomUUID().toString(),
+        annonsenr = "1000",
         created = LocalDateTime.now().withNano(0),
         createdBy = "nss-admin",
         updated = LocalDateTime.now().withNano(0),
@@ -68,7 +71,7 @@ object Testdata {
         eierNavKontorEnhetId = "1234",
     )
 
-    val enOpprettetStilling = Stilling(
+    val enOpprettetStilling = FrontendStilling(
         title = "Ny stilling",
         createdBy = "pam-rekrutteringsbistand",
         updatedBy = "pam-rekrutteringsbistand",
@@ -83,6 +86,7 @@ object Testdata {
             remarks = emptyList()
         ),
         id = 1000,
+        annonsenr = "1000",
         uuid = UUID.randomUUID().toString(),
         created = LocalDateTime.now(),
         updated = LocalDateTime.now(),
@@ -212,6 +216,11 @@ object Testdata {
         publisert = publishedFor3DagerSiden,
         publisertAvAdmin = publishedFor3DagerSiden.toString(),
         adminStatus = "DONE",
+    )
+
+    val enKandidatListeDto = KandidatlisteDto(
+        stillingsinfo = enStillingsinfo.asStillingsinfoDto(),
+        stilling = KandidatlisteStillingDto(enDirektemeldtStilling)
     )
 
     val stillingerSomSkalDeaktiveres = listOf(

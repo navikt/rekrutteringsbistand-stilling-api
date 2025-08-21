@@ -19,7 +19,7 @@ import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteKlient
 import no.nav.rekrutteringsbistand.api.standardsøk.LagreStandardsøkDto
 import no.nav.rekrutteringsbistand.api.standardsøk.StandardsøkRepository
 import no.nav.rekrutteringsbistand.api.stilling.Page
-import no.nav.rekrutteringsbistand.api.stilling.Stilling
+import no.nav.rekrutteringsbistand.api.stilling.FrontendStilling
 import no.nav.rekrutteringsbistand.api.stillingsinfo.*
 import no.nav.rekrutteringsbistand.api.stillingsinfo.indekser.BulkStillingsinfoInboundDto
 import no.nav.rekrutteringsbistand.api.support.toMultiValueMap
@@ -355,7 +355,7 @@ private class Kall(private val webClient: WebTestClient, private val mockLogin: 
             post(
                 "$indekserPath/stillingsinfo/bulk",
                 rolle,
-                BulkStillingsinfoInboundDto(stillinger.map(no.nav.rekrutteringsbistand.api.stilling.Stilling::uuid))
+                BulkStillingsinfoInboundDto(stillinger.map(no.nav.rekrutteringsbistand.api.stilling.FrontendStilling::uuid))
             )
         }
     }
@@ -499,7 +499,7 @@ private class Stubber(
         )
     }
 
-    fun mockHentStillingOpenSearch(stilling: Stilling) {
+    fun mockHentStillingOpenSearch(stilling: FrontendStilling) {
         wireMockStillingssokProxyClient.stubFor(
             WireMock.get(WireMock.urlPathMatching("/stilling/_doc/${stilling.uuid}"))
                 .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
@@ -512,7 +512,7 @@ private class Stubber(
         )
     }
 
-    fun mockHentStilling(stilling: Stilling) {
+    fun mockHentStilling(stilling: FrontendStilling) {
         wireMock.stubFor(
             WireMock.get(WireMock.urlPathMatching("/b2b/api/v1/ads/${stilling.uuid}"))
                 .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
@@ -538,7 +538,7 @@ private class Stubber(
         )
     }
 
-    fun mockOppdaterStilling(stilling: Stilling) {
+    fun mockOppdaterStilling(stilling: FrontendStilling) {
         wireMock.stubFor(
             WireMock.put(WireMock.urlPathMatching("/api/v1/ads/${stilling.uuid}"))
                 .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
@@ -551,7 +551,7 @@ private class Stubber(
         )
     }
 
-    fun mockSlettStilling(stilling: Stilling) {
+    fun mockSlettStilling(stilling: FrontendStilling) {
         wireMock.stubFor(
             WireMock.delete(WireMock.urlPathMatching("/api/v1/ads/${stilling.uuid}"))
                 .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))

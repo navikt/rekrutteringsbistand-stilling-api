@@ -1,7 +1,8 @@
 package no.nav.rekrutteringsbistand.api.stilling
 
-import no.nav.rekrutteringsbistand.api.RekrutteringsbistandStilling
+import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteDto
 import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteKlient
+import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteStillingDto
 import no.nav.rekrutteringsbistand.api.stilling.outbox.StillingOutboxService
 import no.nav.rekrutteringsbistand.api.stilling.outbox.EventName
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsid
@@ -25,6 +26,15 @@ class DirektemeldtStillingService(
 
         stillingOutboxService.lagreMeldingIOutbox(
             stillingsId = direktemeldtStilling.stillingsId,
+            eventName = EventName.INDEKSER_DIREKTEMELDT_STILLING
+        )
+    }
+
+    fun settAnnonsenrFraDbId(stillingsId: String) {
+        direktemeldtStillingRepository.settAnnonsenrFraDbId(stillingsId)
+
+        stillingOutboxService.lagreMeldingIOutbox(
+            stillingsId = UUID.fromString(stillingsId),
             eventName = EventName.INDEKSER_DIREKTEMELDT_STILLING
         )
     }
@@ -73,9 +83,9 @@ class DirektemeldtStillingService(
         }
         val stillingsinfo = stillingsinfoService.hentForStilling(Stillingsid(stilling.stillingsId))
 
-        val rekrutteringsbistandStilling = RekrutteringsbistandStilling(
+        val rekrutteringsbistandStilling = KandidatlisteDto(
             stillingsinfo = stillingsinfo?.asStillingsinfoDto(),
-            stilling = oppdatertStilling.toStilling()
+            stilling = KandidatlisteStillingDto(oppdatertStilling)
         )
         kandidatlisteKlient.sendStillingOppdatert(rekrutteringsbistandStilling)
     }

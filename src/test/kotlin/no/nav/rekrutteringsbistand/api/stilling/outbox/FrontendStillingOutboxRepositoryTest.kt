@@ -11,7 +11,7 @@ import java.util.*
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class StillingOutboxRepositoryTest {
+class FrontendStillingOutboxRepositoryTest {
 
     @Autowired
     lateinit var stillingOutboxRepository: StillingOutboxRepository
