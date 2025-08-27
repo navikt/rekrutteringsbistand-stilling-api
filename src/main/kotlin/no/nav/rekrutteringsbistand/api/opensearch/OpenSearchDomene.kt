@@ -43,6 +43,7 @@ data class OpensSearchResponse(
         deactivatedByExpiry = _source.stilling.deactivatedByExpiry,
         activationOnPublishingDate = null,
         location = null,
+        versjon = null
     )
 
     fun konverterDato(dato: String): LocalDateTime {

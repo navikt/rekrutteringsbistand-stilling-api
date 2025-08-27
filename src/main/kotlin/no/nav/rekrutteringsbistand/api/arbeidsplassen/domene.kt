@@ -64,7 +64,8 @@ data class ArbeidsplassenStillingDto(
         businessName = businessName,
         firstPublished = firstPublished,
         deactivatedByExpiry = deactivatedByExpiry,
-        activationOnPublishingDate = activationOnPublishingDate
+        activationOnPublishingDate = activationOnPublishingDate,
+        versjon = null
     )
 }
 

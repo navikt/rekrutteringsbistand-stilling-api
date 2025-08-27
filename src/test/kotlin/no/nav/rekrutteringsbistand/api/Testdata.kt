@@ -45,7 +45,8 @@ object Testdata {
         businessName = null,
         firstPublished = null,
         deactivatedByExpiry = null,
-        activationOnPublishingDate = null
+        activationOnPublishingDate = null,
+        versjon = null
     )
 
     val enOpprettStillingDto = OpprettStillingDto(
@@ -107,6 +108,7 @@ object Testdata {
         status = "ACTIVE",
         employer = null,
         medium = null,
+        versjon = 1
     )
 
     val enAnnenStilling = enStilling.copy(

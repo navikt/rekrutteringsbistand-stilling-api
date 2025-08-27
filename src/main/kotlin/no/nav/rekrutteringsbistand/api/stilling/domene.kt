@@ -42,7 +42,8 @@ data class FrontendStilling(
     val businessName: String?,
     val firstPublished: Boolean?,
     val deactivatedByExpiry: Boolean?,
-    val activationOnPublishingDate: Boolean?
+    val activationOnPublishingDate: Boolean?,
+    val versjon: Int?
 ) {
     companion object {
         const val DEFAULT_EXPIRY_DAYS: Long = 30
@@ -494,7 +495,8 @@ data class DirektemeldtStilling(
             businessName = innhold.businessName,
             firstPublished = innhold.firstPublished,
             deactivatedByExpiry = innhold.deactivatedByExpiry,
-            activationOnPublishingDate = innhold.activationOnPublishingDate
+            activationOnPublishingDate = innhold.activationOnPublishingDate,
+            versjon = versjon
         )
     }
 }
