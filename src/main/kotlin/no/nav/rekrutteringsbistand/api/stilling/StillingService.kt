@@ -45,7 +45,7 @@ class StillingService(
         direktemeldtStillingService.hentDirektemeldtStilling(stillingsId)?.let { direktemeldtStilling ->
             log.info("Hentet stilling fra databasen $stillingsId")
             return RekrutteringsbistandStilling(
-                stilling = direktemeldtStilling.toStilling(arbeidsplassenStilling.id),
+                stilling = direktemeldtStilling.toStilling(arbeidsplassenStilling.id).copyMedBeregnetTitle(stillingsinfo?.stillingskategori),
                 stillingsinfo = stillingsinfo
             )
         }

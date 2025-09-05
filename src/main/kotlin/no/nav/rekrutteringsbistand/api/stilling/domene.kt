@@ -133,10 +133,7 @@ data class FrontendStilling(
             Stillingskategori.JOBBMESSE ->
                 this.copy(title = "Invitasjon til jobbmesse")
 
-            null,
-            Stillingskategori.STILLING,
-            Stillingskategori.FORMIDLING,
-            Stillingskategori.ARBEIDSTRENING ->
+            null, Stillingskategori.STILLING, Stillingskategori.FORMIDLING, Stillingskategori.ARBEIDSTRENING ->
                 this.copy(title = hentInternEllerEksternTittel())
         }
 
