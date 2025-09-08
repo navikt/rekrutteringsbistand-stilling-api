@@ -196,11 +196,23 @@ class StillingService(
         log.info("Oppdaterte stilling i databasen med uuid: ${dto.stilling.uuid}")
         val direktemeldtStillingFraDb = direktemeldtStillingService.hentDirektemeldtStilling(id.asString())!!
 
+        if (PubliserteArbeidsplassenStillinger.erPublisertPåArbeidsplassenViaRestApi(direktemeldtStillingFraDb.stillingsId)) {
+            log.info("Stillingen er publisert på arbeidsplassen, oppdaterer stilling der med uuid: ${dto.stilling.uuid}")
+        } else {
+            log.info("Stillingen er ikke publisert på arbeidsplassen, oppdaterer likevel stilling der med uuid: ${dto.stilling.uuid}")
+        }
         // Hent stilling før den oppdateres, da det er en OptimisticLocking strategi på 'updated' feltet hos Arbeidsplassen
         val existerendeStilling = arbeidsplassenKlient.hentStilling(dto.stilling.uuid)
-        val oppdatertStilling = arbeidsplassenKlient.oppdaterStilling(stilling.toArbeidsplassenDto().copy(updated = existerendeStilling.updated), queryString)
-        val oppdatertStillingsinfo: Stillingsinfo? = stillingsinfoService.hentForStilling(id)
+        val oppdatertStilling = arbeidsplassenKlient.oppdaterStilling(
+            stilling.toArbeidsplassenDto().copy(
+                id = existerendeStilling.id,
+                updated = existerendeStilling.updated,
+            ), queryString
+        )
+        oppdatertStilling.id
         log.info("Oppdaterte stilling hos Arbeidsplassen med uuid: ${dto.stilling.uuid}")
+
+        val oppdatertStillingsinfo: Stillingsinfo? = stillingsinfoService.hentForStilling(id)
 
         return OppdaterRekrutteringsbistandStillingDto(
             stilling = direktemeldtStillingFraDb.toStilling(oppdatertStilling.id),
