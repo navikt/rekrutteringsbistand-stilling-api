@@ -32,7 +32,7 @@ class ProsesserStillingOutboxJobb(
                     val direktemeldtStilling = direktemeldtStillingService.hentDirektemeldtStilling(it.stillingsId.toString())
 
                     if(direktemeldtStilling != null) {
-                        val stillingsinfo = stillingsinfoService.hentForStilling(stillingId = Stillingsid(direktemeldtStilling.stillingsId))?.asStillingsinfoDto()
+                        val stillingsinfo = stillingsinfoService.hentStillingsinfo(stillingId = Stillingsid(direktemeldtStilling.stillingsId))?.asStillingsinfoDto()
 
                         val packet = JsonMessage.newMessage(eventName = it.eventName.toString())
                         packet["stillingsinfo"] = stillingsinfo ?: JsonNodeFactory.instance.nullNode()

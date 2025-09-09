@@ -9,7 +9,6 @@ import kotlin.collections.ArrayList
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class StillingForPersonbruker(
-        val id: Long?,
         val annonsenr: String?,
         val uuid: String?,
         val updated: LocalDateTime?,
