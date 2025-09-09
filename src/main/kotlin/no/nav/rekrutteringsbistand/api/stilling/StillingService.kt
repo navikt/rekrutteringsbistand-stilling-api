@@ -213,7 +213,10 @@ class StillingService(
 
         // Hent stilling før den oppdateres, da det er en OptimisticLocking strategi på 'updated' feltet hos Arbeidsplassen
         val existerendeStilling = arbeidsplassenKlient.hentStilling(dto.stilling.uuid)
-        val oppdatertStilling = arbeidsplassenKlient.oppdaterStilling(stilling.toArbeidsplassenDto().copy(updated = existerendeStilling.updated), queryString)
+        val oppdatertStilling = arbeidsplassenKlient.oppdaterStilling(stilling.toArbeidsplassenDto().copy(
+            id = existerendeStilling.id,
+            updated = existerendeStilling.updated,
+        ), queryString)
         val oppdatertStillingsinfo: Stillingsinfo? = stillingsinfoService.hentForStilling(id)
         log.info("Oppdaterte stilling hos Arbeidsplassen med uuid: ${dto.stilling.uuid}")
 
