@@ -18,7 +18,6 @@ import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.server.ResponseStatusException
-import java.time.Duration
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
@@ -44,7 +43,7 @@ class StillingService(
         direktemeldtStillingService.hentDirektemeldtStilling(stillingsId)?.let { direktemeldtStilling ->
             log.info("Hentet stilling fra databasen $stillingsId")
             return RekrutteringsbistandStilling(
-                stilling = direktemeldtStilling.toStilling(),
+                stilling = direktemeldtStilling.toStilling().copyMedBeregnetTitle(stillingsinfo?.stillingskategori),
                 stillingsinfo = stillingsinfo
             )
         }

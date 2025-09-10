@@ -18,6 +18,7 @@ import com.github.tomakehurst.wiremock.matching.UrlPattern
 import no.nav.rekrutteringsbistand.api.OppdaterRekrutteringsbistandStillingDto
 import no.nav.rekrutteringsbistand.api.RekrutteringsbistandStilling
 import no.nav.rekrutteringsbistand.api.TestRepository
+import no.nav.rekrutteringsbistand.api.Testdata
 import no.nav.rekrutteringsbistand.api.Testdata.enOpprettRekrutteringsbistandstillingDto
 import no.nav.rekrutteringsbistand.api.Testdata.enOpprettStillingDto
 import no.nav.rekrutteringsbistand.api.Testdata.enOpprettetStilling
@@ -49,6 +50,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatus.OK
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.test.context.bean.override.mockito.MockitoBean
+import java.time.ZonedDateTime
 import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -77,6 +79,9 @@ internal class FrontendStillingComponentTest {
             .options(WireMockConfiguration.options().port(8766))
             .build()
     }
+
+    @Autowired
+    private lateinit var direktemeldtStillingRepository: DirektemeldtStillingRepository
 
     @MockitoBean
     lateinit var stillingssokProxyClient: StillingssokProxyClient
@@ -163,7 +168,6 @@ internal class FrontendStillingComponentTest {
             stilling = enOpprettStillingDto.copy(categoryList = emptyList())
         )
 
-        mockPamAdApi(HttpMethod.POST, "/api/v1/ads", enOpprettetStilling.copy(title = "Ny stilling"))
         mockKandidatlisteOppdatering()
         mockAzureObo(wiremockAzure)
 
@@ -173,6 +177,7 @@ internal class FrontendStillingComponentTest {
             RekrutteringsbistandStilling::class.java
         ).also {
             val stilling = requestUtenStillingstittel.stilling
+            assertThat(it.stilling.title).isEqualTo("Ny stilling")
             assertThat(it.stilling.administration?.navIdent).isEqualTo(stilling.administration.navIdent)
             assertThat(it.stilling.administration?.reportee).isEqualTo(stilling.administration.reportee)
             assertThat(it.stilling.administration?.status).isEqualTo(stilling.administration.status)
@@ -184,141 +189,87 @@ internal class FrontendStillingComponentTest {
             assertThat(it.stillingsinfo?.stillingskategori).isEqualTo(Stillingskategori.ARBEIDSTRENING)
             assertThat(it.stillingsinfo?.eierNavKontorEnhetId).isEqualTo("1234")
         }
-
-        wiremockPamAdApi.verify(
-            1,
-            RequestPatternBuilder
-                .newRequestPattern(RequestMethod.POST, urlPathMatching("/api/v1/ads"))
-                .withRequestBody(MatchesJsonPathPattern("title", EqualToPattern("Ny stilling")))
-        )
     }
 
     @Test
     fun `kopiert stilling skal inneholde styrk som tittel gitt at styrk finnes i original stilling`() {
         val styrkCode = "3112.12"
         val styrkTittel = "Byggeleder"
-        val styrkCodeList = listOf(Kategori(2148934, styrkCode, "STYRK08NAV", styrkTittel, null, null))
-        val eksisterendeStillingMedStyrk = enStilling.copy(
+        val styrkCodeList = listOf(DirektemeldtStillingKategori(code = styrkCode, categoryType = "STYRK08NAV", name = styrkTittel, description = "", parentId = null))
+        val eksisterendeStillingMedStyrk = Testdata.enDirektemeldtStilling.copy(innhold = Testdata.enDirektemeldtStilling.innhold.copy(
             title = "Eksisterende stilling", categoryList = styrkCodeList
-        )
-        val eksisterendeStillingsId = UUID.randomUUID()
+        ))
 
-        mockPamAdApi(HttpMethod.GET, "/b2b/api/v1/ads/$eksisterendeStillingsId", eksisterendeStillingMedStyrk)
-        mockPamAdApi(HttpMethod.POST, "/api/v1/ads", enOpprettetStilling)
         mockKandidatlisteOppdatering()
         mockAzureObo(wiremockAzure)
-        whenever(stillingssokProxyClient.hentStilling(eksisterendeStillingsId.toString())).thenReturn(eksisterendeStillingMedStyrk)
+
+        direktemeldtStillingRepository.lagreDirektemeldtStilling(eksisterendeStillingMedStyrk)
 
         restTemplate.postForObject(
-            "$localBaseUrl/rekrutteringsbistandstilling/kopier/$eksisterendeStillingsId",
+            "$localBaseUrl/rekrutteringsbistandstilling/kopier/${eksisterendeStillingMedStyrk.stillingsId}",
             null,
             RekrutteringsbistandStilling::class.java
-        )
-
-        wiremockPamAdApi.verify(
-            1,
-            RequestPatternBuilder
-                .newRequestPattern(RequestMethod.POST, urlPathMatching("/api/v1/ads"))
-                .withRequestBody(MatchesJsonPathPattern("title", EqualToPattern(styrkTittel)))
-        )
+        ).also {
+            assertThat(it.stilling.title).isEqualTo(styrkTittel)
+        }
     }
 
     @Test
-    fun `PUT oppdaterer arbeidsplassen sin stilling med ny eier`() {
+    fun `PUT oppdaterer stilling med ny eier`() {
         val nyEier = "ny eier"
-        val stilling = enStilling.copy(administration = Administration(null, null, null, null, emptyList(), nyEier))
+        val stilling = Testdata.enDirektemeldtStilling
+
+        direktemeldtStillingRepository.lagreDirektemeldtStilling(stilling)
+
         val stillingsinfo = enStillingsinfo
         repository.opprett(stillingsinfo)
         mockAzureObo(wiremockAzure)
         mockKandidatlisteOppdatering()
-        mockPamAdApi(
-            HttpMethod.GET,
-            "/b2b/api/v1/ads/${stilling.uuid}",
-            enStilling.copy(administration = Administration(null, null, null, null, navIdent = "Gammel"))
+
+        val oppdatertStilling = stilling.toStilling().copy(
+            administration = stilling.toStilling().administration?.copy(navIdent = nyEier)
         )
-        mockPamAdApi(HttpMethod.PUT, "/api/v1/ads/${stilling.uuid}", stilling)
 
         val dto = OppdaterRekrutteringsbistandStillingDto(
-            stillingsinfoid = stillingsinfo.stillingsinfoid.asString(), stilling = stilling, stillingsinfo = stillingsinfo.asStillingsinfoDto()
+            stillingsinfoid = stillingsinfo.stillingsinfoid.asString(), stilling = oppdatertStilling, stillingsinfo = stillingsinfo.asStillingsinfoDto()
         )
 
         restTemplate.exchange(
-            "$localBaseUrl/rekrutteringsbistandstilling", HttpMethod.PUT, HttpEntity(dto), String::class.java
-        )
-
-        wiremockPamAdApi.verify(
-            1, RequestPatternBuilder
-                .newRequestPattern(RequestMethod.PUT, urlPathMatching("/api/v1/ads/${stilling.uuid}"))
-                .withRequestBody(MatchesJsonPathPattern("administration.navIdent", EqualToPattern(nyEier)))
-        )
-    }
-
-    @Test
-    fun `PUT oppdaterer arbeidsplassen sin stilling med uforandret tittel`() {
-        val tittel = "Arbeidsplassen sin tittel"
-        val source = "IKKEINTERN"
-        val styrkCode = "3112.12"
-        val styrkTittel = "Byggeleder"
-        val styrkCodeList = listOf(Kategori(2148934, styrkCode, "STYRK08NAV", styrkTittel, null, null))
-        val stilling = enStilling.copy(title = tittel, source = source, categoryList = styrkCodeList)
-        val stillingsinfo = enStillingsinfo
-        repository.opprett(stillingsinfo)
-        mockAzureObo(wiremockAzure)
-        mockKandidatlisteOppdatering()
-        mockPamAdApi(HttpMethod.GET, "/b2b/api/v1/ads/${stilling.uuid}", stilling)
-        mockPamAdApi(HttpMethod.PUT, "/api/v1/ads/${stilling.uuid}", stilling)
-
-        val dto = OppdaterRekrutteringsbistandStillingDto(
-            stillingsinfoid = stillingsinfo.stillingsinfoid.asString(),
-            stilling = stilling,
-            stillingsinfo = stillingsinfo.asStillingsinfoDto(),
-        )
-
-        restTemplate.exchange(
-            "$localBaseUrl/rekrutteringsbistandstilling", HttpMethod.PUT, HttpEntity(dto), String::class.java
-        )
-
-        wiremockPamAdApi.verify(
-            1, RequestPatternBuilder
-                .newRequestPattern(RequestMethod.PUT, urlPathMatching("/api/v1/ads/${stilling.uuid}"))
-                .withRequestBody(MatchesJsonPathPattern("title", EqualToPattern(tittel)))
-                .withRequestBody(MatchesJsonPathPattern("categoryList[0].code", EqualToPattern(styrkCode)))
-                .withRequestBody(MatchesJsonPathPattern("categoryList[0].name", EqualToPattern(styrkTittel)))
-        )
+            "$localBaseUrl/rekrutteringsbistandstilling", HttpMethod.PUT, HttpEntity(dto), OppdaterRekrutteringsbistandStillingDto::class.java
+        ).also {
+            assertThat(it.body?.stilling?.administration?.navIdent).isEqualTo(nyEier)
+        }
     }
 
     @Test
     fun `PUT oppdaterer direktemeldt stilling med styrk som tittel`() {
         val tittel = "Uønsket tittel"
-        val source = "DIR"
         val styrkCode = "3112.12"
         val styrkTittel = "Byggeleder"
-        val styrkCodeList = listOf(Kategori(2148934, styrkCode, "STYRK08NAV", styrkTittel, null, null))
-        val stilling = enStilling.copy(title = tittel, source = source, categoryList = styrkCodeList)
+
+        val styrkCodeList = listOf(DirektemeldtStillingKategori(code = styrkCode, categoryType = "STYRK08NAV", name = styrkTittel, description = "", parentId = null))
+        val stilling = Testdata.enDirektemeldtStilling.copy(innhold = Testdata.enDirektemeldtStilling.innhold.copy(
+            title = tittel, categoryList = styrkCodeList
+        ))
+
         val stillingsinfo = enStillingsinfo
         repository.opprett(stillingsinfo)
         mockAzureObo(wiremockAzure)
         mockKandidatlisteOppdatering()
-        mockPamAdApi(HttpMethod.GET, "/b2b/api/v1/ads/${stilling.uuid}", stilling)
-        mockPamAdApi(HttpMethod.PUT, "/api/v1/ads/${stilling.uuid}", stilling)
 
         val dto = OppdaterRekrutteringsbistandStillingDto(
             stillingsinfoid = stillingsinfo.stillingsinfoid.asString(),
-            stilling = stilling,
+            stilling = stilling.toStilling(),
             stillingsinfo = stillingsinfo.asStillingsinfoDto(),
         )
 
         restTemplate.exchange(
-            "$localBaseUrl/rekrutteringsbistandstilling", HttpMethod.PUT, HttpEntity(dto), String::class.java
-        )
-
-        wiremockPamAdApi.verify(
-            1, RequestPatternBuilder
-                .newRequestPattern(RequestMethod.PUT, urlPathMatching("/api/v1/ads/${stilling.uuid}"))
-                .withRequestBody(MatchesJsonPathPattern("title", EqualToPattern(styrkTittel)))
-                .withRequestBody(MatchesJsonPathPattern("categoryList[0].code", EqualToPattern(styrkCode)))
-                .withRequestBody(MatchesJsonPathPattern("categoryList[0].name", EqualToPattern(styrkTittel)))
-        )
+            "$localBaseUrl/rekrutteringsbistandstilling", HttpMethod.PUT, HttpEntity(dto), OppdaterRekrutteringsbistandStillingDto::class.java
+        ).also {
+            assertThat(it.body?.stilling?.title).isEqualTo(styrkTittel)
+            assertThat(it.body?.stilling?.categoryList[0]?.code).isEqualTo(styrkCode)
+            assertThat(it.body?.stilling?.categoryList[0]?.name).isEqualTo(styrkTittel)
+        }
     }
 
     @Test

@@ -1,13 +1,9 @@
 package no.nav.rekrutteringsbistand.api.stilling.indekser
 
-import no.nav.rekrutteringsbistand.api.arbeidsplassen.ArbeidsplassenKlient
-import no.nav.rekrutteringsbistand.api.autorisasjon.AuthorizedPartyUtils
-import no.nav.rekrutteringsbistand.api.stilling.DirektemeldtStillingRepository
 import no.nav.rekrutteringsbistand.api.stilling.StillingService
-import no.nav.rekrutteringsbistand.api.stilling.outbox.StillingOutboxService
 import no.nav.rekrutteringsbistand.api.stilling.outbox.EventName
+import no.nav.rekrutteringsbistand.api.stilling.outbox.StillingOutboxService
 import no.nav.rekrutteringsbistand.api.support.log
-import no.nav.security.token.support.core.api.Protected
 import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -21,7 +17,6 @@ import kotlin.concurrent.thread
 @RestController
 @RequestMapping("/reindekser")
 class StillingIndekserController(
-    val authorizedPartyUtils: AuthorizedPartyUtils,
     val stillingService: StillingService,
     val stillingOutboxService: StillingOutboxService,
     ) {
@@ -29,10 +24,6 @@ class StillingIndekserController(
     @PostMapping("/stillinger")
     @Unprotected
     fun reindekserAlleStillinger(): ResponseEntity<String> {
-//        if (!authorizedPartyUtils.kallKommerFraStillingIndekser()) {
-//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
-//        }
-
         thread {
             val stillingsIder = stillingService.hentAlleStillingsIder()
 
