@@ -243,15 +243,17 @@ class StillingService(
                 HttpStatus.BAD_REQUEST, "Stilling med id $stillingsId finnes ikke i databasen."
             )
 
-        direktemeldtStillingService.lagreDirektemeldtStilling(direktemeldtStilling.copy(
-                status = "DELETED",
-                sistEndret = ZonedDateTime.now(ZoneId.of("Europe/Oslo"))))
+        val slettetStilling = direktemeldtStilling.copy(
+            status = "DELETED",
+            sistEndret = ZonedDateTime.now(ZoneId.of("Europe/Oslo"))
+        )
+        direktemeldtStillingService.lagreDirektemeldtStilling(slettetStilling)
 
         if (PubliserteArbeidsplassenStillinger.erPublisertPåArbeidsplassenViaRestApi(direktemeldtStilling.stillingsId)) {
             arbeidsplassenKlient.slettStilling(stillingsId)
         }
 
-        return direktemeldtStilling.toStilling()
+        return slettetStilling.toStilling()
     }
 
     fun hentDirektemeldtStilling(stillingsId: String): DirektemeldtStilling {
