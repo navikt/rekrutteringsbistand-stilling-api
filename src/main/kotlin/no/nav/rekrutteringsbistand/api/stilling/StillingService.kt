@@ -39,13 +39,12 @@ class StillingService(
         stillingsId: String,
         somSystembruker: Boolean = false
     ): RekrutteringsbistandStilling {
-        val stillingsinfo = stillingsinfoService.hentForStilling(Stillingsid(stillingsId))?.asStillingsinfoDto()
-        val arbeidsplassenStilling = arbeidsplassenKlient.hentStilling(stillingsId, somSystembruker)
+        val stillingsinfo = stillingsinfoService.hentStillingsinfo(Stillingsid(stillingsId))?.asStillingsinfoDto()
 
         direktemeldtStillingService.hentDirektemeldtStilling(stillingsId)?.let { direktemeldtStilling ->
             log.info("Hentet stilling fra databasen $stillingsId")
             return RekrutteringsbistandStilling(
-                stilling = direktemeldtStilling.toStilling(arbeidsplassenStilling.id),
+                stilling = direktemeldtStilling.toStilling(),
                 stillingsinfo = stillingsinfo
             )
         }
@@ -117,10 +116,10 @@ class StillingService(
             eierNavKontorEnhetId = eierNavKontorEnhetId,
         )
 
-        val stillingsinfo = stillingsinfoService.hentStillingsinfo(opprettetStillingArbeidsplassen)
+        val stillingsinfo = stillingsinfoService.hentStillingsinfo(Stillingsid(opprettetStillingArbeidsplassen.uuid))
 
         return RekrutteringsbistandStilling(
-            stilling = direktemeldtStillingFraDb.toStilling(opprettetStillingArbeidsplassen.id),
+            stilling = direktemeldtStillingFraDb.toStilling(),
             stillingsinfo = stillingsinfo?.asStillingsinfoDto()
         ).also {
             val kandidatListeDto = KandidatlisteDto(
@@ -157,7 +156,7 @@ class StillingService(
         loggEventuellOvertagelse(dto)
 
         val id = Stillingsid(dto.stilling.uuid)
-        val eksisterendeStillingsinfo: Stillingsinfo? = stillingsinfoService.hentForStilling(id)
+        val eksisterendeStillingsinfo: Stillingsinfo? = stillingsinfoService.hentStillingsinfo(id)
         if (eksisterendeStillingsinfo != null && dto.stillingsinfo?.eierNavKontorEnhetId != null) {
             stillingsinfoService.endreNavKontor(
                 stillingsinfoId = eksisterendeStillingsinfo.stillingsinfoid,
@@ -203,19 +202,17 @@ class StillingService(
         }
         // Hent stilling før den oppdateres, da det er en OptimisticLocking strategi på 'updated' feltet hos Arbeidsplassen
         val existerendeStilling = arbeidsplassenKlient.hentStilling(dto.stilling.uuid)
-        val oppdatertStilling = arbeidsplassenKlient.oppdaterStilling(
-            stilling.toArbeidsplassenDto().copy(
-                id = existerendeStilling.id,
-                updated = existerendeStilling.updated,
-            ), queryString
-        )
-        oppdatertStilling.id
+        val oppdatertStilling = arbeidsplassenKlient.oppdaterStilling(stilling.toArbeidsplassenDto(existerendeStilling.id).copy(
+            id = existerendeStilling.id,
+            updated = existerendeStilling.updated,
+        ), queryString)
+        val oppdatertStillingsinfo: Stillingsinfo? = stillingsinfoService.hentStillingsinfo(id)
         log.info("Oppdaterte stilling hos Arbeidsplassen med uuid: ${dto.stilling.uuid}")
 
         val oppdatertStillingsinfo: Stillingsinfo? = stillingsinfoService.hentForStilling(id)
 
         return OppdaterRekrutteringsbistandStillingDto(
-            stilling = direktemeldtStillingFraDb.toStilling(oppdatertStilling.id),
+            stilling = direktemeldtStillingFraDb.toStilling(),
             stillingsinfoid = eksisterendeStillingsinfo?.stillingsinfoid?.asString(),
             stillingsinfo = oppdatertStillingsinfo?.asStillingsinfoDto(),
         ).also {
@@ -261,7 +258,9 @@ class StillingService(
     @Transactional
     fun lagreDirektemeldtStilling(stillingsId: String) {
         log.info("Hent stilling fra Arbeidsplassen og lagre til databasen uuid: $stillingsId")
-        val arbeidsplassenStilling = arbeidsplassenKlient.hentStilling(stillingsId, true).toStilling()
+        val arbeidsplassenStillingDto = arbeidsplassenKlient.hentStilling(stillingsId, true)
+        val arbeidsplassenStillingId = arbeidsplassenStillingDto.id
+        val arbeidsplassenStilling = arbeidsplassenStillingDto.toStilling()
 
         direktemeldtStillingService.hentDirektemeldtStilling(stillingsId)?.let { dbStilling ->
             logDiff(dbStilling, arbeidsplassenStilling, stillingsId)
@@ -278,7 +277,7 @@ class StillingService(
                 sistEndretAv = arbeidsplassenStilling.updatedBy,
                 sistEndret = arbeidsplassenStilling.updated.atZone(ZoneId.of("Europe/Oslo")),
                 status = arbeidsplassenStilling.status,
-                annonsenr = arbeidsplassenStilling.id.toString(),
+                annonsenr = arbeidsplassenStillingId.toString(),
                 utløpsdato = arbeidsplassenStilling.hentExpiresMedDefaultVerdiOmIkkeOppgitt(),
                 publisert = arbeidsplassenStilling.published?.atZone(ZoneId.of("Europe/Oslo")),
                 publisertAvAdmin = arbeidsplassenStilling.publishedByAdmin,

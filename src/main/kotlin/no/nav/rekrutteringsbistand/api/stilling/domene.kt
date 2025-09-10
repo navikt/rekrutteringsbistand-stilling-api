@@ -14,7 +14,6 @@ import java.util.*
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class FrontendStilling(
-    val id: Long,
     val annonsenr: String = "",
     val uuid: String,
     val created: LocalDateTime,
@@ -95,7 +94,7 @@ data class FrontendStilling(
         )
     }
 
-    fun toArbeidsplassenDto(): ArbeidsplassenStillingDto {
+    fun toArbeidsplassenDto(arbeidsplassenId: Long): ArbeidsplassenStillingDto {
         return ArbeidsplassenStillingDto(
             title = title,
             createdBy = createdBy,
@@ -114,7 +113,7 @@ data class FrontendStilling(
             firstPublished = firstPublished,
             deactivatedByExpiry = deactivatedByExpiry,
             activationOnPublishingDate = activationOnPublishingDate,
-            id = id,
+            id = arbeidsplassenId,
             uuid = uuid,
             created = created,
             updated = updated,
@@ -465,9 +464,8 @@ data class DirektemeldtStilling(
     val publisertAvAdmin: String?,
     val adminStatus: String?
 ) {
-    fun toStilling(arbeidsplassenAnnonsenr: Long): FrontendStilling {
+    fun toStilling(): FrontendStilling {
         return FrontendStilling(
-            id = arbeidsplassenAnnonsenr,
             annonsenr = annonsenr,
             uuid = stillingsId.toString(),
             created = opprettet.toLocalDateTime(),

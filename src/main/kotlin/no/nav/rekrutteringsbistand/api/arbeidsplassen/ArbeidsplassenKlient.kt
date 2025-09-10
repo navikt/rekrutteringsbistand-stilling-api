@@ -124,13 +124,13 @@ class ArbeidsplassenKlient(
             }
         }
 
-    fun opprettStilling(stilling: OpprettStillingDto): FrontendStilling =
+    fun opprettStilling(stilling: OpprettStillingDto): ArbeidsplassenStillingDto =
         timer("rekrutteringsbistand.stilling.arbeidsplassen.opprettStilling.kall.tid") {
             val url = "${hentBaseUrl()}/api/v1/ads?classify=true"
 
             try {
                 val response = restTemplate.exchange(
-                    url, HttpMethod.POST, HttpEntity(stilling, httpHeaders()), FrontendStilling::class.java
+                    url, HttpMethod.POST, HttpEntity(stilling, httpHeaders()), ArbeidsplassenStillingDto::class.java
                 )
                 return@timer response.body ?: throw kunneIkkeTolkeBodyException()
 
