@@ -76,12 +76,12 @@ class DirektemeldtStillingService(
         )
 
         lagreDirektemeldtStilling(oppdatertStilling)
-        val forrigeStillingsinfo = stillingsinfoService.hentForStilling(Stillingsid(stilling.stillingsId))
+        val forrigeStillingsinfo = stillingsinfoService.hentStillingsinfo(Stillingsid(stilling.stillingsId))
 
         if(forrigeStillingsinfo?.stillingsinfoid != null && stillingsinfo.eierNavKontorEnhetId != null) {
             stillingsinfoService.endreNavKontor(stillingsinfoId = forrigeStillingsinfo.stillingsinfoid, navKontorEnhetId = stillingsinfo.eierNavKontorEnhetId)
         }
-        val stillingsinfo = stillingsinfoService.hentForStilling(Stillingsid(stilling.stillingsId))
+        val stillingsinfo = stillingsinfoService.hentStillingsinfo(Stillingsid(stilling.stillingsId))
 
         val rekrutteringsbistandStilling = KandidatlisteDto(
             stillingsinfo = stillingsinfo?.asStillingsinfoDto(),

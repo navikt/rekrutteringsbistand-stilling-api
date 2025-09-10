@@ -40,7 +40,7 @@ class StillingController(private val stillingsinfoService: StillingsinfoService,
 
     @PutMapping("/rekrutteringsbistandstilling")
     fun oppdaterStilling(request: HttpServletRequest, @RequestBody rekrutteringsbistandStillingDto: OppdaterRekrutteringsbistandStillingDto): ResponseEntity<OppdaterRekrutteringsbistandStillingDto> {
-        val stillingskategori = stillingsinfoService.hentForStilling(
+        val stillingskategori = stillingsinfoService.hentStillingsinfo(
             Stillingsid(rekrutteringsbistandStillingDto.stilling.uuid)
         )?.stillingskategori ?: Stillingskategori.STILLING
         if(stillingskategori==Stillingskategori.FORMIDLING) {

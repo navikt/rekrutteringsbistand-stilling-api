@@ -5,7 +5,6 @@ import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteDto
 import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteKlient
 import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteStillingDto
 import no.nav.rekrutteringsbistand.api.stilling.DirektemeldtStilling
-import no.nav.rekrutteringsbistand.api.stilling.FrontendStilling
 import no.nav.rekrutteringsbistand.api.support.log
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
@@ -70,10 +69,7 @@ class StillingsinfoService(
         return stillingsinfoMedNyEier
     }
 
-    fun hentStillingsinfo(stilling: FrontendStilling): Stillingsinfo? =
-        hentForStilling(Stillingsid(stilling.uuid))
-
-    fun hentForStilling(stillingId: Stillingsid): Stillingsinfo? =
+    fun hentStillingsinfo(stillingId: Stillingsid): Stillingsinfo? =
         repo.hentForStilling(stillingId)
 
     fun hentForStillinger(stillingIder: List<Stillingsid>): List<Stillingsinfo> {
