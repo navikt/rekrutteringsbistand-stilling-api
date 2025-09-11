@@ -87,7 +87,7 @@ data class FrontendStilling(
             locationList = locationList,
             categoryList = categoryList.map { it.toDirektemeldtStillingKategori() },
             properties = properties.filterValues { !it.isNullOrBlank() && it != "[]" }, // fjern tomme verdier
-            businessName = businessName,
+            businessName = businessName ?: employer?.name,
             firstPublished = firstPublished,
             deactivatedByExpiry = deactivatedByExpiry,
             activationOnPublishingDate = activationOnPublishingDate,
