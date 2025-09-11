@@ -33,7 +33,7 @@ class PubliserTilArbeidsplassenController(
         }
 
         val stilling = stillingService.hentDirektemeldtStilling(uuid.toString())
-        val packet = JsonMessage.newMessage(eventName = "publiserTilArbeidsplassen")
+        val packet = JsonMessage.newMessage(eventName = "publiserEllerAvpubliserTilArbeidsplassen")
 
         packet["direktemeldtStilling"] = stilling
         packet["stillingsId"] = uuid.toString()
