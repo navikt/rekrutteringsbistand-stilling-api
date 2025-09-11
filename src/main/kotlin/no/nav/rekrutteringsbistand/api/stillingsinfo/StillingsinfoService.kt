@@ -45,8 +45,8 @@ class StillingsinfoService(
             val direktemeldtStillingInnhold = arbeidsplassenStilling.toDirektemeldtStillingInnhold()
 
             val direktemeldtStilling = DirektemeldtStilling(
-                UUID.fromString(stillingsId.toString()),
-                direktemeldtStillingInnhold,
+                stillingsId = UUID.fromString(stillingsId.toString()),
+                innhold = direktemeldtStillingInnhold,
                 opprettet = arbeidsplassenStilling.created.atZone(ZoneId.of("Europe/Oslo")),
                 opprettetAv = arbeidsplassenStilling.createdBy,
                 sistEndretAv = arbeidsplassenStilling.updatedBy,
