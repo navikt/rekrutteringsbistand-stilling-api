@@ -187,7 +187,7 @@ class StillingService(
                 status = stilling.status,
                 annonsenr = dto.stilling.annonsenr,
                 utløpsdato = dto.stilling.hentExpiresMedDefaultVerdiOmIkkeOppgitt(),
-                publisert = dto.stilling.published?.atZone(ZoneId.of("Europe/Oslo")),
+                publisert = dto.stilling.published?.atZone(ZoneId.of("Europe/Oslo")) ?: ZonedDateTime.now(ZoneId.of("Europe/Oslo")),
                 publisertAvAdmin = publishedByAdmin,
                 adminStatus = dto.stilling.administration?.status,
             )
