@@ -1,6 +1,5 @@
 package no.nav.rekrutteringsbistand.api.stillingsinfo
 
-import no.nav.rekrutteringsbistand.api.arbeidsplassen.ArbeidsplassenKlient
 import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteDto
 import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteKlient
 import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteStillingDto
@@ -21,7 +20,6 @@ import java.util.concurrent.TimeUnit
 class StillingsinfoService(
     private val repo: StillingsinfoRepository,
     private val kandidatlisteKlient: KandidatlisteKlient,
-    private val arbeidsplassenKlient: ArbeidsplassenKlient,
     private val stillingOutboxService: StillingOutboxService,
     private val stillingssokProxyClient: StillingssokProxyClient,
     ) {
