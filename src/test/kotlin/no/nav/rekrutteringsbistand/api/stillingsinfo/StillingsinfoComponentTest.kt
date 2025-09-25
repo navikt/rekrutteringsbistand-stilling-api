@@ -91,7 +91,6 @@ class StillingsinfoComponentTest {
             UUID.fromString(dto.stillingsid),
             EventName.INDEKSER_STILLINGSINFO
         )
-
         assertThat(stillingsinfoRespons.statusCode).isEqualTo(HttpStatus.OK)
 
         stillingsinfoRespons.body!!.apply {
