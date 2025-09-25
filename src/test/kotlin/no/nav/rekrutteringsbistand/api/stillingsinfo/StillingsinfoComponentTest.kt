@@ -12,6 +12,8 @@ import no.nav.rekrutteringsbistand.api.arbeidsplassen.ArbeidsplassenKlient
 import no.nav.rekrutteringsbistand.api.config.MockLogin
 import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteKlient
 import no.nav.rekrutteringsbistand.api.mockAzureObo
+import no.nav.rekrutteringsbistand.api.stilling.outbox.EventName
+import no.nav.rekrutteringsbistand.api.stilling.outbox.StillingOutboxService
 import no.nav.rekrutteringsbistand.api.opensearch.StillingssokProxyClient
 import no.nav.rekrutteringsbistand.api.support.toMultiValueMap
 import org.assertj.core.api.Assertions.assertThat
@@ -33,6 +35,7 @@ import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.test.context.junit4.SpringRunner
+import java.util.UUID
 
 @RunWith(SpringRunner::class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -60,6 +63,9 @@ class StillingsinfoComponentTest {
     @MockBean
     lateinit var arbeidsplassenKlient: ArbeidsplassenKlient
 
+    @MockBean
+    lateinit var stillingOutboxService: StillingOutboxService
+
     @Autowired
     lateinit var repository: StillingsinfoRepository
 
@@ -85,7 +91,10 @@ class StillingsinfoComponentTest {
         val stillingsinfoRespons =
             restTemplate.exchange(url, HttpMethod.PUT, httpEntity(dto), StillingsinfoDto::class.java)
 
-        verify(arbeidsplassenKlient, times(1)).triggResendingAvStillingsmeldingFraArbeidsplassen(dto.stillingsid)
+        verify(stillingOutboxService, times(1)).lagreMeldingIOutbox(
+            UUID.fromString(dto.stillingsid),
+            EventName.INDEKSER_STILLINGSINFO
+        )
         assertThat(stillingsinfoRespons.statusCode).isEqualTo(HttpStatus.OK)
 
         stillingsinfoRespons.body!!.apply {

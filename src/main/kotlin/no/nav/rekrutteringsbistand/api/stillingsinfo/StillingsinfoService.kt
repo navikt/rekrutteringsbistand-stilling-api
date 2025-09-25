@@ -6,6 +6,8 @@ import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteKlient
 import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteStillingDto
 import no.nav.rekrutteringsbistand.api.opensearch.StillingssokProxyClient
 import no.nav.rekrutteringsbistand.api.stilling.DirektemeldtStilling
+import no.nav.rekrutteringsbistand.api.stilling.outbox.EventName
+import no.nav.rekrutteringsbistand.api.stilling.outbox.StillingOutboxService
 import no.nav.rekrutteringsbistand.api.support.log
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
@@ -20,8 +22,8 @@ class StillingsinfoService(
     private val repo: StillingsinfoRepository,
     private val kandidatlisteKlient: KandidatlisteKlient,
     private val arbeidsplassenKlient: ArbeidsplassenKlient,
+    private val stillingOutboxService: StillingOutboxService,
     private val stillingssokProxyClient: StillingssokProxyClient,
-
     ) {
 
     @Transactional
@@ -67,8 +69,7 @@ class StillingsinfoService(
         } catch (e: Exception) {
             throw RuntimeException("Varsel til rekbis-kandidat-api om endring av eier for ekstern stilling feilet", e)
         }
-
-        arbeidsplassenKlient.triggResendingAvStillingsmeldingFraArbeidsplassen(stillingsId.asString())
+        stillingOutboxService.lagreMeldingIOutbox(stillingsId = UUID.fromString(stillingsId.toString()), eventName = EventName.INDEKSER_STILLINGSINFO)
         return stillingsinfoMedNyEier
     }
 
