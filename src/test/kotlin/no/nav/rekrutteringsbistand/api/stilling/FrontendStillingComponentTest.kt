@@ -420,28 +420,13 @@ internal class FrontendStillingComponentTest {
             stillingsinfo = stillingsinfo.asStillingsinfoDto(),
         )
 
-//        direktemeldtStillingRepository.lagreDirektemeldtStilling(DirektemeldtStilling(
-//            stillingsId = UUID.fromString(stilling.uuid),
-//            innhold = stilling.toDirektemeldtStillingInnhold(),
-//            opprettet = ZonedDateTime.of(stilling.created, ZoneId.of("Europe/Oslo")),
-//            opprettetAv = stilling.createdBy,
-//            sistEndret = ZonedDateTime.of(stilling.updated, ZoneId.of("Europe/Oslo")),
-//            sistEndretAv = stilling.updatedBy,
-//            status = stilling.status,
-//            annonsenr = stilling.annonsenr,
-//            utløpsdato = ZonedDateTime.of(stilling.expires, ZoneId.of("Europe/Oslo")),
-//            publisert = ZonedDateTime.of(stilling.published, ZoneId.of("Europe/Oslo")),
-//            publisertAvAdmin = stilling.publishedByAdmin,
-//            adminStatus = stilling.administration?.status
-//        ))
-
         restTemplate.exchange(
             "$localBaseUrl/rekrutteringsbistandstilling",
             HttpMethod.PUT,
             HttpEntity(dto),
             OppdaterRekrutteringsbistandStillingDto::class.java
         ).body!!.also {
-            assertThat(it.stilling).isEqualTo(rekrutteringsbistandStilling.stilling.copy(id = it.stilling.id, updated = it.stilling.updated, versjon = 2)) // ignorer id og updated
+            assertThat(it.stilling).isEqualTo(rekrutteringsbistandStilling.stilling.copy(updated = it.stilling.updated, versjon = 2)) // ignorer id og updated
             assertThat(it.stillingsinfoid).isEqualTo(stillingsinfo.stillingsinfoid.asString())
         }
     }
@@ -472,7 +457,7 @@ internal class FrontendStillingComponentTest {
             ), OppdaterRekrutteringsbistandStillingDto::class.java
         ).body.also {
             assertThat(it!!.stilling.uuid).isNotEmpty
-            assertThat(it.stilling).isEqualTo(rekrutteringsbistandStilling.stilling.copy(id = it.stilling.id, updated = it.stilling.updated, versjon = 2)) // ignorer id og updated
+            assertThat(it.stilling).isEqualTo(rekrutteringsbistandStilling.stilling.copy(updated = it.stilling.updated, versjon = 2)) // ignorer id og updated
             assertThat(it.stillingsinfoid).isEqualTo(rekrutteringsbistandStilling.stillingsinfo?.stillingsinfoid)
         }
     }

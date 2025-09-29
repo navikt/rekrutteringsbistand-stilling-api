@@ -27,7 +27,7 @@ class StillingsinfoController(
         tokenUtils.hentInnloggetVeileder().validerMinstEnAvRollene(Rolle.ARBEIDSGIVERRETTET)
         val stillingsid = Stillingsid(dto.stillingsid)
 
-        val forrigeStillingsinfo = service.hentForStilling(stillingId = stillingsid)
+        val forrigeStillingsinfo = service.hentStillingsinfo(stillingId = stillingsid)
         val forrigeEier = forrigeStillingsinfo?.eier?.navident
 
         log.info("Stilling ${dto.stillingsid} har byttet eierskap med url /stillingsinfo")
@@ -47,7 +47,7 @@ class StillingsinfoController(
         val stilling = direktemeldtStillingService.hentDirektemeldtStilling(dto.stillingsid)
         val stillingsid = Stillingsid(dto.stillingsid)
 
-        val forrigeStillingsinfo = service.hentForStilling(stillingId = stillingsid)
+        val forrigeStillingsinfo = service.hentStillingsinfo(stillingId = stillingsid)
         val forrigeEier = forrigeStillingsinfo?.eier?.navident
 
         if (forrigeStillingsinfo?.stillingskategori == Stillingskategori.FORMIDLING) {

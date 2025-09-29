@@ -196,7 +196,6 @@ internal class StillingEksternComponentTest {
     private fun forventetStillingForPersonbruker(stilling: FrontendStilling, stillingskategori: Stillingskategori?): StillingForPersonbruker {
         require(stilling.employer == null) { "Testkode er ikke tilpasset at employer er noe annet enn null" }
         return StillingForPersonbruker(
-            id = stilling.id,
             annonsenr = stilling.annonsenr,
             updated = stilling.updated,
             title = stilling.title,

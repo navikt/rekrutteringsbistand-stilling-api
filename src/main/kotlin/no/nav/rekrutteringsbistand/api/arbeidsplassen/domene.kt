@@ -37,7 +37,6 @@ data class ArbeidsplassenStillingDto(
     val activationOnPublishingDate: Boolean?
 ) {
     fun toStilling() = FrontendStilling(
-        id = id,
         uuid = uuid,
         annonsenr = "",
         created = created,

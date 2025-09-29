@@ -23,7 +23,6 @@ object Testdata {
     val styrk = Kategori(2148934, styrkCode, "STYRK08NAV", styrkTittel, null, null)
 
     val enStilling = FrontendStilling(
-        id = 1000,
         uuid = UUID.randomUUID().toString(),
         annonsenr = "1000",
         created = LocalDateTime.now().withNano(0),
@@ -86,7 +85,6 @@ object Testdata {
             comments = "",
             remarks = emptyList()
         ),
-        id = 1000,
         annonsenr = "1000",
         uuid = UUID.randomUUID().toString(),
         created = LocalDateTime.now(),
@@ -112,7 +110,6 @@ object Testdata {
     )
 
     val enAnnenStilling = enStilling.copy(
-        id = 1001,
         uuid = UUID.randomUUID().toString(),
         title = "En annen stilling"
     )

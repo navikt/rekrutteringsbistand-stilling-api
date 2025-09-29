@@ -12,6 +12,8 @@ import no.nav.rekrutteringsbistand.api.arbeidsplassen.ArbeidsplassenKlient
 import no.nav.rekrutteringsbistand.api.config.MockLogin
 import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteKlient
 import no.nav.rekrutteringsbistand.api.mockAzureObo
+import no.nav.rekrutteringsbistand.api.stilling.outbox.EventName
+import no.nav.rekrutteringsbistand.api.stilling.outbox.StillingOutboxService
 import no.nav.rekrutteringsbistand.api.support.toMultiValueMap
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.fail
@@ -32,6 +34,7 @@ import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.test.context.junit4.SpringRunner
+import java.util.UUID
 
 @RunWith(SpringRunner::class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -56,6 +59,9 @@ class StillingsinfoComponentTest {
     @MockBean
     lateinit var arbeidsplassenKlient: ArbeidsplassenKlient
 
+    @MockBean
+    lateinit var stillingOutboxService: StillingOutboxService
+
     @Autowired
     lateinit var repository: StillingsinfoRepository
 
@@ -75,13 +81,16 @@ class StillingsinfoComponentTest {
         val dto = enStillingsinfoInboundDto
         mockAzureObo(wiremockAzure)
         val stilling = enStilling
-        `when`(arbeidsplassenKlient.hentStilling(stilling.uuid)).thenReturn(stilling.toArbeidsplassenDto())
+        `when`(arbeidsplassenKlient.hentStilling(stilling.uuid)).thenReturn(stilling.toArbeidsplassenDto(1))
 
         val url = "$localBaseUrl/stillingsinfo"
         val stillingsinfoRespons =
             restTemplate.exchange(url, HttpMethod.PUT, httpEntity(dto), StillingsinfoDto::class.java)
 
-        verify(arbeidsplassenKlient, times(1)).triggResendingAvStillingsmeldingFraArbeidsplassen(dto.stillingsid)
+        verify(stillingOutboxService, times(1)).lagreMeldingIOutbox(
+            UUID.fromString(dto.stillingsid),
+            EventName.INDEKSER_STILLINGSINFO
+        )
         assertThat(stillingsinfoRespons.statusCode).isEqualTo(HttpStatus.OK)
 
         stillingsinfoRespons.body!!.apply {
@@ -97,7 +106,7 @@ class StillingsinfoComponentTest {
         val tilLagring = enStillingsinfoInboundDto
         mockAzureObo(wiremockAzure)
         val stilling = enStilling
-        `when`(arbeidsplassenKlient.hentStilling(stilling.uuid)).thenReturn(stilling.toArbeidsplassenDto())
+        `when`(arbeidsplassenKlient.hentStilling(stilling.uuid)).thenReturn(stilling.toArbeidsplassenDto(1))
         val url = "$localBaseUrl/stillingsinfo"
         val stillingsinfoRespons =
             restTemplate.exchange(url, HttpMethod.PUT, httpEntity(tilLagring), StillingsinfoDto::class.java)

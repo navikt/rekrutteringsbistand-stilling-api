@@ -10,7 +10,8 @@ data class StillingOutboxMelding(
 
 enum class EventName(val value: String) {
     REINDEKSER_DIREKTEMELDT_STILLING("reindekserDirektemeldtStilling"),
-    INDEKSER_DIREKTEMELDT_STILLING("indekserDirektemeldtStilling");
+    INDEKSER_DIREKTEMELDT_STILLING("indekserDirektemeldtStilling"),
+    INDEKSER_STILLINGSINFO("indekserStillingsinfo");
 
     override fun toString(): String {
         return value
@@ -21,6 +22,7 @@ enum class EventName(val value: String) {
             return when(value) {
                 "reindekserDirektemeldtStilling" -> REINDEKSER_DIREKTEMELDT_STILLING
                 "indekserDirektemeldtStilling" -> INDEKSER_DIREKTEMELDT_STILLING
+                "indekserStillingsinfo" -> INDEKSER_STILLINGSINFO
                 else -> throw IllegalArgumentException("Ugyldig event name: $value")
             }
         }

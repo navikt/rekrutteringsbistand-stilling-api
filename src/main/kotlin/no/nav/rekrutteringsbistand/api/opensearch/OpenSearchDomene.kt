@@ -18,7 +18,6 @@ data class OpensSearchResponse(
             }
         },
         businessName = _source.stilling.businessName,
-        id = _source.stilling.annonsenr.toLong(), // Ok siden det kun er eksterne stillinger som har id med bare tall
         annonsenr = _source.stilling.annonsenr,
         uuid = _source.stilling.uuid,
         created = konverterDato(_source.stilling.created),

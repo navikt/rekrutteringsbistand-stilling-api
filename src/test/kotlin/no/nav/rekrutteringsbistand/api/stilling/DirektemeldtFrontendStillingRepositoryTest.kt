@@ -38,7 +38,7 @@ class DirektemeldtFrontendStillingRepositoryTest {
     @Test
     fun `Skal kunne opprette 2 ulike annonser med forskjellig stillingsid`() {
         val stilling = enStilling
-        val stilling2 = enStilling.copy(id = 2000, uuid = UUID.randomUUID().toString(), title = "Stilling 2", reference = UUID.randomUUID().toString())
+        val stilling2 = enStilling.copy(uuid = UUID.randomUUID().toString(), title = "Stilling 2", reference = UUID.randomUUID().toString())
 
         val direktemeldtStilling1 = DirektemeldtStilling(
             UUID.fromString(stilling.uuid),
