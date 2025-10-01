@@ -205,6 +205,7 @@ class StillingService(
                 publisert = dto.stilling.published?.atZone(ZoneId.of("Europe/Oslo")) ?: ZonedDateTime.now(ZoneId.of("Europe/Oslo")),
                 publisertAvAdmin = publishedByAdmin,
                 adminStatus = dto.stilling.administration?.status,
+                versjon = dto.stilling.versjon ?: 1
             )
         )
         log.info("Oppdaterte stilling i databasen med uuid: ${dto.stilling.uuid}")

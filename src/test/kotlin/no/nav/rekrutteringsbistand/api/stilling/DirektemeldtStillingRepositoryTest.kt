@@ -21,7 +21,7 @@ import java.util.*
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class DirektemeldtFrontendStillingRepositoryTest {
+class DirektemeldtStillingRepositoryTest {
 
 
     @Autowired
