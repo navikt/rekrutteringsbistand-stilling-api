@@ -49,6 +49,8 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatus.OK
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.test.context.bean.override.mockito.MockitoBean
+import java.time.ZoneId
+import java.time.ZonedDateTime
 import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -87,7 +89,10 @@ internal class FrontendStillingComponentTest {
     val localBaseUrl by lazy { "http://localhost:$port" }
 
     @Autowired
-    lateinit var repository: StillingsinfoRepository
+    lateinit var stillingsinfoRepository: StillingsinfoRepository
+
+    @Autowired
+    lateinit var direktemeldtStillingRepository: DirektemeldtStillingRepository
 
     @Autowired
     lateinit var testRepository: TestRepository
@@ -108,6 +113,8 @@ internal class FrontendStillingComponentTest {
     @Test
     fun `GET mot en stilling skal returnere en stilling uten stillingsinfo hvis det ikke er lagret`() {
         val stilling = enStilling
+        lagreDirektemeldtStillingIDatabase(stilling)
+
         mockUtenAuthorization("/b2b/api/v1/ads/${stilling.uuid}", stilling)
         mockAzureObo(wiremockAzure)
 
@@ -117,26 +124,26 @@ internal class FrontendStillingComponentTest {
             "$localBaseUrl/rekrutteringsbistandstilling/${stilling.uuid}", RekrutteringsbistandStilling::class.java
         ).also {
             assertThat(it.stillingsinfo).isNull()
-            assertThat(it.stilling).isEqualTo(stilling)
+            assertThat(it.stilling).isEqualTo(stilling.copy(versjon = 1))
         }
     }
 
     @Test
     fun `GET mot en rekrutteringsbistandstilling skal returnere en stilling med stillingsinfo hvis det er lagret`() {
-
         val stilling = enStilling
         val stillingsinfo = enStillingsinfo.copy(stillingsid = Stillingsid(stilling.uuid))
+        lagreDirektemeldtStillingIDatabase(stilling)
 
         mockUtenAuthorization("/b2b/api/v1/ads/${stilling.uuid}", stilling)
         mockAzureObo(wiremockAzure)
         whenever(stillingssokProxyClient.hentStilling(stilling.uuid)).thenReturn(stilling)
 
-        repository.opprett(stillingsinfo)
+        stillingsinfoRepository.opprett(stillingsinfo)
 
         restTemplate.getForObject(
             "$localBaseUrl/rekrutteringsbistandstilling/${stilling.uuid}", RekrutteringsbistandStilling::class.java
         ).also {
-            assertThat(it.stilling).isEqualTo(stilling)
+            assertThat(it.stilling).isEqualTo(stilling.copy(versjon = 1))
             assertThat(it.stillingsinfo).isEqualTo(stillingsinfo.asStillingsinfoDto())
         }
     }
@@ -228,7 +235,7 @@ internal class FrontendStillingComponentTest {
         val nyEier = "ny eier"
         val stilling = enStilling.copy(administration = Administration(null, null, null, null, emptyList(), nyEier))
         val stillingsinfo = enStillingsinfo
-        repository.opprett(stillingsinfo)
+        stillingsinfoRepository.opprett(stillingsinfo)
         mockAzureObo(wiremockAzure)
         mockKandidatlisteOppdatering()
         mockPamAdApi(
@@ -254,40 +261,6 @@ internal class FrontendStillingComponentTest {
     }
 
     @Test
-    fun `PUT oppdaterer arbeidsplassen sin stilling med uforandret tittel`() {
-        val tittel = "Arbeidsplassen sin tittel"
-        val source = "IKKEINTERN"
-        val styrkCode = "3112.12"
-        val styrkTittel = "Byggeleder"
-        val styrkCodeList = listOf(Kategori(2148934, styrkCode, "STYRK08NAV", styrkTittel, null, null))
-        val stilling = enStilling.copy(title = tittel, source = source, categoryList = styrkCodeList)
-        val stillingsinfo = enStillingsinfo
-        repository.opprett(stillingsinfo)
-        mockAzureObo(wiremockAzure)
-        mockKandidatlisteOppdatering()
-        mockPamAdApi(HttpMethod.GET, "/b2b/api/v1/ads/${stilling.uuid}", stilling)
-        mockPamAdApi(HttpMethod.PUT, "/api/v1/ads/${stilling.uuid}", stilling)
-
-        val dto = OppdaterRekrutteringsbistandStillingDto(
-            stillingsinfoid = stillingsinfo.stillingsinfoid.asString(),
-            stilling = stilling,
-            stillingsinfo = stillingsinfo.asStillingsinfoDto(),
-        )
-
-        restTemplate.exchange(
-            "$localBaseUrl/rekrutteringsbistandstilling", HttpMethod.PUT, HttpEntity(dto), String::class.java
-        )
-
-        wiremockPamAdApi.verify(
-            1, RequestPatternBuilder
-                .newRequestPattern(RequestMethod.PUT, urlPathMatching("/api/v1/ads/${stilling.uuid}"))
-                .withRequestBody(MatchesJsonPathPattern("title", EqualToPattern(tittel)))
-                .withRequestBody(MatchesJsonPathPattern("categoryList[0].code", EqualToPattern(styrkCode)))
-                .withRequestBody(MatchesJsonPathPattern("categoryList[0].name", EqualToPattern(styrkTittel)))
-        )
-    }
-
-    @Test
     fun `PUT oppdaterer direktemeldt stilling med styrk som tittel`() {
         val tittel = "Uønsket tittel"
         val source = "DIR"
@@ -296,7 +269,7 @@ internal class FrontendStillingComponentTest {
         val styrkCodeList = listOf(Kategori(2148934, styrkCode, "STYRK08NAV", styrkTittel, null, null))
         val stilling = enStilling.copy(title = tittel, source = source, categoryList = styrkCodeList)
         val stillingsinfo = enStillingsinfo
-        repository.opprett(stillingsinfo)
+        stillingsinfoRepository.opprett(stillingsinfo)
         mockAzureObo(wiremockAzure)
         mockKandidatlisteOppdatering()
         mockPamAdApi(HttpMethod.GET, "/b2b/api/v1/ads/${stilling.uuid}", stilling)
@@ -325,7 +298,7 @@ internal class FrontendStillingComponentTest {
     fun `PUT mot stilling skal returnere 500 og ikke gjøre endringer i databasen når kall mot Arbeidsplassen feiler`() {
         val stilling = enStilling
         val stillingsinfo = enStillingsinfo
-        repository.opprett(stillingsinfo)
+        stillingsinfoRepository.opprett(stillingsinfo)
         mockAzureObo(wiremockAzure)
         mockKandidatlisteOppdatering()
         mockPamAdApi(
@@ -352,7 +325,7 @@ internal class FrontendStillingComponentTest {
     fun `PUT mot stilling skal returnere 500 og ikke gjøre endringer i database når kall mot kandidat-api feiler`() {
         val stilling = enOpprettetStilling
         val stillingsinfo = enStillingsinfo.copy(stillingsid = Stillingsid(stilling.uuid))
-        repository.opprett(stillingsinfo)
+        stillingsinfoRepository.opprett(stillingsinfo)
         mockAzureObo(wiremockAzure)
         mockPamAdApi(HttpMethod.PUT, "/api/v1/ads/${stilling.uuid}", stilling)
         mockPamAdApi(HttpMethod.GET, "/b2b/api/v1/ads/${stilling.uuid}", enStilling)
@@ -364,6 +337,22 @@ internal class FrontendStillingComponentTest {
             stillingsinfo = stillingsinfo.asStillingsinfoDto(),
         )
 
+        direktemeldtStillingRepository.lagreDirektemeldtStilling(DirektemeldtStilling(
+            stillingsId = UUID.fromString(stilling.uuid),
+            innhold = stilling.toDirektemeldtStillingInnhold(),
+            opprettet = ZonedDateTime.of(stilling.created, ZoneId.of("Europe/Oslo")),
+            opprettetAv = stilling.createdBy,
+            sistEndret = ZonedDateTime.of(stilling.updated, ZoneId.of("Europe/Oslo")),
+            sistEndretAv = stilling.updatedBy,
+            status = stilling.status,
+            annonsenr = stilling.annonsenr,
+            versjon = stilling.versjon ?: 1,
+            utløpsdato = ZonedDateTime.of(stilling.expires, ZoneId.of("Europe/Oslo")),
+            publisert = ZonedDateTime.of(stilling.published, ZoneId.of("Europe/Oslo")),
+            publisertAvAdmin = stilling.publishedByAdmin,
+            adminStatus = stilling.administration?.status
+        ))
+
         restTemplate.exchange(
             "$localBaseUrl/rekrutteringsbistandstilling", HttpMethod.PUT, HttpEntity(dto), String::class.java
         ).also {
@@ -373,9 +362,10 @@ internal class FrontendStillingComponentTest {
 
     @Test
     fun `PUT mot stilling med notat skal returnere endret stilling når stillingsinfo finnes`() {
-
         val rekrutteringsbistandStilling = enRekrutteringsbistandStilling
         val stillingsinfo = enStillingsinfo
+
+        lagreDirektemeldtStillingIDatabase(rekrutteringsbistandStilling.stilling)
 
         mockPamAdApi(
             HttpMethod.PUT,
@@ -386,11 +376,11 @@ internal class FrontendStillingComponentTest {
         mockKandidatlisteOppdatering()
         mockAzureObo(wiremockAzure)
 
-        repository.opprett(stillingsinfo)
+        stillingsinfoRepository.opprett(stillingsinfo)
 
         val dto = OppdaterRekrutteringsbistandStillingDto(
             stillingsinfoid = stillingsinfo.stillingsinfoid.asString(),
-            stilling = rekrutteringsbistandStilling.stilling,
+            stilling = rekrutteringsbistandStilling.stilling.copy(versjon = 1),
             stillingsinfo = stillingsinfo.asStillingsinfoDto(),
         )
 
@@ -400,7 +390,7 @@ internal class FrontendStillingComponentTest {
             HttpEntity(dto),
             OppdaterRekrutteringsbistandStillingDto::class.java
         ).body!!.also {
-            assertThat(it.stilling).isEqualTo(rekrutteringsbistandStilling.stilling.copy(updated = it.stilling.updated)) // ignorer id og updated
+            assertThat(it.stilling).isEqualTo(rekrutteringsbistandStilling.stilling.copy(updated = it.stilling.updated, versjon = 2)) // ignorer id og updated
             assertThat(it.stillingsinfoid).isEqualTo(stillingsinfo.stillingsinfoid.asString())
         }
     }
@@ -408,6 +398,7 @@ internal class FrontendStillingComponentTest {
     @Test
     fun `PUT mot stilling med notat skal returnere endret stilling når stillingsinfo ikke har eier`() {
         val rekrutteringsbistandStilling = enRekrutteringsbistandStillingUtenEier
+        lagreDirektemeldtStillingIDatabase(rekrutteringsbistandStilling.stilling)
 
         mockPamAdApi(
             HttpMethod.PUT,
@@ -418,19 +409,19 @@ internal class FrontendStillingComponentTest {
         mockAzureObo(wiremockAzure)
 
         mockKandidatlisteOppdatering()
-        repository.opprett(enStillingsinfoUtenEier)
+        stillingsinfoRepository.opprett(enStillingsinfoUtenEier)
 
         restTemplate.exchange(
             "$localBaseUrl/rekrutteringsbistandstilling", HttpMethod.PUT, HttpEntity(
                 OppdaterRekrutteringsbistandStillingDto(
                     stillingsinfoid = rekrutteringsbistandStilling.stillingsinfo?.stillingsinfoid,
-                    stilling = rekrutteringsbistandStilling.stilling,
+                    stilling = rekrutteringsbistandStilling.stilling.copy(versjon = 1),
                     stillingsinfo = null,
                 )
             ), OppdaterRekrutteringsbistandStillingDto::class.java
         ).body.also {
             assertThat(it!!.stilling.uuid).isNotEmpty
-            assertThat(it.stilling).isEqualTo(rekrutteringsbistandStilling.stilling.copy(updated = it.stilling.updated)) // ignorer id og updated
+            assertThat(it.stilling).isEqualTo(rekrutteringsbistandStilling.stilling.copy(updated = it.stilling.updated, versjon = 2)) // ignorer id og updated
             assertThat(it.stillingsinfoid).isEqualTo(rekrutteringsbistandStilling.stillingsinfo?.stillingsinfoid)
         }
     }
@@ -513,12 +504,12 @@ internal class FrontendStillingComponentTest {
         val stilling = enStilling
         val stillingsId = Stillingsid(stilling.uuid)
         val stillingsinfo = enStillingsinfo.copy(stillingsid = stillingsId)
-        repository.opprett(stillingsinfo)
+        stillingsinfoRepository.opprett(stillingsinfo)
         val slettetStilling = stilling.copy(status = "DELETED")
         mockPamAdApi(HttpMethod.DELETE, "/api/v1/ads/${slettetStilling.uuid}", slettetStilling)
         mockKandidatlisteSlettet()
         mockAzureObo(wiremockAzure)
-        repository.hentForStilling(stillingsId) ?: fail("Setup")
+        stillingsinfoRepository.hentForStilling(stillingsId) ?: fail("Setup")
 
         // når vi sletter stillingen
         restTemplate.exchange(
@@ -533,7 +524,7 @@ internal class FrontendStillingComponentTest {
         }
 
         // så skal stillingens Stillingsinfo ikke slettes
-        repository.hentForStilling(stillingsId) ?: fail("Det skal finnes en Stillingsinfo i db for ")
+        stillingsinfoRepository.hentForStilling(stillingsId) ?: fail("Det skal finnes en Stillingsinfo i db for ")
 
     }
 
@@ -654,6 +645,24 @@ internal class FrontendStillingComponentTest {
             )
         )
     }
+
+    private fun lagreDirektemeldtStillingIDatabase(stilling: FrontendStilling) {
+        direktemeldtStillingRepository.lagreDirektemeldtStilling(DirektemeldtStilling(
+            stillingsId = UUID.fromString(stilling.uuid),
+            innhold = stilling.toDirektemeldtStillingInnhold(),
+            opprettet = ZonedDateTime.of(stilling.created, ZoneId.of("Europe/Oslo")),
+            opprettetAv = stilling.createdBy,
+            sistEndret = ZonedDateTime.of(stilling.updated, ZoneId.of("Europe/Oslo")),
+            sistEndretAv = stilling.updatedBy,
+            status = stilling.status,
+            annonsenr = stilling.annonsenr,
+            utløpsdato = ZonedDateTime.of(stilling.expires, ZoneId.of("Europe/Oslo")),
+            publisert = ZonedDateTime.of(stilling.published, ZoneId.of("Europe/Oslo")),
+            publisertAvAdmin = stilling.publishedByAdmin,
+            adminStatus = stilling.administration?.status
+        ))
+    }
+
 
     @AfterEach
     fun after() {

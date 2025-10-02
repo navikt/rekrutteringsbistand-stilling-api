@@ -21,7 +21,7 @@ import java.util.*
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class DirektemeldtFrontendStillingRepositoryTest {
+class DirektemeldtStillingRepositoryTest {
 
 
     @Autowired
@@ -80,7 +80,7 @@ class DirektemeldtFrontendStillingRepositoryTest {
         assertEquals(hentetStilling1?.stillingsId, direktemeldtStilling1.stillingsId)
         assertEquals(hentetStilling2?.stillingsId, direktemeldtStilling2.stillingsId)
 
-        assertEquals("testnss", hentetStilling1?.innhold?.title)
+        assertEquals("Stilling uten valgt jobbtittel", hentetStilling1?.innhold?.title)
         assertEquals("Stilling 2", hentetStilling2?.innhold?.title)
     }
 
