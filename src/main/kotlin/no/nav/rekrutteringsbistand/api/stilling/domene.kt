@@ -41,7 +41,8 @@ data class FrontendStilling(
     val businessName: String?,
     val firstPublished: Boolean?,
     val deactivatedByExpiry: Boolean?,
-    val activationOnPublishingDate: Boolean?
+    val activationOnPublishingDate: Boolean?,
+    val versjon: Int?
 ) {
     companion object {
         const val DEFAULT_EXPIRY_DAYS: Long = 30
@@ -131,10 +132,7 @@ data class FrontendStilling(
             Stillingskategori.JOBBMESSE ->
                 this.copy(title = "Invitasjon til jobbmesse")
 
-            null,
-            Stillingskategori.STILLING,
-            Stillingskategori.FORMIDLING,
-            Stillingskategori.ARBEIDSTRENING ->
+            null, Stillingskategori.STILLING, Stillingskategori.FORMIDLING, Stillingskategori.ARBEIDSTRENING ->
                 this.copy(title = hentInternEllerEksternTittel())
         }
 
@@ -492,7 +490,8 @@ data class DirektemeldtStilling(
             businessName = innhold.businessName,
             firstPublished = innhold.firstPublished,
             deactivatedByExpiry = innhold.deactivatedByExpiry,
-            activationOnPublishingDate = innhold.activationOnPublishingDate
+            activationOnPublishingDate = innhold.activationOnPublishingDate,
+            versjon = versjon
         )
     }
 }

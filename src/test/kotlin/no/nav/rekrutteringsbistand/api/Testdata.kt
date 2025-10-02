@@ -26,14 +26,14 @@ object Testdata {
         uuid = UUID.randomUUID().toString(),
         annonsenr = "1000",
         created = LocalDateTime.now().withNano(0),
-        createdBy = "nss-admin",
+        createdBy = "pam-rekrutteringsbistand",
         updated = LocalDateTime.now().withNano(0),
-        updatedBy = "nss-admin",
-        title = "testnss",
+        updatedBy = "pam-rekrutteringsbistand",
+        title = "Stilling uten valgt jobbtittel",
         status = "ACTIVE",
         privacy = "SHOW_ALL",
-        source = "ASS",
-        medium = "ASS",
+        source = "DIR",
+        medium = "DIR",
         reference = UUID.randomUUID().toString(),
         published = LocalDateTime.now().withNano(0),
         expires = LocalDateTime.now().withNano(0),
@@ -44,7 +44,8 @@ object Testdata {
         businessName = null,
         firstPublished = null,
         deactivatedByExpiry = null,
-        activationOnPublishingDate = null
+        activationOnPublishingDate = null,
+        versjon = null
     )
 
     val enOpprettStillingDto = OpprettStillingDto(
@@ -105,6 +106,7 @@ object Testdata {
         status = "ACTIVE",
         employer = null,
         medium = null,
+        versjon = 1
     )
 
     val enAnnenStilling = enStilling.copy(

@@ -11,7 +11,8 @@ import no.nav.rekrutteringsbistand.api.Testdata.enStilling
 import no.nav.rekrutteringsbistand.api.Testdata.styrk
 import no.nav.rekrutteringsbistand.api.config.MockLogin
 import no.nav.rekrutteringsbistand.api.mockAzureObo
-import no.nav.rekrutteringsbistand.api.opensearch.StillingssokProxyClient
+import no.nav.rekrutteringsbistand.api.stilling.DirektemeldtStilling
+import no.nav.rekrutteringsbistand.api.stilling.DirektemeldtStillingRepository
 import no.nav.rekrutteringsbistand.api.stilling.Kategori
 import no.nav.rekrutteringsbistand.api.stilling.FrontendStilling
 import no.nav.rekrutteringsbistand.api.stillingsinfo.*
@@ -21,7 +22,6 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.RegisterExtension
-import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.context.SpringBootTest
@@ -31,12 +31,13 @@ import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders.*
 import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
-import org.springframework.test.context.bean.override.mockito.MockitoBean
+import java.time.ZoneId
+import java.time.ZonedDateTime
 import java.util.*
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@TestInstance(TestInstance.Lifecycle.PER_METHOD)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-internal class FrontendStillingEksternComponentTest {
+internal class StillingEksternComponentTest {
 
     @Value("\${vis-stilling.azp-name}")
     private val uriTilVisStilling: String = "uriTilVisStilling"
@@ -56,6 +57,9 @@ internal class FrontendStillingEksternComponentTest {
     }
 
     @Autowired
+    lateinit var direktemeldtStillingRepository: DirektemeldtStillingRepository
+
+    @Autowired
     lateinit var mockLogin: MockLogin
 
     @LocalServerPort
@@ -71,10 +75,7 @@ internal class FrontendStillingEksternComponentTest {
     @Autowired
     lateinit var testRepository: TestRepository
 
-    @MockitoBean
-    lateinit var stillingssokProxyClient: StillingssokProxyClient
-
-    val objectMapper = ObjectMapper()
+    private val objectMapper = ObjectMapper()
         .registerModule(JavaTimeModule())
         .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
@@ -85,12 +86,12 @@ internal class FrontendStillingEksternComponentTest {
 
     @Test
     fun `GET mot en stilling skal returnere en stilling uten stillingsinfo hvis det ikke er lagret`() {
-        val stilling = enStilling
+        val stilling = enStilling.copy(categoryList = listOf(styrk))
         mockUtenAuthorization("/b2b/api/v1/ads/${stilling.uuid}", stilling)
         mockAzureObo(wiremockAzure)
         val token = mockLogin.hentAzureAdMaskinTilMaskinToken(uriTilVisStilling)
 
-        whenever(stillingssokProxyClient.hentStilling(stilling.uuid, true)).thenReturn(stilling)
+        lagreDirektemeldtStillingIDatabase(stilling)
 
         restTemplate.exchange(
             "$localBaseUrl/rekrutteringsbistand/ekstern/api/v1/stilling/${stilling.uuid}",
@@ -102,7 +103,7 @@ internal class FrontendStillingEksternComponentTest {
             ),
             StillingForPersonbruker::class.java
         ).also {
-            assertThat(it.body).isEqualTo(forventetStillingForPersonbruker(stilling, null))
+            assertThat(it.body).isEqualTo(forventetStillingForPersonbruker(stilling.copy(title = "Byggeleder"), null))
         }
     }
 
@@ -154,11 +155,11 @@ internal class FrontendStillingEksternComponentTest {
             stillingskategori = stillingskategori,
         )
         repository.opprett(stillingsinfo)
+        lagreDirektemeldtStillingIDatabase(stilling)
+
         mockUtenAuthorization("/b2b/api/v1/ads/${stilling.uuid}", stilling)
         mockAzureObo(wiremockAzure)
         val token = mockLogin.hentAzureAdMaskinTilMaskinToken(uriTilVisStilling)
-
-        whenever(stillingssokProxyClient.hentStilling(stilling.uuid, true)).thenReturn(stilling)
 
         restTemplate.exchange(
             "$localBaseUrl/rekrutteringsbistand/ekstern/api/v1/stilling/${stilling.uuid}",
@@ -208,5 +209,22 @@ internal class FrontendStillingEksternComponentTest {
             source = stilling.source,
             stillingskategori = stillingskategori,
         )
+    }
+
+    private fun lagreDirektemeldtStillingIDatabase(stilling: FrontendStilling) {
+        direktemeldtStillingRepository.lagreDirektemeldtStilling(DirektemeldtStilling(
+            stillingsId = UUID.fromString(stilling.uuid),
+            innhold = stilling.toDirektemeldtStillingInnhold(),
+            opprettet = ZonedDateTime.of(stilling.created, ZoneId.of("Europe/Oslo")),
+            opprettetAv = stilling.createdBy,
+            sistEndret = ZonedDateTime.of(stilling.updated, ZoneId.of("Europe/Oslo")),
+            sistEndretAv = stilling.updatedBy,
+            status = stilling.status,
+            annonsenr = stilling.annonsenr,
+            utløpsdato = ZonedDateTime.of(stilling.expires, ZoneId.of("Europe/Oslo")),
+            publisert = ZonedDateTime.of(stilling.published, ZoneId.of("Europe/Oslo")),
+            publisertAvAdmin = stilling.publishedByAdmin,
+            adminStatus = stilling.administration?.status
+        ))
     }
 }

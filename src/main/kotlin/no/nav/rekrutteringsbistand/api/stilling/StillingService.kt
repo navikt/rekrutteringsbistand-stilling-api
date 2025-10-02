@@ -153,6 +153,18 @@ class StillingService(
         queryString: String?
     ): OppdaterRekrutteringsbistandStillingDto {
         log.info("Oppdaterer stilling med uuid: ${dto.stilling.uuid}")
+
+        if(dto.stilling.source == "DIR") {
+            val eksisterendeStilling = direktemeldtStillingService.hentDirektemeldtStilling(dto.stilling.uuid)
+            if( eksisterendeStilling?.versjon != dto.stilling.versjon) {
+                log.warn("Stillinger er allerede blitt oppdatert og skaper optimistic locking")
+                throw ResponseStatusException(HttpStatus.PRECONDITION_FAILED, "Stillingen er allerede blitt oppdatert")
+            }
+        } else {
+            throw IllegalArgumentException("Skal ikke kunne oppdatere stillinger som ikke er direktemeldt")
+        }
+
+        // Dette burde ikke skje lenger siden overta eierskap er flyttet ut
         loggEventuellOvertagelse(dto)
 
         val id = Stillingsid(dto.stilling.uuid)
@@ -166,6 +178,8 @@ class StillingService(
         }
 
         val eksisterendeStillingsinfo: Stillingsinfo? = stillingsinfoService.hentStillingsinfo(id)
+
+        // Dette vil hjelpe til med å fylle ut navkontor for stillinger som ikke allerede har det satt hvis de blir oppdatert
         if (eksisterendeStillingsinfo != null && dto.stillingsinfo?.eierNavKontorEnhetId != null) {
             stillingsinfoService.endreNavKontor(
                 stillingsinfoId = eksisterendeStillingsinfo.stillingsinfoid,
@@ -199,6 +213,7 @@ class StillingService(
                 publisert = dto.stilling.published?.atZone(ZoneId.of("Europe/Oslo")) ?: ZonedDateTime.now(ZoneId.of("Europe/Oslo")),
                 publisertAvAdmin = publishedByAdmin,
                 adminStatus = dto.stilling.administration?.status,
+                versjon = dto.stilling.versjon ?: 1
             )
         )
         log.info("Oppdaterte stilling i databasen med uuid: ${dto.stilling.uuid}")

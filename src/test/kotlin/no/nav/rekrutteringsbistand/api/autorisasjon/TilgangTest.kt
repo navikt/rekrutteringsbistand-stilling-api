@@ -317,7 +317,7 @@ private class Kall(private val webClient: WebTestClient, private val mockLogin: 
         }
 
         private fun oppdaterStilling(rolle: TestRolle, stillingskategori: Stillingskategori): StatusAssertions {
-            val stilling = Testdata.enStilling
+            val stilling = Testdata.enStilling.copy(versjon = 1)
             val stillingsInfo = Testdata.enStillingsinfo.copy(stillingskategori = stillingskategori)
             stubber.mockOppdaterStilling(stilling)
             stubber.mockHentStilling(stilling)
@@ -522,19 +522,6 @@ private class Stubber(
                     WireMock.aResponse().withStatus(200).withHeader(HttpHeaders.CONNECTION, "close") // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                         .withBody(objectMapper.writeValueAsString(stilling))
-                )
-        )
-    }
-
-    fun mockHentStillingMedAnnonseNr() {
-        wireMock.stubFor(
-            WireMock.get(WireMock.urlPathMatching("/b2b/api/v1/ads"))
-                .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
-                .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE)).withHeader(AUTHORIZATION, WireMock.matching("Bearer .*"))
-                .willReturn(
-                    WireMock.aResponse().withStatus(200).withHeader(HttpHeaders.CONNECTION, "close") // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
-                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                        .withBody(objectMapper.writeValueAsString(Page(content = listOf(Testdata.enStilling), totalPages = 1, totalElements = 1)))
                 )
         )
     }

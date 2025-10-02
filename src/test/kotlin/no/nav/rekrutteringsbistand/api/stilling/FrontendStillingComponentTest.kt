@@ -43,12 +43,13 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatus.OK
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.test.context.bean.override.mockito.MockitoBean
+import java.time.ZoneId
+import java.time.ZonedDateTime
 import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(
-    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-    properties = arrayOf("external.pam-ad-api.url=http://localhost:9935")
+    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
 internal class FrontendStillingComponentTest {
 
@@ -78,7 +79,7 @@ internal class FrontendStillingComponentTest {
     val localBaseUrl by lazy { "http://localhost:$port" }
 
     @Autowired
-    lateinit var repository: StillingsinfoRepository
+    lateinit var stillingsinfoRepository: StillingsinfoRepository
 
     @Autowired
     lateinit var testRepository: TestRepository
@@ -96,9 +97,16 @@ internal class FrontendStillingComponentTest {
         mockLogin.leggAzureVeilederTokenPåAlleRequests(restTemplate)
     }
 
+    @AfterEach
+    fun cleanUp() {
+        testRepository.slettAlt()
+    }
+
     @Test
     fun `GET mot en stilling skal returnere en stilling uten stillingsinfo hvis det ikke er lagret`() {
         val stilling = enStilling
+        lagreDirektemeldtStillingIDatabase(stilling)
+
         mockAzureObo(wiremockAzure)
 
         whenever(stillingssokProxyClient.hentStilling(stilling.uuid)).thenReturn(stilling)
@@ -107,7 +115,7 @@ internal class FrontendStillingComponentTest {
             "$localBaseUrl/rekrutteringsbistandstilling/${stilling.uuid}", RekrutteringsbistandStilling::class.java
         ).also {
             assertThat(it.stillingsinfo).isNull()
-            assertThat(it.stilling).isEqualTo(stilling)
+            assertThat(it.stilling).isEqualTo(stilling.copy(versjon = 1))
         }
     }
 
@@ -115,16 +123,17 @@ internal class FrontendStillingComponentTest {
     fun `GET mot en rekrutteringsbistandstilling skal returnere en stilling med stillingsinfo hvis det er lagret`() {
         val stilling = enStilling
         val stillingsinfo = enStillingsinfo.copy(stillingsid = Stillingsid(stilling.uuid))
+        lagreDirektemeldtStillingIDatabase(stilling)
 
         mockAzureObo(wiremockAzure)
         whenever(stillingssokProxyClient.hentStilling(stilling.uuid)).thenReturn(stilling)
 
-        repository.opprett(stillingsinfo)
+        stillingsinfoRepository.opprett(stillingsinfo)
 
         restTemplate.getForObject(
             "$localBaseUrl/rekrutteringsbistandstilling/${stilling.uuid}", RekrutteringsbistandStilling::class.java
         ).also {
-            assertThat(it.stilling).isEqualTo(stilling)
+            assertThat(it.stilling).isEqualTo(stilling.copy(versjon = 1))
             assertThat(it.stillingsinfo).isEqualTo(stillingsinfo.asStillingsinfoDto())
         }
     }
@@ -202,7 +211,7 @@ internal class FrontendStillingComponentTest {
         direktemeldtStillingRepository.lagreDirektemeldtStilling(stilling)
 
         val stillingsinfo = enStillingsinfo
-        repository.opprett(stillingsinfo)
+        stillingsinfoRepository.opprett(stillingsinfo)
         mockAzureObo(wiremockAzure)
         mockKandidatlisteOppdatering()
 
@@ -224,16 +233,18 @@ internal class FrontendStillingComponentTest {
     @Test
     fun `PUT oppdaterer direktemeldt stilling med styrk som tittel`() {
         val tittel = "Uønsket tittel"
+        val source = "DIR"
         val styrkCode = "3112.12"
         val styrkTittel = "Byggeleder"
 
         val styrkCodeList = listOf(DirektemeldtStillingKategori(code = styrkCode, categoryType = "STYRK08NAV", name = styrkTittel, description = "", parentId = null))
         val stilling = Testdata.enDirektemeldtStilling.copy(innhold = Testdata.enDirektemeldtStilling.innhold.copy(
-            title = tittel, categoryList = styrkCodeList
+            title = tittel, categoryList = styrkCodeList, source = source
         ))
+        lagreDirektemeldtStillingIDatabase(stilling.toStilling())
 
         val stillingsinfo = enStillingsinfo
-        repository.opprett(stillingsinfo)
+        stillingsinfoRepository.opprett(stillingsinfo)
         mockAzureObo(wiremockAzure)
         mockKandidatlisteOppdatering()
 
@@ -256,7 +267,7 @@ internal class FrontendStillingComponentTest {
     fun `PUT mot stilling skal returnere 500 og ikke gjøre endringer i database når kall mot kandidat-api feiler`() {
         val stilling = enOpprettetStilling
         val stillingsinfo = enStillingsinfo.copy(stillingsid = Stillingsid(stilling.uuid))
-        repository.opprett(stillingsinfo)
+        stillingsinfoRepository.opprett(stillingsinfo)
         mockAzureObo(wiremockAzure)
         mockKandidatlisteOppdateringFeiler()
 
@@ -265,6 +276,7 @@ internal class FrontendStillingComponentTest {
             stilling = stilling,
             stillingsinfo = stillingsinfo.asStillingsinfoDto(),
         )
+        lagreDirektemeldtStillingIDatabase(stilling)
 
         restTemplate.exchange(
             "$localBaseUrl/rekrutteringsbistandstilling", HttpMethod.PUT, HttpEntity(dto), String::class.java
@@ -275,18 +287,19 @@ internal class FrontendStillingComponentTest {
 
     @Test
     fun `PUT mot stilling med notat skal returnere endret stilling når stillingsinfo finnes`() {
-
         val rekrutteringsbistandStilling = enRekrutteringsbistandStilling
         val stillingsinfo = enStillingsinfo
+
+        lagreDirektemeldtStillingIDatabase(rekrutteringsbistandStilling.stilling)
 
         mockKandidatlisteOppdatering()
         mockAzureObo(wiremockAzure)
 
-        repository.opprett(stillingsinfo)
+        stillingsinfoRepository.opprett(stillingsinfo)
 
         val dto = OppdaterRekrutteringsbistandStillingDto(
             stillingsinfoid = stillingsinfo.stillingsinfoid.asString(),
-            stilling = rekrutteringsbistandStilling.stilling,
+            stilling = rekrutteringsbistandStilling.stilling.copy(versjon = 1),
             stillingsinfo = stillingsinfo.asStillingsinfoDto(),
         )
 
@@ -296,7 +309,7 @@ internal class FrontendStillingComponentTest {
             HttpEntity(dto),
             OppdaterRekrutteringsbistandStillingDto::class.java
         ).body!!.also {
-            assertThat(it.stilling).isEqualTo(rekrutteringsbistandStilling.stilling.copy(updated = it.stilling.updated)) // ignorer id og updated
+            assertThat(it.stilling).isEqualTo(rekrutteringsbistandStilling.stilling.copy(updated = it.stilling.updated, versjon = 2)) // ignorer id og updated
             assertThat(it.stillingsinfoid).isEqualTo(stillingsinfo.stillingsinfoid.asString())
         }
     }
@@ -304,23 +317,24 @@ internal class FrontendStillingComponentTest {
     @Test
     fun `PUT mot stilling med notat skal returnere endret stilling når stillingsinfo ikke har eier`() {
         val rekrutteringsbistandStilling = enRekrutteringsbistandStillingUtenEier
+        lagreDirektemeldtStillingIDatabase(rekrutteringsbistandStilling.stilling)
 
         mockAzureObo(wiremockAzure)
 
         mockKandidatlisteOppdatering()
-        repository.opprett(enStillingsinfoUtenEier)
+        stillingsinfoRepository.opprett(enStillingsinfoUtenEier)
 
         restTemplate.exchange(
             "$localBaseUrl/rekrutteringsbistandstilling", HttpMethod.PUT, HttpEntity(
                 OppdaterRekrutteringsbistandStillingDto(
                     stillingsinfoid = rekrutteringsbistandStilling.stillingsinfo?.stillingsinfoid,
-                    stilling = rekrutteringsbistandStilling.stilling,
+                    stilling = rekrutteringsbistandStilling.stilling.copy(versjon = 1),
                     stillingsinfo = null,
                 )
             ), OppdaterRekrutteringsbistandStillingDto::class.java
         ).body.also {
             assertThat(it!!.stilling.uuid).isNotEmpty
-            assertThat(it.stilling).isEqualTo(rekrutteringsbistandStilling.stilling.copy(updated = it.stilling.updated)) // ignorer id og updated
+            assertThat(it.stilling).isEqualTo(rekrutteringsbistandStilling.stilling.copy(updated = it.stilling.updated, versjon = 2)) // ignorer id og updated
             assertThat(it.stillingsinfoid).isEqualTo(rekrutteringsbistandStilling.stillingsinfo?.stillingsinfoid)
         }
     }
@@ -402,15 +416,16 @@ internal class FrontendStillingComponentTest {
     fun `Sletting av stilling skal ikke slette tilhørende Stillingsinfo`() {
         // Gitt en stilling med en Stillingsinfo
         val stilling =  Testdata.enDirektemeldtStilling
+        val stillingsId = Stillingsid(stilling.stillingsId)
         val stillingsinfo = enStillingsinfo.copy(stillingsid = Stillingsid(stilling.stillingsId))
 
         direktemeldtStillingRepository.lagreDirektemeldtStilling(stilling)
+        stillingsinfoRepository.opprett(stillingsinfo)
 
-        repository.opprett(stillingsinfo)
         val slettetStilling = stilling.copy(status = "DELETED")
         mockKandidatlisteSlettet()
         mockAzureObo(wiremockAzure)
-        repository.hentForStilling(Stillingsid(stilling.stillingsId)) ?: fail("Setup")
+        stillingsinfoRepository.hentForStilling(stillingsId) ?: fail("Setup")
 
         // når vi sletter stillingen
         restTemplate.exchange(
@@ -425,7 +440,7 @@ internal class FrontendStillingComponentTest {
         }
 
         // så skal stillingens Stillingsinfo ikke slettes
-        repository.hentForStilling(Stillingsid(stilling.stillingsId)) ?: fail("Det skal finnes en Stillingsinfo i db for ")
+        stillingsinfoRepository.hentForStilling(Stillingsid(stilling.stillingsId)) ?: fail("Det skal finnes en Stillingsinfo i db for ")
 
     }
 
@@ -499,6 +514,24 @@ internal class FrontendStillingComponentTest {
             )
         )
     }
+
+    private fun lagreDirektemeldtStillingIDatabase(stilling: FrontendStilling) {
+        direktemeldtStillingRepository.lagreDirektemeldtStilling(DirektemeldtStilling(
+            stillingsId = UUID.fromString(stilling.uuid),
+            innhold = stilling.toDirektemeldtStillingInnhold(),
+            opprettet = ZonedDateTime.of(stilling.created, ZoneId.of("Europe/Oslo")),
+            opprettetAv = stilling.createdBy,
+            sistEndret = ZonedDateTime.of(stilling.updated, ZoneId.of("Europe/Oslo")),
+            sistEndretAv = stilling.updatedBy,
+            status = stilling.status,
+            annonsenr = stilling.annonsenr,
+            utløpsdato = ZonedDateTime.of(stilling.expires, ZoneId.of("Europe/Oslo")),
+            publisert = ZonedDateTime.of(stilling.published, ZoneId.of("Europe/Oslo")),
+            publisertAvAdmin = stilling.publishedByAdmin,
+            adminStatus = stilling.administration?.status
+        ))
+    }
+
 
     @AfterEach
     fun after() {
