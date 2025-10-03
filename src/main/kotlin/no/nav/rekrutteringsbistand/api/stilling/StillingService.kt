@@ -169,15 +169,16 @@ class StillingService(
 
         val id = Stillingsid(dto.stilling.uuid)
         val eksisterendeStillingIDb = direktemeldtStillingService.hentDirektemeldtStilling(id.asString())
-        if (dto.stilling.privacy == "SHOW_ALL"
-            || eksisterendeStillingIDb?.innhold?.privacy == "SHOW_ALL" && dto.stilling.privacy == "INTERNAL_NOT_SHOWN") {
+        val eksisterendeStillingsinfo: Stillingsinfo? = stillingsinfoService.hentStillingsinfo(id)
+
+        // Sjekk om stillingen skal sendes til arbeidsplassen
+        if (eksisterendeStillingsinfo?.stillingskategori != Stillingskategori.FORMIDLING && (dto.stilling.privacy == "SHOW_ALL"
+            || eksisterendeStillingIDb?.innhold?.privacy == "SHOW_ALL" && dto.stilling.privacy == "INTERNAL_NOT_SHOWN")) {
             stillingOutboxService.lagreMeldingIOutbox(
                 stillingsId = id.verdi,
                 eventName = EventName.PUBLISER_ELLER_AVPUBLISER_TIL_ARBEIDSPLASSEN
             )
         }
-
-        val eksisterendeStillingsinfo: Stillingsinfo? = stillingsinfoService.hentStillingsinfo(id)
 
         // Dette vil hjelpe til med å fylle ut navkontor for stillinger som ikke allerede har det satt hvis de blir oppdatert
         if (eksisterendeStillingsinfo != null && dto.stillingsinfo?.eierNavKontorEnhetId != null) {
