@@ -156,8 +156,8 @@ class StillingService(
 
         if(dto.stilling.source == "DIR") {
             val eksisterendeStilling = direktemeldtStillingService.hentDirektemeldtStilling(dto.stilling.uuid)
-            if( eksisterendeStilling?.versjon != dto.stilling.versjon) {
-                log.info("Stillingen ${dto.stilling.uuid} gir optimistic locking. Versjon: ${dto.stilling.versjon}")
+            if(eksisterendeStilling?.versjon != dto.stilling.versjon) {
+                log.info("Stillingen ${dto.stilling.uuid} gir optimistic locking. Versjon fra frontend: ${dto.stilling.versjon}, eksisterende versjon: ${eksisterendeStilling?.versjon}")
                // throw ResponseStatusException(HttpStatus.PRECONDITION_FAILED, "Stillingen er allerede blitt oppdatert")
             }
         } else {
