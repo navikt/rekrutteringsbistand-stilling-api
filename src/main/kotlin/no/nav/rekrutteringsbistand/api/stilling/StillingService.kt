@@ -156,9 +156,9 @@ class StillingService(
 
         if(dto.stilling.source == "DIR") {
             val eksisterendeStilling = direktemeldtStillingService.hentDirektemeldtStilling(dto.stilling.uuid)
-            if( eksisterendeStilling?.versjon != dto.stilling.versjon) {
-                log.warn("Stillinger er allerede blitt oppdatert og skaper optimistic locking")
-                throw ResponseStatusException(HttpStatus.PRECONDITION_FAILED, "Stillingen er allerede blitt oppdatert")
+            if(eksisterendeStilling?.versjon != dto.stilling.versjon) {
+                log.info("Stillingen ${dto.stilling.uuid} gir optimistic locking. Versjon fra frontend: ${dto.stilling.versjon}, eksisterende versjon: ${eksisterendeStilling?.versjon}")
+               // throw ResponseStatusException(HttpStatus.PRECONDITION_FAILED, "Stillingen er allerede blitt oppdatert")
             }
         } else {
             throw IllegalArgumentException("Skal ikke kunne oppdatere stillinger som ikke er direktemeldt")
