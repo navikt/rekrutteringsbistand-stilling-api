@@ -68,7 +68,7 @@ private fun isoStringTilNorskTidssone(isoString: String): ZonedDateTime? {
     }
 }
 
-private fun parseAntallStillinger(stilling: no.nav.rekrutteringsbistand.api.stilling.Stilling): Int {
+private fun parseAntallStillinger(stilling: no.nav.rekrutteringsbistand.api.stilling.FrontendStilling): Int {
     val antallStillinger: String = stilling.properties.getOrDefault("positioncount", "0")
     return if (NumberUtils.isCreatable(antallStillinger)) antallStillinger.toInt() else 0
 }

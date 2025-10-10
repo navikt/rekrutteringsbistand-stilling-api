@@ -1,0 +1,1 @@
+CREATE PUBLICATION toi_rekrutteringsbistand_stilling_api_publication for ALL TABLES;

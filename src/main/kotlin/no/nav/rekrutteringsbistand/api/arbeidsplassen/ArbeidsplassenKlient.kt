@@ -4,7 +4,7 @@ import io.micrometer.core.instrument.Metrics
 import io.micrometer.core.instrument.Timer
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
 import no.nav.rekrutteringsbistand.api.stilling.Page
-import no.nav.rekrutteringsbistand.api.stilling.Stilling
+import no.nav.rekrutteringsbistand.api.stilling.FrontendStilling
 import no.nav.rekrutteringsbistand.api.support.config.ExternalConfiguration
 import no.nav.rekrutteringsbistand.api.support.log
 import no.nav.rekrutteringsbistand.api.support.rest.RetrySpringRestTemplate.retry
@@ -23,8 +23,7 @@ import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.util.UriComponentsBuilder
 import java.io.EOFException
 import java.time.Duration
-import java.util.*
-
+import java.util.UUID
 
 @Component
 class ArbeidsplassenKlient(
@@ -34,19 +33,19 @@ class ArbeidsplassenKlient(
     @Value("\${scope.forarbeidsplassen}") private val scopeMotArbeidsplassen: String
 ) {
 
-    fun hentStilling(stillingsId: String, somSystembruker: Boolean = false): Stilling {
+    fun hentStilling(stillingsId: String, somSystembruker: Boolean = false): ArbeidsplassenStillingDto {
         val url = "${hentBaseUrl()}/b2b/api/v1/ads/$stillingsId"
 
-        val hent: () -> ResponseEntity<Stilling> = {
+        val hent: () -> ResponseEntity<ArbeidsplassenStillingDto> = {
             restTemplate.exchange(
                 url,
                 HttpMethod.GET,
                 HttpEntity(null, if (somSystembruker) httpHeadersSomSystembruker() else httpHeaders()),
-                Stilling::class.java
+                ArbeidsplassenStillingDto::class.java
             )
         }
 
-        val hentMedFeilhåndtering: () -> Stilling = {
+        val hentMedFeilhåndtering: () -> ArbeidsplassenStillingDto = {
             try {
                 val respons = retry(hent)
                 respons.body ?: throw kunneIkkeTolkeBodyException()
@@ -98,16 +97,16 @@ class ArbeidsplassenKlient(
             log.info("Trigget resending av stillingsmelding fra Arbeidsplassen for stilling $stillingsid")
         }
 
-    fun hentStillingBasertPåUUID(uuid: String): Stilling? =
+    fun hentStillingBasertPåUUID(uuid: String): FrontendStilling? =
         timer("rekrutteringsbistand.stilling.arbeidsplassen.hentStillingBasertPåUUID.kall.tid") {
             val url = UriComponentsBuilder.fromHttpUrl("${hentBaseUrl()}/b2b/api/v1/ads").query("uuid=${uuid}")
                 .build()
                 .toString()
             try {
-                val response: ResponseEntity<Page<Stilling>> = restTemplate.exchange(url,
+                val response: ResponseEntity<Page<FrontendStilling>> = restTemplate.exchange(url,
                     HttpMethod.GET,
                     HttpEntity(null, httpHeadersSomSystembruker()),
-                    object : ParameterizedTypeReference<Page<Stilling>>() {})
+                    object : ParameterizedTypeReference<Page<FrontendStilling>>() {})
                 return@timer response.body?.content?.firstOrNull() ?: throw kunneIkkeTolkeBodyException()
 
             } catch (e: RestClientResponseException) {
@@ -125,13 +124,13 @@ class ArbeidsplassenKlient(
             }
         }
 
-    fun opprettStilling(stilling: OpprettStillingDto): Stilling =
+    fun opprettStilling(stilling: OpprettStillingDto): ArbeidsplassenStillingDto =
         timer("rekrutteringsbistand.stilling.arbeidsplassen.opprettStilling.kall.tid") {
             val url = "${hentBaseUrl()}/api/v1/ads?classify=true"
 
             try {
                 val response = restTemplate.exchange(
-                    url, HttpMethod.POST, HttpEntity(stilling, httpHeaders()), Stilling::class.java
+                    url, HttpMethod.POST, HttpEntity(stilling, httpHeaders()), ArbeidsplassenStillingDto::class.java
                 )
                 return@timer response.body ?: throw kunneIkkeTolkeBodyException()
 
@@ -140,7 +139,7 @@ class ArbeidsplassenKlient(
             }
         }
 
-    fun oppdaterStilling(stilling: Stilling, queryString: String?): Stilling =
+    fun oppdaterStilling(stilling: ArbeidsplassenStillingDto, queryString: String?): ArbeidsplassenStillingDto =
         timer("rekrutteringsbistand.stilling.arbeidsplassen.oppdaterStilling.kall.tid") {
             val url = "${hentBaseUrl()}/api/v1/ads/${stilling.uuid}"
 
@@ -149,7 +148,7 @@ class ArbeidsplassenKlient(
                     url + if (queryString != null) "?$queryString" else "",
                     HttpMethod.PUT,
                     HttpEntity(stilling, httpHeaders()),
-                    Stilling::class.java
+                    ArbeidsplassenStillingDto::class.java
                 )
                 return@timer response.body ?: throw kunneIkkeTolkeBodyException()
 
@@ -158,13 +157,20 @@ class ArbeidsplassenKlient(
             }
         }
 
-    fun slettStilling(stillingsId: String): Stilling =
+    fun slettStilling(stillingsId: String): FrontendStilling =
         timer("rekrutteringsbistand.stilling.arbeidsplassen.slettStilling.kall.tid") {
-            val url = "${hentBaseUrl()}/api/v1/ads/$stillingsId"
+            val uuid = try {
+                UUID.fromString(stillingsId)
+            } catch (_: IllegalArgumentException) {
+                throw ResponseStatusException(
+                    BAD_REQUEST, "Ugyldig stillingsId. Må være en gyldig UUID."
+                )
+            }
+            val url = "${hentBaseUrl()}/api/v1/ads/$uuid"
 
             try {
                 val response = restTemplate.exchange(
-                    url, HttpMethod.DELETE, HttpEntity(null, httpHeaders()), Stilling::class.java
+                    url, HttpMethod.DELETE, HttpEntity(null, httpHeaders()), FrontendStilling::class.java
                 )
                 return@timer response.body ?: throw kunneIkkeTolkeBodyException()
             } catch (e: UnknownContentTypeException) {
@@ -179,13 +185,13 @@ class ArbeidsplassenKlient(
     ): ResponseStatusException {
         val logMsg =
             "$melding. URL: $url, Status: ${exception.rawStatusCode}, Body: ${exception.responseBodyAsString}"
-        when (exception.rawStatusCode) {
+        when (exception.statusCode.value()) {
             NOT_FOUND.value() -> log.warn(logMsg, exception)
             PRECONDITION_FAILED.value() -> log.info(logMsg, exception)
             else -> log.error(logMsg, exception)
             // 412 får vi når noen prøver å endre en stilling, men en annen har endret stillingen samtidig. pam-ad sjekker “updated”-timestampen i databasen og sørger for at “updated”-timestampen som kommer inn ikke er eldre enn den som er lagret
         }
-        return ResponseStatusException(valueOf(exception.rawStatusCode), melding)
+        return ResponseStatusException(valueOf(exception.statusCode.value()), melding)
     }
 
     /**

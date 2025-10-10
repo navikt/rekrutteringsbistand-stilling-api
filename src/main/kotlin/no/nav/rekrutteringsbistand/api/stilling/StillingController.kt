@@ -16,7 +16,6 @@ import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingskategori
 import org.springframework.http.HttpStatus
 import org.springframework.transaction.annotation.Transactional
 
-
 @RestController
 @Protected
 class StillingController(private val stillingsinfoService: StillingsinfoService, private val stillingService: StillingService, private val tokenUtils: TokenUtils, private val authorizedPartyUtils: AuthorizedPartyUtils) {
@@ -41,7 +40,7 @@ class StillingController(private val stillingsinfoService: StillingsinfoService,
 
     @PutMapping("/rekrutteringsbistandstilling")
     fun oppdaterStilling(request: HttpServletRequest, @RequestBody rekrutteringsbistandStillingDto: OppdaterRekrutteringsbistandStillingDto): ResponseEntity<OppdaterRekrutteringsbistandStillingDto> {
-        val stillingskategori = stillingsinfoService.hentForStilling(
+        val stillingskategori = stillingsinfoService.hentStillingsinfo(
             Stillingsid(rekrutteringsbistandStillingDto.stilling.uuid)
         )?.stillingskategori ?: Stillingskategori.STILLING
         if(stillingskategori==Stillingskategori.FORMIDLING) {
@@ -54,7 +53,7 @@ class StillingController(private val stillingsinfoService: StillingsinfoService,
     }
 
     @DeleteMapping("/rekrutteringsbistandstilling/{stillingsId}")
-    fun slettRekrutteringsbistandStilling(@PathVariable(value = "stillingsId") stillingsId: String): ResponseEntity<Stilling> {
+    fun slettRekrutteringsbistandStilling(@PathVariable(value = "stillingsId") stillingsId: String): ResponseEntity<FrontendStilling> {
         tokenUtils.hentInnloggetVeileder().validerMinstEnAvRollene(Rolle.ARBEIDSGIVERRETTET)
         val slettetStilling = stillingService.slettRekrutteringsbistandStilling(stillingsId)
         return ok(slettetStilling)

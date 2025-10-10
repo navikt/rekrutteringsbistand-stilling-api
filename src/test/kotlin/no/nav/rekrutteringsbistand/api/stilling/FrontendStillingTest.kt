@@ -12,7 +12,7 @@ import org.mockito.Mockito.`when`
 import org.mockito.junit.MockitoJUnitRunner
 
 @RunWith(MockitoJUnitRunner::class)
-class StillingTest {
+class FrontendStillingTest {
 
     @Mock
     lateinit var tokenUtils: TokenUtils

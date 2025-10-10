@@ -62,10 +62,10 @@ class StillingControllerEkstern(
                         medium = stilling.medium,
                         businessName = stilling.businessName,
                         status = stilling.status,
-                        id = stilling.id,
                         uuid = stilling.uuid,
                         source = stilling.source,
-                        stillingskategori = rekrutteringsbistandStilling.stillingsinfo?.stillingskategori
+                        stillingskategori = rekrutteringsbistandStilling.stillingsinfo?.stillingskategori,
+                        annonsenr = stilling.annonsenr
                 )
         )
     }

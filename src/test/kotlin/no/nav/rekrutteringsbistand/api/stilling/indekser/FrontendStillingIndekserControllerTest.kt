@@ -23,7 +23,7 @@ import java.util.concurrent.TimeUnit
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
-class StillingIndekserControllerTest {
+class FrontendStillingIndekserControllerTest {
 
     @LocalServerPort
     var port = 0

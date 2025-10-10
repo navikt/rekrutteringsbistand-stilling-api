@@ -3,6 +3,8 @@ package no.nav.rekrutteringsbistand.api
 import no.nav.rekrutteringsbistand.api.arbeidsplassen.OpprettStillingAdministrationDto
 import no.nav.rekrutteringsbistand.api.autorisasjon.InnloggetVeileder
 import no.nav.rekrutteringsbistand.api.autorisasjon.Rolle
+import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteDto
+import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteStillingDto
 import no.nav.rekrutteringsbistand.api.stilling.*
 import no.nav.rekrutteringsbistand.api.stillingsinfo.*
 import java.time.LocalDateTime
@@ -20,18 +22,18 @@ object Testdata {
     private val styrkTittel = "Byggeleder"
     val styrk = Kategori(2148934, styrkCode, "STYRK08NAV", styrkTittel, null, null)
 
-    val enStilling = Stilling(
-        id = 1000,
+    val enStilling = FrontendStilling(
         uuid = UUID.randomUUID().toString(),
+        annonsenr = "1000",
         created = LocalDateTime.now().withNano(0),
-        createdBy = "nss-admin",
+        createdBy = "pam-rekrutteringsbistand",
         updated = LocalDateTime.now().withNano(0),
-        updatedBy = "nss-admin",
-        title = "testnss",
+        updatedBy = "pam-rekrutteringsbistand",
+        title = "Stilling uten valgt jobbtittel",
         status = "ACTIVE",
         privacy = "SHOW_ALL",
-        source = "ASS",
-        medium = "ASS",
+        source = "DIR",
+        medium = "DIR",
         reference = UUID.randomUUID().toString(),
         published = LocalDateTime.now().withNano(0),
         expires = LocalDateTime.now().withNano(0),
@@ -42,7 +44,8 @@ object Testdata {
         businessName = null,
         firstPublished = null,
         deactivatedByExpiry = null,
-        activationOnPublishingDate = null
+        activationOnPublishingDate = null,
+        versjon = null
     )
 
     val enOpprettStillingDto = OpprettStillingDto(
@@ -68,7 +71,7 @@ object Testdata {
         eierNavKontorEnhetId = "1234",
     )
 
-    val enOpprettetStilling = Stilling(
+    val enOpprettetStilling = FrontendStilling(
         title = "Ny stilling",
         createdBy = "pam-rekrutteringsbistand",
         updatedBy = "pam-rekrutteringsbistand",
@@ -82,7 +85,7 @@ object Testdata {
             comments = "",
             remarks = emptyList()
         ),
-        id = 1000,
+        annonsenr = "1000",
         uuid = UUID.randomUUID().toString(),
         created = LocalDateTime.now(),
         updated = LocalDateTime.now(),
@@ -103,10 +106,10 @@ object Testdata {
         status = "ACTIVE",
         employer = null,
         medium = null,
+        versjon = 1
     )
 
     val enAnnenStilling = enStilling.copy(
-        id = 1001,
         uuid = UUID.randomUUID().toString(),
         title = "En annen stilling"
     )
@@ -212,6 +215,11 @@ object Testdata {
         publisert = publishedFor3DagerSiden,
         publisertAvAdmin = publishedFor3DagerSiden.toString(),
         adminStatus = "DONE",
+    )
+
+    val enKandidatListeDto = KandidatlisteDto(
+        stillingsinfo = enStillingsinfo.asStillingsinfoDto(),
+        stilling = KandidatlisteStillingDto(enDirektemeldtStilling)
     )
 
     val stillingerSomSkalDeaktiveres = listOf(

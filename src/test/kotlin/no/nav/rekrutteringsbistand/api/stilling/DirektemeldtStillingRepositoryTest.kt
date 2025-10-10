@@ -38,7 +38,7 @@ class DirektemeldtStillingRepositoryTest {
     @Test
     fun `Skal kunne opprette 2 ulike annonser med forskjellig stillingsid`() {
         val stilling = enStilling
-        val stilling2 = enStilling.copy(id = 2000, uuid = UUID.randomUUID().toString(), title = "Stilling 2", reference = UUID.randomUUID().toString())
+        val stilling2 = enStilling.copy(uuid = UUID.randomUUID().toString(), title = "Stilling 2", reference = UUID.randomUUID().toString())
 
         val direktemeldtStilling1 = DirektemeldtStilling(
             UUID.fromString(stilling.uuid),
@@ -80,7 +80,7 @@ class DirektemeldtStillingRepositoryTest {
         assertEquals(hentetStilling1?.stillingsId, direktemeldtStilling1.stillingsId)
         assertEquals(hentetStilling2?.stillingsId, direktemeldtStilling2.stillingsId)
 
-        assertEquals("testnss", hentetStilling1?.innhold?.title)
+        assertEquals("Stilling uten valgt jobbtittel", hentetStilling1?.innhold?.title)
         assertEquals("Stilling 2", hentetStilling2?.innhold?.title)
     }
 
@@ -196,5 +196,17 @@ class DirektemeldtStillingRepositoryTest {
         }
 
         assertTrue(repository.hentUtgåtteStillingerFor6mndSidenSomErPending().isEmpty())
+    }
+
+    @Test
+    fun `settAnnonsenrFraDbId skal oppdatere annonsenr for en direktemeldt stilling`() {
+        val stilling = enDirektemeldtStilling
+        repository.lagreDirektemeldtStilling(stilling)
+
+        repository.settAnnonsenrFraDbId(stilling.stillingsId.toString())
+
+        val oppdatertStilling = repository.hentDirektemeldtStilling(stilling.stillingsId.toString())
+        assertNotNull(oppdatertStilling)
+        assertTrue(oppdatertStilling?.annonsenr?.startsWith("R") ?: false)
     }
 }

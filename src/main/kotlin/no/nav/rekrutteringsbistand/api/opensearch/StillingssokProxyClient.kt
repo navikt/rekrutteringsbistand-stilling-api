@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
-import no.nav.rekrutteringsbistand.api.stilling.Stilling
+import no.nav.rekrutteringsbistand.api.stilling.FrontendStilling
 import no.nav.rekrutteringsbistand.api.support.log
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
@@ -33,7 +33,7 @@ class StillingssokProxyClient(
         .followRedirects(HttpClient.Redirect.ALWAYS)
         .build()
 
-    fun hentStilling(stillingsId: String, somSystembruker: Boolean = false): Stilling {
+    fun hentStilling(stillingsId: String, somSystembruker: Boolean = false): FrontendStilling {
         val token = if(somSystembruker) {
             tokenUtils.hentSystemToken(stillingssokProxyScope)
         } else {

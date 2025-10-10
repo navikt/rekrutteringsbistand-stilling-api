@@ -1,14 +1,18 @@
 package no.nav.rekrutteringsbistand.api.stillingsinfo
 
-import no.nav.rekrutteringsbistand.api.RekrutteringsbistandStilling
 import no.nav.rekrutteringsbistand.api.arbeidsplassen.ArbeidsplassenKlient
+import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteDto
 import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteKlient
-import no.nav.rekrutteringsbistand.api.stilling.Stilling
+import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteStillingDto
+import no.nav.rekrutteringsbistand.api.stilling.DirektemeldtStilling
+import no.nav.rekrutteringsbistand.api.stilling.outbox.EventName
+import no.nav.rekrutteringsbistand.api.stilling.outbox.StillingOutboxService
 import no.nav.rekrutteringsbistand.api.support.log
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.server.ResponseStatusException
+import java.time.ZoneId
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -16,7 +20,8 @@ import java.util.concurrent.TimeUnit
 class StillingsinfoService(
     private val repo: StillingsinfoRepository,
     private val kandidatlisteKlient: KandidatlisteKlient,
-    private val arbeidsplassenKlient: ArbeidsplassenKlient
+    private val arbeidsplassenKlient: ArbeidsplassenKlient,
+    private val stillingOutboxService: StillingOutboxService
 ) {
 
     @Transactional
@@ -36,26 +41,37 @@ class StillingsinfoService(
         opprinneligStillingsinfo?.let { repo.oppdaterEier(it.stillingsinfoid, nyEier) } ?: repo.opprett(stillingsinfoMedNyEier)
 
         try {
-            val stilling = arbeidsplassenKlient.hentStilling(stillingsId.asString(), false)
+            val arbeidsplassenStilling = arbeidsplassenKlient.hentStilling(stillingsId.asString(), false)
 
-            val rekrutteringsbistandStilling = RekrutteringsbistandStilling(
-                stilling = stilling,
-                stillingsinfo = stillingsinfoMedNyEier.asStillingsinfoDto()
+            val direktemeldtStillingInnhold = arbeidsplassenStilling.toStilling().toDirektemeldtStillingInnhold()
+            val direktemeldtStilling = DirektemeldtStilling(
+                UUID.fromString(stillingsId.toString()),
+                direktemeldtStillingInnhold,
+                opprettet = arbeidsplassenStilling.created.atZone(ZoneId.of("Europe/Oslo")),
+                opprettetAv = arbeidsplassenStilling.createdBy,
+                sistEndretAv = arbeidsplassenStilling.updatedBy,
+                sistEndret = arbeidsplassenStilling.updated.atZone(ZoneId.of("Europe/Oslo")),
+                status = arbeidsplassenStilling.status,
+                annonsenr = arbeidsplassenStilling.id.toString(),
+                utløpsdato = arbeidsplassenStilling.expires?.atZone(ZoneId.of("Europe/Oslo")),
+                publisert = arbeidsplassenStilling.published?.atZone(ZoneId.of("Europe/Oslo")),
+                publisertAvAdmin = arbeidsplassenStilling.publishedByAdmin,
+                adminStatus = arbeidsplassenStilling.administration?.status
             )
 
-            kandidatlisteKlient.sendStillingOppdatert(rekrutteringsbistandStilling)
+            val kandidatListeDto = KandidatlisteDto(
+                stillingsinfo = stillingsinfoMedNyEier.asStillingsinfoDto(),
+                stilling = KandidatlisteStillingDto(direktemeldtStilling)
+            )
+            kandidatlisteKlient.sendStillingOppdatert(kandidatListeDto)
         } catch (e: Exception) {
             throw RuntimeException("Varsel til rekbis-kandidat-api om endring av eier for ekstern stilling feilet", e)
         }
-
-        arbeidsplassenKlient.triggResendingAvStillingsmeldingFraArbeidsplassen(stillingsId.asString())
+        stillingOutboxService.lagreMeldingIOutbox(stillingsId = UUID.fromString(stillingsId.toString()), eventName = EventName.INDEKSER_STILLINGSINFO)
         return stillingsinfoMedNyEier
     }
 
-    fun hentStillingsinfo(stilling: Stilling): Stillingsinfo? =
-        hentForStilling(Stillingsid(stilling.uuid))
-
-    fun hentForStilling(stillingId: Stillingsid): Stillingsinfo? =
+    fun hentStillingsinfo(stillingId: Stillingsid): Stillingsinfo? =
         repo.hentForStilling(stillingId)
 
     fun hentForStillinger(stillingIder: List<Stillingsid>): List<Stillingsinfo> {

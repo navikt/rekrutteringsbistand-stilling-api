@@ -1,6 +1,7 @@
 package no.nav.rekrutteringsbistand.api.stilling
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import no.nav.rekrutteringsbistand.api.arbeidsplassen.ArbeidsplassenStillingDto
 import no.nav.rekrutteringsbistand.api.arbeidsplassen.OpprettStillingAdministrationDto
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
 import no.nav.rekrutteringsbistand.api.stilling.Kategori.Companion.hentTittel
@@ -12,8 +13,8 @@ import java.time.ZonedDateTime
 import java.util.*
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class Stilling(
-    val id: Long,
+data class FrontendStilling(
+    val annonsenr: String = "",
     val uuid: String,
     val created: LocalDateTime,
     val createdBy: String,
@@ -40,7 +41,8 @@ data class Stilling(
     val businessName: String?,
     val firstPublished: Boolean?,
     val deactivatedByExpiry: Boolean?,
-    val activationOnPublishingDate: Boolean?
+    val activationOnPublishingDate: Boolean?,
+    val versjon: Int?
 ) {
     companion object {
         const val DEFAULT_EXPIRY_DAYS: Long = 30
@@ -93,15 +95,44 @@ data class Stilling(
         )
     }
 
-    fun copyMedBeregnetTitle(stillingskategori: Stillingskategori?): Stilling =
+    fun toArbeidsplassenDto(arbeidsplassenId: Long): ArbeidsplassenStillingDto {
+        return ArbeidsplassenStillingDto(
+            title = title,
+            createdBy = createdBy,
+            updatedBy = updatedBy,
+            privacy = privacy,
+            source = source,
+            administration = administration,
+            mediaList = mediaList,
+            contactList = contactList,
+            medium = medium,
+            employer = employer,
+            locationList = locationList,
+            categoryList = categoryList,
+            properties = properties,
+            businessName = businessName,
+            firstPublished = firstPublished,
+            deactivatedByExpiry = deactivatedByExpiry,
+            activationOnPublishingDate = activationOnPublishingDate,
+            id = arbeidsplassenId,
+            uuid = uuid,
+            created = created,
+            updated = updated,
+            status = status,
+            reference = reference,
+            published = published,
+            expires = expires,
+            location = location,
+            publishedByAdmin = publishedByAdmin
+        )
+    }
+
+    fun copyMedBeregnetTitle(stillingskategori: Stillingskategori?): FrontendStilling =
         when (stillingskategori) {
             Stillingskategori.JOBBMESSE ->
                 this.copy(title = "Invitasjon til jobbmesse")
 
-            null,
-            Stillingskategori.STILLING,
-            Stillingskategori.FORMIDLING,
-            Stillingskategori.ARBEIDSTRENING ->
+            null, Stillingskategori.STILLING, Stillingskategori.FORMIDLING, Stillingskategori.ARBEIDSTRENING ->
                 this.copy(title = hentInternEllerEksternTittel())
         }
 
@@ -431,9 +462,9 @@ data class DirektemeldtStilling(
     val publisertAvAdmin: String?,
     val adminStatus: String?
 ) {
-    fun toStilling(): Stilling {
-        return Stilling(
-            id = annonsenr.toLong(),
+    fun toStilling(): FrontendStilling {
+        return FrontendStilling(
+            annonsenr = annonsenr,
             uuid = stillingsId.toString(),
             created = opprettet.toLocalDateTime(),
             createdBy = opprettetAv,
@@ -459,7 +490,8 @@ data class DirektemeldtStilling(
             businessName = innhold.businessName,
             firstPublished = innhold.firstPublished,
             deactivatedByExpiry = innhold.deactivatedByExpiry,
-            activationOnPublishingDate = innhold.activationOnPublishingDate
+            activationOnPublishingDate = innhold.activationOnPublishingDate,
+            versjon = versjon
         )
     }
 }

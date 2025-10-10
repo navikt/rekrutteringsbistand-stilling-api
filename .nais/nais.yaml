@@ -45,6 +45,11 @@ spec:
         diskAutoresize: {{ disk_autoresize }}
         databases:
           - name: rekrutteringsbistand-stilling
+            users:
+              - name: bigquery_datastream
+        flags:
+          - name: cloudsql.logical_decoding
+            value: "on"
   azure:
     application:
       enabled: true
