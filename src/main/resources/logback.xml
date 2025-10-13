@@ -34,9 +34,12 @@
             </logger>
         </then>
     </if>
+    <appender name="OTEL" class="io.opentelemetry.instrumentation.logback.mdc.v1_0.OpenTelemetryAppender">
+        <appender-ref ref="consoleJsonAppender" />
+    </appender>
 
     <root level="INFO">
-        <appender-ref ref="consoleJsonAppender"/>
+        <appender-ref ref="OTEL"/>
     </root>
 
     <logger name="no.nav.rekrutteringsbistand.api" level="info"/>

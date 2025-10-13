@@ -5,7 +5,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.rekrutteringsbistand.api.stilling.StillingService
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsid
-import org.springframework.beans.factory.annotation.Autowired
+import no.nav.rekrutteringsbistand.api.support.log
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Profile
@@ -17,13 +17,23 @@ import org.springframework.stereotype.Component
 
 @Profile("!test")
 @Component
-class RapidApplikasjonImpl(
-    @Autowired private val context: ApplicationContext,
-    @Autowired private val environment: Environment,
-    @Autowired private val stillingService: StillingService,
-    ): Runnable, RapidApplikasjon {
+class RapidApplikasjonImpl constructor(
+    private val context: ApplicationContext,
+    private val environment: Environment,
+    private val stillingService: StillingService
+) : Runnable, RapidApplikasjon {
 
-    private val rapidsConnection = RapidApplication.create(environment.toMap())
+    private lateinit var rapidsConnection: RapidsConnection
+
+    init {
+        try {
+            rapidsConnection = RapidApplication.create(environment.toMap())
+            log.info("RapidApplikasjonImpl har blitt initialisert")
+        } catch (e: Exception) {
+            log.error("Exception in RapidApplikasjonImpl constructor", e)
+            throw e
+        }
+    }
 
     companion object {
         fun <T: RapidsConnection> T.registrerLyttere(
@@ -51,3 +61,4 @@ private fun Environment.toMap() = if (this is AbstractEnvironment)
     this.propertySources.filterIsInstance<MapPropertySource>()
         .flatMap { it.source.map { (key, value) -> key to value.toString() } }.toMap()
 else emptyMap<String, String>()
+

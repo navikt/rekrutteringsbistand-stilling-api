@@ -12,10 +12,10 @@ spec:
     - {{ ingress }}
   liveness:
     path: /internal/actuator/health
-    initialDelay: 60
+    initialDelay: 120
   readiness:
     path: /internal/actuator/health
-    initialDelay: 60
+    initialDelay: 120
   replicas:
     max: {{ max_replicas }}
     min: {{ min_replicas }}
@@ -29,6 +29,15 @@ spec:
   prometheus:
     enabled: true
     path: /internal/actuator/prometheus
+  observability:
+    logging:
+      destinations:
+        - id: loki
+        - id: elastic
+      enabled: true
+    autoInstrumentation:
+      enabled: true
+      runtime: java
   gcp:
     sqlInstances:
       - type: POSTGRES_16
@@ -104,9 +113,3 @@ spec:
       value: {{ ad_gruppe_arbeidsgiverrettet }}
     - name: AD_GRUPPE_UTVIKLER
       value: {{ ad_gruppe_utvikler }}
-  observability:
-    logging:
-      destinations:
-        - id: loki
-        - id: elastic
-      enabled: true
