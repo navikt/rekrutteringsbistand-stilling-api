@@ -72,7 +72,6 @@ spec:
     inbound:
       rules:
         - application: vis-stilling
-        - application: rekrutteringsbistand-stilling-indekser
         - application: rekrutteringsbistand
         - application: rekrutteringsbistand-frontend
         - application: rekrutteringsbistand-kandidat-api
@@ -97,8 +96,6 @@ spec:
       value: {{ vis_stilling_azp_name }}
     - name: KANDIDATVARSEL_AZP_NAME
       value: {{ kandidatvarsel_azp_name }}
-    - name: REKRUTTERINGSBISTAND_STILLING_INDEKSER_AZP_NAME
-      value: {{ rekrutteringsbistand_stilling_indekser_azp_name }}
     - name: TOI_STILLING_INDEKSER_AZP_NAME
       value: {{ toi_stilling_indekser_azp_name }}
     - name: KAFKA_RAPID_TOPIC
