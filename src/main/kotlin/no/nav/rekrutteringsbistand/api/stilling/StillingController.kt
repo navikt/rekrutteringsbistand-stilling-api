@@ -13,8 +13,6 @@ import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsid
 import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoService
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingskategori
-import org.springframework.http.HttpStatus
-import org.springframework.transaction.annotation.Transactional
 
 @RestController
 @Protected
