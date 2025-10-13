@@ -13,8 +13,6 @@ import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsid
 import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoService
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingskategori
-import org.springframework.http.HttpStatus
-import org.springframework.transaction.annotation.Transactional
 
 @RestController
 @Protected
@@ -63,18 +61,5 @@ class StillingController(private val stillingsinfoService: StillingsinfoService,
     fun hentRekrutteringsbistandStilling(@PathVariable uuid: String): ResponseEntity<RekrutteringsbistandStilling> {
         // TODO styrk(kan tas til slutt): Interne stillinger burde ikke sende tittel.
         return ok(stillingService.hentRekrutteringsbistandStilling(uuid))
-    }
-
-    // Endepunkt som kan brukes i rekrutteringsbistand-stilling-indekser
-    @PostMapping("/rekrutteringsbistandstilling/lagre")
-    @Transactional
-    fun lagreStilling(@RequestBody stillingsId: String) : ResponseEntity<String> {
-        if (!authorizedPartyUtils.kallKommerFraStillingIndekser()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
-        }
-        // hent stillinger fra ad-api og lagre
-
-        stillingService.lagreDirektemeldtStilling(stillingsId)
-        return ok("Stilling lagret")
     }
 }
