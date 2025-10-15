@@ -171,15 +171,6 @@ class StillingService(
         val eksisterendeStillingIDb = direktemeldtStillingService.hentDirektemeldtStilling(id.asString())
         val eksisterendeStillingsinfo: Stillingsinfo? = stillingsinfoService.hentStillingsinfo(id)
 
-        // Sjekk om stillingen skal sendes til arbeidsplassen
-        if (eksisterendeStillingsinfo?.stillingskategori != Stillingskategori.FORMIDLING && (dto.stilling.privacy == "SHOW_ALL"
-            || (eksisterendeStillingIDb?.innhold?.privacy == "SHOW_ALL" && dto.stilling.privacy == "INTERNAL_NOT_SHOWN"))) {
-            stillingOutboxService.lagreMeldingIOutbox(
-                stillingsId = id.verdi,
-                eventName = EventName.PUBLISER_ELLER_AVPUBLISER_TIL_ARBEIDSPLASSEN
-            )
-        }
-
         // Dette vil hjelpe til med å fylle ut navkontor for stillinger som ikke allerede har det satt hvis de blir oppdatert
         if (eksisterendeStillingsinfo != null && dto.stillingsinfo?.eierNavKontorEnhetId != null) {
             stillingsinfoService.endreNavKontor(
@@ -228,6 +219,15 @@ class StillingService(
                 stilling.toArbeidsplassenDto(existerendeStilling.id).copy(updated = existerendeStilling.updated,), queryString
             )
             log.info("Oppdaterte stilling hos Arbeidsplassen med uuid: ${dto.stilling.uuid}")
+        } else {
+            // Sjekk om stillingen skal sendes til arbeidsplassen
+            if (eksisterendeStillingsinfo?.stillingskategori != Stillingskategori.FORMIDLING && (dto.stilling.privacy == "SHOW_ALL"
+                        || (eksisterendeStillingIDb?.innhold?.privacy == "SHOW_ALL" && dto.stilling.privacy == "INTERNAL_NOT_SHOWN"))) {
+                stillingOutboxService.lagreMeldingIOutbox(
+                    stillingsId = id.verdi,
+                    eventName = EventName.PUBLISER_ELLER_AVPUBLISER_TIL_ARBEIDSPLASSEN
+                )
+            }
         }
 
         val oppdatertStillingsinfo: Stillingsinfo? = stillingsinfoService.hentStillingsinfo(id)
