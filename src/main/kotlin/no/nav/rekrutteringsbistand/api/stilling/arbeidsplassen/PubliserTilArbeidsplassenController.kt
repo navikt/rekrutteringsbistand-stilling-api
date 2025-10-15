@@ -35,7 +35,7 @@ class PubliserTilArbeidsplassenController(
             return ResponseEntity("Fikk ikke til å konvertere til uuid", HttpStatus.BAD_REQUEST)
         }
         val stillingsinfo = stillingsinfoService.hentStillingsinfo(Stillingsid(uuid))
-        if(stillingsinfo?.stillingskategori == Stillingskategori.FORMIDLING) {
+        if (stillingsinfo?.stillingskategori == Stillingskategori.FORMIDLING) {
             throw IllegalArgumentException("Kan ikke sende formidling/etterregistrering til arbeidsplassen")
         }
 
