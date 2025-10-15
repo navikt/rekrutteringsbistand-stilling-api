@@ -173,7 +173,7 @@ class StillingService(
 
         // Sjekk om stillingen skal sendes til arbeidsplassen
         if (eksisterendeStillingsinfo?.stillingskategori != Stillingskategori.FORMIDLING && (dto.stilling.privacy == "SHOW_ALL"
-            || eksisterendeStillingIDb?.innhold?.privacy == "SHOW_ALL" && dto.stilling.privacy == "INTERNAL_NOT_SHOWN")) {
+            || (eksisterendeStillingIDb?.innhold?.privacy == "SHOW_ALL" && dto.stilling.privacy == "INTERNAL_NOT_SHOWN"))) {
             stillingOutboxService.lagreMeldingIOutbox(
                 stillingsId = id.verdi,
                 eventName = EventName.PUBLISER_ELLER_AVPUBLISER_TIL_ARBEIDSPLASSEN
