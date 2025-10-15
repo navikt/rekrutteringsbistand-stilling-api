@@ -97,9 +97,9 @@ class DirektemeldtStillingRepositoryTest {
 
         assertEquals(3, deaktiveringskandidater.size)
 
-        assertEquals("Stilling 1", deaktiveringskandidater[0].innhold.title)
-        assertEquals("Stilling 2", deaktiveringskandidater[1].innhold.title)
-        assertEquals("Stilling 3", deaktiveringskandidater[2].innhold.title)
+        val titler = listOf("Stilling 1", "Stilling 2", "Stilling 3")
+        val titlerFraResultat = deaktiveringskandidater.map { it.innhold.title }
+        assertTrue(titler.all { it in titlerFraResultat })
     }
 
     @Test

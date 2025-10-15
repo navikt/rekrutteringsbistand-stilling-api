@@ -102,7 +102,7 @@ data class OpprettStillingDto(
         ),
     )
 
-     fun toDirektemeldtStillingInnhold(stillingsId: Stillingsid): DirektemeldtStillingInnhold {
+     fun toDirektemeldtStillingInnhold(reference: String): DirektemeldtStillingInnhold {
         return DirektemeldtStillingInnhold(
             title = title,
             administration = administration.let {
@@ -118,7 +118,7 @@ data class OpprettStillingDto(
             privacy = privacy,
             source = source,
             medium = medium,
-            reference = stillingsId.asString(),
+            reference = reference,
             employer = employer?.toDirektemeldtStillingArbeidsgiver(),
             location = null,
             locationList = locationList ?: emptyList(),

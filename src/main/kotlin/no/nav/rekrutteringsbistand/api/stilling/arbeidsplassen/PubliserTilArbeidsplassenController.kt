@@ -4,6 +4,8 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import no.nav.rekrutteringsbistand.api.hendelser.RapidApplikasjon
 import no.nav.rekrutteringsbistand.api.stilling.StillingService
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsid
+import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoService
+import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingskategori
 import no.nav.rekrutteringsbistand.api.support.log
 import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.http.HttpStatus
@@ -20,6 +22,7 @@ import java.util.UUID
 @Unprotected
 class PubliserTilArbeidsplassenController(
     val stillingService: StillingService,
+    val stillingsinfoService: StillingsinfoService,
     val rapidApplikasjon: RapidApplikasjon
 ) {
 
@@ -31,9 +34,13 @@ class PubliserTilArbeidsplassenController(
         } catch (e: Exception) {
             return ResponseEntity("Fikk ikke til å konvertere til uuid", HttpStatus.BAD_REQUEST)
         }
+        val stillingsinfo = stillingsinfoService.hentStillingsinfo(Stillingsid(uuid))
+        if (stillingsinfo?.stillingskategori == Stillingskategori.FORMIDLING) {
+            throw IllegalArgumentException("Kan ikke sende formidling/etterregistrering til arbeidsplassen")
+        }
 
         val stilling = stillingService.hentDirektemeldtStilling(uuid.toString())
-        val packet = JsonMessage.newMessage(eventName = "publiserTilArbeidsplassen")
+        val packet = JsonMessage.newMessage(eventName = "publiserEllerAvpubliserTilArbeidsplassen")
 
         packet["direktemeldtStilling"] = stilling
         packet["stillingsId"] = uuid.toString()

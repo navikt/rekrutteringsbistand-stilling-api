@@ -12,13 +12,14 @@ import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteKlient
 import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteStillingDto
 import no.nav.rekrutteringsbistand.api.opensearch.StillingssokProxyClient
 import no.nav.rekrutteringsbistand.api.stilling.FrontendStilling.Companion.DEFAULT_EXPIRY_DAYS
+import no.nav.rekrutteringsbistand.api.stilling.outbox.EventName
+import no.nav.rekrutteringsbistand.api.stilling.outbox.StillingOutboxService
 import no.nav.rekrutteringsbistand.api.stillingsinfo.*
 import no.nav.rekrutteringsbistand.api.support.log
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.server.ResponseStatusException
-import java.time.Duration
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
@@ -33,7 +34,8 @@ class StillingService(
     val arbeidsplassenKlient: ArbeidsplassenKlient,
     val direktemeldtStillingService: DirektemeldtStillingService,
     val stillingssokProxyClient: StillingssokProxyClient,
-    val geografiService: GeografiService
+    val geografiService: GeografiService,
+    val stillingOutboxService: StillingOutboxService,
 ) {
     fun hentRekrutteringsbistandStilling(
         stillingsId: String,
@@ -78,45 +80,42 @@ class StillingService(
         val populertGeografi = populerGeografi(opprettStilling.employer?.location)
         var stilling = opprettStilling.copy(employer = opprettStilling.employer?.copy(location = populertGeografi))
 
-        val opprettetStillingArbeidsplassen = arbeidsplassenKlient.opprettStilling(stilling)
-        log.info("Opprettet stilling hos Arbeidsplassen med uuid: ${opprettetStillingArbeidsplassen.uuid}")
-        val stillingsId = Stillingsid(opprettetStillingArbeidsplassen.uuid)
-
         if(stilling.medium == null) {
             stilling = stilling.copy(medium = "DIR")
         }
 
         // Opprett stilling i db med samme uuid som arbeidsplassen
         val opprettet = ZonedDateTime.of(LocalDateTime.now(), ZoneId.of("Europe/Oslo"))
+        val uuid = UUID.randomUUID()
         direktemeldtStillingService.lagreDirektemeldtStilling(
             DirektemeldtStilling(
-                stillingsId = stillingsId.verdi,
-                innhold = stilling.toDirektemeldtStillingInnhold(stillingsId),
+                stillingsId = uuid,
+                innhold = stilling.toDirektemeldtStillingInnhold(uuid.toString()),
                 opprettet = opprettet,
                 opprettetAv = stilling.createdBy,
                 sistEndretAv = stilling.updatedBy,
                 sistEndret = opprettet,
                 status = "INACTIVE",
-                annonsenr = stillingsId.verdi.toString(),
+                annonsenr = uuid.toString(),
                 utløpsdato = if (stillingskategori == Stillingskategori.FORMIDLING) opprettet else LocalDateTime.now().plusDays(DEFAULT_EXPIRY_DAYS).atZone(ZoneId.of("Europe/Oslo")),
                 publisert = opprettet,
                 publisertAvAdmin = null,
                 adminStatus = stilling.administration.status
             )
         )
-        log.info("Opprettet stilling i databasen med uuid: ${opprettetStillingArbeidsplassen.uuid}")
-        direktemeldtStillingService.settAnnonsenrFraDbId(stillingsId.asString())
-        val direktemeldtStillingFraDb = direktemeldtStillingService.hentDirektemeldtStilling(stillingsId)!!
+        log.info("Opprettet stilling i databasen med uuid: ${uuid}")
+        direktemeldtStillingService.settAnnonsenrFraDbId(uuid.toString())
+        val direktemeldtStillingFraDb = direktemeldtStillingService.hentDirektemeldtStilling(uuid.toString())!!
 
         stillingsinfoService.opprettStillingsinfo(
-            stillingsId = stillingsId,
+            stillingsId = Stillingsid(uuid),
             stillingskategori = stillingskategori,
             eierNavident = eierNavident,
             eierNavn = eierNavn,
             eierNavKontorEnhetId = eierNavKontorEnhetId,
         )
 
-        val stillingsinfo = stillingsinfoService.hentStillingsinfo(Stillingsid(opprettetStillingArbeidsplassen.uuid))
+        val stillingsinfo = stillingsinfoService.hentStillingsinfo(Stillingsid(uuid))
 
         return RekrutteringsbistandStilling(
             stilling = direktemeldtStillingFraDb.toStilling(),
@@ -131,6 +130,7 @@ class StillingService(
     }
 
     fun kopierStilling(stillingsId: String): RekrutteringsbistandStilling {
+        log.info("Kopierer stilling med uuid: $stillingsId")
         val eksisterendeRekrutteringsbistandStilling = hentRekrutteringsbistandStilling(stillingsId)
         val eksisterendeStilling = eksisterendeRekrutteringsbistandStilling.stilling
         val kopi = eksisterendeStilling.toKopiertStilling(tokenUtils)
@@ -168,7 +168,17 @@ class StillingService(
         loggEventuellOvertagelse(dto)
 
         val id = Stillingsid(dto.stilling.uuid)
+        val eksisterendeStillingIDb = direktemeldtStillingService.hentDirektemeldtStilling(id.asString())
         val eksisterendeStillingsinfo: Stillingsinfo? = stillingsinfoService.hentStillingsinfo(id)
+
+        // Sjekk om stillingen skal sendes til arbeidsplassen
+        if (eksisterendeStillingsinfo?.stillingskategori != Stillingskategori.FORMIDLING && (dto.stilling.privacy == "SHOW_ALL"
+            || (eksisterendeStillingIDb?.innhold?.privacy == "SHOW_ALL" && dto.stilling.privacy == "INTERNAL_NOT_SHOWN"))) {
+            stillingOutboxService.lagreMeldingIOutbox(
+                stillingsId = id.verdi,
+                eventName = EventName.PUBLISER_ELLER_AVPUBLISER_TIL_ARBEIDSPLASSEN
+            )
+        }
 
         // Dette vil hjelpe til med å fylle ut navkontor for stillinger som ikke allerede har det satt hvis de blir oppdatert
         if (eksisterendeStillingsinfo != null && dto.stillingsinfo?.eierNavKontorEnhetId != null) {
@@ -210,21 +220,24 @@ class StillingService(
         log.info("Oppdaterte stilling i databasen med uuid: ${dto.stilling.uuid}")
         val direktemeldtStillingFraDb = direktemeldtStillingService.hentDirektemeldtStilling(id.asString())!!
 
-        // Hent stilling før den oppdateres, da det er en OptimisticLocking strategi på 'updated' feltet hos Arbeidsplassen
-        val existerendeStilling = arbeidsplassenKlient.hentStilling(dto.stilling.uuid)
-        val oppdatertStilling = arbeidsplassenKlient.oppdaterStilling(stilling.toArbeidsplassenDto(existerendeStilling.id).copy(
-            id = existerendeStilling.id,
-            updated = existerendeStilling.updated,
-        ), queryString)
+        if (PubliserteArbeidsplassenStillinger.erPublisertPåArbeidsplassenViaRestApi(direktemeldtStillingFraDb.stillingsId)) {
+            log.info("Stillingen er publisert på arbeidsplassen, oppdaterer stilling der med uuid: ${dto.stilling.uuid}")
+            // Hent stilling før den oppdateres, da det er en OptimisticLocking strategi på 'updated' feltet hos Arbeidsplassen
+            val existerendeStilling = arbeidsplassenKlient.hentStilling(dto.stilling.uuid)
+            arbeidsplassenKlient.oppdaterStilling(
+                stilling.toArbeidsplassenDto(existerendeStilling.id).copy(updated = existerendeStilling.updated,), queryString
+            )
+            log.info("Oppdaterte stilling hos Arbeidsplassen med uuid: ${dto.stilling.uuid}")
+        }
+
         val oppdatertStillingsinfo: Stillingsinfo? = stillingsinfoService.hentStillingsinfo(id)
-        log.info("Oppdaterte stilling hos Arbeidsplassen med uuid: ${dto.stilling.uuid}")
 
         return OppdaterRekrutteringsbistandStillingDto(
             stilling = direktemeldtStillingFraDb.toStilling(),
             stillingsinfoid = eksisterendeStillingsinfo?.stillingsinfoid?.asString(),
             stillingsinfo = oppdatertStillingsinfo?.asStillingsinfoDto(),
         ).also {
-            if (oppdatertStilling.source.equals("DIR", ignoreCase = false)) {
+            if (direktemeldtStillingFraDb.innhold.source.equals("DIR", ignoreCase = false)) {
                 val kandidatListeDto = KandidatlisteDto(
                     stillingsinfo = eksisterendeStillingsinfo?.asStillingsinfoDto(),
                     stilling = KandidatlisteStillingDto(direktemeldtStillingFraDb)
@@ -235,11 +248,11 @@ class StillingService(
     }
 
     private fun loggEventuellOvertagelse(dto: OppdaterRekrutteringsbistandStillingDto) {
-        val gammelStilling = arbeidsplassenKlient.hentStilling(dto.stilling.uuid)
-        val gammelEier = gammelStilling.administration?.navIdent
+        val gammelStilling = direktemeldtStillingService.hentDirektemeldtStilling(dto.stilling.uuid)
+        val gammelEier = gammelStilling?.innhold?.administration?.navIdent
         val nyEier = dto.stilling.administration?.navIdent
         if (!nyEier.equals(gammelEier)) {
-            AuditLogg.loggOvertattStilling(navIdent = nyEier ?: "", forrigeEier=gammelEier, stillingsid=gammelStilling.uuid)
+            AuditLogg.loggOvertattStilling(navIdent = nyEier ?: "", forrigeEier=gammelEier, stillingsid=gammelStilling?.stillingsId.toString())
         }
     }
 
@@ -254,13 +267,22 @@ class StillingService(
 
         kandidatlisteKlient.varsleOmSlettetStilling(Stillingsid(stillingsId))
 
-        direktemeldtStillingService.hentDirektemeldtStilling(stillingsId)?.let { dbStilling ->
-            direktemeldtStillingService.lagreDirektemeldtStilling(dbStilling.copy(
-                status = "DELETED",
-                sistEndret = ZonedDateTime.now(ZoneId.of("Europe/Oslo"))))
+        val direktemeldtStilling = direktemeldtStillingService.hentDirektemeldtStilling(stillingsId)
+            ?: throw ResponseStatusException(
+                HttpStatus.BAD_REQUEST, "Stilling med id $stillingsId finnes ikke i databasen."
+            )
+
+        val slettetStilling = direktemeldtStilling.copy(
+            status = "DELETED",
+            sistEndret = ZonedDateTime.now(ZoneId.of("Europe/Oslo"))
+        )
+        direktemeldtStillingService.lagreDirektemeldtStilling(slettetStilling)
+
+        if (PubliserteArbeidsplassenStillinger.erPublisertPåArbeidsplassenViaRestApi(direktemeldtStilling.stillingsId)) {
+            arbeidsplassenKlient.slettStilling(stillingsId)
         }
 
-        return arbeidsplassenKlient.slettStilling(stillingsId)
+        return slettetStilling.toStilling()
     }
 
     fun hentDirektemeldtStilling(stillingsId: String): DirektemeldtStilling {

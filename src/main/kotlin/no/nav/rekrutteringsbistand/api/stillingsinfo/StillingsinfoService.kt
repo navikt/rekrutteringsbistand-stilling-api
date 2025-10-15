@@ -1,9 +1,9 @@
 package no.nav.rekrutteringsbistand.api.stillingsinfo
 
-import no.nav.rekrutteringsbistand.api.arbeidsplassen.ArbeidsplassenKlient
 import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteDto
 import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteKlient
 import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteStillingDto
+import no.nav.rekrutteringsbistand.api.opensearch.StillingssokProxyClient
 import no.nav.rekrutteringsbistand.api.stilling.DirektemeldtStilling
 import no.nav.rekrutteringsbistand.api.stilling.outbox.EventName
 import no.nav.rekrutteringsbistand.api.stilling.outbox.StillingOutboxService
@@ -20,9 +20,9 @@ import java.util.concurrent.TimeUnit
 class StillingsinfoService(
     private val repo: StillingsinfoRepository,
     private val kandidatlisteKlient: KandidatlisteKlient,
-    private val arbeidsplassenKlient: ArbeidsplassenKlient,
-    private val stillingOutboxService: StillingOutboxService
-) {
+    private val stillingOutboxService: StillingOutboxService,
+    private val stillingssokProxyClient: StillingssokProxyClient,
+    ) {
 
     @Transactional
     fun overtaEierskapForEksternStillingOgKandidatliste(stillingsId: Stillingsid, nyEier: Eier): Stillingsinfo {
@@ -41,18 +41,18 @@ class StillingsinfoService(
         opprinneligStillingsinfo?.let { repo.oppdaterEier(it.stillingsinfoid, nyEier) } ?: repo.opprett(stillingsinfoMedNyEier)
 
         try {
-            val arbeidsplassenStilling = arbeidsplassenKlient.hentStilling(stillingsId.asString(), false)
+            val arbeidsplassenStilling = stillingssokProxyClient.hentStilling(stillingsId.asString())
+            val direktemeldtStillingInnhold = arbeidsplassenStilling.toDirektemeldtStillingInnhold()
 
-            val direktemeldtStillingInnhold = arbeidsplassenStilling.toStilling().toDirektemeldtStillingInnhold()
             val direktemeldtStilling = DirektemeldtStilling(
-                UUID.fromString(stillingsId.toString()),
-                direktemeldtStillingInnhold,
+                stillingsId = UUID.fromString(stillingsId.toString()),
+                innhold = direktemeldtStillingInnhold,
                 opprettet = arbeidsplassenStilling.created.atZone(ZoneId.of("Europe/Oslo")),
                 opprettetAv = arbeidsplassenStilling.createdBy,
                 sistEndretAv = arbeidsplassenStilling.updatedBy,
                 sistEndret = arbeidsplassenStilling.updated.atZone(ZoneId.of("Europe/Oslo")),
                 status = arbeidsplassenStilling.status,
-                annonsenr = arbeidsplassenStilling.id.toString(),
+                annonsenr = arbeidsplassenStilling.annonsenr,
                 utløpsdato = arbeidsplassenStilling.expires?.atZone(ZoneId.of("Europe/Oslo")),
                 publisert = arbeidsplassenStilling.published?.atZone(ZoneId.of("Europe/Oslo")),
                 publisertAvAdmin = arbeidsplassenStilling.publishedByAdmin,

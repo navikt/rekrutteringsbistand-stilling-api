@@ -6,7 +6,6 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.options
-import org.mockito.kotlin.whenever
 import no.nav.rekrutteringsbistand.api.OppdaterRekrutteringsbistandStillingDto
 import no.nav.rekrutteringsbistand.api.TestRepository
 import no.nav.rekrutteringsbistand.api.Testdata
@@ -18,34 +17,31 @@ import no.nav.rekrutteringsbistand.api.config.utvikler
 import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteKlient
 import no.nav.rekrutteringsbistand.api.standardsøk.LagreStandardsøkDto
 import no.nav.rekrutteringsbistand.api.standardsøk.StandardsøkRepository
-import no.nav.rekrutteringsbistand.api.stilling.Page
+import no.nav.rekrutteringsbistand.api.stilling.DirektemeldtStillingRepository
 import no.nav.rekrutteringsbistand.api.stilling.FrontendStilling
+import no.nav.rekrutteringsbistand.api.stilling.Page
 import no.nav.rekrutteringsbistand.api.stillingsinfo.*
 import no.nav.rekrutteringsbistand.api.stillingsinfo.indekser.BulkStillingsinfoInboundDto
 import no.nav.rekrutteringsbistand.api.support.toMultiValueMap
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.assertj.core.api.Assertions
-import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.*
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mockito
+import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.http.*
-import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpHeaders.AUTHORIZATION
-import org.springframework.http.HttpMethod
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.reactive.server.StatusAssertions
 import org.springframework.test.web.reactive.server.WebTestClient
+import java.util.UUID
 
 private val objectMapper: ObjectMapper =
     ObjectMapper().registerModule(JavaTimeModule()).disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
@@ -80,6 +76,9 @@ class TilgangTest {
     @Autowired
     private lateinit var stillingsinfoRepository: StillingsinfoRepository
 
+    @Autowired
+    private lateinit var direktemeldtStillingRepository: DirektemeldtStillingRepository
+
     private lateinit var stubber: Stubber
 
     private val restTemplate = TestRestTemplate()
@@ -96,6 +95,7 @@ class TilgangTest {
         stubber.resetAll()
         Mockito.reset(kandidatlisteKlient, azureKlient)
         repository.slettAlt()
+        direktemeldtStillingRepository.lagreDirektemeldtStilling(Testdata.enDirektemeldtStilling.copy(stillingsId = UUID.fromString(Testdata.enStilling.uuid)))
     }
 
     @AfterAll
@@ -317,7 +317,7 @@ private class Kall(private val webClient: WebTestClient, private val mockLogin: 
         }
 
         private fun oppdaterStilling(rolle: TestRolle, stillingskategori: Stillingskategori): StatusAssertions {
-            val stilling = Testdata.enStilling
+            val stilling = Testdata.enStilling.copy(versjon = 1)
             val stillingsInfo = Testdata.enStillingsinfo.copy(stillingskategori = stillingskategori)
             stubber.mockOppdaterStilling(stilling)
             stubber.mockHentStilling(stilling)
@@ -339,6 +339,7 @@ private class Kall(private val webClient: WebTestClient, private val mockLogin: 
         val overtaEierskapForEksternStillingOgKandidatliste: EndepunktHandler = { rolle ->
             val stilling = Testdata.enStilling
             stubber.mockHentStilling(stilling)
+            stubber.mockHentStillingOpenSearch(stilling)
             stubber.mockOppdaterStilling(stilling)
             put(
                 stillingInfoPath,
@@ -521,19 +522,6 @@ private class Stubber(
                     WireMock.aResponse().withStatus(200).withHeader(HttpHeaders.CONNECTION, "close") // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                         .withBody(objectMapper.writeValueAsString(stilling))
-                )
-        )
-    }
-
-    fun mockHentStillingMedAnnonseNr() {
-        wireMock.stubFor(
-            WireMock.get(WireMock.urlPathMatching("/b2b/api/v1/ads"))
-                .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
-                .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE)).withHeader(AUTHORIZATION, WireMock.matching("Bearer .*"))
-                .willReturn(
-                    WireMock.aResponse().withStatus(200).withHeader(HttpHeaders.CONNECTION, "close") // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
-                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                        .withBody(objectMapper.writeValueAsString(Page(content = listOf(Testdata.enStilling), totalPages = 1, totalElements = 1)))
                 )
         )
     }

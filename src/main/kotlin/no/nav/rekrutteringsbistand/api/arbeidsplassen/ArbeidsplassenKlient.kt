@@ -80,65 +80,6 @@ class ArbeidsplassenKlient(
         )
     }
 
-    /**
-     * Dette er en "hack" for å sørge for at stillingssøket vårt alltid er oppdatert
-     * med riktig stillingsinfo.
-     *
-     * Vi henter vi en stilling fra Arbeidsplassen og sender den tilbake til dem.
-     * Dette gjør at de sender en ny Kafka-melding med stillingen. Vi lytter på denne
-     * meldingen i stilling-indekseren vår, som vil hente oppdatert stillingsinfo og
-     * oppdaterer indeksen.
-     */
-    fun triggResendingAvStillingsmeldingFraArbeidsplassen(stillingsid: String) =
-        timer("rekrutteringsbistand.stilling.arbeidsplassen.triggResendingAvStillingsmeldingFraArbeidsplassen.kall.tid") {
-            val stilling = hentStilling(stillingsid)
-            oppdaterStilling(stilling, null)
-
-            log.info("Trigget resending av stillingsmelding fra Arbeidsplassen for stilling $stillingsid")
-        }
-
-    fun hentStillingBasertPåUUID(uuid: String): FrontendStilling? =
-        timer("rekrutteringsbistand.stilling.arbeidsplassen.hentStillingBasertPåUUID.kall.tid") {
-            val url = UriComponentsBuilder.fromHttpUrl("${hentBaseUrl()}/b2b/api/v1/ads").query("uuid=${uuid}")
-                .build()
-                .toString()
-            try {
-                val response: ResponseEntity<Page<FrontendStilling>> = restTemplate.exchange(url,
-                    HttpMethod.GET,
-                    HttpEntity(null, httpHeadersSomSystembruker()),
-                    object : ParameterizedTypeReference<Page<FrontendStilling>>() {})
-                return@timer response.body?.content?.firstOrNull() ?: throw kunneIkkeTolkeBodyException()
-
-            } catch (e: RestClientResponseException) {
-                throw svarMedFeilmelding(
-                    "Klarte ikke hente stillingen med uuid $uuid fra Arbeidsplassen",
-                    url,
-                    e
-                )
-            } catch (e: UnknownContentTypeException) {
-                throw svarMedFeilmelding(
-                    "Klarte ikke hente stillingen med uuid $uuid fra Arbeidsplassen",
-                    url,
-                    e
-                )
-            }
-        }
-
-    fun opprettStilling(stilling: OpprettStillingDto): ArbeidsplassenStillingDto =
-        timer("rekrutteringsbistand.stilling.arbeidsplassen.opprettStilling.kall.tid") {
-            val url = "${hentBaseUrl()}/api/v1/ads?classify=true"
-
-            try {
-                val response = restTemplate.exchange(
-                    url, HttpMethod.POST, HttpEntity(stilling, httpHeaders()), ArbeidsplassenStillingDto::class.java
-                )
-                return@timer response.body ?: throw kunneIkkeTolkeBodyException()
-
-            } catch (exception: RestClientResponseException) {
-                throw svarMedFeilmelding("Klarte ikke å opprette stilling hos Arbeidsplassen", url, exception)
-            }
-        }
-
     fun oppdaterStilling(stilling: ArbeidsplassenStillingDto, queryString: String?): ArbeidsplassenStillingDto =
         timer("rekrutteringsbistand.stilling.arbeidsplassen.oppdaterStilling.kall.tid") {
             val url = "${hentBaseUrl()}/api/v1/ads/${stilling.uuid}"

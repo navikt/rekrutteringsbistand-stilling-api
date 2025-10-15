@@ -14,6 +14,7 @@ import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteKlient
 import no.nav.rekrutteringsbistand.api.mockAzureObo
 import no.nav.rekrutteringsbistand.api.stilling.outbox.EventName
 import no.nav.rekrutteringsbistand.api.stilling.outbox.StillingOutboxService
+import no.nav.rekrutteringsbistand.api.opensearch.StillingssokProxyClient
 import no.nav.rekrutteringsbistand.api.support.toMultiValueMap
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.fail
@@ -39,6 +40,9 @@ import java.util.UUID
 @RunWith(SpringRunner::class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class StillingsinfoComponentTest {
+
+    @MockBean
+    private lateinit var stillingssokProxyClient: StillingssokProxyClient
 
     @get:Rule
     val wiremockKandidatApi = WireMockRule(WireMockConfiguration.options().port(8766))
@@ -81,7 +85,7 @@ class StillingsinfoComponentTest {
         val dto = enStillingsinfoInboundDto
         mockAzureObo(wiremockAzure)
         val stilling = enStilling
-        `when`(arbeidsplassenKlient.hentStilling(stilling.uuid)).thenReturn(stilling.toArbeidsplassenDto(1))
+        `when`(stillingssokProxyClient.hentStilling(stilling.uuid)).thenReturn(stilling)
 
         val url = "$localBaseUrl/stillingsinfo"
         val stillingsinfoRespons =
@@ -106,7 +110,7 @@ class StillingsinfoComponentTest {
         val tilLagring = enStillingsinfoInboundDto
         mockAzureObo(wiremockAzure)
         val stilling = enStilling
-        `when`(arbeidsplassenKlient.hentStilling(stilling.uuid)).thenReturn(stilling.toArbeidsplassenDto(1))
+        `when`(stillingssokProxyClient.hentStilling(stilling.uuid)).thenReturn(stilling)
         val url = "$localBaseUrl/stillingsinfo"
         val stillingsinfoRespons =
             restTemplate.exchange(url, HttpMethod.PUT, httpEntity(tilLagring), StillingsinfoDto::class.java)

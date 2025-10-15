@@ -8,6 +8,7 @@ import no.nav.rekrutteringsbistand.api.geografi.KommuneDTO
 import no.nav.rekrutteringsbistand.api.geografi.PostDataDTO
 import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteKlient
 import no.nav.rekrutteringsbistand.api.opensearch.StillingssokProxyClient
+import no.nav.rekrutteringsbistand.api.stilling.outbox.StillingOutboxService
 import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoService
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -34,6 +35,8 @@ class FrontendStillingServiceTest {
     lateinit var stillingssokProxyClient: StillingssokProxyClient
     @Mock
     lateinit var geografiService: GeografiService
+    @Mock
+    lateinit var stillingOutboxService: StillingOutboxService
 
 
     lateinit var stillingService: StillingService
@@ -47,7 +50,8 @@ class FrontendStillingServiceTest {
             arbeidsplassenKlient,
             direktemeldtStillingService,
             stillingssokProxyClient,
-            geografiService
+            geografiService,
+            stillingOutboxService,
         )
     }
 
