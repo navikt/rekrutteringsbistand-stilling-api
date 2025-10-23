@@ -1,18 +1,17 @@
 package no.nav.rekrutteringsbistand.api.autorisasjon
 
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.Before
-import org.junit.Test
-import org.junit.runner.RunWith
-import org.springframework.test.context.junit4.SpringRunner
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 
-@RunWith(SpringRunner::class)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class AzureCacheTest {
     private val appScope = "app_scope"
     private val navIdent = "nav_ident"
     private lateinit var azureCache: AzureCache
 
-    @Before
+    @BeforeEach
     fun initializeCache() {
         azureCache = AzureCache()
     }

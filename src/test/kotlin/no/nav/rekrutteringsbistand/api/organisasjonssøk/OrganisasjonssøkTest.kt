@@ -3,35 +3,37 @@ package no.nav.rekrutteringsbistand.api.organisasjonssøk
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.common.Slf4jNotifier
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
-import com.github.tomakehurst.wiremock.extension.responsetemplating.ResponseTemplateTransformer
-import com.github.tomakehurst.wiremock.junit.WireMockRule
+import com.github.tomakehurst.wiremock.junit5.WireMockExtension
 import no.nav.rekrutteringsbistand.api.config.MockLogin
 import no.nav.rekrutteringsbistand.api.mockAzureObo
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
-import org.junit.runner.RunWith
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.extension.RegisterExtension
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.http.*
-import org.springframework.test.context.junit4.SpringRunner
 
-@RunWith(SpringRunner::class)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 internal class OrganisasjonssøkTest {
 
-    @get:Rule
-    val wiremockPamAdApi = WireMockRule(WireMockConfiguration
-        .options()
-        .port(9934)
-        .notifier(Slf4jNotifier(true)))
-        //.extensions(ResponseTemplateTransformer(true)))
+    companion object {
+        @JvmStatic
+        @RegisterExtension
+        val wiremockAzure: WireMockExtension = WireMockExtension.newInstance()
+            .options(WireMockConfiguration.options().port(9954))
+            .build()
 
-    @get:Rule
-    val wiremockAzure = WireMockRule(9954)
+        @JvmStatic
+        @RegisterExtension
+        val wiremockPamAdApi: WireMockExtension = WireMockExtension.newInstance()
+            .options(WireMockConfiguration.options().port(9934).notifier(Slf4jNotifier(true)))
+            .build()
+    }
 
     @LocalServerPort
     private var port = 0
@@ -43,7 +45,7 @@ internal class OrganisasjonssøkTest {
 
     private val restTemplate = TestRestTemplate()
 
-    @Before
+    @BeforeEach
     fun authenticateClient() {
         mockLogin.leggAzureVeilederTokenPåAlleRequests(restTemplate)
         mockAzureObo(wiremockAzure)

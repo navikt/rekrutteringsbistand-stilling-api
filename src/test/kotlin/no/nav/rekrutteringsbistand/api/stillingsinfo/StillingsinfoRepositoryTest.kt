@@ -6,14 +6,13 @@ import no.nav.rekrutteringsbistand.api.Testdata.enStillingsinfo
 import no.nav.rekrutteringsbistand.api.Testdata.enStillingsinfoOppdatering
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.fail
-import org.junit.After
-import org.junit.Test
-import org.junit.runner.RunWith
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.context.junit4.SpringRunner
 
-@RunWith(SpringRunner::class)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class StillingsinfoRepositoryTest {
 
@@ -71,7 +70,7 @@ class StillingsinfoRepositoryTest {
         assertThat(endretRekrutteringsbistand.eier?.navKontorEnhetId).isEqualTo(nyKontorId)
     }
 
-    @After
+    @AfterEach
     fun cleanUp() {
         testRepository.slettAlt()
     }

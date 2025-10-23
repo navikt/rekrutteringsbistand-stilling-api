@@ -5,14 +5,17 @@ import no.nav.rekrutteringsbistand.api.Testdata.enStilling
 import no.nav.rekrutteringsbistand.api.Testdata.enVeileder
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.Test
-import org.junit.runner.RunWith
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
-import org.mockito.junit.MockitoJUnitRunner
+import org.springframework.boot.test.context.SpringBootTest
 
-@RunWith(MockitoJUnitRunner::class)
-class FrontendStillingTest {
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@SpringBootTest(
+    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
+)
+class StillingTest {
 
     @Mock
     lateinit var tokenUtils: TokenUtils

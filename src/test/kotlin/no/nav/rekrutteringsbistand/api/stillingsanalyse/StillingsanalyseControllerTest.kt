@@ -2,15 +2,15 @@ package no.nav.rekrutteringsbistand.api.stillingsanalyse
 
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
-import com.github.tomakehurst.wiremock.junit.WireMockRule
+import com.github.tomakehurst.wiremock.junit5.WireMockExtension
 import no.nav.rekrutteringsbistand.api.config.MockLogin
 import no.nav.rekrutteringsbistand.api.mockAzureObo
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingskategori
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
-import org.junit.runner.RunWith
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.extension.RegisterExtension
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.client.TestRestTemplate
@@ -19,19 +19,26 @@ import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
-import org.springframework.test.context.junit4.SpringRunner
 
-@RunWith(SpringRunner::class)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 internal class StillingsanalyseControllerTest {
 
+    companion object {
+        @JvmStatic
+        @RegisterExtension
+        val wiremockAzure: WireMockExtension = WireMockExtension.newInstance()
+            .options(WireMockConfiguration.options().port(9954))
+            .build()
+
+        @JvmStatic
+        @RegisterExtension
+        val wiremockOpenAi: WireMockExtension = WireMockExtension.newInstance()
+            .options(WireMockConfiguration.options().port(9955))
+            .build()
+    }
+
     private val utviklerrolle = "a1749d9a-52e0-4116-bb9f-935c38f6c74a"
-
-    @get:Rule
-    val wiremockOpenAi = WireMockRule(WireMockConfiguration.options().port(9955))
-
-    @get:Rule
-    val wiremockAzure = WireMockRule(9954)
 
     @LocalServerPort
     private var port = 0
@@ -43,7 +50,7 @@ internal class StillingsanalyseControllerTest {
 
     private val restTemplate = TestRestTemplate()
 
-    @Before
+    @BeforeEach
     fun setUp() {
         mockLogin.leggAzureVeilederTokenPåAlleRequests(restTemplate, listOf(utviklerrolle))
         mockAzureObo(wiremockAzure)
@@ -109,7 +116,7 @@ internal class StillingsanalyseControllerTest {
 
         assertThat(response.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
 
-        WireMock.verify(
+        wiremockOpenAi.verify(
             0, WireMock.postRequestedFor(
                 WireMock.urlEqualTo("/openai/deployments/toi-gpt-4o/chat/completions?api-version=2023-03-15-preview")
             )
@@ -140,7 +147,7 @@ internal class StillingsanalyseControllerTest {
 
         assertThat(response.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
 
-        WireMock.verify(
+        wiremockOpenAi.verify(
             0, WireMock.postRequestedFor(
                 WireMock.urlEqualTo("/openai/deployments/toi-gpt-4o/chat/completions?api-version=2023-03-15-preview")
             )
