@@ -1,54 +1,54 @@
 package no.nav.rekrutteringsbistand.api.stillingsinfo
 
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
-import com.github.tomakehurst.wiremock.junit.WireMockRule
+import com.github.tomakehurst.wiremock.junit5.WireMockExtension
 import no.nav.rekrutteringsbistand.api.TestRepository
 import no.nav.rekrutteringsbistand.api.Testdata.enKandidatListeDto
-import no.nav.rekrutteringsbistand.api.Testdata.enRekrutteringsbistandStilling
 import no.nav.rekrutteringsbistand.api.Testdata.enStilling
 import no.nav.rekrutteringsbistand.api.Testdata.enStillingsinfo
 import no.nav.rekrutteringsbistand.api.Testdata.enStillingsinfoInboundDto
-import no.nav.rekrutteringsbistand.api.arbeidsplassen.ArbeidsplassenKlient
 import no.nav.rekrutteringsbistand.api.config.MockLogin
 import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteKlient
 import no.nav.rekrutteringsbistand.api.mockAzureObo
+import no.nav.rekrutteringsbistand.api.opensearch.StillingssokProxyClient
 import no.nav.rekrutteringsbistand.api.stilling.outbox.EventName
 import no.nav.rekrutteringsbistand.api.stilling.outbox.StillingOutboxService
-import no.nav.rekrutteringsbistand.api.opensearch.StillingssokProxyClient
 import no.nav.rekrutteringsbistand.api.support.toMultiValueMap
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.fail
-import org.junit.After
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
-import org.junit.runner.RunWith
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.extension.RegisterExtension
 import org.mockito.Mockito.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.http.HttpEntity
-import org.springframework.http.HttpHeaders.*
+import org.springframework.http.HttpHeaders.ACCEPT
+import org.springframework.http.HttpHeaders.CONTENT_TYPE
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
-import org.springframework.test.context.junit4.SpringRunner
-import java.util.UUID
+import org.springframework.test.context.bean.override.mockito.MockitoBean
+import java.util.*
 
-@RunWith(SpringRunner::class)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class StillingsinfoComponentTest {
 
-    @MockBean
+    companion object {
+        @JvmStatic
+        @RegisterExtension
+        val wiremockAzure: WireMockExtension = WireMockExtension.newInstance()
+            .options(WireMockConfiguration.options().port(9954))
+            .build()
+    }
+
+    @MockitoBean
     private lateinit var stillingssokProxyClient: StillingssokProxyClient
-
-    @get:Rule
-    val wiremockKandidatApi = WireMockRule(WireMockConfiguration.options().port(8766))
-
-    @get:Rule
-    val wiremockAzure = WireMockRule(9954)
 
     @LocalServerPort
     private var port = 0
@@ -60,10 +60,7 @@ class StillingsinfoComponentTest {
 
     private val restTemplate = TestRestTemplate()
 
-    @MockBean
-    lateinit var arbeidsplassenKlient: ArbeidsplassenKlient
-
-    @MockBean
+    @MockitoBean
     lateinit var stillingOutboxService: StillingOutboxService
 
     @Autowired
@@ -72,10 +69,10 @@ class StillingsinfoComponentTest {
     @Autowired
     lateinit var testRepository: TestRepository
 
-    @MockBean
+    @MockitoBean
     private lateinit var kandidatlisteKlient: KandidatlisteKlient
 
-    @Before
+    @BeforeEach
     fun authenticateClient() {
         mockLogin.leggAzureVeilederTokenPåAlleRequests(restTemplate)
     }
@@ -130,7 +127,7 @@ class StillingsinfoComponentTest {
         val respons =
             restTemplate.exchange("$localBaseUrl/stillingsinfo", HttpMethod.PUT, httpEntity(dto), String::class.java)
 
-        assertThat(respons.statusCodeValue).isEqualTo(500)
+        assertThat(respons.statusCode.value()).isEqualTo(500)
         val stillingsinfo = repository.hentForStilling(Stillingsid(dto.stillingsid))
         assertThat(stillingsinfo).isNull()
     }
@@ -155,7 +152,7 @@ class StillingsinfoComponentTest {
             String::class.java
         )
 
-        assertThat(respons.statusCodeValue).isEqualTo(500)
+        assertThat(respons.statusCode.value()).isEqualTo(500)
         val lagretStillingsinfo = repository.hentForStilling(stillingsinfo.stillingsid)
         assertThat(lagretStillingsinfo!!.eier).isEqualTo(stillingsinfo.eier)
     }
@@ -171,8 +168,6 @@ class StillingsinfoComponentTest {
             eierNavn = "Helt Annet Navn",
             eierNavKontorEnhetId = "1234",
         )
-        val rekrutteringsbistandStilling =
-            enRekrutteringsbistandStilling.copy(stillingsinfo = stillingsinfoDerEierErNull.asStillingsinfoDto())
         `when`(kandidatlisteKlient.sendStillingOppdatert(enKandidatListeDto)).thenThrow(RuntimeException::class.java)
 
         val respons = restTemplate.exchange(
@@ -182,7 +177,7 @@ class StillingsinfoComponentTest {
             String::class.java
         )
 
-        assertThat(respons.statusCodeValue).isEqualTo(500)
+        assertThat(respons.statusCode.value()).isEqualTo(500)
         val lagretStillingsinfo = repository.hentForStilling(stillingsinfoDerEierErNull.stillingsid)
         assertThat(lagretStillingsinfo!!.eier?.navident).isNull()
     }
@@ -210,10 +205,10 @@ class StillingsinfoComponentTest {
             String::class.java
         )
 
-        assertThat(respons.statusCodeValue).isEqualTo(403)
+        assertThat(respons.statusCode.value()).isEqualTo(403)
     }
 
-    @After
+    @AfterEach
     fun tearDown() {
         testRepository.slettAlt()
     }

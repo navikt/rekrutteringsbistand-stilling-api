@@ -3,16 +3,15 @@ package no.nav.rekrutteringsbistand.api.autorisasjon
 import no.nav.rekrutteringsbistand.api.Testdata.enVeileder
 import no.nav.rekrutteringsbistand.api.config.MockLogin
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.Before
-import org.junit.Test
-import org.junit.runner.RunWith
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.boot.test.web.server.LocalServerPort
-import org.springframework.test.context.junit4.SpringRunner
 
-@RunWith(SpringRunner::class)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 internal class InnloggetVeilederComponentTest {
 
@@ -26,7 +25,7 @@ internal class InnloggetVeilederComponentTest {
 
     private fun localBaseUrl(): String = "http://localhost:$port"
 
-    @Before
+    @BeforeEach
     fun authenticateClient() {
         mockLogin.leggAzureVeilederTokenPåAlleRequests(restTemplate)
     }
