@@ -26,7 +26,8 @@ class ProsesserStillingOutboxJobb(
             val uprosesserteStillinger = stillingOutboxRepository.finnBatchMedUprossesertMeldinger()
 
             if(uprosesserteStillinger.isNotEmpty()) {
-                log.info("Prosesserer ${uprosesserteStillinger.size} stillinger i outbox")
+                val stillingsider = uprosesserteStillinger.map { it.stillingsId.toString() }
+                log.info("Prosesserer ${uprosesserteStillinger.size} stillinger i outbox. Stillingsider: $stillingsider")
 
                 uprosesserteStillinger.forEach {
                     if(it.eventName == EventName.INDEKSER_STILLINGSINFO) {
@@ -51,6 +52,7 @@ class ProsesserStillingOutboxJobb(
                             rapidApplikasjon.publish(Stillingsid(direktemeldtStilling.stillingsId), packet)
 
                             stillingOutboxRepository.settSomProsessert(it.id)
+                            log.info("Sendt stilling ${direktemeldtStilling.stillingsId} på rapid")
                         }
                     }
                 }
