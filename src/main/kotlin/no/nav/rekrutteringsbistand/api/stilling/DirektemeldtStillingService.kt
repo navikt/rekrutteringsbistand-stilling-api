@@ -21,6 +21,7 @@ class DirektemeldtStillingService(
     private val stillingOutboxService: StillingOutboxService,
     private val kandidatlisteKlient: KandidatlisteKlient
 ) {
+    @Transactional
     fun lagreDirektemeldtStilling(direktemeldtStilling: DirektemeldtStilling) {
         direktemeldtStillingRepository.lagreDirektemeldtStilling(direktemeldtStilling)
 

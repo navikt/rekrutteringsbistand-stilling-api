@@ -60,6 +60,7 @@ class StillingService(
         )
     }
 
+    @Transactional
     fun opprettNyStilling(opprettDto: OpprettRekrutteringsbistandstillingDto): RekrutteringsbistandStilling {
         return opprettStilling(
             opprettStilling = opprettDto.stilling.toArbeidsplassenDto(title = "Ny stilling"),
@@ -129,6 +130,7 @@ class StillingService(
         }
     }
 
+    @Transactional
     fun kopierStilling(stillingsId: String): RekrutteringsbistandStilling {
         log.info("Kopierer stilling med uuid: $stillingsId")
         val eksisterendeRekrutteringsbistandStilling = hentRekrutteringsbistandStilling(stillingsId)
@@ -255,7 +257,7 @@ class StillingService(
             AuditLogg.loggOvertattStilling(navIdent = nyEier ?: "", forrigeEier=gammelEier, stillingsid=gammelStilling?.stillingsId.toString())
         }
     }
-
+    @Transactional
     fun slettRekrutteringsbistandStilling(stillingsId: String): FrontendStilling {
         try {
             UUID.fromString(stillingsId)
