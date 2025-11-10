@@ -39,6 +39,7 @@ class ProsesserStillingOutboxJobb(
                         rapidApplikasjon.publish(Stillingsid(it.stillingsId), packet)
 
                         stillingOutboxRepository.settSomProsessert(it.id)
+                        log.info("Sendt stilling ${it.stillingsId} på rapid")
                     } else {
                         val direktemeldtStilling = direktemeldtStillingService.hentDirektemeldtStilling(it.stillingsId.toString())
 
@@ -53,6 +54,8 @@ class ProsesserStillingOutboxJobb(
 
                             stillingOutboxRepository.settSomProsessert(it.id)
                             log.info("Sendt stilling ${direktemeldtStilling.stillingsId} på rapid")
+                        } else {
+                            log.error("Fant ikke direktemeldt stilling med stillingsId ${it.stillingsId}, sender ikke melding på rapid")
                         }
                     }
                 }
