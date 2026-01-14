@@ -282,6 +282,15 @@ class StillingService(
 
         if (PubliserteArbeidsplassenStillinger.erPublisertPåArbeidsplassenViaRestApi(direktemeldtStilling.stillingsId)) {
             arbeidsplassenKlient.slettStilling(stillingsId)
+        } else {
+            val stillingsinfo: Stillingsinfo? = stillingsinfoService.hentStillingsinfo(Stillingsid(stillingsId))
+            // Sjekk om stillingen skal sendes til arbeidsplassen
+            if (stillingsinfo?.stillingskategori != Stillingskategori.FORMIDLING && direktemeldtStilling.innhold.privacy == "SHOW_ALL") {
+                stillingOutboxService.lagreMeldingIOutbox(
+                    stillingsId = Stillingsid(stillingsId).verdi,
+                    eventName = EventName.PUBLISER_ELLER_AVPUBLISER_TIL_ARBEIDSPLASSEN
+                )
+            }
         }
 
         return slettetStilling.toStilling()
