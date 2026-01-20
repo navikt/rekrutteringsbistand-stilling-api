@@ -5,16 +5,15 @@ import no.nav.common.audit_log.cef.CefMessage
 import no.nav.common.audit_log.cef.CefMessageEvent
 import no.nav.common.audit_log.log.AuditLogger
 import no.nav.common.audit_log.log.AuditLoggerImpl
-import org.slf4j.LoggerFactory
-
+import no.nav.rekrutteringsbistand.api.support.log
 
 object AuditLogg {
-    private val secureLog = LoggerFactory.getLogger("secureLog")!!
+    private val secureLog = SecureLog(log)
     private val auditLogger: AuditLogger = AuditLoggerImpl()
 
     fun loggOvertattStilling(navIdent: String, forrigeEier: String?, stillingsid: String) {
         logCefMessage(navIdent = navIdent, userid = "",
-            msg = "NAV-ansatt har overtatt stilling og kandidatliste med stillingsid $stillingsid"
+            msg = "Nav-ansatt har overtatt stilling og kandidatliste med stillingsid $stillingsid"
                     + if(forrigeEier!=null) " fra $forrigeEier" else "")
     }
 
