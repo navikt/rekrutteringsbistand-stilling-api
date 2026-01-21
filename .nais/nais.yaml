@@ -65,8 +65,6 @@ spec:
           - id: {{ ad_gruppe_utvikler }}                  # adGruppeUtvikler
   kafka:
     pool: {{ kafka_pool }}
-  secureLogs:
-    enabled: true
   leaderElection: true
   accessPolicy:
     inbound:
@@ -83,6 +81,8 @@ spec:
         - application: rekrutteringsbistand-stillingssok-proxy
         - application: pam-geografi
           namespace: teampam
+        - application: logging
+          namespace: nais-system
       external:
         - host: {{ ad_api_host }}
         - host: {{ rekrutteringsbistand_kandidat_api_host }}

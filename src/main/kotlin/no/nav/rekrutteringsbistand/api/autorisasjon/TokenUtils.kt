@@ -1,6 +1,7 @@
 package no.nav.rekrutteringsbistand.api.autorisasjon
 
-import no.nav.rekrutteringsbistand.api.support.secureLog
+import no.nav.rekrutteringsbistand.SecureLog
+import no.nav.rekrutteringsbistand.api.support.log
 import no.nav.security.token.support.core.context.TokenValidationContextHolder
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
@@ -64,6 +65,8 @@ data class InnloggetVeileder(
     val navIdent: String,
     val roller: List<Rolle>
 ) {
+    private val secureLog = SecureLog(log)
+
     fun validerMinstEnAvRollene(vararg potensielleRoller: Rolle) {
         if ((potensielleRoller.toList() + Rolle.UTVIKLER).any { it in roller }) {
             return
