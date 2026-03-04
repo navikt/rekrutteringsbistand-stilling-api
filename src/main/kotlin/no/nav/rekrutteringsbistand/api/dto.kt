@@ -20,5 +20,5 @@ data class OppdaterRekrutteringsbistandStillingDto(
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class KopierStillingDto(
-    val eierNavKontorEnehetId: String?,
+    val eierNavKontorEnhetId: String?,
 )

@@ -35,7 +35,7 @@ class StillingController(private val stillingsinfoService: StillingsinfoService,
         tokenUtils.hentInnloggetVeileder().validerMinstEnAvRollene(Rolle.ARBEIDSGIVERRETTET)
         val navIdent = tokenUtils.hentInnloggetVeileder().navIdent
         val displayName = tokenUtils.hentInnloggetVeileder().displayName
-        val eierNavKontorEnhetId = kopierStillingDto?.eierNavKontorEnehetId
+        val eierNavKontorEnhetId = kopierStillingDto?.eierNavKontorEnhetId
 
         val kopiertStilling = stillingService.kopierStilling(stillingsId, navIdent,  displayName, eierNavKontorEnhetId)
         return ok(kopiertStilling)
