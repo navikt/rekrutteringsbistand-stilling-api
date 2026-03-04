@@ -17,3 +17,8 @@ data class OppdaterRekrutteringsbistandStillingDto(
     val stilling: FrontendStilling,
     val stillingsinfo: StillingsinfoDto?
 )
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class KopierStillingDto(
+    val eierNavKontorEnehetId: String?,
+)
