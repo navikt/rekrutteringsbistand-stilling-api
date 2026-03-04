@@ -144,7 +144,7 @@ class StillingService(
             eierNavident = eksisterendeRekrutteringsbistandStilling.stillingsinfo?.eierNavident,
             eierNavn = eksisterendeRekrutteringsbistandStilling.stillingsinfo?.eierNavn,
         )
-        log.info("Opprettet stilling ${opprettStilling.stilling.uuid} er en Kopi av stilling: $stillingsId")
+        log.info("Opprettet stilling ${opprettStilling.stilling.uuid} er en kopi av stilling $stillingsId")
         return opprettStilling
     }
 
