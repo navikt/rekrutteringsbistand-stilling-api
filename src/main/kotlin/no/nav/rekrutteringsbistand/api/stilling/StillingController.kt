@@ -30,12 +30,12 @@ class StillingController(private val stillingsinfoService: StillingsinfoService,
         return ok(opprettetStilling)
     }
 
-    fun kopierStilling(@PathVariable stillingsId: String, @RequestBody kopierStillingDto: KopierStillingDto): ResponseEntity<RekrutteringsbistandStilling> {
     @PostMapping("/rekrutteringsbistandstilling/kopier/{stillingsId}")
+    fun kopierStilling(@PathVariable stillingsId: String, @RequestBody kopierStillingDto: KopierStillingDto?): ResponseEntity<RekrutteringsbistandStilling> {
         tokenUtils.hentInnloggetVeileder().validerMinstEnAvRollene(Rolle.ARBEIDSGIVERRETTET)
         val navIdent = tokenUtils.hentInnloggetVeileder().navIdent
         val displayName = tokenUtils.hentInnloggetVeileder().displayName
-        val eierNavKontorEnhetId = kopierStillingDto.eierNavKontorEnehetId
+        val eierNavKontorEnhetId = kopierStillingDto?.eierNavKontorEnehetId
 
         val kopiertStilling = stillingService.kopierStilling(stillingsId, navIdent,  displayName, eierNavKontorEnhetId)
         return ok(kopiertStilling)
