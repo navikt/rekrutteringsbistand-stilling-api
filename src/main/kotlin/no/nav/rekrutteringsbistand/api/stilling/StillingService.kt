@@ -131,7 +131,7 @@ class StillingService(
     }
 
     @Transactional
-    fun kopierStilling(stillingsId: String): RekrutteringsbistandStilling {
+    fun kopierStilling(stillingsId: String, navIdent: String, displayName: String): RekrutteringsbistandStilling {
         log.info("Kopierer stilling med uuid: $stillingsId")
         val eksisterendeRekrutteringsbistandStilling = hentRekrutteringsbistandStilling(stillingsId)
         val eksisterendeStilling = eksisterendeRekrutteringsbistandStilling.stilling
@@ -140,9 +140,9 @@ class StillingService(
         val opprettStilling = opprettStilling(
             opprettStilling = kopi,
             stillingskategori = kategoriMedDefault(eksisterendeRekrutteringsbistandStilling.stillingsinfo),
-            eierNavKontorEnhetId = eksisterendeRekrutteringsbistandStilling.stillingsinfo?.eierNavKontorEnhetId,
-            eierNavident = eksisterendeRekrutteringsbistandStilling.stillingsinfo?.eierNavident,
-            eierNavn = eksisterendeRekrutteringsbistandStilling.stillingsinfo?.eierNavn,
+            eierNavKontorEnhetId = null, // TODO: Send inn NavKontor i requesten
+            eierNavident = navIdent,
+            eierNavn = displayName,
         )
         log.info("Opprettet stilling ${opprettStilling.stilling.uuid} er en kopi av stilling $stillingsId")
         return opprettStilling
