@@ -131,19 +131,21 @@ class StillingService(
     }
 
     @Transactional
-    fun kopierStilling(stillingsId: String): RekrutteringsbistandStilling {
+    fun kopierStilling(stillingsId: String, navIdent: String?, displayName: String?, eierNavKontorEnhetId: String?): RekrutteringsbistandStilling {
         log.info("Kopierer stilling med uuid: $stillingsId")
         val eksisterendeRekrutteringsbistandStilling = hentRekrutteringsbistandStilling(stillingsId)
         val eksisterendeStilling = eksisterendeRekrutteringsbistandStilling.stilling
         val kopi = eksisterendeStilling.toKopiertStilling(tokenUtils)
 
-        return opprettStilling(
+        val nyStilling = opprettStilling(
             opprettStilling = kopi,
             stillingskategori = kategoriMedDefault(eksisterendeRekrutteringsbistandStilling.stillingsinfo),
-            eierNavKontorEnhetId = eksisterendeRekrutteringsbistandStilling.stillingsinfo?.eierNavKontorEnhetId,
-            eierNavident = eksisterendeRekrutteringsbistandStilling.stillingsinfo?.eierNavident,
-            eierNavn = eksisterendeRekrutteringsbistandStilling.stillingsinfo?.eierNavn,
+            eierNavident = navIdent,
+            eierNavn = displayName,
+            eierNavKontorEnhetId = eierNavKontorEnhetId,
         )
+        log.info("Opprettet stilling ${nyStilling.stilling.uuid} er en kopi av stilling $stillingsId")
+        return nyStilling
     }
 
     fun kategoriMedDefault(stillingsInfo: StillingsinfoDto?) =

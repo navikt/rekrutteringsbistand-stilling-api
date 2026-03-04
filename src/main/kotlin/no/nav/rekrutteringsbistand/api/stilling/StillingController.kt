@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.http.ResponseEntity.ok
 import org.springframework.web.bind.annotation.*
 import jakarta.servlet.http.HttpServletRequest
+import no.nav.rekrutteringsbistand.api.KopierStillingDto
 import no.nav.rekrutteringsbistand.api.autorisasjon.AuthorizedPartyUtils
 import no.nav.rekrutteringsbistand.api.autorisasjon.Rolle
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
@@ -30,9 +31,14 @@ class StillingController(private val stillingsinfoService: StillingsinfoService,
     }
 
     @PostMapping("/rekrutteringsbistandstilling/kopier/{stillingsId}")
-    fun kopierStilling(@PathVariable stillingsId: String): ResponseEntity<RekrutteringsbistandStilling> {
-        tokenUtils.hentInnloggetVeileder().validerMinstEnAvRollene(Rolle.ARBEIDSGIVERRETTET)
-        val kopiertStilling = stillingService.kopierStilling(stillingsId)
+    fun kopierStilling(@PathVariable stillingsId: String, @RequestBody kopierStillingDto: KopierStillingDto?): ResponseEntity<RekrutteringsbistandStilling> {
+        val innloggetVeileder = tokenUtils.hentInnloggetVeileder()
+        innloggetVeileder.validerMinstEnAvRollene(Rolle.ARBEIDSGIVERRETTET)
+        val navIdent = innloggetVeileder.navIdent
+        val displayName = innloggetVeileder.displayName
+        val eierNavKontorEnhetId = kopierStillingDto?.eierNavKontorEnhetId
+
+        val kopiertStilling = stillingService.kopierStilling(stillingsId, navIdent,  displayName, eierNavKontorEnhetId)
         return ok(kopiertStilling)
     }
 
