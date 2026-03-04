@@ -137,15 +137,15 @@ class StillingService(
         val eksisterendeStilling = eksisterendeRekrutteringsbistandStilling.stilling
         val kopi = eksisterendeStilling.toKopiertStilling(tokenUtils)
 
-        val opprettStilling = opprettStilling(
+        val nyStilling = opprettStilling(
             opprettStilling = kopi,
             stillingskategori = kategoriMedDefault(eksisterendeRekrutteringsbistandStilling.stillingsinfo),
             eierNavident = navIdent,
             eierNavn = displayName,
             eierNavKontorEnhetId = eierNavKontorEnhetId,
         )
-        log.info("Opprettet stilling ${opprettStilling.stilling.uuid} er en kopi av stilling $stillingsId")
-        return opprettStilling
+        log.info("Opprettet stilling ${nyStilling.stilling.uuid} er en kopi av stilling $stillingsId")
+        return nyStilling
     }
 
     fun kategoriMedDefault(stillingsInfo: StillingsinfoDto?) =
