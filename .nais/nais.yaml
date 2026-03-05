@@ -70,8 +70,8 @@ spec:
     inbound:
       rules:
         - application: vis-stilling
-        - application: rekrutteringsbistand
         - application: rekrutteringsbistand-frontend
+        - application: rekrutteringsbistand-frontend2
         - application: rekrutteringsbistand-kandidat-api
           cluster: {{ fss_cluster }}
         - application: rekrutteringsbistand-kandidatvarsel-api
