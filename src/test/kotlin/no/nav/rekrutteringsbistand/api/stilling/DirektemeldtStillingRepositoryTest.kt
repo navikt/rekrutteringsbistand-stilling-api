@@ -7,10 +7,12 @@ import no.nav.rekrutteringsbistand.api.Testdata.stillingSomIkkeSkalAktiveres
 import no.nav.rekrutteringsbistand.api.Testdata.stillingSomIkkeSkalDeaktiveres
 import no.nav.rekrutteringsbistand.api.Testdata.stillingerSomSkalAktiveres
 import no.nav.rekrutteringsbistand.api.Testdata.stillingerSomSkalDeaktiveres
+import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
@@ -30,8 +32,13 @@ class DirektemeldtStillingRepositoryTest {
     @Autowired
     lateinit var testRepository: TestRepository
 
-    @AfterEach
+    @BeforeEach
     fun cleanUp() {
+        testRepository.slettAlt()
+    }
+
+    @AfterAll
+    fun tearDown() {
         testRepository.slettAlt()
     }
 

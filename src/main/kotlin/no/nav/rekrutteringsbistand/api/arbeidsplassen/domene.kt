@@ -102,6 +102,21 @@ data class OpprettStillingDto(
         ),
     )
 
+    // Gjør testing lettere
+    constructor(tittel: String = "Ny stilling", eierNavn: String, eierNavident: String): this(
+        title = tittel,
+        createdBy = "pam-rekrutteringsbistand",
+        updatedBy = "pam-rekrutteringsbistand",
+        source = "DIR",
+        medium = "DIR",
+        privacy = "INTERNAL_NOT_SHOWN",
+        administration = OpprettStillingAdministrationDto(
+            status = "PENDING",
+            reportee = eierNavn,
+            navIdent = eierNavident,
+        ),
+    )
+
      fun toDirektemeldtStillingInnhold(reference: String): DirektemeldtStillingInnhold {
         return DirektemeldtStillingInnhold(
             title = title,

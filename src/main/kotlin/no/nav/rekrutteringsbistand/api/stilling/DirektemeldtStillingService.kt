@@ -5,6 +5,7 @@ import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteKlient
 import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteStillingDto
 import no.nav.rekrutteringsbistand.api.stilling.outbox.StillingOutboxService
 import no.nav.rekrutteringsbistand.api.stilling.outbox.EventName
+import no.nav.rekrutteringsbistand.api.stillingsinfo.Eier
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsid
 import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoInboundDto
 import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoService
@@ -65,13 +66,13 @@ class DirektemeldtStillingService(
     }
 
     @Transactional
-    fun overtaEierskapForStillingOgKandidatliste(stillingsinfo: StillingsinfoInboundDto, stilling: DirektemeldtStilling) {
+    fun overtaEierskapForStillingOgKandidatliste(stillingsinfo: StillingsinfoInboundDto, stilling: DirektemeldtStilling, nyEier: Eier) {
         val oppdatertStilling = stilling.copy(
             sistEndret = ZonedDateTime.now(ZoneId.of("Europe/Oslo")),
             innhold = stilling.innhold.copy(
                 administration = stilling.innhold.administration?.copy(
-                    navIdent = stillingsinfo.eierNavident,
-                    reportee = stillingsinfo.eierNavn
+                    navIdent = nyEier.navident,
+                    reportee = nyEier.navn
                 )
             )
         )
@@ -80,7 +81,7 @@ class DirektemeldtStillingService(
         val forrigeStillingsinfo = stillingsinfoService.hentStillingsinfo(Stillingsid(stilling.stillingsId))
 
         if(forrigeStillingsinfo?.stillingsinfoid != null && stillingsinfo.eierNavKontorEnhetId != null) {
-            stillingsinfoService.endreNavKontor(stillingsinfoId = forrigeStillingsinfo.stillingsinfoid, navKontorEnhetId = stillingsinfo.eierNavKontorEnhetId)
+            stillingsinfoService.oppdaterEier(stillingsinfoId = forrigeStillingsinfo.stillingsinfoid, nyEier = nyEier)
         }
         val stillingsinfo = stillingsinfoService.hentStillingsinfo(Stillingsid(stilling.stillingsId))
 

@@ -1,5 +1,6 @@
 package no.nav.rekrutteringsbistand.api.stilling.arbeidsplassen
 
+import com.fasterxml.jackson.databind.node.JsonNodeFactory
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import no.nav.rekrutteringsbistand.api.hendelser.RapidApplikasjon
 import no.nav.rekrutteringsbistand.api.stilling.StillingService
@@ -44,6 +45,7 @@ class PubliserTilArbeidsplassenController(
 
         packet["direktemeldtStilling"] = stilling
         packet["stillingsId"] = uuid.toString()
+        packet["stillingsinfo"] = stillingsinfo?.asStillingsinfoDto() ?: JsonNodeFactory.instance.nullNode()
 
         rapidApplikasjon.publish(Stillingsid(uuid), packet)
 

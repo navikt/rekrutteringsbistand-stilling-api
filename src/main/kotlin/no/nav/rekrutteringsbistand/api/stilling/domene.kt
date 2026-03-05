@@ -301,12 +301,10 @@ data class Page<T>(
     val totalElements: Int?
 )
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class OpprettRekrutteringsbistandstillingDto(
     val kategori: Stillingskategori,
-    val eierNavident: String?,
-    val eierNavn: String?,
     val eierNavKontorEnhetId: String?,
-    val stilling: OpprettStillingDto,
 )
 
 // TODO: denne klassen ble duplisert fra arbeidsplassen-domenet, og inneholder kanskje

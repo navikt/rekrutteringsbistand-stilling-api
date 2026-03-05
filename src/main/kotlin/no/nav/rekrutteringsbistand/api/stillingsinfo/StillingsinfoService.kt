@@ -82,12 +82,8 @@ class StillingsinfoService(
         return stillingsinfoListe
     }
 
-    fun lagre(stillingsinfo: Stillingsinfo) {
-        repo.opprett(stillingsinfo)
-    }
-
-    fun endreNavKontor(stillingsinfoId: Stillingsinfoid, navKontorEnhetId: String) {
-        repo.oppdaterNavKontorEnhetId(stillingsinfoId, navKontorEnhetId)
+    fun oppdaterEier(stillingsinfoId: Stillingsinfoid, nyEier: Eier) {
+        repo.oppdaterEier(stillingsinfoId, nyEier)
     }
 
     fun opprettStillingsinfo(

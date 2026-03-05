@@ -61,12 +61,13 @@ class StillingService(
     }
 
     @Transactional
-    fun opprettNyStilling(opprettDto: OpprettRekrutteringsbistandstillingDto): RekrutteringsbistandStilling {
+    fun opprettNyStilling(opprettDto: OpprettRekrutteringsbistandstillingDto, tokenUtils: TokenUtils): RekrutteringsbistandStilling {
+        val veileder = tokenUtils.hentInnloggetVeileder()
         return opprettStilling(
-            opprettStilling = opprettDto.stilling.toArbeidsplassenDto(title = "Ny stilling"),
+            opprettStilling = OpprettStillingDto(tittel = "Ny stilling", tokenUtils),
             stillingskategori = opprettDto.kategori,
-            eierNavident = opprettDto.eierNavident,
-            eierNavn = opprettDto.eierNavn,
+            eierNavident = veileder.navIdent,
+            eierNavn = veileder.displayName,
             eierNavKontorEnhetId = opprettDto.eierNavKontorEnhetId,
         )
     }
@@ -104,7 +105,7 @@ class StillingService(
                 adminStatus = stilling.administration.status
             )
         )
-        log.info("Opprettet stilling i databasen med uuid: ${uuid}")
+        log.info("Opprettet stilling i databasen med uuid: $uuid")
         direktemeldtStillingService.settAnnonsenrFraDbId(uuid.toString())
         val direktemeldtStillingFraDb = direktemeldtStillingService.hentDirektemeldtStilling(uuid.toString())!!
 
@@ -154,7 +155,8 @@ class StillingService(
     @Transactional
     fun oppdaterRekrutteringsbistandStilling(
         dto: OppdaterRekrutteringsbistandStillingDto,
-        queryString: String?
+        queryString: String?,
+        eier: Eier
     ): OppdaterRekrutteringsbistandStillingDto {
         log.info("Oppdaterer stilling med uuid: ${dto.stilling.uuid}")
 
@@ -175,12 +177,10 @@ class StillingService(
         val eksisterendeStillingIDb = direktemeldtStillingService.hentDirektemeldtStilling(id.asString())
         val eksisterendeStillingsinfo: Stillingsinfo? = stillingsinfoService.hentStillingsinfo(id)
 
-        // Dette vil hjelpe til med å fylle ut navkontor for stillinger som ikke allerede har det satt hvis de blir oppdatert
-        if (eksisterendeStillingsinfo != null && dto.stillingsinfo?.eierNavKontorEnhetId != null) {
-            stillingsinfoService.endreNavKontor(
-                stillingsinfoId = eksisterendeStillingsinfo.stillingsinfoid,
-                navKontorEnhetId = dto.stillingsinfo.eierNavKontorEnhetId,
-            )
+
+        // Endrer eier på stillingsinfo, passer også på at navKontorEnhetId blir oppdatert
+        if (eksisterendeStillingsinfo != null && dto.stillingsinfo != null) {
+            stillingsinfoService.oppdaterEier(Stillingsinfoid(dto.stillingsinfo.stillingsinfoid), eier)
         } else if (eksisterendeStillingsinfo == null) {
             log.info("Fant ikke stillingsinfo for stilling med id ved en oppdatering: ${dto.stilling.uuid}")
         }

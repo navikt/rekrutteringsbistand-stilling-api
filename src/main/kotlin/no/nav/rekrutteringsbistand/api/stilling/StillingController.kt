@@ -11,6 +11,7 @@ import no.nav.rekrutteringsbistand.api.KopierStillingDto
 import no.nav.rekrutteringsbistand.api.autorisasjon.AuthorizedPartyUtils
 import no.nav.rekrutteringsbistand.api.autorisasjon.Rolle
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
+import no.nav.rekrutteringsbistand.api.stillingsinfo.Eier
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsid
 import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoService
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingskategori
@@ -26,7 +27,7 @@ class StillingController(private val stillingsinfoService: StillingsinfoService,
         } else {
             tokenUtils.hentInnloggetVeileder().validerMinstEnAvRollene(Rolle.ARBEIDSGIVERRETTET)
         }
-        val opprettetStilling = stillingService.opprettNyStilling(stilling)
+        val opprettetStilling = stillingService.opprettNyStilling(stilling, tokenUtils)
         return ok(opprettetStilling)
     }
 
@@ -52,7 +53,10 @@ class StillingController(private val stillingsinfoService: StillingsinfoService,
         } else {
             tokenUtils.hentInnloggetVeileder().validerMinstEnAvRollene(Rolle.ARBEIDSGIVERRETTET)
         }
-        val oppdatertStilling = stillingService.oppdaterRekrutteringsbistandStilling(rekrutteringsbistandStillingDto, request.queryString)
+        val veileder = tokenUtils.hentInnloggetVeileder()
+        val eier = Eier(navn = veileder.displayName, navident = veileder.navIdent, navKontorEnhetId = rekrutteringsbistandStillingDto.stillingsinfo?.eierNavKontorEnhetId)
+
+        val oppdatertStilling = stillingService.oppdaterRekrutteringsbistandStilling(dto = rekrutteringsbistandStillingDto, queryString = request.queryString, eier = eier)
         return ok(oppdatertStilling)
     }
 

@@ -1,5 +1,6 @@
 package no.nav.rekrutteringsbistand.api.stillingsinfo
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import no.nav.rekrutteringsbistand.AuditLogg
 import no.nav.rekrutteringsbistand.api.autorisasjon.Rolle
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
@@ -26,13 +27,14 @@ class StillingsinfoController(
     ): ResponseEntity<StillingsinfoDto> {
         tokenUtils.hentInnloggetVeileder().validerMinstEnAvRollene(Rolle.ARBEIDSGIVERRETTET)
         val stillingsid = Stillingsid(dto.stillingsid)
+        val veileder = tokenUtils.hentInnloggetVeileder()
 
         val forrigeStillingsinfo = service.hentStillingsinfo(stillingId = stillingsid)
         val forrigeEier = forrigeStillingsinfo?.eier?.navident
 
         log.info("Stilling ${dto.stillingsid} har byttet eierskap med url /stillingsinfo")
-        AuditLogg.loggOvertattStilling(navIdent = dto.eierNavident, forrigeEier=forrigeEier, stillingsid=dto.stillingsid)
-        val nyEier = Eier(dto.eierNavident, dto.eierNavn, dto.eierNavKontorEnhetId)
+        AuditLogg.loggOvertattStilling(navIdent = veileder.navIdent, forrigeEier=forrigeEier, stillingsid=dto.stillingsid)
+        val nyEier = Eier(veileder.navIdent, veileder.displayName, dto.eierNavKontorEnhetId)
         val oppdatertStillingsinfo =
             service.overtaEierskapForEksternStillingOgKandidatliste(stillingsId = stillingsid, nyEier = nyEier)
 
@@ -46,6 +48,7 @@ class StillingsinfoController(
         tokenUtils.hentInnloggetVeileder().validerMinstEnAvRollene(Rolle.ARBEIDSGIVERRETTET)
         val stilling = direktemeldtStillingService.hentDirektemeldtStilling(dto.stillingsid)
         val stillingsid = Stillingsid(dto.stillingsid)
+        val veileder = tokenUtils.hentInnloggetVeileder()
 
         val forrigeStillingsinfo = service.hentStillingsinfo(stillingId = stillingsid)
         val forrigeEier = forrigeStillingsinfo?.eier?.navident
@@ -55,21 +58,21 @@ class StillingsinfoController(
         }
 
         if(stilling != null) {
-            direktemeldtStillingService.overtaEierskapForStillingOgKandidatliste(stillingsinfo = dto, stilling = stilling)
+            val nyEier = Eier(navident = veileder.navIdent, navn = veileder.displayName, navKontorEnhetId = dto.eierNavKontorEnhetId)
+            direktemeldtStillingService.overtaEierskapForStillingOgKandidatliste(stillingsinfo = dto, stilling = stilling, nyEier = nyEier)
         } else {
-            val nyEier = Eier(dto.eierNavident, dto.eierNavn, dto.eierNavKontorEnhetId)
+            val nyEier = Eier(veileder.navIdent, veileder.displayName, dto.eierNavKontorEnhetId)
             service.overtaEierskapForEksternStillingOgKandidatliste(stillingsId = stillingsid, nyEier = nyEier)
         }
 
-        AuditLogg.loggOvertattStilling(navIdent = dto.eierNavident, forrigeEier=forrigeEier, stillingsid=dto.stillingsid)
+        AuditLogg.loggOvertattStilling(navIdent = veileder.navIdent, forrigeEier=forrigeEier, stillingsid=dto.stillingsid)
         log.info("Stilling ${dto.stillingsid} har byttet eierskap med url /overta-eierskap")
         return ResponseEntity.status(HttpStatus.OK).body("OK")
     }
 }
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class StillingsinfoInboundDto(
     val stillingsid: String,
-    val eierNavident: String,
-    val eierNavn: String,
     val eierNavKontorEnhetId: String?,
 )
