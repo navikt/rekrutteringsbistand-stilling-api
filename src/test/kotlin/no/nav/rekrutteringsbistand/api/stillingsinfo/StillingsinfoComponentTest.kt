@@ -96,8 +96,8 @@ class StillingsinfoComponentTest {
 
         stillingsinfoRespons.body!!.apply {
             assertThat(this.stillingsid).isNotNull
-            assertThat(this.eierNavn).isEqualTo(dto.eierNavn)
-            assertThat(this.eierNavident).isEqualTo(dto.eierNavident)
+            assertThat(this.eierNavn).isEqualTo("Clark Kent")
+            assertThat(this.eierNavident).isEqualTo("C12345")
         }
     }
 
@@ -138,8 +138,6 @@ class StillingsinfoComponentTest {
         repository.opprett(stillingsinfo)
         val endringDto = StillingsinfoInboundDto(
             stillingsid = stillingsinfo.stillingsid.asString(),
-            eierNavident = "X998877",
-            eierNavn = "Helt Annet Navn",
             eierNavKontorEnhetId = "1234",
         )
         mockAzureObo(wiremockAzure)
@@ -164,8 +162,6 @@ class StillingsinfoComponentTest {
         mockAzureObo(wiremockAzure)
         val endringDto = StillingsinfoInboundDto(
             stillingsid = stillingsinfoDerEierErNull.stillingsid.asString(),
-            eierNavident = "X998877",
-            eierNavn = "Helt Annet Navn",
             eierNavKontorEnhetId = "1234",
         )
         `when`(kandidatlisteKlient.sendStillingOppdatert(enKandidatListeDto)).thenThrow(RuntimeException::class.java)
@@ -193,8 +189,6 @@ class StillingsinfoComponentTest {
 
         val endringDto = StillingsinfoInboundDto(
             stillingsid = stillingsinfoForFormidlingsstilling.stillingsid.asString(),
-            eierNavident = "X998877",
-            eierNavn = "Helt Annet Navn",
             eierNavKontorEnhetId = "1234",
         )
 

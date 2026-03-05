@@ -126,8 +126,6 @@ object Testdata {
 
     val enStillingsinfoInboundDto = StillingsinfoInboundDto(
         stillingsid = enStilling.uuid,
-        eierNavident = enVeileder.navIdent,
-        eierNavn = enVeileder.displayName,
         eierNavKontorEnhetId = "1234",
     )
 

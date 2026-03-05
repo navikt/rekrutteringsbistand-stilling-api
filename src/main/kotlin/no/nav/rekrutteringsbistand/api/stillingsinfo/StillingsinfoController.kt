@@ -60,11 +60,11 @@ class StillingsinfoController(
             val nyEier = Eier(navident = veileder.navIdent, navn = veileder.displayName, navKontorEnhetId = dto.eierNavKontorEnhetId)
             direktemeldtStillingService.overtaEierskapForStillingOgKandidatliste(stillingsinfo = dto, stilling = stilling, nyEier = nyEier)
         } else {
-            val nyEier = Eier(dto.eierNavident, dto.eierNavn, dto.eierNavKontorEnhetId)
+            val nyEier = Eier(veileder.navIdent, veileder.displayName, dto.eierNavKontorEnhetId)
             service.overtaEierskapForEksternStillingOgKandidatliste(stillingsId = stillingsid, nyEier = nyEier)
         }
 
-        AuditLogg.loggOvertattStilling(navIdent = dto.eierNavident, forrigeEier=forrigeEier, stillingsid=dto.stillingsid)
+        AuditLogg.loggOvertattStilling(navIdent = veileder.navIdent, forrigeEier=forrigeEier, stillingsid=dto.stillingsid)
         log.info("Stilling ${dto.stillingsid} har byttet eierskap med url /overta-eierskap")
         return ResponseEntity.status(HttpStatus.OK).body("OK")
     }
@@ -72,7 +72,5 @@ class StillingsinfoController(
 
 data class StillingsinfoInboundDto(
     val stillingsid: String,
-    val eierNavident: String,
-    val eierNavn: String,
     val eierNavKontorEnhetId: String?,
 )

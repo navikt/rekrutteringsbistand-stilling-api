@@ -71,8 +71,8 @@ class DirektemeldtStillingService(
             sistEndret = ZonedDateTime.now(ZoneId.of("Europe/Oslo")),
             innhold = stilling.innhold.copy(
                 administration = stilling.innhold.administration?.copy(
-                    navIdent = stillingsinfo.eierNavident,
-                    reportee = stillingsinfo.eierNavn
+                    navIdent = nyEier.navident,
+                    reportee = nyEier.navn
                 )
             )
         )
@@ -82,8 +82,6 @@ class DirektemeldtStillingService(
 
         if(forrigeStillingsinfo?.stillingsinfoid != null && stillingsinfo.eierNavKontorEnhetId != null) {
             stillingsinfoService.oppdaterEier(stillingsinfoId = forrigeStillingsinfo.stillingsinfoid, nyEier = nyEier)
-
-            //stillingsinfoService.endreNavKontor(stillingsinfoId = forrigeStillingsinfo.stillingsinfoid, navKontorEnhetId = stillingsinfo.eierNavKontorEnhetId)
         }
         val stillingsinfo = stillingsinfoService.hentStillingsinfo(Stillingsid(stilling.stillingsId))
 
