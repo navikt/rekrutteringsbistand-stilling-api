@@ -301,6 +301,7 @@ data class Page<T>(
     val totalElements: Int?
 )
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class OpprettRekrutteringsbistandstillingDto(
     val kategori: Stillingskategori,
     val eierNavKontorEnhetId: String?,

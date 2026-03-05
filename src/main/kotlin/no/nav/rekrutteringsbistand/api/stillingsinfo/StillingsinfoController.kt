@@ -1,5 +1,6 @@
 package no.nav.rekrutteringsbistand.api.stillingsinfo
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import no.nav.rekrutteringsbistand.AuditLogg
 import no.nav.rekrutteringsbistand.api.autorisasjon.Rolle
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
@@ -70,6 +71,7 @@ class StillingsinfoController(
     }
 }
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class StillingsinfoInboundDto(
     val stillingsid: String,
     val eierNavKontorEnhetId: String?,

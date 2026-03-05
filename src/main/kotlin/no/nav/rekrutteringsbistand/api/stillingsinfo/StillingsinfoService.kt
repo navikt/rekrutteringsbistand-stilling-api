@@ -86,10 +86,6 @@ class StillingsinfoService(
         repo.oppdaterEier(stillingsinfoId, nyEier)
     }
 
-    fun endreNavKontor(stillingsinfoId: Stillingsinfoid, navKontorEnhetId: String) {
-        repo.oppdaterNavKontorEnhetId(stillingsinfoId, navKontorEnhetId)
-    }
-
     fun opprettStillingsinfo(
         stillingsId: Stillingsid,
         stillingskategori: Stillingskategori,
