@@ -6,9 +6,11 @@ import org.springframework.http.ResponseEntity
 import org.springframework.http.ResponseEntity.ok
 import org.springframework.web.bind.annotation.*
 import jakarta.servlet.http.HttpServletRequest
+import no.nav.rekrutteringsbistand.api.KopierStillingDto
 import no.nav.rekrutteringsbistand.api.autorisasjon.AuthorizedPartyUtils
 import no.nav.rekrutteringsbistand.api.autorisasjon.Rolle
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
+import no.nav.rekrutteringsbistand.api.stillingsinfo.Eier
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsid
 import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoService
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingskategori
@@ -24,14 +26,19 @@ class StillingController(private val stillingsinfoService: StillingsinfoService,
         } else {
             tokenUtils.hentInnloggetVeileder().validerMinstEnAvRollene(Rolle.ARBEIDSGIVERRETTET)
         }
-        val opprettetStilling = stillingService.opprettNyStilling(stilling)
+        val opprettetStilling = stillingService.opprettNyStilling(stilling, tokenUtils)
         return ok(opprettetStilling)
     }
 
     @PostMapping("/rekrutteringsbistandstilling/kopier/{stillingsId}")
-    fun kopierStilling(@PathVariable stillingsId: String): ResponseEntity<RekrutteringsbistandStilling> {
-        tokenUtils.hentInnloggetVeileder().validerMinstEnAvRollene(Rolle.ARBEIDSGIVERRETTET)
-        val kopiertStilling = stillingService.kopierStilling(stillingsId)
+    fun kopierStilling(@PathVariable stillingsId: String, @RequestBody kopierStillingDto: KopierStillingDto?): ResponseEntity<RekrutteringsbistandStilling> {
+        val innloggetVeileder = tokenUtils.hentInnloggetVeileder()
+        innloggetVeileder.validerMinstEnAvRollene(Rolle.ARBEIDSGIVERRETTET)
+        val navIdent = innloggetVeileder.navIdent
+        val displayName = innloggetVeileder.displayName
+        val eierNavKontorEnhetId = kopierStillingDto?.eierNavKontorEnhetId
+
+        val kopiertStilling = stillingService.kopierStilling(stillingsId, navIdent,  displayName, eierNavKontorEnhetId)
         return ok(kopiertStilling)
     }
 
@@ -45,7 +52,10 @@ class StillingController(private val stillingsinfoService: StillingsinfoService,
         } else {
             tokenUtils.hentInnloggetVeileder().validerMinstEnAvRollene(Rolle.ARBEIDSGIVERRETTET)
         }
-        val oppdatertStilling = stillingService.oppdaterRekrutteringsbistandStilling(rekrutteringsbistandStillingDto, request.queryString)
+        val veileder = tokenUtils.hentInnloggetVeileder()
+        val eier = Eier(navn = veileder.displayName, navident = veileder.navIdent, navKontorEnhetId = rekrutteringsbistandStillingDto.stillingsinfo?.eierNavKontorEnhetId)
+
+        val oppdatertStilling = stillingService.oppdaterRekrutteringsbistandStilling(dto = rekrutteringsbistandStillingDto, queryString = request.queryString, eier = eier)
         return ok(oppdatertStilling)
     }
 

@@ -150,11 +150,11 @@ class StillingServiceTest {
     @Test
     fun `Jobbmesse skal ikke kunne publiseres til arbeidsplassen`() {
         val stillingsid = Stillingsid("123e4567-e89b-12d3-a456-426614174000")
+        val eier = Eier(navident = "Z123456", navn = "Ola Nordmann", navKontorEnhetId = "1234")
         val stillingsinfo = Stillingsinfo(
             stillingsid = stillingsid,
             stillingsinfoid = Stillingsinfoid("123e4567-e89b-12d3-a456-426614174001"),
-            eier = Eier(navident = "Z123456",
-                navn = "Ola Nordmann", navKontorEnhetId = "1234"),
+            eier = eier,
 
             stillingskategori = Stillingskategori.JOBBMESSE,
 
@@ -170,7 +170,7 @@ class StillingServiceTest {
         whenever(direktemeldtStillingService.hentDirektemeldtStilling(stillingsid)).thenReturn(direktemeldtStilling)
         whenever(direktemeldtStillingService.hentDirektemeldtStilling(stillingsid.asString())).thenReturn(direktemeldtStilling)
 
-        stillingService.oppdaterRekrutteringsbistandStilling(rekrutteringsbistandStilling, null)
+        stillingService.oppdaterRekrutteringsbistandStilling(rekrutteringsbistandStilling, null, eier)
 
         verify(times(0)) { stillingOutboxService.lagreMeldingIOutbox(
             any(), any()) }

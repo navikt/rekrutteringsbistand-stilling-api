@@ -65,15 +65,13 @@ spec:
           - id: {{ ad_gruppe_utvikler }}                  # adGruppeUtvikler
   kafka:
     pool: {{ kafka_pool }}
-  secureLogs:
-    enabled: true
   leaderElection: true
   accessPolicy:
     inbound:
       rules:
         - application: vis-stilling
-        - application: rekrutteringsbistand
         - application: rekrutteringsbistand-frontend
+        - application: rekrutteringsbistand-frontend2
         - application: rekrutteringsbistand-kandidat-api
           cluster: {{ fss_cluster }}
         - application: rekrutteringsbistand-kandidatvarsel-api
@@ -83,6 +81,8 @@ spec:
         - application: rekrutteringsbistand-stillingssok-proxy
         - application: pam-geografi
           namespace: teampam
+        - application: logging
+          namespace: nais-system
       external:
         - host: {{ ad_api_host }}
         - host: {{ rekrutteringsbistand_kandidat_api_host }}

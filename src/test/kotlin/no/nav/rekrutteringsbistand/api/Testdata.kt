@@ -64,10 +64,7 @@ object Testdata {
         enOpprettRekrutteringsbistandstillingDtoMedKategori(Stillingskategori.ARBEIDSTRENING)
 
     fun enOpprettRekrutteringsbistandstillingDtoMedKategori(kategori: Stillingskategori) = OpprettRekrutteringsbistandstillingDto(
-        stilling = enOpprettStillingDto,
         kategori = kategori,
-        eierNavn = "Clark Kent",
-        eierNavident = "C12345",
         eierNavKontorEnhetId = "1234",
     )
 
@@ -129,8 +126,6 @@ object Testdata {
 
     val enStillingsinfoInboundDto = StillingsinfoInboundDto(
         stillingsid = enStilling.uuid,
-        eierNavident = enVeileder.navIdent,
-        eierNavn = enVeileder.displayName,
         eierNavKontorEnhetId = "1234",
     )
 

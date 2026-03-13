@@ -4,7 +4,6 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.rekrutteringsbistand.api.stillingsanalyse.StillingsanalyseController.StillingsanalyseResponsDto
 import no.nav.rekrutteringsbistand.api.support.log
-import no.nav.rekrutteringsbistand.api.support.secureLog
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
@@ -14,6 +13,7 @@ import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
+import no.nav.rekrutteringsbistand.SecureLog
 
 @Component
 class OpenAiClient(
@@ -21,6 +21,8 @@ class OpenAiClient(
     @Value("\${openai.api.url}") private val openAiApiUrl: String,
     @Value("\${openai.api.key}") private val openAiApiKey: String,
 ) {
+    private val secureLog = SecureLog(log)
+
     fun analyserStilling(stillingsanalyseDto: StillingsanalyseController.StillingsanalyseDto): StillingsanalyseResponsDto {
 
         val systemMessage = StillingsanalyseTemplate.SYSTEM_MESSAGE

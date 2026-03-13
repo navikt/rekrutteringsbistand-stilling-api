@@ -2,7 +2,6 @@ package no.nav.rekrutteringsbistand.api.arbeidsplassen
 
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
 import no.nav.rekrutteringsbistand.api.stilling.*
-import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsid
 import java.time.LocalDateTime
 import java.util.HashMap
 
@@ -99,6 +98,21 @@ data class OpprettStillingDto(
             status = "PENDING",
             reportee = tokenUtils.hentInnloggetVeileder().displayName,
             navIdent = tokenUtils.hentInnloggetVeileder().navIdent,
+        ),
+    )
+
+    // Gjør testing lettere
+    constructor(tittel: String = "Ny stilling", eierNavn: String, eierNavident: String): this(
+        title = tittel,
+        createdBy = "pam-rekrutteringsbistand",
+        updatedBy = "pam-rekrutteringsbistand",
+        source = "DIR",
+        medium = "DIR",
+        privacy = "INTERNAL_NOT_SHOWN",
+        administration = OpprettStillingAdministrationDto(
+            status = "PENDING",
+            reportee = eierNavn,
+            navIdent = eierNavident,
         ),
     )
 

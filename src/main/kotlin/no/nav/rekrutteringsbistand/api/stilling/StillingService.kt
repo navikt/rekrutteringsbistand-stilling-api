@@ -60,12 +60,13 @@ class StillingService(
     }
 
     @Transactional
-    fun opprettNyStilling(opprettDto: OpprettRekrutteringsbistandstillingDto): RekrutteringsbistandStilling {
+    fun opprettNyStilling(opprettDto: OpprettRekrutteringsbistandstillingDto, tokenUtils: TokenUtils): RekrutteringsbistandStilling {
+        val veileder = tokenUtils.hentInnloggetVeileder()
         return opprettStilling(
-            opprettStilling = opprettDto.stilling.toArbeidsplassenDto(title = "Ny stilling"),
+            opprettStilling = OpprettStillingDto(tittel = "Ny stilling", tokenUtils),
             stillingskategori = opprettDto.kategori,
-            eierNavident = opprettDto.eierNavident,
-            eierNavn = opprettDto.eierNavn,
+            eierNavident = veileder.navIdent,
+            eierNavn = veileder.displayName,
             eierNavKontorEnhetId = opprettDto.eierNavKontorEnhetId,
         )
     }
@@ -103,7 +104,7 @@ class StillingService(
                 adminStatus = stilling.administration.status
             )
         )
-        log.info("Opprettet stilling i databasen med uuid: ${uuid}")
+        log.info("Opprettet stilling i databasen med uuid: $uuid")
         direktemeldtStillingService.settAnnonsenrFraDbId(uuid.toString())
         val direktemeldtStillingFraDb = direktemeldtStillingService.hentDirektemeldtStilling(uuid.toString())!!
 
@@ -130,19 +131,21 @@ class StillingService(
     }
 
     @Transactional
-    fun kopierStilling(stillingsId: String): RekrutteringsbistandStilling {
+    fun kopierStilling(stillingsId: String, navIdent: String?, displayName: String?, eierNavKontorEnhetId: String?): RekrutteringsbistandStilling {
         log.info("Kopierer stilling med uuid: $stillingsId")
         val eksisterendeRekrutteringsbistandStilling = hentRekrutteringsbistandStilling(stillingsId)
         val eksisterendeStilling = eksisterendeRekrutteringsbistandStilling.stilling
         val kopi = eksisterendeStilling.toKopiertStilling(tokenUtils)
 
-        return opprettStilling(
+        val nyStilling = opprettStilling(
             opprettStilling = kopi,
             stillingskategori = kategoriMedDefault(eksisterendeRekrutteringsbistandStilling.stillingsinfo),
-            eierNavKontorEnhetId = eksisterendeRekrutteringsbistandStilling.stillingsinfo?.eierNavKontorEnhetId,
-            eierNavident = eksisterendeRekrutteringsbistandStilling.stillingsinfo?.eierNavident,
-            eierNavn = eksisterendeRekrutteringsbistandStilling.stillingsinfo?.eierNavn,
+            eierNavident = navIdent,
+            eierNavn = displayName,
+            eierNavKontorEnhetId = eierNavKontorEnhetId,
         )
+        log.info("Opprettet stilling ${nyStilling.stilling.uuid} er en kopi av stilling $stillingsId")
+        return nyStilling
     }
 
     fun kategoriMedDefault(stillingsInfo: StillingsinfoDto?) =
@@ -151,7 +154,8 @@ class StillingService(
     @Transactional
     fun oppdaterRekrutteringsbistandStilling(
         dto: RekrutteringsbistandStilling,
-        queryString: String?
+        queryString: String?,
+        eier: Eier
     ): RekrutteringsbistandStilling {
         log.info("Oppdaterer stilling med uuid: ${dto.stilling.uuid}")
 
@@ -172,12 +176,10 @@ class StillingService(
         val eksisterendeStillingIDb = direktemeldtStillingService.hentDirektemeldtStilling(id.asString())
         val eksisterendeStillingsinfo: Stillingsinfo? = stillingsinfoService.hentStillingsinfo(id)
 
-        // Dette vil hjelpe til med å fylle ut navkontor for stillinger som ikke allerede har det satt hvis de blir oppdatert
-        if (eksisterendeStillingsinfo != null && dto.stillingsinfo?.eierNavKontorEnhetId != null) {
-            stillingsinfoService.endreNavKontor(
-                stillingsinfoId = eksisterendeStillingsinfo.stillingsinfoid,
-                navKontorEnhetId = dto.stillingsinfo.eierNavKontorEnhetId,
-            )
+
+        // Endrer eier på stillingsinfo, passer også på at navKontorEnhetId blir oppdatert
+        if (eksisterendeStillingsinfo != null && dto.stillingsinfo != null) {
+            stillingsinfoService.oppdaterEier(Stillingsinfoid(dto.stillingsinfo.stillingsinfoid), eier)
         } else if (eksisterendeStillingsinfo == null) {
             log.info("Fant ikke stillingsinfo for stilling med id ved en oppdatering: ${dto.stilling.uuid}")
         }
@@ -280,6 +282,15 @@ class StillingService(
 
         if (PubliserteArbeidsplassenStillinger.erPublisertPåArbeidsplassenViaRestApi(direktemeldtStilling.stillingsId)) {
             arbeidsplassenKlient.slettStilling(stillingsId)
+        } else {
+            val stillingsinfo: Stillingsinfo? = stillingsinfoService.hentStillingsinfo(Stillingsid(stillingsId))
+            // Sjekk om stillingen skal sendes til arbeidsplassen
+            if (stillingsinfo?.stillingskategori != Stillingskategori.FORMIDLING && direktemeldtStilling.innhold.privacy == "SHOW_ALL") {
+                stillingOutboxService.lagreMeldingIOutbox(
+                    stillingsId = Stillingsid(stillingsId).verdi,
+                    eventName = EventName.PUBLISER_ELLER_AVPUBLISER_TIL_ARBEIDSPLASSEN
+                )
+            }
         }
 
         return slettetStilling.toStilling()

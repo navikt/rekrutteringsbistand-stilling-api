@@ -7,13 +7,14 @@ import com.github.tomakehurst.wiremock.junit5.WireMockExtension
 import com.github.tomakehurst.wiremock.matching.UrlPattern
 import no.nav.rekrutteringsbistand.api.*
 import no.nav.rekrutteringsbistand.api.Testdata.enOpprettRekrutteringsbistandstillingDto
-import no.nav.rekrutteringsbistand.api.Testdata.enOpprettStillingDto
 import no.nav.rekrutteringsbistand.api.Testdata.enOpprettetStilling
 import no.nav.rekrutteringsbistand.api.Testdata.enRekrutteringsbistandStilling
 import no.nav.rekrutteringsbistand.api.Testdata.enRekrutteringsbistandStillingUtenEier
 import no.nav.rekrutteringsbistand.api.Testdata.enStilling
 import no.nav.rekrutteringsbistand.api.Testdata.enStillingsinfo
 import no.nav.rekrutteringsbistand.api.Testdata.enStillingsinfoUtenEier
+import no.nav.rekrutteringsbistand.api.Testdata.enVeileder
+import no.nav.rekrutteringsbistand.api.arbeidsplassen.OpprettStillingDto
 import no.nav.rekrutteringsbistand.api.config.MockLogin
 import no.nav.rekrutteringsbistand.api.opensearch.StillingssokProxyClient
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsid
@@ -143,9 +144,8 @@ internal class StillingComponentTest {
 
     @Test
     fun `Ved opprettelse av stilling skal stillingstittel i arbeidsplassen være "Ny stilling" selv om frontend ikke sender noen stillingstittel`() {
-        val requestUtenStillingstittel = enOpprettRekrutteringsbistandstillingDto.copy(
-            stilling = enOpprettStillingDto.copy(categoryList = emptyList())
-        )
+        val requestUtenStillingstittel = enOpprettRekrutteringsbistandstillingDto
+        val enNyStilling = OpprettStillingDto(eierNavn = "Clark Kent", eierNavident = "C12345")
 
         mockKandidatlisteOppdatering()
         mockAzureObo(wiremockAzure)
@@ -155,7 +155,7 @@ internal class StillingComponentTest {
             requestUtenStillingstittel,
             RekrutteringsbistandStilling::class.java
         ).also {
-            val stilling = requestUtenStillingstittel.stilling
+            val stilling = enNyStilling
             assertThat(it.stilling.title).isEqualTo("Ny stilling")
             assertThat(it.stilling.administration?.navIdent).isEqualTo(stilling.administration.navIdent)
             assertThat(it.stilling.administration?.reportee).isEqualTo(stilling.administration.reportee)
@@ -190,6 +190,35 @@ internal class StillingComponentTest {
             RekrutteringsbistandStilling::class.java
         ).also {
             assertThat(it.stilling.title).isEqualTo(styrkTittel)
+        }
+    }
+
+    @Test
+    fun `kopier stilling skal overskrive navIdent, eierNavn og eierNavKontorEnhetId`() {
+        mockKandidatlisteOppdatering()
+        mockAzureObo(wiremockAzure)
+
+        val eksisterendeStilling = Testdata.enDirektemeldtStilling.copy(innhold = Testdata.enDirektemeldtStilling.innhold.copy(
+            administration = DirektemeldtStillingAdministration(
+                comments = null,
+                navIdent = "skal overskrives",
+                reportee = "skal overskrives",
+                remarks = emptyList(),
+            )
+        ))
+        direktemeldtStillingRepository.lagreDirektemeldtStilling(eksisterendeStilling)
+
+        val eierNavKontorEnhetId = "navKontor"
+        restTemplate.postForObject(
+            "$localBaseUrl/rekrutteringsbistandstilling/kopier/${eksisterendeStilling.stillingsId}",
+            KopierStillingDto(eierNavKontorEnhetId = eierNavKontorEnhetId),
+            RekrutteringsbistandStilling::class.java
+        ).also {
+            assertThat(it.stillingsinfo?.eierNavident).isEqualTo(enVeileder.navIdent)
+            assertThat(it.stillingsinfo?.eierNavn).isEqualTo(enVeileder.displayName)
+            assertThat(it.stillingsinfo?.eierNavKontorEnhetId).isEqualTo(eierNavKontorEnhetId)
+            assertThat(it.stilling.administration?.navIdent).isEqualTo(enVeileder.navIdent)
+            assertThat(it.stilling.administration?.reportee).isEqualTo(enVeileder.displayName)
         }
     }
 

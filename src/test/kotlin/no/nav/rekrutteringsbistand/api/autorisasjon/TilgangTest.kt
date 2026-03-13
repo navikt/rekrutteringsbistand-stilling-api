@@ -342,7 +342,7 @@ private class Kall(private val webClient: WebTestClient, private val mockLogin: 
             put(
                 stillingInfoPath,
                 rolle,
-                StillingsinfoInboundDto(stilling.uuid, "A123456", "Test Testesen", "1234")
+                StillingsinfoInboundDto(stilling.uuid, "A123456")
             )
         }
     }
