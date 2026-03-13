@@ -3,14 +3,12 @@ package no.nav.rekrutteringsbistand.api.arbeidsplassen
 import io.micrometer.core.instrument.Metrics
 import io.micrometer.core.instrument.Timer
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
-import no.nav.rekrutteringsbistand.api.stilling.Page
 import no.nav.rekrutteringsbistand.api.stilling.FrontendStilling
 import no.nav.rekrutteringsbistand.api.support.config.ExternalConfiguration
 import no.nav.rekrutteringsbistand.api.support.log
 import no.nav.rekrutteringsbistand.api.support.rest.RetrySpringRestTemplate.retry
 import no.nav.rekrutteringsbistand.api.support.toMultiValueMap
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders.*
 import org.springframework.http.HttpMethod
@@ -20,7 +18,6 @@ import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Component
 import org.springframework.web.client.*
 import org.springframework.web.server.ResponseStatusException
-import org.springframework.web.util.UriComponentsBuilder
 import java.io.EOFException
 import java.time.Duration
 import java.util.UUID
@@ -80,13 +77,13 @@ class ArbeidsplassenKlient(
         )
     }
 
-    fun oppdaterStilling(stilling: ArbeidsplassenStillingDto, queryString: String?): ArbeidsplassenStillingDto =
+    fun oppdaterStilling(stilling: ArbeidsplassenStillingDto): ArbeidsplassenStillingDto =
         timer("rekrutteringsbistand.stilling.arbeidsplassen.oppdaterStilling.kall.tid") {
             val url = "${hentBaseUrl()}/api/v1/ads/${stilling.uuid}"
 
             try {
                 val response = restTemplate.exchange(
-                    url + if (queryString != null) "?$queryString" else "",
+                    url,
                     HttpMethod.PUT,
                     HttpEntity(stilling, httpHeaders()),
                     ArbeidsplassenStillingDto::class.java

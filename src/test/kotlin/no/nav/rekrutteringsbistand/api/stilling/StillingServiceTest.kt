@@ -170,7 +170,7 @@ class StillingServiceTest {
         whenever(direktemeldtStillingService.hentDirektemeldtStilling(stillingsid)).thenReturn(direktemeldtStilling)
         whenever(direktemeldtStillingService.hentDirektemeldtStilling(stillingsid.asString())).thenReturn(direktemeldtStilling)
 
-        stillingService.oppdaterRekrutteringsbistandStilling(rekrutteringsbistandStilling, null, eier)
+        stillingService.oppdaterRekrutteringsbistandStilling(rekrutteringsbistandStilling, eier)
 
         verify(times(0)) { stillingOutboxService.lagreMeldingIOutbox(
             any(), any()) }

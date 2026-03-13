@@ -154,7 +154,6 @@ class StillingService(
     @Transactional
     fun oppdaterRekrutteringsbistandStilling(
         dto: RekrutteringsbistandStilling,
-        queryString: String?,
         eier: Eier
     ): RekrutteringsbistandStilling {
         log.info("Oppdaterer stilling med uuid: ${dto.stilling.uuid}")
@@ -219,7 +218,7 @@ class StillingService(
             // Hent stilling før den oppdateres, da det er en OptimisticLocking strategi på 'updated' feltet hos Arbeidsplassen
             val existerendeStilling = arbeidsplassenKlient.hentStilling(dto.stilling.uuid)
             arbeidsplassenKlient.oppdaterStilling(
-                stilling.toArbeidsplassenDto(existerendeStilling.id).copy(updated = existerendeStilling.updated,), queryString
+                stilling.toArbeidsplassenDto(existerendeStilling.id).copy(updated = existerendeStilling.updated,)
             )
             log.info("Oppdaterte stilling hos Arbeidsplassen med uuid: ${dto.stilling.uuid}")
         } else {

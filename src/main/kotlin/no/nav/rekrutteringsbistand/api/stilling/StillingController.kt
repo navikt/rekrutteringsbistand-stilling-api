@@ -55,7 +55,7 @@ class StillingController(private val stillingsinfoService: StillingsinfoService,
         val veileder = tokenUtils.hentInnloggetVeileder()
         val eier = Eier(navn = veileder.displayName, navident = veileder.navIdent, navKontorEnhetId = rekrutteringsbistandStillingDto.stillingsinfo?.eierNavKontorEnhetId)
 
-        val oppdatertStilling = stillingService.oppdaterRekrutteringsbistandStilling(dto = rekrutteringsbistandStillingDto, queryString = request.queryString, eier = eier)
+        val oppdatertStilling = stillingService.oppdaterRekrutteringsbistandStilling(dto = rekrutteringsbistandStillingDto, eier = eier)
         return ok(oppdatertStilling)
     }
 
