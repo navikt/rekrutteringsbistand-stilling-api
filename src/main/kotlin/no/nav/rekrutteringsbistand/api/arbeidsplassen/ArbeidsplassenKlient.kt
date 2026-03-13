@@ -79,7 +79,14 @@ class ArbeidsplassenKlient(
 
     fun oppdaterStilling(stilling: ArbeidsplassenStillingDto): ArbeidsplassenStillingDto =
         timer("rekrutteringsbistand.stilling.arbeidsplassen.oppdaterStilling.kall.tid") {
-            val url = "${hentBaseUrl()}/api/v1/ads/${stilling.uuid}"
+            val uuid = try {
+                UUID.fromString(stilling.uuid)
+            } catch (_: IllegalArgumentException) {
+                throw ResponseStatusException(
+                    BAD_REQUEST, "Ugyldig stillingsId. Må være en gyldig UUID."
+                )
+            }
+            val url = "${hentBaseUrl()}/api/v1/ads/$uuid"
 
             try {
                 val response = restTemplate.exchange(
@@ -122,7 +129,7 @@ class ArbeidsplassenKlient(
         melding: String, url: String, exception: RestClientResponseException
     ): ResponseStatusException {
         val logMsg =
-            "$melding. URL: $url, Status: ${exception.rawStatusCode}, Body: ${exception.responseBodyAsString}"
+            "$melding. URL: $url, Status: ${exception.statusCode}, Body: ${exception.responseBodyAsString}"
         when (exception.statusCode.value()) {
             NOT_FOUND.value() -> log.warn(logMsg, exception)
             PRECONDITION_FAILED.value() -> log.info(logMsg, exception)
@@ -140,7 +147,7 @@ class ArbeidsplassenKlient(
         melding: String, url: String, exception: UnknownContentTypeException
     ): ResponseStatusException {
         val logMsg =
-            "$melding. URL: $url, Status: ${exception.rawStatusCode}, Body: ${exception.responseBodyAsString}"
+            "$melding. URL: $url, Status: ${exception.statusCode}, Body: ${exception.responseBodyAsString}"
         log.error(logMsg, exception)
         return ResponseStatusException(INTERNAL_SERVER_ERROR, melding)
     }
