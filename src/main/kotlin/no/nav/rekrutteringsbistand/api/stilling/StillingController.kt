@@ -1,7 +1,6 @@
 package no.nav.rekrutteringsbistand.api.stilling
 
 import no.nav.rekrutteringsbistand.api.RekrutteringsbistandStilling
-import no.nav.rekrutteringsbistand.api.OppdaterRekrutteringsbistandStillingDto
 import no.nav.security.token.support.core.api.Protected
 import org.springframework.http.ResponseEntity
 import org.springframework.http.ResponseEntity.ok
@@ -37,7 +36,7 @@ class StillingController(private val stillingsinfoService: StillingsinfoService,
     }
 
     @PutMapping("/rekrutteringsbistandstilling")
-    fun oppdaterStilling(request: HttpServletRequest, @RequestBody rekrutteringsbistandStillingDto: OppdaterRekrutteringsbistandStillingDto): ResponseEntity<OppdaterRekrutteringsbistandStillingDto> {
+    fun oppdaterStilling(request: HttpServletRequest, @RequestBody rekrutteringsbistandStillingDto: RekrutteringsbistandStilling): ResponseEntity<RekrutteringsbistandStilling> {
         val stillingskategori = stillingsinfoService.hentStillingsinfo(
             Stillingsid(rekrutteringsbistandStillingDto.stilling.uuid)
         )?.stillingskategori ?: Stillingskategori.STILLING

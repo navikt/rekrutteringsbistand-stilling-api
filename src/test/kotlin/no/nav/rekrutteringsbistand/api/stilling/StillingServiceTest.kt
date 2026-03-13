@@ -1,5 +1,8 @@
 package no.nav.rekrutteringsbistand.api.stilling
 
+import no.nav.rekrutteringsbistand.api.RekrutteringsbistandStilling
+import no.nav.rekrutteringsbistand.api.Testdata.enDirektemeldtStilling
+import no.nav.rekrutteringsbistand.api.Testdata.enStilling
 import no.nav.rekrutteringsbistand.api.arbeidsplassen.ArbeidsplassenKlient
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
 import no.nav.rekrutteringsbistand.api.geografi.FylkeDTO
@@ -9,14 +12,23 @@ import no.nav.rekrutteringsbistand.api.geografi.PostDataDTO
 import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteKlient
 import no.nav.rekrutteringsbistand.api.opensearch.StillingssokProxyClient
 import no.nav.rekrutteringsbistand.api.stilling.outbox.StillingOutboxService
+import no.nav.rekrutteringsbistand.api.stillingsinfo.Eier
+import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsid
+import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsinfo
 import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoService
+import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsinfoid
+import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingskategori
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.mockito.Mock
+import org.mockito.kotlin.any
+import org.mockito.kotlin.times
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.boot.test.context.SpringBootTest
+import java.util.UUID
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
@@ -133,5 +145,34 @@ class StillingServiceTest {
         assertEquals("1201", populertGeografi?.municipalCode)
         assertEquals("BERGEN", populertGeografi?.municipal)
         assertEquals("BERGEN", populertGeografi?.city)
+    }
+
+    @Test
+    fun `Jobbmesse skal ikke kunne publiseres til arbeidsplassen`() {
+        val stillingsid = Stillingsid("123e4567-e89b-12d3-a456-426614174000")
+        val stillingsinfo = Stillingsinfo(
+            stillingsid = stillingsid,
+            stillingsinfoid = Stillingsinfoid("123e4567-e89b-12d3-a456-426614174001"),
+            eier = Eier(navident = "Z123456",
+                navn = "Ola Nordmann", navKontorEnhetId = "1234"),
+
+            stillingskategori = Stillingskategori.JOBBMESSE,
+
+        )
+        val direktemeldtStilling = enDirektemeldtStilling.copy(stillingsId = UUID.fromString(stillingsid.asString()), innhold = enDirektemeldtStilling.innhold.copy(privacy = "SHOW_ALL"))
+        val frontendStilling = enStilling.copy(uuid = stillingsid.toString())
+        val rekrutteringsbistandStilling = RekrutteringsbistandStilling(
+            stillingsinfo = stillingsinfo.asStillingsinfoDto(),
+            stilling = frontendStilling
+        )
+
+        whenever(stillingsinfoService.hentStillingsinfo(stillingsid)).thenReturn(stillingsinfo)
+        whenever(direktemeldtStillingService.hentDirektemeldtStilling(stillingsid)).thenReturn(direktemeldtStilling)
+        whenever(direktemeldtStillingService.hentDirektemeldtStilling(stillingsid.asString())).thenReturn(direktemeldtStilling)
+
+        stillingService.oppdaterRekrutteringsbistandStilling(rekrutteringsbistandStilling, null)
+
+        verify(times(0)) { stillingOutboxService.lagreMeldingIOutbox(
+            any(), any()) }
     }
 }

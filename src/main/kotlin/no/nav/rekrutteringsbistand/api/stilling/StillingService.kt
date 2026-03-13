@@ -1,7 +1,6 @@
 package no.nav.rekrutteringsbistand.api.stilling
 
 import no.nav.rekrutteringsbistand.AuditLogg
-import no.nav.rekrutteringsbistand.api.OppdaterRekrutteringsbistandStillingDto
 import no.nav.rekrutteringsbistand.api.RekrutteringsbistandStilling
 import no.nav.rekrutteringsbistand.api.arbeidsplassen.ArbeidsplassenKlient
 import no.nav.rekrutteringsbistand.api.arbeidsplassen.OpprettStillingDto
@@ -151,9 +150,9 @@ class StillingService(
 
     @Transactional
     fun oppdaterRekrutteringsbistandStilling(
-        dto: OppdaterRekrutteringsbistandStillingDto,
+        dto: RekrutteringsbistandStilling,
         queryString: String?
-    ): OppdaterRekrutteringsbistandStillingDto {
+    ): RekrutteringsbistandStilling {
         log.info("Oppdaterer stilling med uuid: ${dto.stilling.uuid}")
 
         if(dto.stilling.source == "DIR") {
@@ -223,7 +222,7 @@ class StillingService(
             log.info("Oppdaterte stilling hos Arbeidsplassen med uuid: ${dto.stilling.uuid}")
         } else {
             // Sjekk om stillingen skal sendes til arbeidsplassen
-            if (eksisterendeStillingsinfo?.stillingskategori != Stillingskategori.FORMIDLING && (dto.stilling.privacy == "SHOW_ALL"
+            if (eksisterendeStillingsinfo?.stillingskategori == Stillingskategori.STILLING && (dto.stilling.privacy == "SHOW_ALL"
                         || (eksisterendeStillingIDb?.innhold?.privacy == "SHOW_ALL" && dto.stilling.privacy == "INTERNAL_NOT_SHOWN"))) {
                 stillingOutboxService.lagreMeldingIOutbox(
                     stillingsId = id.verdi,
@@ -234,9 +233,8 @@ class StillingService(
 
         val oppdatertStillingsinfo: Stillingsinfo? = stillingsinfoService.hentStillingsinfo(id)
 
-        return OppdaterRekrutteringsbistandStillingDto(
+        return RekrutteringsbistandStilling(
             stilling = direktemeldtStillingFraDb.toStilling(),
-            stillingsinfoid = eksisterendeStillingsinfo?.stillingsinfoid?.asString(),
             stillingsinfo = oppdatertStillingsinfo?.asStillingsinfoDto(),
         ).also {
             if (direktemeldtStillingFraDb.innhold.source.equals("DIR", ignoreCase = false)) {
@@ -249,7 +247,7 @@ class StillingService(
         }
     }
 
-    private fun loggEventuellOvertagelse(dto: OppdaterRekrutteringsbistandStillingDto) {
+    private fun loggEventuellOvertagelse(dto: RekrutteringsbistandStilling) {
         val gammelStilling = direktemeldtStillingService.hentDirektemeldtStilling(dto.stilling.uuid)
         val gammelEier = gammelStilling?.innhold?.administration?.navIdent
         val nyEier = dto.stilling.administration?.navIdent
