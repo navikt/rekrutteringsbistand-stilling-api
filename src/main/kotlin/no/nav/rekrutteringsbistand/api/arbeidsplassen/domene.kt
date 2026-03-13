@@ -2,7 +2,6 @@ package no.nav.rekrutteringsbistand.api.arbeidsplassen
 
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
 import no.nav.rekrutteringsbistand.api.stilling.*
-import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsid
 import java.time.LocalDateTime
 import java.util.HashMap
 

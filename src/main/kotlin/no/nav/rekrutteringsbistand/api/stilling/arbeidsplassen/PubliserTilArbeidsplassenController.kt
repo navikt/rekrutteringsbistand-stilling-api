@@ -38,6 +38,8 @@ class PubliserTilArbeidsplassenController(
         val stillingsinfo = stillingsinfoService.hentStillingsinfo(Stillingsid(uuid))
         if (stillingsinfo?.stillingskategori == Stillingskategori.FORMIDLING) {
             throw IllegalArgumentException("Kan ikke sende formidling/etterregistrering til arbeidsplassen")
+        } else if (stillingsinfo?.stillingskategori == Stillingskategori.JOBBMESSE) {
+            throw IllegalArgumentException("Kan ikke sende jobbmesse til arbeidsplassen")
         }
 
         val stilling = stillingService.hentDirektemeldtStilling(uuid.toString())

@@ -238,12 +238,12 @@ internal class StillingComponentTest {
             administration = stilling.toStilling().administration?.copy(navIdent = nyEier)
         )
 
-        val dto = OppdaterRekrutteringsbistandStillingDto(
-            stillingsinfoid = stillingsinfo.stillingsinfoid.asString(), stilling = oppdatertStilling, stillingsinfo = stillingsinfo.asStillingsinfoDto()
+        val dto = RekrutteringsbistandStilling(
+            stilling = oppdatertStilling, stillingsinfo = stillingsinfo.asStillingsinfoDto()
         )
 
         restTemplate.exchange(
-            "$localBaseUrl/rekrutteringsbistandstilling", HttpMethod.PUT, HttpEntity(dto), OppdaterRekrutteringsbistandStillingDto::class.java
+            "$localBaseUrl/rekrutteringsbistandstilling", HttpMethod.PUT, HttpEntity(dto), RekrutteringsbistandStilling::class.java
         ).also {
             assertThat(it.body?.stilling?.administration?.navIdent).isEqualTo(nyEier)
         }
@@ -267,14 +267,13 @@ internal class StillingComponentTest {
         mockAzureObo(wiremockAzure)
         mockKandidatlisteOppdatering()
 
-        val dto = OppdaterRekrutteringsbistandStillingDto(
-            stillingsinfoid = stillingsinfo.stillingsinfoid.asString(),
+        val dto = RekrutteringsbistandStilling(
             stilling = stilling.toStilling(),
             stillingsinfo = stillingsinfo.asStillingsinfoDto(),
         )
 
         restTemplate.exchange(
-            "$localBaseUrl/rekrutteringsbistandstilling", HttpMethod.PUT, HttpEntity(dto), OppdaterRekrutteringsbistandStillingDto::class.java
+            "$localBaseUrl/rekrutteringsbistandstilling", HttpMethod.PUT, HttpEntity(dto), RekrutteringsbistandStilling::class.java
         ).also {
             assertThat(it.body?.stilling?.title).isEqualTo(styrkTittel)
             assertThat(it.body?.stilling?.categoryList[0]?.code).isEqualTo(styrkCode)
@@ -290,8 +289,7 @@ internal class StillingComponentTest {
         mockAzureObo(wiremockAzure)
         mockKandidatlisteOppdateringFeiler()
 
-        val dto = OppdaterRekrutteringsbistandStillingDto(
-            stillingsinfoid = stillingsinfo.stillingsinfoid.asString(),
+        val dto = RekrutteringsbistandStilling(
             stilling = stilling,
             stillingsinfo = stillingsinfo.asStillingsinfoDto(),
         )
@@ -316,8 +314,7 @@ internal class StillingComponentTest {
 
         stillingsinfoRepository.opprett(stillingsinfo)
 
-        val dto = OppdaterRekrutteringsbistandStillingDto(
-            stillingsinfoid = stillingsinfo.stillingsinfoid.asString(),
+        val dto = RekrutteringsbistandStilling(
             stilling = rekrutteringsbistandStilling.stilling.copy(versjon = 1),
             stillingsinfo = stillingsinfo.asStillingsinfoDto(),
         )
@@ -326,10 +323,10 @@ internal class StillingComponentTest {
             "$localBaseUrl/rekrutteringsbistandstilling",
             HttpMethod.PUT,
             HttpEntity(dto),
-            OppdaterRekrutteringsbistandStillingDto::class.java
+            RekrutteringsbistandStilling::class.java
         ).body!!.also {
             assertThat(it.stilling).isEqualTo(rekrutteringsbistandStilling.stilling.copy(updated = it.stilling.updated, versjon = 2)) // ignorer id og updated
-            assertThat(it.stillingsinfoid).isEqualTo(stillingsinfo.stillingsinfoid.asString())
+            assertThat(it.stillingsinfo?.stillingsinfoid).isEqualTo(stillingsinfo.stillingsinfoid.asString())
         }
     }
 
@@ -345,16 +342,15 @@ internal class StillingComponentTest {
 
         restTemplate.exchange(
             "$localBaseUrl/rekrutteringsbistandstilling", HttpMethod.PUT, HttpEntity(
-                OppdaterRekrutteringsbistandStillingDto(
-                    stillingsinfoid = rekrutteringsbistandStilling.stillingsinfo?.stillingsinfoid,
+                RekrutteringsbistandStilling(
                     stilling = rekrutteringsbistandStilling.stilling.copy(versjon = 1),
                     stillingsinfo = null,
                 )
-            ), OppdaterRekrutteringsbistandStillingDto::class.java
+            ), RekrutteringsbistandStilling::class.java
         ).body.also {
             assertThat(it!!.stilling.uuid).isNotEmpty
             assertThat(it.stilling).isEqualTo(rekrutteringsbistandStilling.stilling.copy(updated = it.stilling.updated, versjon = 2)) // ignorer id og updated
-            assertThat(it.stillingsinfoid).isEqualTo(rekrutteringsbistandStilling.stillingsinfo?.stillingsinfoid)
+            assertThat(it.stillingsinfo?.stillingsinfoid).isEqualTo(rekrutteringsbistandStilling.stillingsinfo?.stillingsinfoid)
         }
     }
 

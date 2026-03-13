@@ -8,7 +8,6 @@ import no.nav.rekrutteringsbistand.api.Testdata.stillingSomIkkeSkalDeaktiveres
 import no.nav.rekrutteringsbistand.api.Testdata.stillingerSomSkalAktiveres
 import no.nav.rekrutteringsbistand.api.Testdata.stillingerSomSkalDeaktiveres
 import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue

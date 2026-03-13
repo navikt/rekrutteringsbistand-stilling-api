@@ -10,14 +10,6 @@ data class RekrutteringsbistandStilling(
     val stilling: FrontendStilling
 )
 
-// TODO: Slutt å bruke denne DTO'en og bytt med RekrutteringsbistandStilling når gammel frontend er borte
-@JsonIgnoreProperties(ignoreUnknown = true)
-data class OppdaterRekrutteringsbistandStillingDto(
-    val stillingsinfoid: String?,
-    val stilling: FrontendStilling,
-    val stillingsinfo: StillingsinfoDto?
-)
-
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class KopierStillingDto(
     val eierNavKontorEnhetId: String?,

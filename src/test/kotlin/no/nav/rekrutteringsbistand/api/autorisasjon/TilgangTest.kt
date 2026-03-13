@@ -6,7 +6,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.options
-import no.nav.rekrutteringsbistand.api.OppdaterRekrutteringsbistandStillingDto
+import no.nav.rekrutteringsbistand.api.RekrutteringsbistandStilling
 import no.nav.rekrutteringsbistand.api.TestRepository
 import no.nav.rekrutteringsbistand.api.Testdata
 import no.nav.rekrutteringsbistand.api.autorisasjon.StatusType.*
@@ -19,7 +19,6 @@ import no.nav.rekrutteringsbistand.api.standardsøk.LagreStandardsøkDto
 import no.nav.rekrutteringsbistand.api.standardsøk.StandardsøkRepository
 import no.nav.rekrutteringsbistand.api.stilling.DirektemeldtStillingRepository
 import no.nav.rekrutteringsbistand.api.stilling.FrontendStilling
-import no.nav.rekrutteringsbistand.api.stilling.Page
 import no.nav.rekrutteringsbistand.api.stillingsinfo.*
 import no.nav.rekrutteringsbistand.api.stillingsinfo.indekser.BulkStillingsinfoInboundDto
 import no.nav.rekrutteringsbistand.api.support.toMultiValueMap
@@ -325,8 +324,7 @@ private class Kall(private val webClient: WebTestClient, private val mockLogin: 
             return put(
                 stillingPath,
                 rolle,
-                OppdaterRekrutteringsbistandStillingDto(
-                    stillingsinfoid = stillingsInfo.stillingsinfoid.asString(),
+                RekrutteringsbistandStilling(
                     stilling = stilling,
                     stillingsinfo = stillingsInfo.asStillingsinfoDto()
                 )
