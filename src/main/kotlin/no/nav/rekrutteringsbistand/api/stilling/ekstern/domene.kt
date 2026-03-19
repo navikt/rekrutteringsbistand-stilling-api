@@ -2,6 +2,7 @@ package no.nav.rekrutteringsbistand.api.stilling.ekstern
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import no.nav.rekrutteringsbistand.api.stilling.Geografi
+import no.nav.rekrutteringsbistand.api.stilling.Kategori
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingskategori
 import java.time.LocalDateTime
 import java.util.*
@@ -9,19 +10,20 @@ import kotlin.collections.ArrayList
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class StillingForPersonbruker(
-        val annonsenr: String?,
-        val uuid: String?,
-        val updated: LocalDateTime?,
-        val contactList: List<Contact> = ArrayList(),
-        val title: String?,
-        val medium: String?,
-        val employer: Arbeidsgiver?,
-        val businessName: String?,
-        val status: String?,
-        val location: Geografi?,
-        val properties: Map<String, String> = HashMap(),
-        val source: String?,
-        val stillingskategori: Stillingskategori?
+    val annonsenr: String?,
+    val uuid: String?,
+    val updated: LocalDateTime?,
+    val contactList: List<Contact> = ArrayList(),
+    val title: String?,
+    val medium: String?,
+    val employer: Arbeidsgiver?,
+    val businessName: String?,
+    val status: String?,
+    val location: Geografi?,
+    val properties: Map<String, String> = HashMap(),
+    val source: String?,
+    val stillingskategori: Stillingskategori?,
+    val categoryList: List<Kategori> = ArrayList(),
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
