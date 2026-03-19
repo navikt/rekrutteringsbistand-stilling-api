@@ -208,6 +208,7 @@ internal class StillingEksternComponentTest {
             uuid = stilling.uuid,
             source = stilling.source,
             stillingskategori = stillingskategori,
+            categoryList = stilling.categoryList
         )
     }
 

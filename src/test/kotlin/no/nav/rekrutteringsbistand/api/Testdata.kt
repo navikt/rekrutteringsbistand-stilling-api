@@ -20,7 +20,7 @@ object Testdata {
 
     private  val styrkCode = "3112.12"
     private val styrkTittel = "Byggeleder"
-    val styrk = Kategori(2148934, styrkCode, "STYRK08NAV", styrkTittel, null, null)
+    val styrk = Kategori(id = null, code = styrkCode, categoryType = "STYRK08NAV", styrkTittel, null, null)
 
     val enStilling = FrontendStilling(
         uuid = UUID.randomUUID().toString(),
