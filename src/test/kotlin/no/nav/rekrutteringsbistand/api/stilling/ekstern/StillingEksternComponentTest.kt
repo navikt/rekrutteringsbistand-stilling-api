@@ -9,6 +9,7 @@ import com.github.tomakehurst.wiremock.junit5.WireMockExtension
 import no.nav.rekrutteringsbistand.api.TestRepository
 import no.nav.rekrutteringsbistand.api.Testdata.enStilling
 import no.nav.rekrutteringsbistand.api.Testdata.styrk
+import no.nav.rekrutteringsbistand.api.config.MdcTraceIdTestConfig
 import no.nav.rekrutteringsbistand.api.config.MockLogin
 import no.nav.rekrutteringsbistand.api.mockAzureObo
 import no.nav.rekrutteringsbistand.api.stilling.DirektemeldtStilling
@@ -16,6 +17,7 @@ import no.nav.rekrutteringsbistand.api.stilling.DirektemeldtStillingRepository
 import no.nav.rekrutteringsbistand.api.stilling.Kategori
 import no.nav.rekrutteringsbistand.api.stilling.FrontendStilling
 import no.nav.rekrutteringsbistand.api.stillingsinfo.*
+import no.nav.rekrutteringsbistand.api.support.log
 import no.nav.rekrutteringsbistand.api.support.toMultiValueMap
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
@@ -27,9 +29,11 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.boot.test.web.server.LocalServerPort
+import org.springframework.context.annotation.Import
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders.*
 import org.springframework.http.HttpMethod
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import java.time.ZoneId
 import java.time.ZonedDateTime
@@ -37,6 +41,7 @@ import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@Import(MdcTraceIdTestConfig::class)
 internal class StillingEksternComponentTest {
 
     @Value("\${vis-stilling.azp-name}")
@@ -138,6 +143,36 @@ internal class StillingEksternComponentTest {
             categoryList = listOf(styrk),
             forventetTittel ="Invitasjon til jobbmesse"
         )
+    }
+
+    @Test
+    fun `GET mot en stilling med ugyldig uuid skal gi 400 bad request og en utfylt problemdetails som respons`() {
+        val stilling = enStilling.copy(categoryList = listOf(styrk))
+        mockAzureObo(wiremockAzure)
+        val token = mockLogin.hentAzureAdMaskinTilMaskinToken(uriTilVisStilling)
+
+        lagreDirektemeldtStillingIDatabase(stilling)
+        val ugyldigUuid = "Ulovlig"
+
+        restTemplate.exchange(
+            "$localBaseUrl/rekrutteringsbistand/ekstern/api/v1/stilling/$ugyldigUuid",
+            HttpMethod.GET,
+            HttpEntity(
+                null, mapOf(
+                    AUTHORIZATION to "Bearer $token"
+                ).toMultiValueMap()
+            ),
+            String::class.java
+        ).also {
+            assertThat(it.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
+
+            val json = objectMapper.readTree(it.body)
+            assertThat(json.get("detail").asText()).isEqualTo("Ugyldig uuid")
+            assertThat(json.get("title").asText()).isEqualTo("Bad Request")
+            assertThat(json.get("type").asText()).isEqualTo("about:blank")
+            assertThat(json.get("status").asInt()).isEqualTo(400)
+            assertThat(json.has("traceId")).isTrue()
+        }
     }
 
     private fun testTittelPåStillingFor(

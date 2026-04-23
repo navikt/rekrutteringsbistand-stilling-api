@@ -14,6 +14,9 @@ import no.nav.rekrutteringsbistand.api.stillingsinfo.Eier
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsid
 import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoService
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingskategori
+import org.springframework.http.HttpStatus
+import org.springframework.web.server.ResponseStatusException
+import java.util.UUID
 
 @RestController
 @Protected
@@ -69,6 +72,12 @@ class StillingController(private val stillingsinfoService: StillingsinfoService,
     @GetMapping("/rekrutteringsbistandstilling/{uuid}")
     fun hentRekrutteringsbistandStilling(@PathVariable uuid: String): ResponseEntity<RekrutteringsbistandStilling> {
         // TODO styrk(kan tas til slutt): Interne stillinger burde ikke sende tittel.
+        try {
+            UUID.fromString(uuid)
+        } catch (e: IllegalArgumentException) {
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Ugyldig uuid", e)
+        }
+
         return ok(stillingService.hentRekrutteringsbistandStilling(uuid))
     }
 }

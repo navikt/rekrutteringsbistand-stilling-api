@@ -421,7 +421,7 @@ internal class StillingComponentTest {
             "$localBaseUrl/rekrutteringsbistandstilling/${enStilling.uuid}",
             HttpMethod.DELETE,
             null,
-            FrontendStilling::class.java
+            String::class.java
         ).also {
             assertThat(it.statusCode).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
         }
