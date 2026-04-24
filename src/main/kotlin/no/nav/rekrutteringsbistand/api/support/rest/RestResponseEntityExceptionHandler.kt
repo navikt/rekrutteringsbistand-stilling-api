@@ -41,9 +41,11 @@ class RestResponseEntityExceptionHandler : ResponseEntityExceptionHandler() {
     }
 
     @ExceptionHandler(JwtTokenValidatorException::class)
-    fun håndterUinnlogget(e: Exception, request: HttpServletRequest): ResponseEntity<Any>  {
+    fun håndterUinnlogget(e: Exception, request: HttpServletRequest): ResponseEntity<TraceableProblemDetail> {
         log.info("Unauthorized. requestURI=${request.requestURI}, HTTP method=${request.method}", e)
-        return ResponseEntity.status(UNAUTHORIZED).body("You are not authorized to access this resource")
+        val problem = TraceableProblemDetail.forStatusAndDetail(UNAUTHORIZED, "You are not authorized to access this resource")
+        problem.title = "Unauthorized"
+        return ResponseEntity.status(UNAUTHORIZED).body(problem)
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException::class)
@@ -63,16 +65,20 @@ class RestResponseEntityExceptionHandler : ResponseEntityExceptionHandler() {
     }
 
     @ExceptionHandler(RestClientResponseException::class)
-    @ResponseBody
     fun handleExceptionFraRestTemplate(
         e: RestClientResponseException, request: HttpServletRequest
-    ): ResponseEntity<Any>  {
+    ): ResponseEntity<TraceableProblemDetail> {
         val msg = "Mottok HTTP respons ${e.statusCode.value()} fra ${request.method} mot URL ${request.requestURL}"
         when (e.statusCode.value()) {
             403, 404 -> log.info(msg, e)
             else -> log.error(msg, e)
         }
-        return ResponseEntity.status(e.statusCode.value()).body(e.responseBodyAsString)
+        val problem = TraceableProblemDetail.forStatusAndDetail(
+            HttpStatus.valueOf(e.statusCode.value()),
+            e.responseBodyAsString
+        )
+        problem.title = e.statusText
+        return ResponseEntity.status(e.statusCode).body(problem)
     }
 
     @ExceptionHandler(value = [EmptyResultDataAccessException::class, NoContentException::class])
