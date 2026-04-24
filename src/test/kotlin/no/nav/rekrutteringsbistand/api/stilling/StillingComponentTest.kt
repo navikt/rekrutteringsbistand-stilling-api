@@ -100,7 +100,7 @@ internal class StillingComponentTest {
 
         mockAzureObo(wiremockAzure)
 
-        whenever(stillingssokProxyClient.hentStilling(stilling.uuid)).thenReturn(stilling)
+        whenever(stillingssokProxyClient.hentStilling(UUID.fromString(stilling.uuid))).thenReturn(stilling)
 
         restTemplate.getForObject(
             "$localBaseUrl/rekrutteringsbistandstilling/${stilling.uuid}", RekrutteringsbistandStilling::class.java
@@ -117,7 +117,7 @@ internal class StillingComponentTest {
         lagreDirektemeldtStillingIDatabase(stilling)
 
         mockAzureObo(wiremockAzure)
-        whenever(stillingssokProxyClient.hentStilling(stilling.uuid)).thenReturn(stilling)
+        whenever(stillingssokProxyClient.hentStilling(UUID.fromString(stilling.uuid))).thenReturn(stilling)
 
         stillingsinfoRepository.opprett(stillingsinfo)
 

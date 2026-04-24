@@ -82,7 +82,7 @@ class StillingsinfoComponentTest {
         val dto = enStillingsinfoInboundDto
         mockAzureObo(wiremockAzure)
         val stilling = enStilling
-        `when`(stillingssokProxyClient.hentStilling(stilling.uuid)).thenReturn(stilling)
+        `when`(stillingssokProxyClient.hentStilling(UUID.fromString(stilling.uuid))).thenReturn(stilling)
 
         val url = "$localBaseUrl/stillingsinfo"
         val stillingsinfoRespons =
@@ -107,7 +107,7 @@ class StillingsinfoComponentTest {
         val tilLagring = enStillingsinfoInboundDto
         mockAzureObo(wiremockAzure)
         val stilling = enStilling
-        `when`(stillingssokProxyClient.hentStilling(stilling.uuid)).thenReturn(stilling)
+        `when`(stillingssokProxyClient.hentStilling(UUID.fromString(stilling.uuid))).thenReturn(stilling)
         val url = "$localBaseUrl/stillingsinfo"
         val stillingsinfoRespons =
             restTemplate.exchange(url, HttpMethod.PUT, httpEntity(tilLagring), StillingsinfoDto::class.java)

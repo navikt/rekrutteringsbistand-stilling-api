@@ -77,8 +77,8 @@ class DirektemeldtStillingRepositoryTest {
         repository.lagreDirektemeldtStilling(direktemeldtStilling1)
         repository.lagreDirektemeldtStilling(direktemeldtStilling2)
 
-        val hentetStilling1 = repository.hentDirektemeldtStilling(direktemeldtStilling1.stillingsId.toString())
-        val hentetStilling2 = repository.hentDirektemeldtStilling(direktemeldtStilling2.stillingsId.toString())
+        val hentetStilling1 = repository.hentDirektemeldtStilling(direktemeldtStilling1.stillingsId)
+        val hentetStilling2 = repository.hentDirektemeldtStilling(direktemeldtStilling2.stillingsId)
 
         assertNotNull(hentetStilling1)
         assertNotNull(hentetStilling2)
@@ -209,9 +209,9 @@ class DirektemeldtStillingRepositoryTest {
         val stilling = enDirektemeldtStilling
         repository.lagreDirektemeldtStilling(stilling)
 
-        repository.settAnnonsenrFraDbId(stilling.stillingsId.toString())
+        repository.settAnnonsenrFraDbId(stilling.stillingsId)
 
-        val oppdatertStilling = repository.hentDirektemeldtStilling(stilling.stillingsId.toString())
+        val oppdatertStilling = repository.hentDirektemeldtStilling(stilling.stillingsId)
         assertNotNull(oppdatertStilling)
         assertTrue(oppdatertStilling?.annonsenr?.startsWith("R") ?: false)
     }

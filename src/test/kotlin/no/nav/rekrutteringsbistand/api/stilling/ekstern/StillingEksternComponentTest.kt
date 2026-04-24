@@ -17,7 +17,6 @@ import no.nav.rekrutteringsbistand.api.stilling.DirektemeldtStillingRepository
 import no.nav.rekrutteringsbistand.api.stilling.Kategori
 import no.nav.rekrutteringsbistand.api.stilling.FrontendStilling
 import no.nav.rekrutteringsbistand.api.stillingsinfo.*
-import no.nav.rekrutteringsbistand.api.support.log
 import no.nav.rekrutteringsbistand.api.support.toMultiValueMap
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
@@ -167,8 +166,8 @@ internal class StillingEksternComponentTest {
             assertThat(it.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
 
             val json = objectMapper.readTree(it.body)
-            assertThat(json.get("detail").asText()).isEqualTo("Ugyldig uuid")
-            assertThat(json.get("title").asText()).isEqualTo("Bad Request")
+            assertThat(json.get("detail").asText()).isEqualTo("Ugyldig UUID")
+            assertThat(json.get("title").asText()).isEqualTo("Valideringsfeil")
             assertThat(json.get("type").asText()).isEqualTo("about:blank")
             assertThat(json.get("status").asInt()).isEqualTo(400)
             assertThat(json.has("traceId")).isTrue()

@@ -14,8 +14,6 @@ import no.nav.rekrutteringsbistand.api.stillingsinfo.Eier
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsid
 import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoService
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingskategori
-import org.springframework.http.HttpStatus
-import org.springframework.web.server.ResponseStatusException
 import java.util.UUID
 
 @RestController
@@ -34,7 +32,7 @@ class StillingController(private val stillingsinfoService: StillingsinfoService,
     }
 
     @PostMapping("/rekrutteringsbistandstilling/kopier/{stillingsId}")
-    fun kopierStilling(@PathVariable stillingsId: String, @RequestBody kopierStillingDto: KopierStillingDto?): ResponseEntity<RekrutteringsbistandStilling> {
+    fun kopierStilling(@PathVariable stillingsId: UUID, @RequestBody kopierStillingDto: KopierStillingDto?): ResponseEntity<RekrutteringsbistandStilling> {
         val innloggetVeileder = tokenUtils.hentInnloggetVeileder()
         innloggetVeileder.validerMinstEnAvRollene(Rolle.ARBEIDSGIVERRETTET)
         val navIdent = innloggetVeileder.navIdent
@@ -63,21 +61,15 @@ class StillingController(private val stillingsinfoService: StillingsinfoService,
     }
 
     @DeleteMapping("/rekrutteringsbistandstilling/{stillingsId}")
-    fun slettRekrutteringsbistandStilling(@PathVariable(value = "stillingsId") stillingsId: String): ResponseEntity<FrontendStilling> {
+    fun slettRekrutteringsbistandStilling(@PathVariable(value = "stillingsId") stillingsId: UUID): ResponseEntity<FrontendStilling> {
         tokenUtils.hentInnloggetVeileder().validerMinstEnAvRollene(Rolle.ARBEIDSGIVERRETTET)
         val slettetStilling = stillingService.slettRekrutteringsbistandStilling(stillingsId)
         return ok(slettetStilling)
     }
 
     @GetMapping("/rekrutteringsbistandstilling/{uuid}")
-    fun hentRekrutteringsbistandStilling(@PathVariable uuid: String): ResponseEntity<RekrutteringsbistandStilling> {
+    fun hentRekrutteringsbistandStilling(@PathVariable uuid: UUID): ResponseEntity<RekrutteringsbistandStilling> {
         // TODO styrk(kan tas til slutt): Interne stillinger burde ikke sende tittel.
-        try {
-            UUID.fromString(uuid)
-        } catch (e: IllegalArgumentException) {
-            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Ugyldig uuid", e)
-        }
-
         return ok(stillingService.hentRekrutteringsbistandStilling(uuid))
     }
 }

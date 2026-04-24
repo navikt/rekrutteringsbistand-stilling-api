@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.server.ResponseStatusException
+import java.util.UUID
 
 @RestController
 @Protected
@@ -46,7 +47,7 @@ class StillingsinfoController(
         @RequestBody dto: StillingsinfoInboundDto
     ): ResponseEntity<String> {
         tokenUtils.hentInnloggetVeileder().validerMinstEnAvRollene(Rolle.ARBEIDSGIVERRETTET)
-        val stilling = direktemeldtStillingService.hentDirektemeldtStilling(dto.stillingsid)
+        val stilling = direktemeldtStillingService.hentDirektemeldtStilling(UUID.fromString(dto.stillingsid))
         val stillingsid = Stillingsid(dto.stillingsid)
         val veileder = tokenUtils.hentInnloggetVeileder()
 

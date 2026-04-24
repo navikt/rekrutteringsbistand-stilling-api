@@ -32,21 +32,21 @@ class DirektemeldtStillingService(
         )
     }
 
-    fun settAnnonsenrFraDbId(stillingsId: String) {
+    fun settAnnonsenrFraDbId(stillingsId: UUID) {
         direktemeldtStillingRepository.settAnnonsenrFraDbId(stillingsId)
 
         stillingOutboxService.lagreMeldingIOutbox(
-            stillingsId = UUID.fromString(stillingsId),
+            stillingsId = stillingsId,
             eventName = EventName.INDEKSER_DIREKTEMELDT_STILLING
         )
     }
 
-    fun hentDirektemeldtStilling(stillingsId: String): DirektemeldtStilling? {
+    fun hentDirektemeldtStilling(stillingsId: UUID): DirektemeldtStilling? {
         return direktemeldtStillingRepository.hentDirektemeldtStilling(stillingsId)
     }
 
     fun hentDirektemeldtStilling(stillingsId: Stillingsid) : DirektemeldtStilling? {
-        return hentDirektemeldtStilling(stillingsId.asString())
+        return hentDirektemeldtStilling(stillingsId.verdi)
     }
 
     fun hentAlleStillingsIder(): List<UUID> {

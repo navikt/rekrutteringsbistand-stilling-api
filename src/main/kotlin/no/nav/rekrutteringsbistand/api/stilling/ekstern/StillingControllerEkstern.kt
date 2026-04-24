@@ -8,7 +8,6 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RestController
-import org.springframework.web.server.ResponseStatusException
 import java.util.*
 
 @RestController
@@ -19,14 +18,9 @@ class StillingControllerEkstern(
 ) {
 
     @GetMapping("/rekrutteringsbistand/ekstern/api/v1/stilling/{uuid}")
-    fun hentStillingTilPersonbruker(@PathVariable uuid: String): ResponseEntity<StillingForPersonbruker> {
+    fun hentStillingTilPersonbruker(@PathVariable uuid: UUID): ResponseEntity<StillingForPersonbruker> {
         if (!authorizedPartyUtils.kallKommerFraVisStilling() && !authorizedPartyUtils.kallKommerFraKandidatvarsel()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
-        }
-        try {
-            UUID.fromString(uuid)
-        } catch (e: IllegalArgumentException) {
-            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Ugyldig uuid", e)
         }
 
         val rekrutteringsbistandStilling = stillingService.hentRekrutteringsbistandStilling(

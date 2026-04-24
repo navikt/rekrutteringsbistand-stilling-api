@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest
 import no.nav.rekrutteringsbistand.api.support.log
 import no.nav.security.token.support.core.exceptions.JwtTokenValidatorException
 import org.springframework.dao.EmptyResultDataAccessException
+import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatus.NO_CONTENT
 import org.springframework.http.HttpStatus.UNAUTHORIZED
 import org.springframework.http.HttpStatusCode
@@ -17,7 +18,9 @@ import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.ResponseBody
 import org.springframework.web.client.RestClientResponseException
 import org.springframework.web.context.request.WebRequest
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler
+import java.util.UUID
 
 @ControllerAdvice
 class RestResponseEntityExceptionHandler : ResponseEntityExceptionHandler() {
@@ -38,23 +41,38 @@ class RestResponseEntityExceptionHandler : ResponseEntityExceptionHandler() {
     }
 
     @ExceptionHandler(JwtTokenValidatorException::class)
-    fun håndterUinnlogget(e: Exception, request: HttpServletRequest): TraceableProblemDetail {
+    fun håndterUinnlogget(e: Exception, request: HttpServletRequest): ResponseEntity<Any>  {
         log.info("Unauthorized. requestURI=${request.requestURI}, HTTP method=${request.method}", e)
-        return TraceableProblemDetail.forStatusAndDetail(
-            UNAUTHORIZED, "You are not authorized to access this resource"
-        )
+        return ResponseEntity.status(UNAUTHORIZED).body("You are not authorized to access this resource")
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException::class)
+    fun handleTypeMismatch(
+        e: MethodArgumentTypeMismatchException,
+        request: HttpServletRequest
+    ): ResponseEntity<TraceableProblemDetail> {
+        val detail = if (e.requiredType == UUID::class.java) {
+            "Ugyldig UUID"
+        } else {
+            "Ugyldig verdi"
+        }
+        log.info("Type mismatch på ${request.requestURI}: ${e.message}")
+        val problem = TraceableProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, detail)
+        problem.title = "Valideringsfeil"
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(problem)
     }
 
     @ExceptionHandler(RestClientResponseException::class)
+    @ResponseBody
     fun handleExceptionFraRestTemplate(
         e: RestClientResponseException, request: HttpServletRequest
-    ): TraceableProblemDetail {
+    ): ResponseEntity<Any>  {
         val msg = "Mottok HTTP respons ${e.statusCode.value()} fra ${request.method} mot URL ${request.requestURL}"
         when (e.statusCode.value()) {
             403, 404 -> log.info(msg, e)
             else -> log.error(msg, e)
         }
-        return TraceableProblemDetail.forStatusAndDetail(e.statusCode, e.responseBodyAsString ?: msg)
+        return ResponseEntity.status(e.statusCode.value()).body(e.responseBodyAsString)
     }
 
     @ExceptionHandler(value = [EmptyResultDataAccessException::class, NoContentException::class])

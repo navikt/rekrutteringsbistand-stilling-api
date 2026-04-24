@@ -30,7 +30,7 @@ class ArbeidsplassenKlient(
     @Value("\${scope.forarbeidsplassen}") private val scopeMotArbeidsplassen: String
 ) {
 
-    fun hentStilling(stillingsId: String, somSystembruker: Boolean = false): ArbeidsplassenStillingDto {
+    fun hentStilling(stillingsId: UUID, somSystembruker: Boolean = false): ArbeidsplassenStillingDto {
         val url = "${hentBaseUrl()}/b2b/api/v1/ads/$stillingsId"
 
         val hent: () -> ResponseEntity<ArbeidsplassenStillingDto> = {
@@ -79,14 +79,7 @@ class ArbeidsplassenKlient(
 
     fun oppdaterStilling(stilling: ArbeidsplassenStillingDto): ArbeidsplassenStillingDto =
         timer("rekrutteringsbistand.stilling.arbeidsplassen.oppdaterStilling.kall.tid") {
-            val uuid = try {
-                UUID.fromString(stilling.uuid)
-            } catch (_: IllegalArgumentException) {
-                throw ResponseStatusException(
-                    BAD_REQUEST, "Ugyldig stillingsId. Må være en gyldig UUID."
-                )
-            }
-            val url = "${hentBaseUrl()}/api/v1/ads/$uuid"
+            val url = "${hentBaseUrl()}/api/v1/ads/${stilling.uuid}"
 
             try {
                 val response = restTemplate.exchange(
@@ -102,16 +95,9 @@ class ArbeidsplassenKlient(
             }
         }
 
-    fun slettStilling(stillingsId: String): FrontendStilling =
+    fun slettStilling(stillingsId: UUID): FrontendStilling =
         timer("rekrutteringsbistand.stilling.arbeidsplassen.slettStilling.kall.tid") {
-            val uuid = try {
-                UUID.fromString(stillingsId)
-            } catch (_: IllegalArgumentException) {
-                throw ResponseStatusException(
-                    BAD_REQUEST, "Ugyldig stillingsId. Må være en gyldig UUID."
-                )
-            }
-            val url = "${hentBaseUrl()}/api/v1/ads/$uuid"
+            val url = "${hentBaseUrl()}/api/v1/ads/$stillingsId"
 
             try {
                 val response = restTemplate.exchange(

@@ -37,7 +37,7 @@ class StillingService(
     val stillingOutboxService: StillingOutboxService,
 ) {
     fun hentRekrutteringsbistandStilling(
-        stillingsId: String,
+        stillingsId: UUID,
         somSystembruker: Boolean = false
     ): RekrutteringsbistandStilling {
         val stillingsinfo = stillingsinfoService.hentStillingsinfo(Stillingsid(stillingsId))?.asStillingsinfoDto()
@@ -105,8 +105,8 @@ class StillingService(
             )
         )
         log.info("Opprettet stilling i databasen med uuid: $uuid")
-        direktemeldtStillingService.settAnnonsenrFraDbId(uuid.toString())
-        val direktemeldtStillingFraDb = direktemeldtStillingService.hentDirektemeldtStilling(uuid.toString())!!
+        direktemeldtStillingService.settAnnonsenrFraDbId(uuid)
+        val direktemeldtStillingFraDb = direktemeldtStillingService.hentDirektemeldtStilling(uuid)!!
 
         stillingsinfoService.opprettStillingsinfo(
             stillingsId = Stillingsid(uuid),
@@ -131,7 +131,7 @@ class StillingService(
     }
 
     @Transactional
-    fun kopierStilling(stillingsId: String, navIdent: String?, displayName: String?, eierNavKontorEnhetId: String?): RekrutteringsbistandStilling {
+    fun kopierStilling(stillingsId: UUID, navIdent: String?, displayName: String?, eierNavKontorEnhetId: String?): RekrutteringsbistandStilling {
         log.info("Kopierer stilling med uuid: $stillingsId")
         val eksisterendeRekrutteringsbistandStilling = hentRekrutteringsbistandStilling(stillingsId)
         val eksisterendeStilling = eksisterendeRekrutteringsbistandStilling.stilling
@@ -159,7 +159,7 @@ class StillingService(
         log.info("Oppdaterer stilling med uuid: ${dto.stilling.uuid}")
 
         if(dto.stilling.source == "DIR") {
-            val eksisterendeStilling = direktemeldtStillingService.hentDirektemeldtStilling(dto.stilling.uuid)
+            val eksisterendeStilling = direktemeldtStillingService.hentDirektemeldtStilling(UUID.fromString(dto.stilling.uuid))
             if(eksisterendeStilling?.versjon != dto.stilling.versjon) {
                 log.info("Stillingen ${dto.stilling.uuid} gir optimistic locking. Versjon fra frontend: ${dto.stilling.versjon}, eksisterende versjon: ${eksisterendeStilling?.versjon}")
                // throw ResponseStatusException(HttpStatus.PRECONDITION_FAILED, "Stillingen er allerede blitt oppdatert")
@@ -172,7 +172,7 @@ class StillingService(
         loggEventuellOvertagelse(dto)
 
         val id = Stillingsid(dto.stilling.uuid)
-        val eksisterendeStillingIDb = direktemeldtStillingService.hentDirektemeldtStilling(id.asString())
+        val eksisterendeStillingIDb = direktemeldtStillingService.hentDirektemeldtStilling(id.verdi)
         val eksisterendeStillingsinfo: Stillingsinfo? = stillingsinfoService.hentStillingsinfo(id)
 
 
@@ -211,12 +211,12 @@ class StillingService(
             )
         )
         log.info("Oppdaterte stilling i databasen med uuid: ${dto.stilling.uuid}")
-        val direktemeldtStillingFraDb = direktemeldtStillingService.hentDirektemeldtStilling(id.asString())!!
+        val direktemeldtStillingFraDb = direktemeldtStillingService.hentDirektemeldtStilling(id.verdi)!!
 
         if (PubliserteArbeidsplassenStillinger.erPublisertPåArbeidsplassenViaRestApi(direktemeldtStillingFraDb.stillingsId)) {
             log.info("Stillingen er publisert på arbeidsplassen, oppdaterer stilling der med uuid: ${dto.stilling.uuid}")
             // Hent stilling før den oppdateres, da det er en OptimisticLocking strategi på 'updated' feltet hos Arbeidsplassen
-            val existerendeStilling = arbeidsplassenKlient.hentStilling(dto.stilling.uuid)
+            val existerendeStilling = arbeidsplassenKlient.hentStilling(UUID.fromString(dto.stilling.uuid))
             arbeidsplassenKlient.oppdaterStilling(
                 stilling.toArbeidsplassenDto(existerendeStilling.id).copy(updated = existerendeStilling.updated,)
             )
@@ -249,7 +249,7 @@ class StillingService(
     }
 
     private fun loggEventuellOvertagelse(dto: RekrutteringsbistandStilling) {
-        val gammelStilling = direktemeldtStillingService.hentDirektemeldtStilling(dto.stilling.uuid)
+        val gammelStilling = direktemeldtStillingService.hentDirektemeldtStilling(UUID.fromString(dto.stilling.uuid))
         val gammelEier = gammelStilling?.innhold?.administration?.navIdent
         val nyEier = dto.stilling.administration?.navIdent
         if (!nyEier.equals(gammelEier)) {
@@ -257,15 +257,7 @@ class StillingService(
         }
     }
     @Transactional
-    fun slettRekrutteringsbistandStilling(stillingsId: String): FrontendStilling {
-        try {
-            UUID.fromString(stillingsId)
-        } catch (_: IllegalArgumentException) {
-            throw ResponseStatusException(
-                HttpStatus.BAD_REQUEST, "Ugyldig stillingsId. Må være en gyldig UUID."
-            )
-        }
-
+    fun slettRekrutteringsbistandStilling(stillingsId: UUID): FrontendStilling {
         kandidatlisteKlient.varsleOmSlettetStilling(Stillingsid(stillingsId))
 
         val direktemeldtStilling = direktemeldtStillingService.hentDirektemeldtStilling(stillingsId)
@@ -286,7 +278,7 @@ class StillingService(
             // Sjekk om stillingen skal sendes til arbeidsplassen
             if (stillingsinfo?.stillingskategori != Stillingskategori.FORMIDLING && direktemeldtStilling.innhold.privacy == "SHOW_ALL") {
                 stillingOutboxService.lagreMeldingIOutbox(
-                    stillingsId = Stillingsid(stillingsId).verdi,
+                    stillingsId = stillingsId,
                     eventName = EventName.PUBLISER_ELLER_AVPUBLISER_TIL_ARBEIDSPLASSEN
                 )
             }
@@ -295,7 +287,7 @@ class StillingService(
         return slettetStilling.toStilling()
     }
 
-    fun hentDirektemeldtStilling(stillingsId: String): DirektemeldtStilling {
+    fun hentDirektemeldtStilling(stillingsId: UUID): DirektemeldtStilling {
         return direktemeldtStillingService.hentDirektemeldtStilling(stillingsId) ?: throw RuntimeException("Fant ikke direktemeldt stilling $stillingsId")
     }
 

@@ -168,7 +168,7 @@ class StillingServiceTest {
 
         whenever(stillingsinfoService.hentStillingsinfo(stillingsid)).thenReturn(stillingsinfo)
         whenever(direktemeldtStillingService.hentDirektemeldtStilling(stillingsid)).thenReturn(direktemeldtStilling)
-        whenever(direktemeldtStillingService.hentDirektemeldtStilling(stillingsid.asString())).thenReturn(direktemeldtStilling)
+        whenever(direktemeldtStillingService.hentDirektemeldtStilling(stillingsid.verdi)).thenReturn(direktemeldtStilling)
 
         stillingService.oppdaterRekrutteringsbistandStilling(rekrutteringsbistandStilling, eier)
 
