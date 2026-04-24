@@ -74,7 +74,7 @@ class RestResponseEntityExceptionHandler : ResponseEntityExceptionHandler() {
             else -> log.error(msg, e)
         }
         val problem = TraceableProblemDetail.forStatusAndDetail(
-            HttpStatus.valueOf(e.statusCode.value()),
+            e.statusCode,
             e.responseBodyAsString
         )
         problem.title = e.statusText
