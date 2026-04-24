@@ -47,7 +47,7 @@ class StillingIndekserController(
             eventName = EventName.REINDEKSER_DIREKTEMELDT_STILLING
         )
 
-        return ResponseEntity.ok("Stilling $stillingsId er lagret i outboxen")
+        return ResponseEntity.ok("Stillingen er lagret i outboxen")
     }
 
 }
