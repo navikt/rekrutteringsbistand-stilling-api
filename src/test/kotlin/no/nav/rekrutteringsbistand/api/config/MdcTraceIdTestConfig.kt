@@ -13,8 +13,8 @@ import org.springframework.web.filter.OncePerRequestFilter
 @TestConfiguration
 class MdcTraceIdTestConfig {
     @Bean
-    fun mdcTraceIdFilter(): FilterRegistrationBean<out OncePerRequestFilter?> {
-        val filter = object : OncePerRequestFilter() {
+    fun mdcTraceIdFilter(): FilterRegistrationBean<OncePerRequestFilter> {
+        val filter: OncePerRequestFilter = object : OncePerRequestFilter() {
             override fun doFilterInternal(
                 req: HttpServletRequest, res: HttpServletResponse, chain: FilterChain
             ) {
