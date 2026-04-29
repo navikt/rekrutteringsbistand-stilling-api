@@ -61,9 +61,15 @@ class StillingController(private val stillingsinfoService: StillingsinfoService,
     }
 
     @DeleteMapping("/rekrutteringsbistandstilling/{stillingsId}")
-    fun slettRekrutteringsbistandStilling(@PathVariable(value = "stillingsId") stillingsId: UUID): ResponseEntity<FrontendStilling> {
-        tokenUtils.hentInnloggetVeileder().validerMinstEnAvRollene(Rolle.ARBEIDSGIVERRETTET)
-        val slettetStilling = stillingService.slettRekrutteringsbistandStilling(stillingsId)
+    fun slettRekrutteringsbistandStilling(@PathVariable(value = "stillingsId") stillingsIdSomUuid: UUID): ResponseEntity<FrontendStilling> {
+        val stillingsId = Stillingsid(stillingsIdSomUuid)
+        val stillingskategori = stillingsinfoService.hentStillingsinfo(stillingsId)?.stillingskategori ?: Stillingskategori.STILLING
+        if (stillingskategori == Stillingskategori.FORMIDLING) {
+            tokenUtils.hentInnloggetVeileder().validerMinstEnAvRollene(Rolle.JOBBSØKERRETTET, Rolle.ARBEIDSGIVERRETTET)
+        } else {
+            tokenUtils.hentInnloggetVeileder().validerMinstEnAvRollene(Rolle.ARBEIDSGIVERRETTET)
+        }
+        val slettetStilling = stillingService.slettRekrutteringsbistandStilling(stillingsIdSomUuid)
         return ok(slettetStilling)
     }
 
