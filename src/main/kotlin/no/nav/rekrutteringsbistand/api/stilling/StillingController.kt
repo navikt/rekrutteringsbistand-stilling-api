@@ -14,6 +14,8 @@ import no.nav.rekrutteringsbistand.api.stillingsinfo.Eier
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsid
 import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoService
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingskategori
+import org.springframework.http.HttpStatus
+import org.springframework.web.server.ResponseStatusException
 
 @RestController
 @Protected
@@ -60,16 +62,21 @@ class StillingController(private val stillingsinfoService: StillingsinfoService,
     }
 
     @DeleteMapping("/rekrutteringsbistandstilling/{stillingsId}")
-    fun slettRekrutteringsbistandStilling(@PathVariable(value = "stillingsId") stillingsId: String): ResponseEntity<FrontendStilling> {
-        val stillingskategori = stillingsinfoService.hentStillingsinfo(
-            Stillingsid(stillingsId)
-        )?.stillingskategori ?: Stillingskategori.STILLING
+    fun slettRekrutteringsbistandStilling(@PathVariable(value = "stillingsId") stillingsIdSomStreng: String): ResponseEntity<FrontendStilling> {
+        val stillingsId = try {
+            Stillingsid(stillingsIdSomStreng)
+        } catch (_: IllegalArgumentException) {
+            throw ResponseStatusException(
+                HttpStatus.BAD_REQUEST, "Ugyldig stillingsId. Må være en gyldig UUID."
+            )
+        }
+        val stillingskategori = stillingsinfoService.hentStillingsinfo(stillingsId)?.stillingskategori ?: Stillingskategori.STILLING
         if (stillingskategori == Stillingskategori.FORMIDLING) {
             tokenUtils.hentInnloggetVeileder().validerMinstEnAvRollene(Rolle.JOBBSØKERRETTET, Rolle.ARBEIDSGIVERRETTET)
         } else {
             tokenUtils.hentInnloggetVeileder().validerMinstEnAvRollene(Rolle.ARBEIDSGIVERRETTET)
         }
-        val slettetStilling = stillingService.slettRekrutteringsbistandStilling(stillingsId)
+        val slettetStilling = stillingService.slettRekrutteringsbistandStilling(stillingsIdSomStreng)
         return ok(slettetStilling)
     }
 
