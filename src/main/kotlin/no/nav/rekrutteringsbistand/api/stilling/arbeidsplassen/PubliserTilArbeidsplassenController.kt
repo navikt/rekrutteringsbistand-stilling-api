@@ -28,28 +28,22 @@ class PubliserTilArbeidsplassenController(
 ) {
 
     @PostMapping("/publiser/{stillingsId}")
-    fun publiserTilRapid(@PathVariable stillingsId: String): ResponseEntity<String> {
-        val uuid: UUID
-        try {
-            uuid = UUID.fromString(stillingsId)
-        } catch (e: Exception) {
-            return ResponseEntity("Fikk ikke til å konvertere til uuid", HttpStatus.BAD_REQUEST)
-        }
-        val stillingsinfo = stillingsinfoService.hentStillingsinfo(Stillingsid(uuid))
+    fun publiserTilRapid(@PathVariable stillingsId: UUID): ResponseEntity<String> {
+        val stillingsinfo = stillingsinfoService.hentStillingsinfo(Stillingsid(stillingsId))
         if (stillingsinfo?.stillingskategori == Stillingskategori.FORMIDLING) {
             throw IllegalArgumentException("Kan ikke sende formidling/etterregistrering til arbeidsplassen")
         } else if (stillingsinfo?.stillingskategori == Stillingskategori.JOBBMESSE) {
             throw IllegalArgumentException("Kan ikke sende jobbmesse til arbeidsplassen")
         }
 
-        val stilling = stillingService.hentDirektemeldtStilling(uuid.toString())
+        val stilling = stillingService.hentDirektemeldtStilling(stillingsId)
         val packet = JsonMessage.newMessage(eventName = "publiserEllerAvpubliserTilArbeidsplassen")
 
         packet["direktemeldtStilling"] = stilling
-        packet["stillingsId"] = uuid.toString()
+        packet["stillingsId"] = stillingsId.toString()
         packet["stillingsinfo"] = stillingsinfo?.asStillingsinfoDto() ?: JsonNodeFactory.instance.nullNode()
 
-        rapidApplikasjon.publish(Stillingsid(uuid), packet)
+        rapidApplikasjon.publish(Stillingsid(stillingsId), packet)
 
         log.info("Publiserte stilling med stillingsId $stillingsId på rapid")
 

@@ -23,3 +23,6 @@ spring:
     caffeine:
       spec: expireAfterAccess=1h,maximumSize=1000
     cache-names: postdata
+  mvc:
+    problemdetails:
+      enabled: true

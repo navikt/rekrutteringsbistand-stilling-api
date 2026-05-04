@@ -13,7 +13,7 @@ class GeografiService(
         val funnetFylke = postdata.find { it.fylke.navn == fylke.uppercase() }?.fylke?.navn
 
         if (funnetFylke == null) {
-            log.warn("Fant ikke fylke for $fylke")
+            log.info("Fant ikke fylke for $fylke")
         }
         return funnetFylke
     }
@@ -24,7 +24,7 @@ class GeografiService(
         val postdataDTO = postdata.find { it.postkode == postnummer }
 
         if (postdataDTO == null) {
-            log.warn("Fant ikke postdata for $postnummer")
+            log.info("Fant ikke postdata for $postnummer")
         }
         return postdataDTO
     }

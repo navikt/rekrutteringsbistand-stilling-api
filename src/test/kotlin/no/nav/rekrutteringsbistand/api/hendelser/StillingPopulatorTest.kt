@@ -61,7 +61,7 @@ class StillingPopulatorTest {
         val stillingskategori = Stillingskategori.STILLING
         val stillingsinfoDto = StillingsinfoDto(stillingsId.asString(), stillingsinfoid.asString(), eier.navident, eier.navn, stillingskategori, "1234")
 
-        Mockito.`when`(stillingService.hentRekrutteringsbistandStilling(stillingsId.toString(), somSystembruker = true))
+        Mockito.`when`(stillingService.hentRekrutteringsbistandStilling(stillingsId.verdi, somSystembruker = true))
             .thenReturn(
                 RekrutteringsbistandStilling(
                     stillingsinfoDto,
@@ -151,7 +151,7 @@ class StillingPopulatorTest {
         val stillingsinfoDto = StillingsinfoDto(stillingsId.asString(), stillingsinfoid.asString(), eier.navident, eier.navn, stillingskategori, "1234")
 
 
-        Mockito.`when`(stillingService.hentRekrutteringsbistandStilling(stillingsId.toString(), somSystembruker = true))
+        Mockito.`when`(stillingService.hentRekrutteringsbistandStilling(stillingsId.verdi, somSystembruker = true))
             .thenReturn(
                 RekrutteringsbistandStilling(
                     stillingsinfoDto,
@@ -204,7 +204,7 @@ class StillingPopulatorTest {
         val stillingsinfoDto = StillingsinfoDto(stillingsId.asString(), stillingsinfoid.asString(), eier.navident, eier.navn, stillingskategori, "1234")
 
 
-        Mockito.`when`(stillingService.hentRekrutteringsbistandStilling(stillingsId.toString(), somSystembruker = true))
+        Mockito.`when`(stillingService.hentRekrutteringsbistandStilling(stillingsId.verdi, somSystembruker = true))
             .thenReturn(
                 RekrutteringsbistandStilling(
                     stillingsinfoDto,
@@ -258,7 +258,7 @@ class StillingPopulatorTest {
         val stillingsinfoDto = StillingsinfoDto(stillingsId.asString(), stillingsinfoid.asString(), eier.navident, eier.navn, stillingskategori, "1234")
 
 
-        Mockito.`when`(stillingService.hentRekrutteringsbistandStilling(stillingsId.toString(), somSystembruker = true))
+        Mockito.`when`(stillingService.hentRekrutteringsbistandStilling(stillingsId.verdi, somSystembruker = true))
             .thenReturn(
                 RekrutteringsbistandStilling(
                     stillingsinfoDto,
@@ -303,7 +303,7 @@ class StillingPopulatorTest {
             null,
             enStilling.copy(title = "Dummy-tittel")
         )
-        Mockito.`when`(stillingService.hentRekrutteringsbistandStilling(stillingsId.toString(), somSystembruker = true))
+        Mockito.`when`(stillingService.hentRekrutteringsbistandStilling(stillingsId.verdi, somSystembruker = true))
             .thenReturn(
                 rekrutteringsbistandStilling
             )

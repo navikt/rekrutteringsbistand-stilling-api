@@ -41,11 +41,11 @@ class StillingsinfoService(
         opprinneligStillingsinfo?.let { repo.oppdaterEier(it.stillingsinfoid, nyEier) } ?: repo.opprett(stillingsinfoMedNyEier)
 
         try {
-            val arbeidsplassenStilling = stillingssokProxyClient.hentStilling(stillingsId.asString())
+            val arbeidsplassenStilling = stillingssokProxyClient.hentStilling(stillingsId.verdi)
             val direktemeldtStillingInnhold = arbeidsplassenStilling.toDirektemeldtStillingInnhold()
 
             val direktemeldtStilling = DirektemeldtStilling(
-                stillingsId = UUID.fromString(stillingsId.toString()),
+                stillingsId = stillingsId.verdi,
                 innhold = direktemeldtStillingInnhold,
                 opprettet = arbeidsplassenStilling.created.atZone(ZoneId.of("Europe/Oslo")),
                 opprettetAv = arbeidsplassenStilling.createdBy,
@@ -67,7 +67,7 @@ class StillingsinfoService(
         } catch (e: Exception) {
             throw RuntimeException("Varsel til rekbis-kandidat-api om endring av eier for ekstern stilling feilet", e)
         }
-        stillingOutboxService.lagreMeldingIOutbox(stillingsId = UUID.fromString(stillingsId.toString()), eventName = EventName.INDEKSER_STILLINGSINFO)
+        stillingOutboxService.lagreMeldingIOutbox(stillingsId = stillingsId.verdi, eventName = EventName.INDEKSER_STILLINGSINFO)
         return stillingsinfoMedNyEier
     }
 

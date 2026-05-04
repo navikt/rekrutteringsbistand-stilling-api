@@ -101,24 +101,24 @@ class DirektemeldtStillingRepository(private val namedJdbcTemplate: NamedParamet
         namedJdbcTemplate.query(sql, MapSqlParameterSource(params)) {rs -> if (rs.next()) rs.getLong("id") else null}
     }
 
-    fun settAnnonsenrFraDbId(stillingsId: String) {
+    fun settAnnonsenrFraDbId(stillingsId: UUID) {
         log.info("Oppdaterer annonsenr for direktemeldt stilling med id: $stillingsId")
 
         val sql = "update $DIREKTEMELDT_STILLING_TABELL set $ANNONSENR=(select 'R' || id from $DIREKTEMELDT_STILLING_TABELL where $STILLINGSID=:stillingsid) where $STILLINGSID=:stillingsid"
         val params = mapOf(
-            "stillingsid" to UUID.fromString(stillingsId),
+            "stillingsid" to stillingsId,
         )
 
         namedJdbcTemplate.update(sql, params)
     }
 
      fun hentDirektemeldtStilling(stillingsId: Stillingsid) : DirektemeldtStilling? {
-         return hentDirektemeldtStilling(stillingsId.asString())
+         return hentDirektemeldtStilling(stillingsId.verdi)
      }
 
-    fun hentDirektemeldtStilling(stillingsId: String) : DirektemeldtStilling? {
+    fun hentDirektemeldtStilling(stillingsId: UUID) : DirektemeldtStilling? {
         val sql = "select $ID, $STILLINGSID, $INNHOLD, $OPPRETTET, $OPPRETTET_AV, $SIST_ENDRET, $SIST_ENDRET_AV, $STATUS, $PUBLISERT, $PUBLISERT_AV_ADMIN, $ADMIN_STATUS, $UTLØPSDATO, $VERSJON, $ANNONSENR from $DIREKTEMELDT_STILLING_TABELL where $STILLINGSID=:stillingsid"
-        val params = mapOf("stillingsid" to UUID.fromString(stillingsId))
+        val params = mapOf("stillingsid" to stillingsId)
 
         val direktemeldtStilling = namedJdbcTemplate.query(
             sql, params, DirektemeldtStillingRowMapper()

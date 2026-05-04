@@ -5,7 +5,6 @@ import no.nav.rekrutteringsbistand.api.stilling.outbox.EventName
 import no.nav.rekrutteringsbistand.api.stilling.outbox.StillingOutboxService
 import no.nav.rekrutteringsbistand.api.support.log
 import no.nav.security.token.support.core.api.Unprotected
-import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -42,20 +41,13 @@ class StillingIndekserController(
 
     @PostMapping("/stilling/{stillingsId}")
     @Unprotected
-    fun reindekser(@PathVariable stillingsId: String): ResponseEntity<String> {
-        val uuid: UUID
-        try {
-            uuid = UUID.fromString(stillingsId)
-        } catch (e: Exception) {
-            return ResponseEntity("Fikk ikke til å konvertere til uuid", HttpStatus.BAD_REQUEST)
-        }
-
+    fun reindekser(@PathVariable stillingsId: UUID): ResponseEntity<String> {
         stillingOutboxService.lagreMeldingIOutbox(
-            stillingsId = uuid,
+            stillingsId = stillingsId,
             eventName = EventName.REINDEKSER_DIREKTEMELDT_STILLING
         )
 
-        return ResponseEntity.ok("Stilling $uuid er lagret i outboxen")
+        return ResponseEntity.ok("Stillingen er lagret i outboxen")
     }
 
 }

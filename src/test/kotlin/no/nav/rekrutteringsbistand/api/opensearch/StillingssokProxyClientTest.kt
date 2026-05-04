@@ -13,6 +13,7 @@ import org.junit.jupiter.api.extension.RegisterExtension
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import java.util.UUID
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -48,7 +49,7 @@ class StillingssokProxyClientTest {
         mockAzureObo(wiremockAzure)
         stillingssokProxyMock.mockStillingssokProxy(wiremockStillingssokProxyClient, "/stilling/_doc/4f7417d0-8678-4b75-9536-ec94cc4aa5bf")
 
-        val stilling = stillingssokProxyClient.hentStilling("4f7417d0-8678-4b75-9536-ec94cc4aa5bf")
+        val stilling = stillingssokProxyClient.hentStilling(UUID.fromString("4f7417d0-8678-4b75-9536-ec94cc4aa5bf"))
 
         assertEquals("4f7417d0-8678-4b75-9536-ec94cc4aa5bf", stilling.uuid)
         val expectedWorkhours = """

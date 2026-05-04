@@ -41,7 +41,7 @@ class ProsesserStillingOutboxJobb(
                         stillingOutboxRepository.settSomProsessert(it.id)
                         log.info("Sendt stilling ${it.stillingsId} på rapid")
                     } else {
-                        val direktemeldtStilling = direktemeldtStillingService.hentDirektemeldtStilling(it.stillingsId.toString())
+                        val direktemeldtStilling = direktemeldtStillingService.hentDirektemeldtStilling(it.stillingsId)
 
                         if(direktemeldtStilling != null) {
                             val stillingsinfo = stillingsinfoService.hentStillingsinfo(stillingId = Stillingsid(direktemeldtStilling.stillingsId))?.asStillingsinfoDto()

@@ -33,24 +33,18 @@ class StillingssokProxyClient(
         .followRedirects(HttpClient.Redirect.ALWAYS)
         .build()
 
-    fun hentStilling(stillingsId: String, somSystembruker: Boolean = false): FrontendStilling {
+    fun hentStilling(stillingsId: UUID, somSystembruker: Boolean = false): FrontendStilling {
         val token = if(somSystembruker) {
             tokenUtils.hentSystemToken(stillingssokProxyScope)
         } else {
             tokenUtils.hentOBOToken(stillingssokProxyScope)
-        }
-        val uuid = try {
-            UUID.fromString(stillingsId)
-        } catch (e: Exception) {
-            log.warn("Feil ved parsing av stillingsId: $stillingsId", e)
-            throw IllegalArgumentException("Ugyldig stillingsId: $stillingsId")
         }
 
         val request = HttpRequest.newBuilder()
             .headers("Authorization", "Bearer $token")
             .header("Accept", "application/json")
             .header("Content-Type", "application/json")
-            .uri(URI("$stillingssokProxyUrl/${URLEncoder.encode(uuid.toString(), Charsets.UTF_8.name())}"))
+            .uri(URI("$stillingssokProxyUrl/${URLEncoder.encode(stillingsId.toString(), Charsets.UTF_8.name())}"))
             .GET().build()
 
         val response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
