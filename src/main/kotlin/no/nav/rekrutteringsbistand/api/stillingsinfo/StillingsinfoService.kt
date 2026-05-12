@@ -28,7 +28,8 @@ class StillingsinfoService(
     fun overtaEierskapForEksternStillingOgKandidatliste(stillingsId: Stillingsid, nyEier: Eier): Stillingsinfo {
         val opprinneligStillingsinfo = repo.hentForStilling(stillingsId)
 
-        if (opprinneligStillingsinfo?.stillingskategori == Stillingskategori.FORMIDLING) {
+        if (opprinneligStillingsinfo?.stillingskategori == Stillingskategori.FORMIDLING ||
+            opprinneligStillingsinfo?.stillingskategori == Stillingskategori.REKRUTTERINGSTREFF_FORMIDLING) {
             throw ResponseStatusException(HttpStatus.FORBIDDEN, "Kan ikke endre eier på formidlingsstillinger")
         }
 
@@ -91,7 +92,8 @@ class StillingsinfoService(
         stillingskategori: Stillingskategori,
         eierNavident: String?,
         eierNavn: String?,
-        eierNavKontorEnhetId: String?
+        eierNavKontorEnhetId: String?,
+        rekrutteringstreffId: UUID? = null
     ) {
         repo.opprett(
             Stillingsinfo(
@@ -103,6 +105,7 @@ class StillingsinfoService(
                     navKontorEnhetId = eierNavKontorEnhetId
                 ),
                 stillingskategori = stillingskategori,
+                rekrutteringstreffId = rekrutteringstreffId
             )
         )
     }

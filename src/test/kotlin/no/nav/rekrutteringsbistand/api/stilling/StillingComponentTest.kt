@@ -6,7 +6,9 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension
 import com.github.tomakehurst.wiremock.matching.UrlPattern
 import no.nav.rekrutteringsbistand.api.*
+import no.nav.rekrutteringsbistand.api.Testdata.enOpprettFormidlingDto
 import no.nav.rekrutteringsbistand.api.Testdata.enOpprettRekrutteringsbistandstillingDto
+import no.nav.rekrutteringsbistand.api.Testdata.enOpprettRekrutteringstreffFormidlingDto
 import no.nav.rekrutteringsbistand.api.Testdata.enOpprettetStilling
 import no.nav.rekrutteringsbistand.api.Testdata.enRekrutteringsbistandStilling
 import no.nav.rekrutteringsbistand.api.Testdata.enRekrutteringsbistandStillingUtenEier
@@ -167,6 +169,64 @@ internal class StillingComponentTest {
 
             assertThat(it.stillingsinfo?.stillingskategori).isEqualTo(Stillingskategori.ARBEIDSTRENING)
             assertThat(it.stillingsinfo?.eierNavKontorEnhetId).isEqualTo("1234")
+        }
+    }
+
+    @Test
+    fun `Opprett formidling for rekrutteringstreff skal få riktig kategori og rekurtteringstreffId skal settes`() {
+        val rekrutteringstreffFormidling = enOpprettRekrutteringstreffFormidlingDto
+        val enNyStilling = OpprettStillingDto(eierNavn = "Clark Kent", eierNavident = "C12345")
+
+        mockKandidatlisteOppdatering()
+        mockAzureObo(wiremockAzure)
+
+        restTemplate.postForObject(
+            "$localBaseUrl/rekrutteringsbistandstilling",
+            rekrutteringstreffFormidling,
+            RekrutteringsbistandStilling::class.java
+        ).also {
+            val formidling = enNyStilling
+            assertThat(it.stilling.title).isEqualTo("Ny stilling")
+            assertThat(it.stilling.administration?.navIdent).isEqualTo(formidling.administration.navIdent)
+            assertThat(it.stilling.administration?.reportee).isEqualTo(formidling.administration.reportee)
+            assertThat(it.stilling.administration?.status).isEqualTo(formidling.administration.status)
+            assertThat(it.stilling.createdBy).isEqualTo(formidling.createdBy)
+            assertThat(it.stilling.updatedBy).isEqualTo(formidling.updatedBy)
+            assertThat(it.stilling.source).isEqualTo(formidling.source)
+            assertThat(it.stilling.privacy).isEqualTo(formidling.privacy)
+
+            assertThat(it.stillingsinfo?.stillingskategori).isEqualTo(Stillingskategori.REKRUTTERINGSTREFF_FORMIDLING)
+            assertThat(it.stillingsinfo?.eierNavKontorEnhetId).isEqualTo("1234")
+            assertThat(it.stillingsinfo?.rekrutteringstreffId).isNotNull()
+        }
+    }
+
+    @Test
+    fun `Opprett formidling skal få riktig kategori og rekurtteringstreffId skal ikke settes`() {
+        val nyFormidling = enOpprettFormidlingDto
+        val enNyStilling = OpprettStillingDto(eierNavn = "Clark Kent", eierNavident = "C12345")
+
+        mockKandidatlisteOppdatering()
+        mockAzureObo(wiremockAzure)
+
+        restTemplate.postForObject(
+            "$localBaseUrl/rekrutteringsbistandstilling",
+            nyFormidling,
+            RekrutteringsbistandStilling::class.java
+        ).also {
+            val formidling = enNyStilling
+            assertThat(it.stilling.title).isEqualTo("Ny stilling")
+            assertThat(it.stilling.administration?.navIdent).isEqualTo(formidling.administration.navIdent)
+            assertThat(it.stilling.administration?.reportee).isEqualTo(formidling.administration.reportee)
+            assertThat(it.stilling.administration?.status).isEqualTo(formidling.administration.status)
+            assertThat(it.stilling.createdBy).isEqualTo(formidling.createdBy)
+            assertThat(it.stilling.updatedBy).isEqualTo(formidling.updatedBy)
+            assertThat(it.stilling.source).isEqualTo(formidling.source)
+            assertThat(it.stilling.privacy).isEqualTo(formidling.privacy)
+
+            assertThat(it.stillingsinfo?.stillingskategori).isEqualTo(Stillingskategori.FORMIDLING)
+            assertThat(it.stillingsinfo?.eierNavKontorEnhetId).isEqualTo("1234")
+            assertThat(it.stillingsinfo?.rekrutteringstreffId).isNull()
         }
     }
 
@@ -456,7 +516,6 @@ internal class StillingComponentTest {
 
         // så skal stillingens Stillingsinfo ikke slettes
         stillingsinfoRepository.hentForStilling(Stillingsid(stilling.stillingsId)) ?: fail("Det skal finnes en Stillingsinfo i db for ")
-
     }
 
     private fun mockKandidatlisteOppdatering(metodeFunksjon: (UrlPattern) -> MappingBuilder = ::put) {

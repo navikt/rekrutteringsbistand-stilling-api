@@ -68,6 +68,7 @@ class StillingService(
             eierNavident = veileder.navIdent,
             eierNavn = veileder.displayName,
             eierNavKontorEnhetId = opprettDto.eierNavKontorEnhetId,
+            rekrutteringstreffId = opprettDto.rekrutteringstreffId
         )
     }
 
@@ -77,6 +78,7 @@ class StillingService(
         eierNavident: String?,
         eierNavn: String?,
         eierNavKontorEnhetId: String?,
+        rekrutteringstreffId: UUID? = null,
     ): RekrutteringsbistandStilling {
         val populertGeografi = populerGeografi(opprettStilling.employer?.location)
         var stilling = opprettStilling.copy(employer = opprettStilling.employer?.copy(location = populertGeografi))
@@ -114,6 +116,7 @@ class StillingService(
             eierNavident = eierNavident,
             eierNavn = eierNavn,
             eierNavKontorEnhetId = eierNavKontorEnhetId,
+            rekrutteringstreffId = rekrutteringstreffId,
         )
 
         val stillingsinfo = stillingsinfoService.hentStillingsinfo(Stillingsid(uuid))
@@ -137,9 +140,16 @@ class StillingService(
         val eksisterendeStilling = eksisterendeRekrutteringsbistandStilling.stilling
         val kopi = eksisterendeStilling.toKopiertStilling(tokenUtils)
 
+        val eksisterendeStillingsinfo = eksisterendeRekrutteringsbistandStilling.stillingsinfo
+
+        if(eksisterendeStillingsinfo?.stillingskategori == Stillingskategori.FORMIDLING ||
+            eksisterendeStillingsinfo?.stillingskategori == Stillingskategori.REKRUTTERINGSTREFF_FORMIDLING) {
+            throw ResponseStatusException(HttpStatus.FORBIDDEN, "Kan ikke endre eier på formidlingsstillinger")
+        }
+
         val nyStilling = opprettStilling(
             opprettStilling = kopi,
-            stillingskategori = kategoriMedDefault(eksisterendeRekrutteringsbistandStilling.stillingsinfo),
+            stillingskategori = kategoriMedDefault(eksisterendeStillingsinfo),
             eierNavident = navIdent,
             eierNavn = displayName,
             eierNavKontorEnhetId = eierNavKontorEnhetId,
