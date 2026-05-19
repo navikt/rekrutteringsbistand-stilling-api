@@ -78,7 +78,7 @@ class StillingService(
         eierNavn: String?,
         eierNavKontorEnhetId: String?,
     ): RekrutteringsbistandStilling {
-        val populertGeografi = populerGeografi(opprettStilling.employer?.location)
+        val populertGeografi = geografiService.populerGeografi(opprettStilling.employer?.location)
         var stilling = opprettStilling.copy(employer = opprettStilling.employer?.copy(location = populertGeografi))
 
         if(stilling.medium == null) {
@@ -188,7 +188,7 @@ class StillingService(
             publishedByAdmin = LocalDateTime.now(ZoneId.of("Europe/Oslo")).toString()
         }
 
-        val populertLocationList = populerLocationList(dto.stilling.locationList)
+        val populertLocationList = geografiService.populerLocationList(dto.stilling.locationList)
         val stilling = dto.stilling.copyMedBeregnetTitle(
             stillingskategori = eksisterendeStillingsinfo?.stillingskategori
         ).copy(updated = LocalDateTime.now(ZoneId.of("Europe/Oslo")), publishedByAdmin = publishedByAdmin, locationList = populertLocationList)
@@ -293,49 +293,5 @@ class StillingService(
 
     fun hentAlleStillingsIder(): List<UUID> {
         return direktemeldtStillingService.hentAlleStillingsIder()
-    }
-
-    fun populerLocationList(locationList: List<Geografi>): List<Geografi> {
-        return locationList.mapNotNull { geografi -> populerGeografi(geografi) }
-    }
-
-    fun populerGeografi(geografi: Geografi?): Geografi? {
-        if(geografi == null) {
-            return null
-        }
-
-        if (!geografi.postalCode.isNullOrBlank()) {
-            val postdata = geografiService.finnPostdata(geografi.postalCode)
-            if (postdata != null) {
-                return geografi.copy(
-                    municipal = postdata.kommune.navn,
-                    county = postdata.fylke.navn,
-                    municipalCode = postdata.kommune.kommunenummer,
-                    country = "NORGE",
-                    city = postdata.by
-                )
-            }
-        }
-
-        val postDataFraKommune = geografiService.finnPostdataFraKommune(geografi.municipalCode, geografi.municipal)
-        if(postDataFraKommune != null) {
-            return geografi.copy(
-                municipalCode = postDataFraKommune.kommune.kommunenummer,
-                municipal = postDataFraKommune.kommune.navn,
-                county = postDataFraKommune.fylke.navn,
-                country = "NORGE",
-            )
-        }
-
-        if(!geografi.county.isNullOrBlank()) {
-            val fylke = geografiService.finnFylke(geografi.county)
-            if (fylke != null) {
-                return geografi.copy(
-                    county = fylke,
-                    country = "NORGE"
-                )
-            }
-        }
-        return geografi
     }
 }

@@ -23,6 +23,8 @@ class StillingsinfoRepository(
                 NOTAT to null,
                 STILLINGSKATEGORI to stillingsinfo.stillingskategori?.name,
                 EIER_NAVKONTOR_ENHETID to stillingsinfo.eier?.navKontorEnhetId,
+                REKRUTTERINGSTREFFID to stillingsinfo.rekrutteringstreffId
+
             )
         )
     }
@@ -86,5 +88,6 @@ class StillingsinfoRepository(
         const val NOTAT = "notat"
         const val STILLINGSKATEGORI = "stillingskategori"
         const val EIER_NAVKONTOR_ENHETID = "eier_navkontor_enhetid"
+        const val REKRUTTERINGSTREFFID = "rekrutteringstreffid"
     }
 }

@@ -69,24 +69,6 @@ class StillingServiceTest {
 
     @Test
     fun `Geografi er populert med fylke og land hvis kommune er satt`() {
-        whenever(geografiService.finnPostdataFraKommune(null, "Oslo")).thenReturn(PostDataDTO(
-            postkode = "1234",
-            by = "OSLO",
-            kommune = KommuneDTO(
-                kommunenummer = "0301",
-                navn = "OSLO",
-                fylkesnummer = "03",
-                korrigertNavn = "Oslo"
-            ),
-            fylke = FylkeDTO(
-                fylkesnummer = "03",
-                navn = "OSLO",
-                korrigertNavn = "Oslo"
-            ),
-            korrigertNavnBy = "Oslo"
-        )
-        )
-
         val upopulertGeografi = Geografi(
             address = null,
             municipalCode = null,
@@ -99,7 +81,19 @@ class StillingServiceTest {
             longitude = null
         )
 
-        val populertGeografi = stillingService.populerGeografi(upopulertGeografi)
+        whenever(geografiService.populerGeografi(upopulertGeografi)).thenReturn(Geografi(
+            address = null,
+            municipalCode = "0301",
+            city = "OSLO",
+            county = "OSLO",
+            municipal = "OSLO",
+            country = "NORGE",
+            postalCode = "1234",
+            latitude = null,
+            longitude = null
+        ))
+
+        val populertGeografi = geografiService.populerGeografi(upopulertGeografi)
 
         assertEquals("OSLO", populertGeografi?.county)
         assertEquals("NORGE", populertGeografi?.country)
@@ -108,24 +102,6 @@ class StillingServiceTest {
 
     @Test
     fun `Geografi er populert hvis postnummer er satt`() {
-        whenever(geografiService.finnPostdata("5678")).thenReturn(PostDataDTO(
-            postkode = "5678",
-            by = "BERGEN",
-            kommune = KommuneDTO(
-                kommunenummer = "1201",
-                navn = "BERGEN",
-                fylkesnummer = "12",
-                korrigertNavn = "Bergen"
-            ),
-            fylke = FylkeDTO(
-                fylkesnummer = "12",
-                navn = "HORDALAND",
-                korrigertNavn = "Hordaland"
-            ),
-            korrigertNavnBy = "Bergen"
-        )
-        )
-
         val upopulertGeografi = Geografi(
             address = null,
             municipalCode = null,
@@ -138,7 +114,19 @@ class StillingServiceTest {
             longitude = null
         )
 
-        val populertGeografi = stillingService.populerGeografi(upopulertGeografi)
+        whenever(geografiService.populerGeografi(upopulertGeografi)).thenReturn(Geografi(
+            address = null,
+            municipalCode = "1201",
+            city = "BERGEN",
+            county = "HORDALAND",
+            municipal = "BERGEN",
+            country = "NORGE",
+            postalCode = "5678",
+            latitude = null,
+            longitude = null
+        ))
+
+        val populertGeografi = geografiService.populerGeografi(upopulertGeografi)
 
         assertEquals("HORDALAND", populertGeografi?.county)
         assertEquals("NORGE", populertGeografi?.country)

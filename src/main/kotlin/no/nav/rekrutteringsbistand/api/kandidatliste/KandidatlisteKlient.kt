@@ -24,21 +24,21 @@ class KandidatlisteKlient(
     private val scopeTilKandidatApi: String
 ) {
 
-    fun sendStillingOppdatert(stilling: KandidatlisteDto): ResponseEntity<Void> {
+    fun sendStillingOppdatert(stilling: KandidatlisteDto): ResponseEntity<KandidatlisteIdDto> {
         val url = byggUrlTilPutEndepunkt()
         log.info("Oppdaterer kandidatliste, stillingsid: ${stilling.stilling.uuid}")
         return restTemplate.exchange(
             url,
             HttpMethod.PUT,
             HttpEntity(stilling, headers()),
-            Void::class.java
+            KandidatlisteIdDto::class.java
         )
             .also {
                 if (it.statusCode != HttpStatus.NO_CONTENT) {
                     log.warn(
                         "Uventet response fra kandidatliste-api for ad {}: {}",
                         stilling.stilling.uuid,
-                        it.statusCodeValue
+                        it.statusCode
                     )
                 }
             }
