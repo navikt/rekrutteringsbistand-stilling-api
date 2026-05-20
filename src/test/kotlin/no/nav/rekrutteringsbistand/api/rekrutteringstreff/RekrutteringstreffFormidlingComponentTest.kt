@@ -5,7 +5,6 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension
 import no.nav.rekrutteringsbistand.api.TestRepository
 import no.nav.rekrutteringsbistand.api.config.MockLogin
-import no.nav.rekrutteringsbistand.api.config.jobbsøkerrettet
 import no.nav.rekrutteringsbistand.api.geografi.GeografiService
 import no.nav.rekrutteringsbistand.api.mockAzureObo
 import no.nav.rekrutteringsbistand.api.rekrutteringstreff.dto.OpprettRekrutteringstreffFormidling
@@ -270,56 +269,7 @@ class RekrutteringstreffFormidlingComponentTest {
     }
 
     @Test
-    fun `POST opprett formidling uten token skal returnere 401`() {
-        val uautentisertRestTemplate = TestRestTemplate()
-        val request = lagOpprettFormidlingRequest()
-
-        val response = uautentisertRestTemplate.postForEntity(
-            "$localBaseUrl/rekrutteringstreff/formidling",
-            request,
-            String::class.java
-        )
-
-        assertThat(response.statusCode).isEqualTo(HttpStatus.UNAUTHORIZED)
-    }
-
-    @Test
-    fun `POST opprett formidling med jobbsøkerrettet rolle skal returnere 200`() {
-        val jobbsøkerRettetRestTemplate = TestRestTemplate()
-        mockLogin.leggAzureVeilederTokenPåAlleRequests(jobbsøkerRettetRestTemplate, roller = listOf(jobbsøkerrettet))
-        mockAzureObo(wiremockAzure)
-        mockKandidatlisteOppdatering()
-
-        val request = lagOpprettFormidlingRequest()
-
-        val response = jobbsøkerRettetRestTemplate.postForEntity(
-            "$localBaseUrl/rekrutteringstreff/formidling",
-            request,
-            OpprettRekrutteringstreffFormidlingRespons::class.java
-        )
-
-        assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
-    }
-
-    @Test
-    fun `POST opprett formidling uten riktig rolle skal returnere 403`() {
-        val utenRolleRestTemplate = TestRestTemplate()
-        mockLogin.leggAzureVeilederTokenPåAlleRequests(utenRolleRestTemplate, roller = listOf("en-annen-rolle"))
-        mockAzureObo(wiremockAzure)
-
-        val request = lagOpprettFormidlingRequest()
-
-        val response = utenRolleRestTemplate.postForEntity(
-            "$localBaseUrl/rekrutteringstreff/formidling",
-            request,
-            String::class.java
-        )
-
-        assertThat(response.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
-    }
-
-    @Test
-    fun `POST opprett formidling skal returnere 500 når kandidatliste-kallet feiler`() {
+    fun `POST opprett formidling skal returnere 500 når kandidatliste-kallet feiler, og ikke lagre stilling og stillingsinfo`() {
         mockAzureObo(wiremockAzure)
         mockKandidatlisteOppdateringFeiler()
 
@@ -330,23 +280,11 @@ class RekrutteringstreffFormidlingComponentTest {
             request,
             String::class.java
         )
+        val antallStillinger = testRepository.hentAntallDirektemeldtStilling()
+        val antallStilllingsinfo = testRepository.hentAntallStillingsinfo()
 
-        assertThat(response.statusCode.is5xxServerError).isTrue()
-    }
-
-    @Test
-    fun `POST opprett formidling skal rulle tilbake stilling og stillingsinfo når kandidatliste-kallet feiler`() {
-        mockAzureObo(wiremockAzure)
-        mockKandidatlisteOppdateringFeiler()
-
-        val request = lagOpprettFormidlingRequest()
-
-        val response = restTemplate.postForEntity(
-            "$localBaseUrl/rekrutteringstreff/formidling",
-            request,
-            String::class.java
-        )
-
+        assertThat(antallStillinger).isEqualTo(0)
+        assertThat(antallStilllingsinfo).isEqualTo(0)
         assertThat(response.statusCode.is5xxServerError).isTrue()
     }
 

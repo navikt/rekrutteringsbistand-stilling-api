@@ -24,7 +24,6 @@ class StillingsinfoRepository(
                 STILLINGSKATEGORI to stillingsinfo.stillingskategori?.name,
                 EIER_NAVKONTOR_ENHETID to stillingsinfo.eier?.navKontorEnhetId,
                 REKRUTTERINGSTREFFID to stillingsinfo.rekrutteringstreffId
-
             )
         )
     }

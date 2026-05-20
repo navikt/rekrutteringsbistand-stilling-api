@@ -99,10 +99,16 @@ class RekrutteringstreffFormidlingService(
             stilling = KandidatlisteStillingDto(direktemeldtStillingFraDb)
         )
         val respons = kandidatlisteKlient.sendStillingOppdatert(kandidatListeDto)
-        val kandidatlisteIdDto = respons.body
+
+        val kandidatlisteIdDto = requireNotNull(respons.body) {
+            "Mottok tom respons fra kandidat-api ved opprettelse av kandidatliste"
+        }
+        val kandidatlisteId = requireNotNull(kandidatlisteIdDto.kandidatlisteId) {
+            "Mottok respons uten kandidatlisteId fra kandidat-api ved opprettelse av kandidatliste"
+        }
 
         return OpprettRekrutteringstreffFormidlingRespons(
-            kandidatlisteId = UUID.fromString(kandidatlisteIdDto?.kandidatlisteId),
+            kandidatlisteId = UUID.fromString(kandidatlisteId),
             stillingsId = direktemeldtStillingFraDb.stillingsId
         )
     }

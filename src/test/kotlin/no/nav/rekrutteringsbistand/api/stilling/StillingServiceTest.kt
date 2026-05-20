@@ -5,20 +5,11 @@ import no.nav.rekrutteringsbistand.api.Testdata.enDirektemeldtStilling
 import no.nav.rekrutteringsbistand.api.Testdata.enStilling
 import no.nav.rekrutteringsbistand.api.arbeidsplassen.ArbeidsplassenKlient
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
-import no.nav.rekrutteringsbistand.api.geografi.FylkeDTO
 import no.nav.rekrutteringsbistand.api.geografi.GeografiService
-import no.nav.rekrutteringsbistand.api.geografi.KommuneDTO
-import no.nav.rekrutteringsbistand.api.geografi.PostDataDTO
 import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteKlient
 import no.nav.rekrutteringsbistand.api.opensearch.StillingssokProxyClient
 import no.nav.rekrutteringsbistand.api.stilling.outbox.StillingOutboxService
-import no.nav.rekrutteringsbistand.api.stillingsinfo.Eier
-import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsid
-import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsinfo
-import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoService
-import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsinfoid
-import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingskategori
-import org.junit.jupiter.api.Assertions.assertEquals
+import no.nav.rekrutteringsbistand.api.stillingsinfo.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -28,7 +19,7 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.boot.test.context.SpringBootTest
-import java.util.UUID
+import java.util.*
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
@@ -65,74 +56,6 @@ class StillingServiceTest {
             geografiService,
             stillingOutboxService,
         )
-    }
-
-    @Test
-    fun `Geografi er populert med fylke og land hvis kommune er satt`() {
-        val upopulertGeografi = Geografi(
-            address = null,
-            municipalCode = null,
-            city = null,
-            county = null,
-            municipal = "Oslo",
-            country = null,
-            postalCode = null,
-            latitude = null,
-            longitude = null
-        )
-
-        whenever(geografiService.populerGeografi(upopulertGeografi)).thenReturn(Geografi(
-            address = null,
-            municipalCode = "0301",
-            city = "OSLO",
-            county = "OSLO",
-            municipal = "OSLO",
-            country = "NORGE",
-            postalCode = "1234",
-            latitude = null,
-            longitude = null
-        ))
-
-        val populertGeografi = geografiService.populerGeografi(upopulertGeografi)
-
-        assertEquals("OSLO", populertGeografi?.county)
-        assertEquals("NORGE", populertGeografi?.country)
-    }
-
-
-    @Test
-    fun `Geografi er populert hvis postnummer er satt`() {
-        val upopulertGeografi = Geografi(
-            address = null,
-            municipalCode = null,
-            city = null,
-            county = null,
-            municipal = null,
-            country = null,
-            postalCode = "5678",
-            latitude = null,
-            longitude = null
-        )
-
-        whenever(geografiService.populerGeografi(upopulertGeografi)).thenReturn(Geografi(
-            address = null,
-            municipalCode = "1201",
-            city = "BERGEN",
-            county = "HORDALAND",
-            municipal = "BERGEN",
-            country = "NORGE",
-            postalCode = "5678",
-            latitude = null,
-            longitude = null
-        ))
-
-        val populertGeografi = geografiService.populerGeografi(upopulertGeografi)
-
-        assertEquals("HORDALAND", populertGeografi?.county)
-        assertEquals("NORGE", populertGeografi?.country)
-        assertEquals("1201", populertGeografi?.municipalCode)
-        assertEquals("BERGEN", populertGeografi?.municipal)
-        assertEquals("BERGEN", populertGeografi?.city)
     }
 
     @Test

@@ -1,5 +1,6 @@
 package no.nav.rekrutteringsbistand.api.geografi
 
+import no.nav.rekrutteringsbistand.api.stilling.Geografi
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -83,4 +84,50 @@ class GeografiServiceTest {
         assertEquals("1201", postData?.kommune?.kommunenummer)
         assertEquals("HORDALAND", postData?.fylke?.navn)
     }
+
+    @Test
+    fun `Test at geografi blir populert hvis postnummer er satt `() {
+        whenever(geografiKlient.hentAllePostdata()).thenReturn(postData)
+
+        val upopulertGeografi = Geografi(
+            address = null,
+            municipalCode = null,
+            city = null,
+            county = null,
+            municipal = null,
+            country = null,
+            postalCode = "5678",
+            latitude = null,
+            longitude = null
+        )
+
+        val populertGeografi = geografiService.populerGeografi(upopulertGeografi)
+
+        assertEquals("HORDALAND", populertGeografi?.county)
+        assertEquals("NORGE", populertGeografi?.country)
+        assertEquals("1201", populertGeografi?.municipalCode)
+        assertEquals("BERGEN", populertGeografi?.municipal)
+        assertEquals("BERGEN", populertGeografi?.city)
+    }
+
+    @Test
+    fun `Test at geografi blir populert med fylke og land hvis kommune er satt`() {
+        whenever(geografiKlient.hentAllePostdata()).thenReturn(postData)
+
+        val upopulertGeografi = Geografi(
+            address = null,
+            municipalCode = null,
+            city = null,
+            county = null,
+            municipal = "Oslo",
+            country = null,
+            postalCode = null,
+            latitude = null,
+            longitude = null
+        )
+
+        val populertGeografi = geografiService.populerGeografi(upopulertGeografi)
+
+        assertEquals("OSLO", populertGeografi?.county)
+        assertEquals("NORGE", populertGeografi?.country)    }
 }

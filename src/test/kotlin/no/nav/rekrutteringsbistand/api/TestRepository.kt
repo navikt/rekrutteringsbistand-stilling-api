@@ -13,4 +13,13 @@ class TestRepository(val jdbcTemplate: JdbcTemplate) {
         jdbcTemplate.update("DELETE FROM ${DirektemeldtStillingRepository.DIREKTEMELDT_STILLING_TABELL}")
         jdbcTemplate.update("DELETE FROM stilling_outbox")
     }
+
+
+    fun hentAntallStillingsinfo(): Int {
+        return jdbcTemplate.queryForObject("SELECT COUNT(*) FROM ${StillingsinfoRepository.STILLINGSINFO}", Int::class.java) ?: 0
+    }
+
+     fun hentAntallDirektemeldtStilling(): Int {
+        return jdbcTemplate.queryForObject("SELECT COUNT(*) FROM ${DirektemeldtStillingRepository.DIREKTEMELDT_STILLING_TABELL}", Int::class.java) ?: 0
+    }
 }

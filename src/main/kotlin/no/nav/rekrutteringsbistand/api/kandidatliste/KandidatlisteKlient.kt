@@ -34,9 +34,9 @@ class KandidatlisteKlient(
             KandidatlisteIdDto::class.java
         )
             .also {
-                if (it.statusCode != HttpStatus.NO_CONTENT) {
+                if (it.statusCode != HttpStatus.OK) {
                     log.warn(
-                        "Uventet response fra kandidatliste-api for ad {}: {}",
+                        "Uventet response fra kandidat-api for ad {}: {}",
                         stilling.stilling.uuid,
                         it.statusCode
                     )
@@ -61,7 +61,7 @@ class KandidatlisteKlient(
         catch (e: HttpClientErrorException.NotFound) { ResponseEntity.notFound().build() }
         catch (e: RestClientResponseException) {
             log.warn(
-                "Uventet response fra kandidatliste-api for ad {}: {}",
+                "Uventet response fra kandidat-api for ad {}: {}",
                 stillingsid.asString(),
                 e.statusCode
             )
