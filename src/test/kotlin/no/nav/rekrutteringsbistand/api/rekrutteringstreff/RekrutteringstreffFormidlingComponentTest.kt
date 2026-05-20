@@ -80,6 +80,7 @@ class RekrutteringstreffFormidlingComponentTest {
         mockLogin.leggAzureVeilederTokenPåAlleRequests(restTemplate)
         whenever(geografiService.populerGeografi(any())).thenAnswer { it.arguments[0] }
         whenever(geografiService.populerLocationList(any())).thenAnswer { it.arguments[0] }
+        testRepository.slettAlt()
     }
 
     @AfterEach
