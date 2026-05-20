@@ -48,6 +48,8 @@ object Testdata {
     val enOpprettRekrutteringsbistandstillingDto =
         enOpprettRekrutteringsbistandstillingDtoMedKategori(Stillingskategori.ARBEIDSTRENING)
 
+    val enOpprettRekrutteringsbistandstillingDtoMedKategoriRekrutteringstreffFormidling = enOpprettRekrutteringsbistandstillingDtoMedKategori(Stillingskategori.REKRUTTERINGSTREFF_FORMIDLING)
+
     fun enOpprettRekrutteringsbistandstillingDtoMedKategori(kategori: Stillingskategori) = OpprettRekrutteringsbistandstillingDto(
         kategori = kategori,
         eierNavKontorEnhetId = "1234",

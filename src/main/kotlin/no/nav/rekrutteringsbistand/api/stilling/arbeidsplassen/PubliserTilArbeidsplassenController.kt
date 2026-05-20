@@ -30,7 +30,7 @@ class PubliserTilArbeidsplassenController(
     @PostMapping("/publiser/{stillingsId}")
     fun publiserTilRapid(@PathVariable stillingsId: UUID): ResponseEntity<String> {
         val stillingsinfo = stillingsinfoService.hentStillingsinfo(Stillingsid(stillingsId))
-        if (stillingsinfo?.stillingskategori == Stillingskategori.FORMIDLING) {
+        if (stillingsinfo?.stillingskategori == Stillingskategori.FORMIDLING || stillingsinfo?.stillingskategori == Stillingskategori.REKRUTTERINGSTREFF_FORMIDLING) {
             throw IllegalArgumentException("Kan ikke sende formidling/etterregistrering til arbeidsplassen")
         } else if (stillingsinfo?.stillingskategori == Stillingskategori.JOBBMESSE) {
             throw IllegalArgumentException("Kan ikke sende jobbmesse til arbeidsplassen")

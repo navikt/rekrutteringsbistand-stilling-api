@@ -12,7 +12,6 @@ import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoService
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingskategori
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.util.*
@@ -38,7 +37,7 @@ class RekrutteringstreffFormidlingService(
         val uuid = UUID.randomUUID()
         val populertLocationList = geografiService.populerLocationList(stilling.locationList)
 
-        val direkemeldtStillingInnhold = DirektemeldtStillingInnhold(
+        val direktemeldtStillingInnhold = DirektemeldtStillingInnhold(
             title = hentTittel(stilling.categoryList),
             administration = DirektemeldtStillingAdministration(
                 comments = null,
@@ -65,7 +64,7 @@ class RekrutteringstreffFormidlingService(
 
         val direktemeldtStilling = DirektemeldtStilling(
             stillingsId = uuid,
-            innhold = direkemeldtStillingInnhold,
+            innhold = direktemeldtStillingInnhold,
             opprettet = opprettetTidspunkt,
             opprettetAv = "pam-rekrutteringsbistand",
             sistEndret = opprettetTidspunkt,
@@ -74,7 +73,7 @@ class RekrutteringstreffFormidlingService(
             annonsenr = uuid.toString(),
             utløpsdato = opprettetTidspunkt,
             publisert = opprettetTidspunkt,
-            publisertAvAdmin = opprettetTidspunkt.toString(),
+            publisertAvAdmin = opprettetTidspunkt.toLocalDateTime().toString(),
             adminStatus = AdminStatus.DONE.name,
         )
         direktemeldtStillingService.lagreDirektemeldtStilling(direktemeldtStilling)

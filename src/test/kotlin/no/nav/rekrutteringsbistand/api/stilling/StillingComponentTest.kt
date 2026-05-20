@@ -7,6 +7,7 @@ import com.github.tomakehurst.wiremock.junit5.WireMockExtension
 import com.github.tomakehurst.wiremock.matching.UrlPattern
 import no.nav.rekrutteringsbistand.api.*
 import no.nav.rekrutteringsbistand.api.Testdata.enOpprettRekrutteringsbistandstillingDto
+import no.nav.rekrutteringsbistand.api.Testdata.enOpprettRekrutteringsbistandstillingDtoMedKategoriRekrutteringstreffFormidling
 import no.nav.rekrutteringsbistand.api.Testdata.enOpprettetStilling
 import no.nav.rekrutteringsbistand.api.Testdata.enRekrutteringsbistandStilling
 import no.nav.rekrutteringsbistand.api.Testdata.enRekrutteringsbistandStillingUtenEier
@@ -457,6 +458,20 @@ internal class StillingComponentTest {
         // så skal stillingens Stillingsinfo ikke slettes
         stillingsinfoRepository.hentForStilling(Stillingsid(stilling.stillingsId)) ?: fail("Det skal finnes en Stillingsinfo i db for ")
 
+    }
+
+    @Test
+    fun `Skal ikke kunne opprette stilling med stillingskategori REKRUTTERINGSTREFF_FORMIDLING, skal gi BAD_REQUEST`() {
+        val request = enOpprettRekrutteringsbistandstillingDtoMedKategoriRekrutteringstreffFormidling
+        mockAzureObo(wiremockAzure)
+
+        restTemplate.postForEntity(
+            "$localBaseUrl/rekrutteringsbistandstilling",
+            request,
+            String::class.java
+        ).also {
+            assertThat(it.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
+        }
     }
 
     private fun mockKandidatlisteOppdatering(metodeFunksjon: (UrlPattern) -> MappingBuilder = ::put) {

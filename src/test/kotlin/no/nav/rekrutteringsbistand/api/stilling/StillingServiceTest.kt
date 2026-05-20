@@ -13,6 +13,7 @@ import no.nav.rekrutteringsbistand.api.stillingsinfo.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.assertThrows
 import org.mockito.Mock
 import org.mockito.kotlin.any
 import org.mockito.kotlin.times
@@ -85,5 +86,47 @@ class StillingServiceTest {
 
         verify(times(0)) { stillingOutboxService.lagreMeldingIOutbox(
             any(), any()) }
+    }
+
+    @Test
+    fun `Skal ikke kunne kopiere stilling med stillingskategori REKRUTTERINGSTREFF_FORMIDLING`() {
+        val stillingsid = UUID.randomUUID()
+        val eier = Eier(navident = "Z123456", navn = "Ola Nordmann", navKontorEnhetId = "1234")
+        val stillingsinfo = Stillingsinfo(
+            stillingsid = Stillingsid(stillingsid),
+            stillingsinfoid = Stillingsinfoid("123e4567-e89b-12d3-a456-426614174001"),
+            eier = eier,
+
+            stillingskategori = Stillingskategori.REKRUTTERINGSTREFF_FORMIDLING,
+            )
+        val direktemeldtStilling = enDirektemeldtStilling.copy(stillingsId = stillingsid, innhold = enDirektemeldtStilling.innhold.copy(privacy = "SHOW_ALL"))
+
+        whenever(stillingsinfoService.hentStillingsinfo(Stillingsid(stillingsid))).thenReturn(stillingsinfo)
+        whenever(direktemeldtStillingService.hentDirektemeldtStilling(stillingsid)).thenReturn(direktemeldtStilling)
+
+        assertThrows<IllegalArgumentException> {
+            stillingService.kopierStilling(stillingsid, eier.navident, eier.navn, eier.navKontorEnhetId)
+        }
+    }
+
+    @Test
+    fun `Skal ikke kunne kopiere stilling med stillingskategori FORMIDLING `() {
+        val stillingsid = UUID.randomUUID()
+        val eier = Eier(navident = "Z123456", navn = "Ola Nordmann", navKontorEnhetId = "1234")
+        val stillingsinfo = Stillingsinfo(
+            stillingsid = Stillingsid(stillingsid),
+            stillingsinfoid = Stillingsinfoid("123e4567-e89b-12d3-a456-426614174001"),
+            eier = eier,
+
+            stillingskategori = Stillingskategori.FORMIDLING,
+        )
+        val direktemeldtStilling = enDirektemeldtStilling.copy(stillingsId = stillingsid, innhold = enDirektemeldtStilling.innhold.copy(privacy = "SHOW_ALL"))
+
+        whenever(stillingsinfoService.hentStillingsinfo(Stillingsid(stillingsid))).thenReturn(stillingsinfo)
+        whenever(direktemeldtStillingService.hentDirektemeldtStilling(stillingsid)).thenReturn(direktemeldtStilling)
+
+        assertThrows<IllegalArgumentException> {
+            stillingService.kopierStilling(stillingsid, eier.navident, eier.navn, eier.navKontorEnhetId)
+        }
     }
 }

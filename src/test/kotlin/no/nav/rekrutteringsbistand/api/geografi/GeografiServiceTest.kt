@@ -86,7 +86,7 @@ class GeografiServiceTest {
     }
 
     @Test
-    fun `Test at geografi blir populert hvis postnummer er satt `() {
+    fun `Test at geografi blir populert hvis postnummer er satt`() {
         whenever(geografiKlient.hentAllePostdata()).thenReturn(postData)
 
         val upopulertGeografi = Geografi(

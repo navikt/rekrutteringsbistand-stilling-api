@@ -134,6 +134,10 @@ class StillingService(
     fun kopierStilling(stillingsId: UUID, navIdent: String?, displayName: String?, eierNavKontorEnhetId: String?): RekrutteringsbistandStilling {
         log.info("Kopierer stilling med uuid: $stillingsId")
         val eksisterendeRekrutteringsbistandStilling = hentRekrutteringsbistandStilling(stillingsId)
+
+        if(eksisterendeRekrutteringsbistandStilling.stillingsinfo?.stillingskategori == Stillingskategori.FORMIDLING || eksisterendeRekrutteringsbistandStilling.stillingsinfo?.stillingskategori == Stillingskategori.REKRUTTERINGSTREFF_FORMIDLING) {
+            throw IllegalArgumentException("Kan ikke kopiere formidlinger")
+        }
         val eksisterendeStilling = eksisterendeRekrutteringsbistandStilling.stilling
         val kopi = eksisterendeStilling.toKopiertStilling(tokenUtils)
 
@@ -276,7 +280,7 @@ class StillingService(
         } else {
             val stillingsinfo: Stillingsinfo? = stillingsinfoService.hentStillingsinfo(Stillingsid(stillingsId))
             // Sjekk om stillingen skal sendes til arbeidsplassen
-            if (stillingsinfo?.stillingskategori != Stillingskategori.FORMIDLING && direktemeldtStilling.innhold.privacy == "SHOW_ALL") {
+            if (stillingsinfo?.stillingskategori == Stillingskategori.STILLING && direktemeldtStilling.innhold.privacy == "SHOW_ALL") {
                 stillingOutboxService.lagreMeldingIOutbox(
                     stillingsId = stillingsId,
                     eventName = EventName.PUBLISER_ELLER_AVPUBLISER_TIL_ARBEIDSPLASSEN
