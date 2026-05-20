@@ -2,7 +2,6 @@ package no.nav.rekrutteringsbistand.api.stilling
 
 import no.nav.rekrutteringsbistand.AuditLogg
 import no.nav.rekrutteringsbistand.api.RekrutteringsbistandStilling
-import no.nav.rekrutteringsbistand.api.arbeidsplassen.ArbeidsplassenKlient
 import no.nav.rekrutteringsbistand.api.arbeidsplassen.OpprettStillingDto
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
 import no.nav.rekrutteringsbistand.api.geografi.GeografiService
@@ -30,7 +29,6 @@ class StillingService(
     val stillingsinfoService: StillingsinfoService,
     val tokenUtils: TokenUtils,
     val kandidatlisteKlient: KandidatlisteKlient,
-    val arbeidsplassenKlient: ArbeidsplassenKlient,
     val direktemeldtStillingService: DirektemeldtStillingService,
     val stillingssokProxyClient: StillingssokProxyClient,
     val geografiService: GeografiService,
@@ -213,23 +211,13 @@ class StillingService(
         log.info("Oppdaterte stilling i databasen med uuid: ${dto.stilling.uuid}")
         val direktemeldtStillingFraDb = direktemeldtStillingService.hentDirektemeldtStilling(id.verdi)!!
 
-        if (PubliserteArbeidsplassenStillinger.erPublisertPåArbeidsplassenViaRestApi(direktemeldtStillingFraDb.stillingsId)) {
-            log.info("Stillingen er publisert på arbeidsplassen, oppdaterer stilling der med uuid: ${dto.stilling.uuid}")
-            // Hent stilling før den oppdateres, da det er en OptimisticLocking strategi på 'updated' feltet hos Arbeidsplassen
-            val existerendeStilling = arbeidsplassenKlient.hentStilling(UUID.fromString(dto.stilling.uuid))
-            arbeidsplassenKlient.oppdaterStilling(
-                stilling.toArbeidsplassenDto(existerendeStilling.id).copy(updated = existerendeStilling.updated,)
+        // Sjekk om stillingen skal sendes til arbeidsplassen
+        if (eksisterendeStillingsinfo?.stillingskategori == Stillingskategori.STILLING && (dto.stilling.privacy == "SHOW_ALL"
+                    || (eksisterendeStillingIDb?.innhold?.privacy == "SHOW_ALL" && dto.stilling.privacy == "INTERNAL_NOT_SHOWN"))) {
+            stillingOutboxService.lagreMeldingIOutbox(
+                stillingsId = id.verdi,
+                eventName = EventName.PUBLISER_ELLER_AVPUBLISER_TIL_ARBEIDSPLASSEN
             )
-            log.info("Oppdaterte stilling hos Arbeidsplassen med uuid: ${dto.stilling.uuid}")
-        } else {
-            // Sjekk om stillingen skal sendes til arbeidsplassen
-            if (eksisterendeStillingsinfo?.stillingskategori == Stillingskategori.STILLING && (dto.stilling.privacy == "SHOW_ALL"
-                        || (eksisterendeStillingIDb?.innhold?.privacy == "SHOW_ALL" && dto.stilling.privacy == "INTERNAL_NOT_SHOWN"))) {
-                stillingOutboxService.lagreMeldingIOutbox(
-                    stillingsId = id.verdi,
-                    eventName = EventName.PUBLISER_ELLER_AVPUBLISER_TIL_ARBEIDSPLASSEN
-                )
-            }
         }
 
         val oppdatertStillingsinfo: Stillingsinfo? = stillingsinfoService.hentStillingsinfo(id)
@@ -271,17 +259,13 @@ class StillingService(
         )
         direktemeldtStillingService.lagreDirektemeldtStilling(slettetStilling)
 
-        if (PubliserteArbeidsplassenStillinger.erPublisertPåArbeidsplassenViaRestApi(direktemeldtStilling.stillingsId)) {
-            arbeidsplassenKlient.slettStilling(stillingsId)
-        } else {
-            val stillingsinfo: Stillingsinfo? = stillingsinfoService.hentStillingsinfo(Stillingsid(stillingsId))
-            // Sjekk om stillingen skal sendes til arbeidsplassen
-            if (stillingsinfo?.stillingskategori != Stillingskategori.FORMIDLING && direktemeldtStilling.innhold.privacy == "SHOW_ALL") {
-                stillingOutboxService.lagreMeldingIOutbox(
-                    stillingsId = stillingsId,
-                    eventName = EventName.PUBLISER_ELLER_AVPUBLISER_TIL_ARBEIDSPLASSEN
-                )
-            }
+        val stillingsinfo: Stillingsinfo? = stillingsinfoService.hentStillingsinfo(Stillingsid(stillingsId))
+        // Sjekk om stillingen skal sendes til arbeidsplassen
+        if (stillingsinfo?.stillingskategori != Stillingskategori.FORMIDLING && direktemeldtStilling.innhold.privacy == "SHOW_ALL") {
+            stillingOutboxService.lagreMeldingIOutbox(
+                stillingsId = stillingsId,
+                eventName = EventName.PUBLISER_ELLER_AVPUBLISER_TIL_ARBEIDSPLASSEN
+            )
         }
 
         return slettetStilling.toStilling()

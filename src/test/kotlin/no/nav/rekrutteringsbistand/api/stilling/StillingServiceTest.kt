@@ -3,7 +3,6 @@ package no.nav.rekrutteringsbistand.api.stilling
 import no.nav.rekrutteringsbistand.api.RekrutteringsbistandStilling
 import no.nav.rekrutteringsbistand.api.Testdata.enDirektemeldtStilling
 import no.nav.rekrutteringsbistand.api.Testdata.enStilling
-import no.nav.rekrutteringsbistand.api.arbeidsplassen.ArbeidsplassenKlient
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
 import no.nav.rekrutteringsbistand.api.geografi.FylkeDTO
 import no.nav.rekrutteringsbistand.api.geografi.GeografiService
@@ -40,8 +39,6 @@ class StillingServiceTest {
     @Mock
     lateinit var kandidatlisteKlient: KandidatlisteKlient
     @Mock
-    lateinit var arbeidsplassenKlient: ArbeidsplassenKlient
-    @Mock
     lateinit var direktemeldtStillingService: DirektemeldtStillingService
     @Mock
     lateinit var stillingssokProxyClient: StillingssokProxyClient
@@ -59,7 +56,6 @@ class StillingServiceTest {
             stillingsinfoService,
             tokenUtils,
             kandidatlisteKlient,
-            arbeidsplassenKlient,
             direktemeldtStillingService,
             stillingssokProxyClient,
             geografiService,
