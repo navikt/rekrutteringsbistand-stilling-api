@@ -34,7 +34,7 @@ class RekrutteringstreffFormidlingService(
         stilling: RekrutteringstreffStilling
     ) : OpprettRekrutteringstreffFormidlingRespons {
         val populertGeografi = geografiService.populerGeografi(stilling.employer.location)
-        val opprettetTidspunkt = ZonedDateTime.of(LocalDateTime.now(), ZoneId.of("Europe/Oslo"))
+        val opprettetTidspunkt = ZonedDateTime.now(ZoneId.of("Europe/Oslo"))
         val uuid = UUID.randomUUID()
         val populertLocationList = geografiService.populerLocationList(stilling.locationList)
 

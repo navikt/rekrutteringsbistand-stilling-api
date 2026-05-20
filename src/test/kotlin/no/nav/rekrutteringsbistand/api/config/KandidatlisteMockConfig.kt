@@ -33,7 +33,7 @@ class KandidatlisteMockConfig {
             return WireMock.put(WireMock.urlPathMatching("/rekrutteringsbistand-kandidat-api/rest/veileder/stilling/.*/kandidatliste"))
                     .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
                     .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
-                    .willReturn(WireMock.aResponse().withStatus(HttpStatus.NO_CONTENT.value())
+                    .willReturn(WireMock.aResponse().withStatus(HttpStatus.OK.value())
                             .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE))
         }
     }

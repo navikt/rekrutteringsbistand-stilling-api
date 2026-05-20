@@ -1,6 +1,5 @@
 package no.nav.rekrutteringsbistand.api.kandidatliste
 
-import no.nav.rekrutteringsbistand.api.RekrutteringsbistandStilling
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsid
 import no.nav.rekrutteringsbistand.api.support.config.ExternalConfiguration

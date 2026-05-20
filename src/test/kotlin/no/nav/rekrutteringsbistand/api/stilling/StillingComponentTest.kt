@@ -465,7 +465,7 @@ internal class StillingComponentTest {
                 CONTENT_TYPE,
                 equalTo(APPLICATION_JSON_VALUE)
             ).withHeader(ACCEPT, equalTo(APPLICATION_JSON_VALUE)).willReturn(
-                aResponse().withStatus(HttpStatus.NO_CONTENT.value()).withHeader(
+                aResponse().withStatus(HttpStatus.OK.value()).withHeader(
                     CONNECTION, "close"
                 ) // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
                     .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)

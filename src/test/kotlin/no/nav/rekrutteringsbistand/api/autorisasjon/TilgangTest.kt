@@ -75,6 +75,7 @@ class TilgangTest {
     private lateinit var azureKlient: AzureKlient
 
     @MockitoBean
+    @Suppress("unused")
     private lateinit var geografiService: GeografiService
 
     @Autowired
@@ -236,7 +237,6 @@ enum class StatusType(val assertion: StatusAssertions.() -> Unit) {
     ok(StatusAssertions::isOk),
     unauthorized(StatusAssertions::isUnauthorized),
     forbidden(StatusAssertions::isForbidden),
-    no_content(StatusAssertions::isNoContent),
     created(StatusAssertions::isCreated),
 }
 
@@ -366,7 +366,7 @@ private class Kall(private val webClient: WebTestClient, private val mockLogin: 
             post(
                 "$indekserPath/stillingsinfo/bulk",
                 rolle,
-                BulkStillingsinfoInboundDto(stillinger.map(no.nav.rekrutteringsbistand.api.stilling.FrontendStilling::uuid))
+                BulkStillingsinfoInboundDto(stillinger.map(FrontendStilling::uuid))
             )
         }
     }
