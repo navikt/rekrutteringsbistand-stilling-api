@@ -18,6 +18,7 @@ data class Stillingsinfo(
         eierNavn = this.eier?.navn,
         eierNavKontorEnhetId = this.eier?.navKontorEnhetId,
         stillingskategori = this.stillingskategori,
+        rekrutteringstreffId = this.rekrutteringstreffId,
     )
 
     companion object {
@@ -67,6 +68,7 @@ data class StillingsinfoDto(
     val eierNavn: String?,
     val stillingskategori: Stillingskategori?,
     val eierNavKontorEnhetId: String?,
+    val rekrutteringstreffId: UUID?,
 )
 
 enum class Stillingskategori {
@@ -77,7 +79,7 @@ enum class Stillingskategori {
     REKRUTTERINGSTREFF_FORMIDLING;
 
     companion object {
-        fun fraDatabase(verdi: String?) = if (verdi == null) null else values().firstOrNull { it.name == verdi }
+        fun fraDatabase(verdi: String?) = if (verdi == null) null else entries.firstOrNull { it.name == verdi }
     }
 }
 

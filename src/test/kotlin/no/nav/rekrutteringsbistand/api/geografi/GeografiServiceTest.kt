@@ -22,6 +22,7 @@ class GeografiServiceTest {
     fun setUp() {
         geografiService = GeografiService(geografiKlient)
     }
+
     val postData = listOf(
         PostDataDTO(
             postkode = "1234",
@@ -129,5 +130,6 @@ class GeografiServiceTest {
         val populertGeografi = geografiService.populerGeografi(upopulertGeografi)
 
         assertEquals("OSLO", populertGeografi?.county)
-        assertEquals("NORGE", populertGeografi?.country)    }
+        assertEquals("NORGE", populertGeografi?.country)
+    }
 }

@@ -136,7 +136,7 @@ class StillingService(
         val eksisterendeRekrutteringsbistandStilling = hentRekrutteringsbistandStilling(stillingsId)
 
         if(eksisterendeRekrutteringsbistandStilling.stillingsinfo?.stillingskategori == Stillingskategori.FORMIDLING || eksisterendeRekrutteringsbistandStilling.stillingsinfo?.stillingskategori == Stillingskategori.REKRUTTERINGSTREFF_FORMIDLING) {
-            throw IllegalArgumentException("Kan ikke kopiere formidlinger")
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Kan ikke kopiere formidlinger")
         }
         val eksisterendeStilling = eksisterendeRekrutteringsbistandStilling.stilling
         val kopi = eksisterendeStilling.toKopiertStilling(tokenUtils)
@@ -162,14 +162,18 @@ class StillingService(
     ): RekrutteringsbistandStilling {
         log.info("Oppdaterer stilling med uuid: ${dto.stilling.uuid}")
 
-        if(dto.stilling.source == "DIR") {
-            val eksisterendeStilling = direktemeldtStillingService.hentDirektemeldtStilling(UUID.fromString(dto.stilling.uuid))
-            if(eksisterendeStilling?.versjon != dto.stilling.versjon) {
+        if (dto.stilling.source == "DIR") {
+            val eksisterendeStilling =
+                direktemeldtStillingService.hentDirektemeldtStilling(UUID.fromString(dto.stilling.uuid))
+            if (eksisterendeStilling?.versjon != dto.stilling.versjon) {
                 log.info("Stillingen ${dto.stilling.uuid} gir optimistic locking. Versjon fra frontend: ${dto.stilling.versjon}, eksisterende versjon: ${eksisterendeStilling?.versjon}")
-               // throw ResponseStatusException(HttpStatus.PRECONDITION_FAILED, "Stillingen er allerede blitt oppdatert")
+                // throw ResponseStatusException(HttpStatus.PRECONDITION_FAILED, "Stillingen er allerede blitt oppdatert")
             }
         } else {
-            throw IllegalArgumentException("Skal ikke kunne oppdatere stillinger som ikke er direktemeldt")
+            throw ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "Skal ikke kunne oppdatere stillinger som ikke er direktemeldt"
+            )
         }
 
         // Dette burde ikke skje lenger siden overta eierskap er flyttet ut

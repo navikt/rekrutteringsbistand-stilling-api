@@ -20,6 +20,7 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.web.server.ResponseStatusException
 import java.util.*
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -104,7 +105,7 @@ class StillingServiceTest {
         whenever(stillingsinfoService.hentStillingsinfo(Stillingsid(stillingsid))).thenReturn(stillingsinfo)
         whenever(direktemeldtStillingService.hentDirektemeldtStilling(stillingsid)).thenReturn(direktemeldtStilling)
 
-        assertThrows<IllegalArgumentException> {
+        assertThrows<ResponseStatusException> {
             stillingService.kopierStilling(stillingsid, eier.navident, eier.navn, eier.navKontorEnhetId)
         }
     }
@@ -125,7 +126,7 @@ class StillingServiceTest {
         whenever(stillingsinfoService.hentStillingsinfo(Stillingsid(stillingsid))).thenReturn(stillingsinfo)
         whenever(direktemeldtStillingService.hentDirektemeldtStilling(stillingsid)).thenReturn(direktemeldtStilling)
 
-        assertThrows<IllegalArgumentException> {
+        assertThrows<ResponseStatusException> {
             stillingService.kopierStilling(stillingsid, eier.navident, eier.navn, eier.navKontorEnhetId)
         }
     }
