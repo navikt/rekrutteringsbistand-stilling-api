@@ -1,7 +1,6 @@
 package no.nav.rekrutteringsbistand.api.stilling
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import no.nav.rekrutteringsbistand.api.arbeidsplassen.ArbeidsplassenStillingDto
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
 import no.nav.rekrutteringsbistand.api.stilling.Kategori.Companion.hentTittel
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingskategori
@@ -91,38 +90,6 @@ data class FrontendStilling(
             firstPublished = firstPublished,
             deactivatedByExpiry = deactivatedByExpiry,
             activationOnPublishingDate = activationOnPublishingDate,
-        )
-    }
-
-    fun toArbeidsplassenDto(arbeidsplassenId: Long): ArbeidsplassenStillingDto {
-        return ArbeidsplassenStillingDto(
-            title = title,
-            createdBy = createdBy,
-            updatedBy = updatedBy,
-            privacy = privacy,
-            source = source,
-            administration = administration,
-            mediaList = mediaList,
-            contactList = contactList,
-            medium = medium,
-            employer = employer,
-            locationList = locationList,
-            categoryList = categoryList,
-            properties = properties,
-            businessName = businessName,
-            firstPublished = firstPublished,
-            deactivatedByExpiry = deactivatedByExpiry,
-            activationOnPublishingDate = activationOnPublishingDate,
-            id = arbeidsplassenId,
-            uuid = uuid,
-            created = created,
-            updated = updated,
-            status = status,
-            reference = reference,
-            published = published,
-            expires = expires,
-            location = location,
-            publishedByAdmin = publishedByAdmin
         )
     }
 
