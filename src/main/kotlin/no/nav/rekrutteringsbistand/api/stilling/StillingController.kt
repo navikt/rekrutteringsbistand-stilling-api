@@ -27,11 +27,11 @@ class StillingController(
     @PostMapping("/rekrutteringsbistandstilling")
     fun opprettStilling(@RequestBody stilling: OpprettRekrutteringsbistandstillingDto): ResponseEntity<RekrutteringsbistandStilling> {
         if (stilling.kategori == Stillingskategori.FORMIDLING) {
-            tokenUtils.hentInnloggetVeileder().validerMinstEnAvRollene(Rolle.JOBBSØKERRETTET, Rolle.ARBEIDSGIVERRETTET)
+            tokenUtils.hentInnloggetVeileder().validerMinstEnAvRolleneEllerUtvikler(Rolle.JOBBSØKERRETTET, Rolle.ARBEIDSGIVERRETTET)
         } else if (stilling.kategori == Stillingskategori.REKRUTTERINGSTREFF_FORMIDLING) {
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Kan ikke opprette stilling med kategori REKRUTTERINGSTREFF_FORMIDLING med dette endepunktet")
         } else {
-            tokenUtils.hentInnloggetVeileder().validerMinstEnAvRollene(Rolle.ARBEIDSGIVERRETTET)
+            tokenUtils.hentInnloggetVeileder().validerMinstEnAvRolleneEllerUtvikler(Rolle.ARBEIDSGIVERRETTET)
         }
         val opprettetStilling = stillingService.opprettNyStilling(stilling, tokenUtils)
         return ok(opprettetStilling)
@@ -43,7 +43,7 @@ class StillingController(
         @RequestBody kopierStillingDto: KopierStillingDto?
     ): ResponseEntity<RekrutteringsbistandStilling> {
         val innloggetVeileder = tokenUtils.hentInnloggetVeileder()
-        innloggetVeileder.validerMinstEnAvRollene(Rolle.ARBEIDSGIVERRETTET)
+        innloggetVeileder.validerMinstEnAvRolleneEllerUtvikler(Rolle.ARBEIDSGIVERRETTET)
         val navIdent = innloggetVeileder.navIdent
         val displayName = innloggetVeileder.displayName
         val eierNavKontorEnhetId = kopierStillingDto?.eierNavKontorEnhetId
@@ -60,9 +60,9 @@ class StillingController(
             Stillingsid(rekrutteringsbistandStillingDto.stilling.uuid)
         )?.stillingskategori ?: Stillingskategori.STILLING
         if (stillingskategori == Stillingskategori.FORMIDLING || stillingskategori == Stillingskategori.REKRUTTERINGSTREFF_FORMIDLING) {
-            tokenUtils.hentInnloggetVeileder().validerMinstEnAvRollene(Rolle.JOBBSØKERRETTET, Rolle.ARBEIDSGIVERRETTET)
+            tokenUtils.hentInnloggetVeileder().validerMinstEnAvRolleneEllerUtvikler(Rolle.JOBBSØKERRETTET, Rolle.ARBEIDSGIVERRETTET)
         } else {
-            tokenUtils.hentInnloggetVeileder().validerMinstEnAvRollene(Rolle.ARBEIDSGIVERRETTET)
+            tokenUtils.hentInnloggetVeileder().validerMinstEnAvRolleneEllerUtvikler(Rolle.ARBEIDSGIVERRETTET)
         }
         val veileder = tokenUtils.hentInnloggetVeileder()
         val eier = Eier(
@@ -82,9 +82,9 @@ class StillingController(
         val stillingskategori =
             stillingsinfoService.hentStillingsinfo(stillingsId)?.stillingskategori ?: Stillingskategori.STILLING
         if (stillingskategori == Stillingskategori.FORMIDLING || stillingskategori == Stillingskategori.REKRUTTERINGSTREFF_FORMIDLING) {
-            tokenUtils.hentInnloggetVeileder().validerMinstEnAvRollene(Rolle.JOBBSØKERRETTET, Rolle.ARBEIDSGIVERRETTET)
+            tokenUtils.hentInnloggetVeileder().validerMinstEnAvRolleneEllerUtvikler(Rolle.JOBBSØKERRETTET, Rolle.ARBEIDSGIVERRETTET)
         } else {
-            tokenUtils.hentInnloggetVeileder().validerMinstEnAvRollene(Rolle.ARBEIDSGIVERRETTET)
+            tokenUtils.hentInnloggetVeileder().validerMinstEnAvRolleneEllerUtvikler(Rolle.ARBEIDSGIVERRETTET)
         }
         val slettetStilling = stillingService.slettRekrutteringsbistandStilling(stillingsIdSomUuid)
         return ok(slettetStilling)

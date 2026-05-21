@@ -67,7 +67,7 @@ data class InnloggetVeileder(
 ) {
     private val secureLog = SecureLog(log)
 
-    fun validerMinstEnAvRollene(vararg potensielleRoller: Rolle) {
+    fun validerMinstEnAvRolleneEllerUtvikler(vararg potensielleRoller: Rolle) {
         if ((potensielleRoller.toList() + Rolle.UTVIKLER).any { it in roller }) {
             return
         }

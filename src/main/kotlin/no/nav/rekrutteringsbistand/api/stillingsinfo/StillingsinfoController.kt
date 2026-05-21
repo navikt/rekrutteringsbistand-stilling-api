@@ -25,7 +25,7 @@ class StillingsinfoController(
     fun overtaEierskapForEksternStillingOgKandidatliste(
         @RequestBody dto: StillingsinfoInboundDto
     ): ResponseEntity<StillingsinfoDto> {
-        tokenUtils.hentInnloggetVeileder().validerMinstEnAvRollene(Rolle.ARBEIDSGIVERRETTET)
+        tokenUtils.hentInnloggetVeileder().validerMinstEnAvRolleneEllerUtvikler(Rolle.ARBEIDSGIVERRETTET)
         val stillingsid = Stillingsid(dto.stillingsid)
         val veileder = tokenUtils.hentInnloggetVeileder()
 
@@ -51,7 +51,7 @@ class StillingsinfoController(
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Ugyldig UUID", e)
         }
 
-        tokenUtils.hentInnloggetVeileder().validerMinstEnAvRollene(Rolle.ARBEIDSGIVERRETTET)
+        tokenUtils.hentInnloggetVeileder().validerMinstEnAvRolleneEllerUtvikler(Rolle.ARBEIDSGIVERRETTET)
         val stilling = direktemeldtStillingService.hentDirektemeldtStilling(stillingsid)
         val veileder = tokenUtils.hentInnloggetVeileder()
 

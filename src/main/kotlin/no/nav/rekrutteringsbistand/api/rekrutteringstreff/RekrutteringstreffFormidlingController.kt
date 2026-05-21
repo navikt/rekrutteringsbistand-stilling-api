@@ -20,7 +20,7 @@ class RekrutteringstreffFormidlingController(
     @PostMapping("/rekrutteringstreff/formidling")
     fun opprettFormidlingRekrutteringstreff(@RequestBody rekrutteringstreffFormidling: OpprettRekrutteringstreffFormidling): ResponseEntity<OpprettRekrutteringstreffFormidlingRespons> {
         val innloggetVeileder = tokenUtils.hentInnloggetVeileder()
-        innloggetVeileder.validerMinstEnAvRollene(Rolle.JOBBSØKERRETTET, Rolle.ARBEIDSGIVERRETTET)
+        innloggetVeileder.validerMinstEnAvRolleneEllerUtvikler(Rolle.JOBBSØKERRETTET, Rolle.ARBEIDSGIVERRETTET)
 
         val navIdent = innloggetVeileder.navIdent
         val displayName = innloggetVeileder.displayName
