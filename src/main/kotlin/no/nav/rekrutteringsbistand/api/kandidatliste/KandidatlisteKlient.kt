@@ -33,7 +33,7 @@ class KandidatlisteKlient(
             KandidatlisteIdDto::class.java
         )
             .also {
-                if (it.statusCode != HttpStatus.OK) {
+                if (!it.statusCode.is2xxSuccessful) {
                     log.warn(
                         "Uventet response fra kandidat-api for ad {}: {}",
                         stilling.stilling.uuid,
