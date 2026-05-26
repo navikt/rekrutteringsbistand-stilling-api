@@ -76,6 +76,7 @@ spec:
           cluster: {{ fss_cluster }}
         - application: rekrutteringsbistand-kandidatvarsel-api
         - application: toi-stilling-indekser
+        - application: rekrutteringstreff-api
     outbound:
       rules:
         - application: rekrutteringsbistand-stillingssok-proxy
