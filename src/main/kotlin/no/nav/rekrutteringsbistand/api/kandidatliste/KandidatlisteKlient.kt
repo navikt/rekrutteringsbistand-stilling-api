@@ -34,7 +34,7 @@ class KandidatlisteKlient(
             Void::class.java
         )
             .also {
-                if (it.statusCode != HttpStatus.NO_CONTENT) {
+                if (!it.statusCode.is2xxSuccessful) {
                     log.warn(
                         "Uventet response fra kandidatliste-api for ad {}: {}",
                         stilling.stilling.uuid,
