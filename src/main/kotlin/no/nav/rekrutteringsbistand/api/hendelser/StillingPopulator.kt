@@ -14,6 +14,7 @@ import org.apache.commons.lang3.math.NumberUtils
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
+import java.util.UUID
 
 class StillingPopulator(
     rapidsConnection: RapidsConnection,
@@ -78,13 +79,14 @@ private fun parseAntallStillinger(stilling: no.nav.rekrutteringsbistand.api.stil
 }
 
 fun StillingsinfoDto.tilStillingsinfoIHendelse() =
-    StillingsinfoIHendelse(stillingsinfoid, stillingsid, Eier(eierNavident, eierNavn, eierNavKontorEnhetId), stillingskategori)
+    StillingsinfoIHendelse(stillingsinfoid, stillingsid, Eier(eierNavident, eierNavn, eierNavKontorEnhetId), stillingskategori, rekrutteringstreffId)
 
 data class StillingsinfoIHendelse(
     val stillingsinfoid: String,
     val stillingsid: String,
     val eier: Eier?,
-    val stillingskategori: Stillingskategori?
+    val stillingskategori: Stillingskategori?,
+    val rekrutteringstreffId: UUID?,
 )
 
 data class Stilling(
