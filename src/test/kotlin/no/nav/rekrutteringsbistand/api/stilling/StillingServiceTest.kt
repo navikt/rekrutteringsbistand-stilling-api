@@ -107,7 +107,7 @@ class StillingServiceTest {
     }
 
     @Test
-    fun `Skal ikke kunne kopiere stilling med stillingskategori FORMIDLING `() {
+    fun `Skal ikke kunne kopiere stilling med stillingskategori FORMIDLING`() {
         val stillingsid = UUID.randomUUID()
         val eier = Eier(navident = "Z123456", navn = "Ola Nordmann", navKontorEnhetId = "1234")
         val stillingsinfo = Stillingsinfo(

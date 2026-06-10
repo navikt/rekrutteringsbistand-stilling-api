@@ -16,10 +16,16 @@ class TestRepository(val jdbcTemplate: JdbcTemplate) {
 
 
     fun hentAntallStillingsinfo(): Int {
-        return jdbcTemplate.queryForObject("SELECT COUNT(*) FROM ${StillingsinfoRepository.STILLINGSINFO}", Int::class.java) ?: 0
+        return jdbcTemplate.queryForObject(
+            "SELECT COUNT(*) FROM ${StillingsinfoRepository.STILLINGSINFO}",
+            Int::class.java
+        ) ?: 0
     }
 
-     fun hentAntallDirektemeldtStilling(): Int {
-        return jdbcTemplate.queryForObject("SELECT COUNT(*) FROM ${DirektemeldtStillingRepository.DIREKTEMELDT_STILLING_TABELL}", Int::class.java) ?: 0
+    fun hentAntallDirektemeldtStilling(): Int {
+        return jdbcTemplate.queryForObject(
+            "SELECT COUNT(*) FROM ${DirektemeldtStillingRepository.DIREKTEMELDT_STILLING_TABELL}",
+            Int::class.java
+        ) ?: 0
     }
 }
