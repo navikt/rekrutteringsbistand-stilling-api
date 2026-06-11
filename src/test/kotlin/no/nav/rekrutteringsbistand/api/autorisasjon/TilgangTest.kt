@@ -14,11 +14,18 @@ import no.nav.rekrutteringsbistand.api.config.MockLogin
 import no.nav.rekrutteringsbistand.api.config.arbeidsgiverrettet
 import no.nav.rekrutteringsbistand.api.config.jobbsøkerrettet
 import no.nav.rekrutteringsbistand.api.config.utvikler
+import no.nav.rekrutteringsbistand.api.geografi.GeografiService
+import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteIdDto
 import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteKlient
+import no.nav.rekrutteringsbistand.api.rekrutteringstreff.dto.OpprettRekrutteringstreffFormidling
+import no.nav.rekrutteringsbistand.api.rekrutteringstreff.dto.RekrutteringstreffStilling
 import no.nav.rekrutteringsbistand.api.standardsøk.LagreStandardsøkDto
 import no.nav.rekrutteringsbistand.api.standardsøk.StandardsøkRepository
+import no.nav.rekrutteringsbistand.api.stilling.Arbeidsgiver
 import no.nav.rekrutteringsbistand.api.stilling.DirektemeldtStillingRepository
 import no.nav.rekrutteringsbistand.api.stilling.FrontendStilling
+import no.nav.rekrutteringsbistand.api.stilling.Geografi
+import no.nav.rekrutteringsbistand.api.stilling.Kategori
 import no.nav.rekrutteringsbistand.api.stillingsinfo.*
 import no.nav.rekrutteringsbistand.api.stillingsinfo.indekser.BulkStillingsinfoInboundDto
 import no.nav.rekrutteringsbistand.api.support.toMultiValueMap
@@ -30,6 +37,7 @@ import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mockito
+import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -65,6 +73,10 @@ class TilgangTest {
 
     @MockitoBean
     private lateinit var azureKlient: AzureKlient
+
+    @MockitoBean
+    @Suppress("unused")
+    private lateinit var geografiService: GeografiService
 
     @Autowired
     private lateinit var repository: TestRepository
@@ -186,7 +198,8 @@ class TilgangTest {
             arbeidsplassenProxy::getSøk to Varianter(ok, ok, ok, ok),
             arbeidsplassenProxy::postSøk to Varianter(ok, ok, ok, ok),
             standardSøk::hentStandardsøk to Varianter(ok, ok, ok, ok),
-            standardSøk::upsertStandardsøk to Varianter(created, created, created, created)
+            standardSøk::upsertStandardsøk to Varianter(created, created, created, created),
+            rekrutteringstreffFormidling::opprettFormidling to Varianter(ok, ok, ok, forbidden),
         ).flatMap { (kall, svar) ->
             listOf(
                 Arguments.of(kall.name, TestRolle.Jobbsøkerrettet, svar.jobbsøkerrettet, kall()),
@@ -224,7 +237,6 @@ enum class StatusType(val assertion: StatusAssertions.() -> Unit) {
     ok(StatusAssertions::isOk),
     unauthorized(StatusAssertions::isUnauthorized),
     forbidden(StatusAssertions::isForbidden),
-    no_content(StatusAssertions::isNoContent),
     created(StatusAssertions::isCreated),
 }
 
@@ -354,7 +366,7 @@ private class Kall(private val webClient: WebTestClient, private val mockLogin: 
             post(
                 "$indekserPath/stillingsinfo/bulk",
                 rolle,
-                BulkStillingsinfoInboundDto(stillinger.map(no.nav.rekrutteringsbistand.api.stilling.FrontendStilling::uuid))
+                BulkStillingsinfoInboundDto(stillinger.map(FrontendStilling::uuid))
             )
         }
     }
@@ -451,12 +463,64 @@ private class Kall(private val webClient: WebTestClient, private val mockLogin: 
         }
     }
 
+    inner class RekrutteringstreffFormidling(private val stubber: Stubber) {
+        private val rekrutteringstreffFormidlingPath = "/rekrutteringstreff/formidling"
+
+        val opprettFormidling: EndepunktHandler = { rolle ->
+            stubber.mockKandidatlisteOppdatering()
+            post(
+                rekrutteringstreffFormidlingPath,
+                rolle,
+                OpprettRekrutteringstreffFormidling(
+                    eierNavKontorEnhetId = "0318",
+                    rekrutteringstreffId = UUID.randomUUID(),
+                    stilling = RekrutteringstreffStilling(
+                        employer = Arbeidsgiver(
+                            id = null, uuid = null, created = null, createdBy = null,
+                            updated = null, updatedBy = null, mediaList = emptyList(),
+                            contactList = emptyList(),
+                            location = Geografi(
+                                address = null,
+                                postalCode = "0182",
+                                county = null,
+                                municipal = null,
+                                municipalCode = null,
+                                city = "OSLO",
+                                country = "NORGE",
+                                latitude = null,
+                                longitude = null
+                            ),
+                            locationList = emptyList(),
+                            properties = emptyMap(),
+                            name = "Test Bedrift AS", orgnr = "123456789", status = null,
+                            parentOrgnr = "987654321", publicName = "Test Bedrift",
+                            deactivated = null, orgform = "AS", employees = 10
+                        ),
+                        locationList = emptyList(),
+                        categoryList = listOf(
+                            Kategori(
+                                id = null,
+                                code = "1234",
+                                categoryType = "JANZZ",
+                                name = "Sykepleier",
+                                description = null,
+                                parentId = null
+                            )
+                        ),
+                        properties = emptyMap()
+                    )
+                )
+            )
+        }
+    }
+
     val stilling = Stilling(stubber)
     val stillingsInfo = StillingsInfo(stubber)
     val indekser = Indekser(stubber)
     val innloggetVeileder = InnloggetVeileder(stubber)
     val arbeidsplassenProxy = ArbeidsplassenProxy(stubber)
     val standardSøk = StandardSøk(stubber)
+    val rekrutteringstreffFormidling = RekrutteringstreffFormidling(stubber)
 }
 
 private class Stubber(
@@ -599,5 +663,13 @@ private class Stubber(
             Stillingsinfoid.ny(),
             Stillingsid(stillingsId), null, stillingskategori
         ))
+    }
+
+    fun mockKandidatlisteOppdatering() {
+        whenever(kandidatlisteKlient.sendStillingOppdatert(any())).thenReturn(
+            ResponseEntity.ok(
+                KandidatlisteIdDto(UUID.randomUUID().toString())
+            )
+        )
     }
 }

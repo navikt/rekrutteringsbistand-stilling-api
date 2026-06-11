@@ -9,6 +9,7 @@ data class Stillingsinfo(
     val stillingsid: Stillingsid,
     val eier: Eier?,
     val stillingskategori: Stillingskategori? = Stillingskategori.STILLING,
+    val rekrutteringstreffId: UUID? = null,
 ) {
     fun asStillingsinfoDto() = StillingsinfoDto(
         stillingsid = this.stillingsid.asString(),
@@ -17,6 +18,7 @@ data class Stillingsinfo(
         eierNavn = this.eier?.navn,
         eierNavKontorEnhetId = this.eier?.navKontorEnhetId,
         stillingskategori = this.stillingskategori,
+        rekrutteringstreffId = this.rekrutteringstreffId,
     )
 
     companion object {
@@ -30,6 +32,7 @@ data class Stillingsinfo(
                     navKontorEnhetId = rs.getString("eier_navkontor_enhetid"),
                 ),
                 stillingskategori = Stillingskategori.fraDatabase(rs.getString("stillingskategori")),
+                rekrutteringstreffId = rs.getObject("rekrutteringstreffid", UUID::class.java),
             )
     }
 }
@@ -65,13 +68,18 @@ data class StillingsinfoDto(
     val eierNavn: String?,
     val stillingskategori: Stillingskategori?,
     val eierNavKontorEnhetId: String?,
+    val rekrutteringstreffId: UUID?,
 )
 
 enum class Stillingskategori {
-    STILLING, FORMIDLING, ARBEIDSTRENING, JOBBMESSE;
+    STILLING,
+    FORMIDLING,
+    ARBEIDSTRENING,
+    JOBBMESSE,
+    REKRUTTERINGSTREFF_FORMIDLING;
 
     companion object {
-        fun fraDatabase(verdi: String?) = if (verdi == null) null else values().firstOrNull { it.name == verdi }
+        fun fraDatabase(verdi: String?) = if (verdi == null) null else entries.firstOrNull { it.name == verdi }
     }
 }
 

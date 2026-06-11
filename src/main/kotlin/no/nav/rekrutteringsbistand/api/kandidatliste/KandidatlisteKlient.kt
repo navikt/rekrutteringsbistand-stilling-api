@@ -1,6 +1,5 @@
 package no.nav.rekrutteringsbistand.api.kandidatliste
 
-import no.nav.rekrutteringsbistand.api.RekrutteringsbistandStilling
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsid
 import no.nav.rekrutteringsbistand.api.support.config.ExternalConfiguration
@@ -24,21 +23,21 @@ class KandidatlisteKlient(
     private val scopeTilKandidatApi: String
 ) {
 
-    fun sendStillingOppdatert(stilling: KandidatlisteDto): ResponseEntity<Void> {
+    fun sendStillingOppdatert(stilling: KandidatlisteDto): ResponseEntity<KandidatlisteIdDto> {
         val url = byggUrlTilPutEndepunkt()
         log.info("Oppdaterer kandidatliste, stillingsid: ${stilling.stilling.uuid}")
         return restTemplate.exchange(
             url,
             HttpMethod.PUT,
             HttpEntity(stilling, headers()),
-            Void::class.java
+            KandidatlisteIdDto::class.java
         )
             .also {
                 if (!it.statusCode.is2xxSuccessful) {
                     log.warn(
-                        "Uventet response fra kandidatliste-api for ad {}: {}",
+                        "Uventet response fra kandidat-api for ad {}: {}",
                         stilling.stilling.uuid,
-                        it.statusCodeValue
+                        it.statusCode
                     )
                 }
             }
@@ -61,7 +60,7 @@ class KandidatlisteKlient(
         catch (e: HttpClientErrorException.NotFound) { ResponseEntity.notFound().build() }
         catch (e: RestClientResponseException) {
             log.warn(
-                "Uventet response fra kandidatliste-api for ad {}: {}",
+                "Uventet response fra kandidat-api for ad {}: {}",
                 stillingsid.asString(),
                 e.statusCode
             )

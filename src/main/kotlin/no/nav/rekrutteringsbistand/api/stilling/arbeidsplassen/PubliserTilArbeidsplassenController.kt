@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.server.ResponseStatusException
 import java.util.UUID
 
 
@@ -30,10 +31,13 @@ class PubliserTilArbeidsplassenController(
     @PostMapping("/publiser/{stillingsId}")
     fun publiserTilRapid(@PathVariable stillingsId: UUID): ResponseEntity<String> {
         val stillingsinfo = stillingsinfoService.hentStillingsinfo(Stillingsid(stillingsId))
-        if (stillingsinfo?.stillingskategori == Stillingskategori.FORMIDLING) {
-            throw IllegalArgumentException("Kan ikke sende formidling/etterregistrering til arbeidsplassen")
+        if (stillingsinfo?.stillingskategori == Stillingskategori.FORMIDLING || stillingsinfo?.stillingskategori == Stillingskategori.REKRUTTERINGSTREFF_FORMIDLING) {
+            throw ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "Kan ikke sende formidling/etterregistrering til arbeidsplassen"
+            )
         } else if (stillingsinfo?.stillingskategori == Stillingskategori.JOBBMESSE) {
-            throw IllegalArgumentException("Kan ikke sende jobbmesse til arbeidsplassen")
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Kan ikke sende jobbmesse til arbeidsplassen")
         }
 
         val stilling = stillingService.hentDirektemeldtStilling(stillingsId)

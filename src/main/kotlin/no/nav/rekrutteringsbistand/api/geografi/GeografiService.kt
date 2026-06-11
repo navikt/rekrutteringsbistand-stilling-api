@@ -1,5 +1,6 @@
 package no.nav.rekrutteringsbistand.api.geografi
 
+import no.nav.rekrutteringsbistand.api.stilling.Geografi
 import org.springframework.stereotype.Service
 import no.nav.rekrutteringsbistand.api.support.log
 
@@ -40,5 +41,49 @@ class GeografiService(
             return postdata.find { it.kommune.navn == kommuneNavn.uppercase() }
         }
         return null
+    }
+
+    fun populerLocationList(locationList: List<Geografi>): List<Geografi> {
+        return locationList.mapNotNull { geografi -> populerGeografi(geografi) }
+    }
+
+    fun populerGeografi(geografi: Geografi?): Geografi? {
+        if(geografi == null) {
+            return null
+        }
+
+        if (!geografi.postalCode.isNullOrBlank()) {
+            val postdata = finnPostdata(geografi.postalCode)
+            if (postdata != null) {
+                return geografi.copy(
+                    municipal = postdata.kommune.navn,
+                    county = postdata.fylke.navn,
+                    municipalCode = postdata.kommune.kommunenummer,
+                    country = "NORGE",
+                    city = postdata.by
+                )
+            }
+        }
+
+        val postDataFraKommune = finnPostdataFraKommune(geografi.municipalCode, geografi.municipal)
+        if(postDataFraKommune != null) {
+            return geografi.copy(
+                municipalCode = postDataFraKommune.kommune.kommunenummer,
+                municipal = postDataFraKommune.kommune.navn,
+                county = postDataFraKommune.fylke.navn,
+                country = "NORGE",
+            )
+        }
+
+        if(!geografi.county.isNullOrBlank()) {
+            val fylke = finnFylke(geografi.county)
+            if (fylke != null) {
+                return geografi.copy(
+                    county = fylke,
+                    country = "NORGE"
+                )
+            }
+        }
+        return geografi
     }
 }

@@ -1,7 +1,6 @@
 package no.nav.rekrutteringsbistand.api.stilling
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import no.nav.rekrutteringsbistand.api.arbeidsplassen.OpprettStillingAdministrationDto
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
 import no.nav.rekrutteringsbistand.api.stilling.Kategori.Companion.hentTittel
 import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingskategori
@@ -99,7 +98,7 @@ data class FrontendStilling(
             Stillingskategori.JOBBMESSE ->
                 this.copy(title = "Invitasjon til jobbmesse")
 
-            null, Stillingskategori.STILLING, Stillingskategori.FORMIDLING, Stillingskategori.ARBEIDSTRENING ->
+            null, Stillingskategori.STILLING, Stillingskategori.FORMIDLING, Stillingskategori.REKRUTTERINGSTREFF_FORMIDLING, Stillingskategori.ARBEIDSTRENING ->
                 this.copy(title = hentInternEllerEksternTittel())
         }
 
@@ -262,60 +261,10 @@ data class Media(
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class Page<T>(
-    val content: List<T> = ArrayList(),
-    val totalPages: Int?,
-    val totalElements: Int?
-)
-
-@JsonIgnoreProperties(ignoreUnknown = true)
 data class OpprettRekrutteringsbistandstillingDto(
     val kategori: Stillingskategori,
     val eierNavKontorEnhetId: String?,
 )
-
-// TODO: denne klassen ble duplisert fra arbeidsplassen-domenet, og inneholder kanskje
-//  properties som ikke blir sendt fra frontend, og som derfor kan slettes.
-data class OpprettStillingDto(
-    val createdBy: String,
-    val updatedBy: String,
-    val privacy: String?,
-    val source: String?,
-    val administration: OpprettStillingAdministrationDto,
-
-    val mediaList: List<Media>? = ArrayList(),
-    val contactList: List<Contact>? = ArrayList(),
-    val medium: String? = null,
-    val employer: Arbeidsgiver? = null,
-    val location: Geografi? = null,
-    val locationList: List<Geografi>? = ArrayList(),
-    val categoryList: List<Kategori>? = ArrayList(),
-    val properties: Map<String, String>? = HashMap(),
-    val businessName: String? = null,
-    val firstPublished: Boolean? = false,
-    val deactivatedByExpiry: Boolean? = false,
-    val activationOnPublishingDate: Boolean? = false
-) {
-    fun toArbeidsplassenDto(title: String) = no.nav.rekrutteringsbistand.api.arbeidsplassen.OpprettStillingDto(
-        title = title,
-        createdBy = createdBy,
-        updatedBy = updatedBy,
-        privacy = privacy,
-        source = source,
-        administration = administration,
-        mediaList = mediaList,
-        contactList = contactList,
-        medium = medium,
-        employer = employer,
-        locationList = locationList,
-        categoryList = categoryList,
-        properties = properties,
-        businessName = businessName,
-        firstPublished = firstPublished,
-        deactivatedByExpiry = deactivatedByExpiry,
-        activationOnPublishingDate = activationOnPublishingDate,
-    )
-}
 
 data class DirektemeldtStillingKategori(
     val code: String?,

@@ -1,6 +1,5 @@
 package no.nav.rekrutteringsbistand.api
 
-import no.nav.rekrutteringsbistand.api.arbeidsplassen.OpprettStillingAdministrationDto
 import no.nav.rekrutteringsbistand.api.autorisasjon.InnloggetVeileder
 import no.nav.rekrutteringsbistand.api.autorisasjon.Rolle
 import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteDto
@@ -15,8 +14,6 @@ import java.util.*
 object Testdata {
 
     val enVeileder = InnloggetVeileder("Clark Kent", "C12345", listOf(Rolle.ARBEIDSGIVERRETTET))
-
-    const val etNotat = "notatet"
 
     private  val styrkCode = "3112.12"
     private val styrkTittel = "Byggeleder"
@@ -48,20 +45,10 @@ object Testdata {
         versjon = null
     )
 
-    val enOpprettStillingDto = OpprettStillingDto(
-        createdBy = "pam-rekrutteringsbistand",
-        updatedBy = "pam-rekrutteringsbistand",
-        source = "DIR",
-        privacy = "INTERNAL_NOT_SHOWN",
-        administration = OpprettStillingAdministrationDto(
-            status = "PENDING",
-            reportee = enVeileder.displayName,
-            navIdent = enVeileder.navIdent,
-        ),
-    )
-
     val enOpprettRekrutteringsbistandstillingDto =
         enOpprettRekrutteringsbistandstillingDtoMedKategori(Stillingskategori.ARBEIDSTRENING)
+
+    val enOpprettRekrutteringsbistandstillingDtoMedKategoriRekrutteringstreffFormidling = enOpprettRekrutteringsbistandstillingDtoMedKategori(Stillingskategori.REKRUTTERINGSTREFF_FORMIDLING)
 
     fun enOpprettRekrutteringsbistandstillingDtoMedKategori(kategori: Stillingskategori) = OpprettRekrutteringsbistandstillingDto(
         kategori = kategori,
@@ -109,12 +96,6 @@ object Testdata {
     val enAnnenStilling = enStilling.copy(
         uuid = UUID.randomUUID().toString(),
         title = "En annen stilling"
-    )
-
-    val enPageMedStilling = Page(
-        content = listOf(enStilling),
-        totalElements = 1,
-        totalPages = 1
     )
 
     val enStillingsinfo = Stillingsinfo(

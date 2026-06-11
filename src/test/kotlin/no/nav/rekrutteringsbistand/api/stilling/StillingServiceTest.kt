@@ -4,30 +4,23 @@ import no.nav.rekrutteringsbistand.api.RekrutteringsbistandStilling
 import no.nav.rekrutteringsbistand.api.Testdata.enDirektemeldtStilling
 import no.nav.rekrutteringsbistand.api.Testdata.enStilling
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
-import no.nav.rekrutteringsbistand.api.geografi.FylkeDTO
 import no.nav.rekrutteringsbistand.api.geografi.GeografiService
-import no.nav.rekrutteringsbistand.api.geografi.KommuneDTO
-import no.nav.rekrutteringsbistand.api.geografi.PostDataDTO
 import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteKlient
 import no.nav.rekrutteringsbistand.api.opensearch.StillingssokProxyClient
 import no.nav.rekrutteringsbistand.api.stilling.outbox.StillingOutboxService
-import no.nav.rekrutteringsbistand.api.stillingsinfo.Eier
-import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsid
-import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsinfo
-import no.nav.rekrutteringsbistand.api.stillingsinfo.StillingsinfoService
-import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingsinfoid
-import no.nav.rekrutteringsbistand.api.stillingsinfo.Stillingskategori
-import org.junit.jupiter.api.Assertions.assertEquals
+import no.nav.rekrutteringsbistand.api.stillingsinfo.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.assertThrows
 import org.mockito.Mock
 import org.mockito.kotlin.any
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.boot.test.context.SpringBootTest
-import java.util.UUID
+import org.springframework.web.server.ResponseStatusException
+import java.util.*
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
@@ -64,86 +57,6 @@ class StillingServiceTest {
     }
 
     @Test
-    fun `Geografi er populert med fylke og land hvis kommune er satt`() {
-        whenever(geografiService.finnPostdataFraKommune(null, "Oslo")).thenReturn(PostDataDTO(
-            postkode = "1234",
-            by = "OSLO",
-            kommune = KommuneDTO(
-                kommunenummer = "0301",
-                navn = "OSLO",
-                fylkesnummer = "03",
-                korrigertNavn = "Oslo"
-            ),
-            fylke = FylkeDTO(
-                fylkesnummer = "03",
-                navn = "OSLO",
-                korrigertNavn = "Oslo"
-            ),
-            korrigertNavnBy = "Oslo"
-        )
-        )
-
-        val upopulertGeografi = Geografi(
-            address = null,
-            municipalCode = null,
-            city = null,
-            county = null,
-            municipal = "Oslo",
-            country = null,
-            postalCode = null,
-            latitude = null,
-            longitude = null
-        )
-
-        val populertGeografi = stillingService.populerGeografi(upopulertGeografi)
-
-        assertEquals("OSLO", populertGeografi?.county)
-        assertEquals("NORGE", populertGeografi?.country)
-    }
-
-
-    @Test
-    fun `Geografi er populert hvis postnummer er satt`() {
-        whenever(geografiService.finnPostdata("5678")).thenReturn(PostDataDTO(
-            postkode = "5678",
-            by = "BERGEN",
-            kommune = KommuneDTO(
-                kommunenummer = "1201",
-                navn = "BERGEN",
-                fylkesnummer = "12",
-                korrigertNavn = "Bergen"
-            ),
-            fylke = FylkeDTO(
-                fylkesnummer = "12",
-                navn = "HORDALAND",
-                korrigertNavn = "Hordaland"
-            ),
-            korrigertNavnBy = "Bergen"
-        )
-        )
-
-        val upopulertGeografi = Geografi(
-            address = null,
-            municipalCode = null,
-            city = null,
-            county = null,
-            municipal = null,
-            country = null,
-            postalCode = "5678",
-            latitude = null,
-            longitude = null
-        )
-
-        val populertGeografi = stillingService.populerGeografi(upopulertGeografi)
-
-        assertEquals("HORDALAND", populertGeografi?.county)
-        assertEquals("NORGE", populertGeografi?.country)
-        assertEquals("1201", populertGeografi?.municipalCode)
-        assertEquals("BERGEN", populertGeografi?.municipal)
-        assertEquals("BERGEN", populertGeografi?.city)
-    }
-
-    @Test
     fun `Jobbmesse skal ikke kunne publiseres til arbeidsplassen`() {
         val stillingsid = Stillingsid("123e4567-e89b-12d3-a456-426614174000")
         val eier = Eier(navident = "Z123456", navn = "Ola Nordmann", navKontorEnhetId = "1234")
@@ -170,5 +83,47 @@ class StillingServiceTest {
 
         verify(times(0)) { stillingOutboxService.lagreMeldingIOutbox(
             any(), any()) }
+    }
+
+    @Test
+    fun `Skal ikke kunne kopiere stilling med stillingskategori REKRUTTERINGSTREFF_FORMIDLING`() {
+        val stillingsid = UUID.randomUUID()
+        val eier = Eier(navident = "Z123456", navn = "Ola Nordmann", navKontorEnhetId = "1234")
+        val stillingsinfo = Stillingsinfo(
+            stillingsid = Stillingsid(stillingsid),
+            stillingsinfoid = Stillingsinfoid("123e4567-e89b-12d3-a456-426614174001"),
+            eier = eier,
+
+            stillingskategori = Stillingskategori.REKRUTTERINGSTREFF_FORMIDLING,
+            )
+        val direktemeldtStilling = enDirektemeldtStilling.copy(stillingsId = stillingsid, innhold = enDirektemeldtStilling.innhold.copy(privacy = "SHOW_ALL"))
+
+        whenever(stillingsinfoService.hentStillingsinfo(Stillingsid(stillingsid))).thenReturn(stillingsinfo)
+        whenever(direktemeldtStillingService.hentDirektemeldtStilling(stillingsid)).thenReturn(direktemeldtStilling)
+
+        assertThrows<ResponseStatusException> {
+            stillingService.kopierStilling(stillingsid, eier.navident, eier.navn, eier.navKontorEnhetId)
+        }
+    }
+
+    @Test
+    fun `Skal ikke kunne kopiere stilling med stillingskategori FORMIDLING`() {
+        val stillingsid = UUID.randomUUID()
+        val eier = Eier(navident = "Z123456", navn = "Ola Nordmann", navKontorEnhetId = "1234")
+        val stillingsinfo = Stillingsinfo(
+            stillingsid = Stillingsid(stillingsid),
+            stillingsinfoid = Stillingsinfoid("123e4567-e89b-12d3-a456-426614174001"),
+            eier = eier,
+
+            stillingskategori = Stillingskategori.FORMIDLING,
+        )
+        val direktemeldtStilling = enDirektemeldtStilling.copy(stillingsId = stillingsid, innhold = enDirektemeldtStilling.innhold.copy(privacy = "SHOW_ALL"))
+
+        whenever(stillingsinfoService.hentStillingsinfo(Stillingsid(stillingsid))).thenReturn(stillingsinfo)
+        whenever(direktemeldtStillingService.hentDirektemeldtStilling(stillingsid)).thenReturn(direktemeldtStilling)
+
+        assertThrows<ResponseStatusException> {
+            stillingService.kopierStilling(stillingsid, eier.navident, eier.navn, eier.navKontorEnhetId)
+        }
     }
 }

@@ -91,7 +91,8 @@ class StillingsinfoService(
         stillingskategori: Stillingskategori,
         eierNavident: String?,
         eierNavn: String?,
-        eierNavKontorEnhetId: String?
+        eierNavKontorEnhetId: String?,
+        rekrutteringstreffId: UUID? = null,
     ) {
         repo.opprett(
             Stillingsinfo(
@@ -103,6 +104,7 @@ class StillingsinfoService(
                     navKontorEnhetId = eierNavKontorEnhetId
                 ),
                 stillingskategori = stillingskategori,
+                rekrutteringstreffId = rekrutteringstreffId,
             )
         )
     }

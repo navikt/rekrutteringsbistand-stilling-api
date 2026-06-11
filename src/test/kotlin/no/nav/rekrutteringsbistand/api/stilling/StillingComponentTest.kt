@@ -7,6 +7,7 @@ import com.github.tomakehurst.wiremock.junit5.WireMockExtension
 import com.github.tomakehurst.wiremock.matching.UrlPattern
 import no.nav.rekrutteringsbistand.api.*
 import no.nav.rekrutteringsbistand.api.Testdata.enOpprettRekrutteringsbistandstillingDto
+import no.nav.rekrutteringsbistand.api.Testdata.enOpprettRekrutteringsbistandstillingDtoMedKategoriRekrutteringstreffFormidling
 import no.nav.rekrutteringsbistand.api.Testdata.enOpprettetStilling
 import no.nav.rekrutteringsbistand.api.Testdata.enRekrutteringsbistandStilling
 import no.nav.rekrutteringsbistand.api.Testdata.enRekrutteringsbistandStillingUtenEier
@@ -459,13 +460,27 @@ internal class StillingComponentTest {
 
     }
 
+    @Test
+    fun `Skal ikke kunne opprette stilling med stillingskategori REKRUTTERINGSTREFF_FORMIDLING, skal gi BAD_REQUEST`() {
+        val request = enOpprettRekrutteringsbistandstillingDtoMedKategoriRekrutteringstreffFormidling
+        mockAzureObo(wiremockAzure)
+
+        restTemplate.postForEntity(
+            "$localBaseUrl/rekrutteringsbistandstilling",
+            request,
+            String::class.java
+        ).also {
+            assertThat(it.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
+        }
+    }
+
     private fun mockKandidatlisteOppdatering(metodeFunksjon: (UrlPattern) -> MappingBuilder = ::put) {
         wiremockKandidatliste.stubFor(
             metodeFunksjon(urlPathMatching("/rekrutteringsbistand-kandidat-api/rest/veileder/stilling/kandidatliste")).withHeader(
                 CONTENT_TYPE,
                 equalTo(APPLICATION_JSON_VALUE)
             ).withHeader(ACCEPT, equalTo(APPLICATION_JSON_VALUE)).willReturn(
-                aResponse().withStatus(HttpStatus.NO_CONTENT.value()).withHeader(
+                aResponse().withStatus(HttpStatus.OK.value()).withHeader(
                     CONNECTION, "close"
                 ) // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
                     .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)

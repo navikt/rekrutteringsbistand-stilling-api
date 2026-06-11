@@ -76,7 +76,7 @@ class StillingService(
         eierNavn: String?,
         eierNavKontorEnhetId: String?,
     ): RekrutteringsbistandStilling {
-        val populertGeografi = populerGeografi(opprettStilling.employer?.location)
+        val populertGeografi = geografiService.populerGeografi(opprettStilling.employer?.location)
         var stilling = opprettStilling.copy(employer = opprettStilling.employer?.copy(location = populertGeografi))
 
         if(stilling.medium == null) {
@@ -132,6 +132,10 @@ class StillingService(
     fun kopierStilling(stillingsId: UUID, navIdent: String?, displayName: String?, eierNavKontorEnhetId: String?): RekrutteringsbistandStilling {
         log.info("Kopierer stilling med uuid: $stillingsId")
         val eksisterendeRekrutteringsbistandStilling = hentRekrutteringsbistandStilling(stillingsId)
+
+        if(eksisterendeRekrutteringsbistandStilling.stillingsinfo?.stillingskategori == Stillingskategori.FORMIDLING || eksisterendeRekrutteringsbistandStilling.stillingsinfo?.stillingskategori == Stillingskategori.REKRUTTERINGSTREFF_FORMIDLING) {
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Kan ikke kopiere formidlinger")
+        }
         val eksisterendeStilling = eksisterendeRekrutteringsbistandStilling.stilling
         val kopi = eksisterendeStilling.toKopiertStilling(tokenUtils)
 
@@ -156,14 +160,18 @@ class StillingService(
     ): RekrutteringsbistandStilling {
         log.info("Oppdaterer stilling med uuid: ${dto.stilling.uuid}")
 
-        if(dto.stilling.source == "DIR") {
-            val eksisterendeStilling = direktemeldtStillingService.hentDirektemeldtStilling(UUID.fromString(dto.stilling.uuid))
-            if(eksisterendeStilling?.versjon != dto.stilling.versjon) {
+        if (dto.stilling.source == "DIR") {
+            val eksisterendeStilling =
+                direktemeldtStillingService.hentDirektemeldtStilling(UUID.fromString(dto.stilling.uuid))
+            if (eksisterendeStilling?.versjon != dto.stilling.versjon) {
                 log.info("Stillingen ${dto.stilling.uuid} gir optimistic locking. Versjon fra frontend: ${dto.stilling.versjon}, eksisterende versjon: ${eksisterendeStilling?.versjon}")
-               // throw ResponseStatusException(HttpStatus.PRECONDITION_FAILED, "Stillingen er allerede blitt oppdatert")
+                // throw ResponseStatusException(HttpStatus.PRECONDITION_FAILED, "Stillingen er allerede blitt oppdatert")
             }
         } else {
-            throw IllegalArgumentException("Skal ikke kunne oppdatere stillinger som ikke er direktemeldt")
+            throw ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "Skal ikke kunne oppdatere stillinger som ikke er direktemeldt"
+            )
         }
 
         // Dette burde ikke skje lenger siden overta eierskap er flyttet ut
@@ -186,7 +194,7 @@ class StillingService(
             publishedByAdmin = LocalDateTime.now(ZoneId.of("Europe/Oslo")).toString()
         }
 
-        val populertLocationList = populerLocationList(dto.stilling.locationList)
+        val populertLocationList = geografiService.populerLocationList(dto.stilling.locationList)
         val stilling = dto.stilling.copyMedBeregnetTitle(
             stillingskategori = eksisterendeStillingsinfo?.stillingskategori
         ).copy(updated = LocalDateTime.now(ZoneId.of("Europe/Oslo")), publishedByAdmin = publishedByAdmin, locationList = populertLocationList)
@@ -261,7 +269,7 @@ class StillingService(
 
         val stillingsinfo: Stillingsinfo? = stillingsinfoService.hentStillingsinfo(Stillingsid(stillingsId))
         // Sjekk om stillingen skal sendes til arbeidsplassen
-        if (stillingsinfo?.stillingskategori != Stillingskategori.FORMIDLING && direktemeldtStilling.innhold.privacy == "SHOW_ALL") {
+        if (stillingsinfo?.stillingskategori == Stillingskategori.STILLING && direktemeldtStilling.innhold.privacy == "SHOW_ALL") {
             stillingOutboxService.lagreMeldingIOutbox(
                 stillingsId = stillingsId,
                 eventName = EventName.PUBLISER_ELLER_AVPUBLISER_TIL_ARBEIDSPLASSEN
@@ -277,49 +285,5 @@ class StillingService(
 
     fun hentAlleStillingsIder(): List<UUID> {
         return direktemeldtStillingService.hentAlleStillingsIder()
-    }
-
-    fun populerLocationList(locationList: List<Geografi>): List<Geografi> {
-        return locationList.mapNotNull { geografi -> populerGeografi(geografi) }
-    }
-
-    fun populerGeografi(geografi: Geografi?): Geografi? {
-        if(geografi == null) {
-            return null
-        }
-
-        if (!geografi.postalCode.isNullOrBlank()) {
-            val postdata = geografiService.finnPostdata(geografi.postalCode)
-            if (postdata != null) {
-                return geografi.copy(
-                    municipal = postdata.kommune.navn,
-                    county = postdata.fylke.navn,
-                    municipalCode = postdata.kommune.kommunenummer,
-                    country = "NORGE",
-                    city = postdata.by
-                )
-            }
-        }
-
-        val postDataFraKommune = geografiService.finnPostdataFraKommune(geografi.municipalCode, geografi.municipal)
-        if(postDataFraKommune != null) {
-            return geografi.copy(
-                municipalCode = postDataFraKommune.kommune.kommunenummer,
-                municipal = postDataFraKommune.kommune.navn,
-                county = postDataFraKommune.fylke.navn,
-                country = "NORGE",
-            )
-        }
-
-        if(!geografi.county.isNullOrBlank()) {
-            val fylke = geografiService.finnFylke(geografi.county)
-            if (fylke != null) {
-                return geografi.copy(
-                    county = fylke,
-                    country = "NORGE"
-                )
-            }
-        }
-        return geografi
     }
 }

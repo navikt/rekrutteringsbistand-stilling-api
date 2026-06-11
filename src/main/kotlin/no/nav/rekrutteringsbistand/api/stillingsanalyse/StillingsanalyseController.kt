@@ -26,7 +26,7 @@ class StillingsanalyseController(
         @RequestBody stillingsanalyseDto: StillingsanalyseDto
     ): ResponseEntity<StillingsanalyseResponsDto> {
         log.info("Analyserer stilling ${stillingsanalyseDto.stillingsId}")
-        tokenUtils.hentInnloggetVeileder().validerMinstEnAvRollene()
+        tokenUtils.hentInnloggetVeileder().validerMinstEnAvRolleneEllerUtvikler()
 
         if (stillingsanalyseDto.source != "DIR") {
             log.error("Mottatt stilling for analyse som ikke er source=DIR, source=${stillingsanalyseDto.source}")
