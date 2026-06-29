@@ -187,6 +187,13 @@
             <version>${jackson-module-kotlin.version}</version>
         </dependency>
 
+        <!-- Jackson 3 (tools.jackson) brukes av Spring Boot 4 sitt HTTP-lag. Kotlin-modulen
+             trengs for at data class-defaults og nullability skal håndteres som i Jackson 2. -->
+        <dependency>
+            <groupId>tools.jackson.module</groupId>
+            <artifactId>jackson-module-kotlin</artifactId>
+        </dependency>
+
         <!-- Dependencies relatert til login -->
         <dependency>
             <groupId>no.nav.security</groupId>
