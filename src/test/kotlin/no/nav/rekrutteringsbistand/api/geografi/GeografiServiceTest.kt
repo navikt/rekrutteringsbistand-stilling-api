@@ -6,6 +6,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.mockito.Mock
+import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.whenever
 import org.springframework.boot.test.context.SpringBootTest
 
@@ -20,6 +21,7 @@ class GeografiServiceTest {
 
     @BeforeEach
     fun setUp() {
+        MockitoAnnotations.openMocks(this)
         geografiService = GeografiService(geografiKlient)
     }
 

@@ -1,6 +1,6 @@
 package no.nav.rekrutteringsbistand.api.support.config
 
-import org.springframework.boot.web.client.RestTemplateBuilder
+import org.springframework.boot.restclient.RestTemplateBuilder
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.converter.StringHttpMessageConverter
@@ -13,10 +13,10 @@ import java.time.Duration
 class AppConfig {
 
     @Bean
-    fun restTemplate(): RestTemplate {
-        val restTemplate = RestTemplateBuilder()
-                .setConnectTimeout(Duration.ofSeconds(30))
-                .setReadTimeout(Duration.ofMinutes(1))
+    fun restTemplate(restTemplateBuilder: RestTemplateBuilder): RestTemplate {
+        val restTemplate = restTemplateBuilder
+                .connectTimeout(Duration.ofSeconds(30))
+                .readTimeout(Duration.ofMinutes(1))
                 .build()
         restTemplate.messageConverters.add(0, StringHttpMessageConverter(StandardCharsets.UTF_8))
         return restTemplate

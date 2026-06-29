@@ -41,9 +41,10 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.web.client.TestRestTemplate
+import no.nav.rekrutteringsbistand.api.config.TestRestTemplate
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.http.*
+import org.springframework.http.MediaType
 import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.reactive.server.StatusAssertions
@@ -65,8 +66,9 @@ class TilgangTest {
     @Autowired
     lateinit var mockLogin: MockLogin
 
-    @Autowired
-    private lateinit var webClient: WebTestClient
+    private val webClient: WebTestClient by lazy {
+        WebTestClient.bindToServer().baseUrl(localBaseUrl()).build()
+    }
 
     @MockitoBean
     private lateinit var kandidatlisteKlient: KandidatlisteKlient

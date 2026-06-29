@@ -8,6 +8,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.mockito.Mock
+import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.whenever
 import org.mockito.kotlin.verify
@@ -28,6 +29,7 @@ class AktiverStillingerServiceTest {
 
     @BeforeEach
     fun setUp() {
+        MockitoAnnotations.openMocks(this)
         aktiverOgDeaktiverStillingerService = AktiverOgDeaktiverStillingerService(direktemeldtStillingService)
     }
 

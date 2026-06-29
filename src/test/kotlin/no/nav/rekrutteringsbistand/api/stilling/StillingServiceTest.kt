@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertThrows
 import org.mockito.Mock
+import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
@@ -45,6 +46,7 @@ class StillingServiceTest {
 
     @BeforeEach
     fun setUp() {
+        MockitoAnnotations.openMocks(this)
         stillingService = StillingService(
             stillingsinfoService,
             tokenUtils,
