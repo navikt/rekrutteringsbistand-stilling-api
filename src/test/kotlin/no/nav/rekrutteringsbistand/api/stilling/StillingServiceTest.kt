@@ -9,6 +9,7 @@ import no.nav.rekrutteringsbistand.api.kandidatliste.KandidatlisteKlient
 import no.nav.rekrutteringsbistand.api.opensearch.StillingssokProxyClient
 import no.nav.rekrutteringsbistand.api.stilling.outbox.StillingOutboxService
 import no.nav.rekrutteringsbistand.api.stillingsinfo.*
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -44,9 +45,11 @@ class StillingServiceTest {
 
     lateinit var stillingService: StillingService
 
+    private lateinit var closeable: AutoCloseable
+
     @BeforeEach
     fun setUp() {
-        MockitoAnnotations.openMocks(this)
+        closeable = MockitoAnnotations.openMocks(this)
         stillingService = StillingService(
             stillingsinfoService,
             tokenUtils,
@@ -56,6 +59,11 @@ class StillingServiceTest {
             geografiService,
             stillingOutboxService,
         )
+    }
+
+    @AfterEach
+    fun tearDown() {
+        closeable.close()
     }
 
     @Test
