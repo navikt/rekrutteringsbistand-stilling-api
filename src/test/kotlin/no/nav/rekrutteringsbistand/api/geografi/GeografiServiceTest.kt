@@ -1,11 +1,13 @@
 package no.nav.rekrutteringsbistand.api.geografi
 
 import no.nav.rekrutteringsbistand.api.stilling.Geografi
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.mockito.Mock
+import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.whenever
 import org.springframework.boot.test.context.SpringBootTest
 
@@ -18,9 +20,17 @@ class GeografiServiceTest {
 
     lateinit var geografiService: GeografiService
 
+    private lateinit var closeable: AutoCloseable
+
     @BeforeEach
     fun setUp() {
+        closeable = MockitoAnnotations.openMocks(this)
         geografiService = GeografiService(geografiKlient)
+    }
+
+    @AfterEach
+    fun tearDown() {
+        closeable.close()
     }
 
     val postData = listOf(

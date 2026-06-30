@@ -26,7 +26,7 @@ import org.junit.jupiter.api.extension.RegisterExtension
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.web.client.TestRestTemplate
+import no.nav.rekrutteringsbistand.api.config.TestRestTemplate
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.context.annotation.Import
 import org.springframework.http.HttpEntity
@@ -168,7 +168,8 @@ internal class StillingEksternComponentTest {
             val json = objectMapper.readTree(it.body)
             assertThat(json.get("detail").asText()).isEqualTo("Ugyldig UUID")
             assertThat(json.get("title").asText()).isEqualTo("Valideringsfeil")
-            assertThat(json.get("type").asText()).isEqualTo("about:blank")
+            // Spring Framework 7 utelater "type" når den er lik RFC-standardverdien "about:blank"
+            assertThat(json.get("type")?.asText() ?: "about:blank").isEqualTo("about:blank")
             assertThat(json.get("status").asInt()).isEqualTo(400)
             assertThat(json.has("traceId")).isTrue()
         }

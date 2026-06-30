@@ -161,7 +161,7 @@ class DirektemeldtStillingRepository(private val namedJdbcTemplate: NamedParamet
         """.trimIndent()
 
         return namedJdbcTemplate.query(
-            sql, DirektemeldtStillingRowMapper()
+            sql, emptyMap<String, Any>(), DirektemeldtStillingRowMapper()
         ).filterNotNull()
     }
 
@@ -177,7 +177,7 @@ class DirektemeldtStillingRepository(private val namedJdbcTemplate: NamedParamet
         """.trimIndent()
 
         return namedJdbcTemplate.query(
-            sql, DirektemeldtStillingRowMapper()
+            sql, emptyMap<String, Any>(), DirektemeldtStillingRowMapper()
         ).filterNotNull()
     }
 
@@ -193,7 +193,7 @@ class DirektemeldtStillingRepository(private val namedJdbcTemplate: NamedParamet
         """.trimIndent()
 
         return namedJdbcTemplate.query(
-            sql, DirektemeldtStillingRowMapper()
+            sql, emptyMap<String, Any>(), DirektemeldtStillingRowMapper()
         ).filterNotNull()
     }
 

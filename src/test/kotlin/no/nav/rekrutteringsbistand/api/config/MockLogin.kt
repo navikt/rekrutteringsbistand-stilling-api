@@ -4,7 +4,7 @@ import no.nav.rekrutteringsbistand.api.autorisasjon.azureAdIssuer
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import no.nav.security.mock.oauth2.token.DefaultOAuth2TokenCallback
 import no.nav.security.token.support.spring.test.MockOAuth2ServerAutoConfiguration
-import org.springframework.boot.test.web.client.TestRestTemplate
+import no.nav.rekrutteringsbistand.api.config.TestRestTemplate
 import org.springframework.context.annotation.Import
 import org.springframework.http.client.ClientHttpRequestInterceptor
 import org.springframework.stereotype.Component

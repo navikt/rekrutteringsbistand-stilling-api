@@ -3,11 +3,13 @@ package no.nav.rekrutteringsbistand.api.stilling
 import no.nav.rekrutteringsbistand.api.Testdata.enDirektemeldtStilling
 import no.nav.rekrutteringsbistand.api.Testdata.publishedFor2TimerSiden
 import no.nav.rekrutteringsbistand.api.stillingStatusoppdatering.AktiverOgDeaktiverStillingerService
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.mockito.Mock
+import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.whenever
 import org.mockito.kotlin.verify
@@ -26,9 +28,17 @@ class AktiverStillingerServiceTest {
 
     val stillingCaptor = argumentCaptor<DirektemeldtStilling>()
 
+    private lateinit var closeable: AutoCloseable
+
     @BeforeEach
     fun setUp() {
+        closeable = MockitoAnnotations.openMocks(this)
         aktiverOgDeaktiverStillingerService = AktiverOgDeaktiverStillingerService(direktemeldtStillingService)
+    }
+
+    @AfterEach
+    fun tearDown() {
+        closeable.close()
     }
 
     @Test

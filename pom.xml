@@ -14,20 +14,20 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.14</version>
+        <version>4.0.7</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <java.version>21</java.version>
-        <kotlin.version>2.2.21</kotlin.version>
+        <java.version>25</java.version>
+        <kotlin.version>2.3.21</kotlin.version>
         <logstash-logback-encoder.version>8.0</logstash-logback-encoder.version>
         <logback-syslog4j.version>1.0.0</logback-syslog4j.version>
         <wiremock.version>3.12.1</wiremock.version>
         <jackson-module-kotlin.version>2.18.2</jackson-module-kotlin.version>
-        <token-validation.version>5.0.39</token-validation.version>
+        <token-validation.version>6.0.8</token-validation.version>
         <resilience4j.version>2.3.0</resilience4j.version>
         <mockito-kotlin.version>5.4.0</mockito-kotlin.version>
         <flyway.version>11.1.1</flyway.version>
@@ -104,6 +104,10 @@
         </dependency>
 
         <!-- database -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-flyway</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
@@ -261,9 +265,21 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <!-- Tvinger Docker API-versjon for Testcontainers (docker-java faller ellers
+                         tilbake til 1.32, som avvises av nyere Docker/Colima som krever >=1.44) -->
+                    <systemPropertyVariables>
+                        <api.version>1.44</api.version>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
+            <plugin>
                 <artifactId>kotlin-maven-plugin</artifactId>
                 <groupId>org.jetbrains.kotlin</groupId>
                 <configuration>
+                    <jvmTarget>25</jvmTarget>
                     <args>
                         <arg>-Xjsr305=strict</arg>
                     </args>

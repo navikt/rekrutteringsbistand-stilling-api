@@ -5,9 +5,12 @@ import no.nav.rekrutteringsbistand.api.Testdata.enStilling
 import no.nav.rekrutteringsbistand.api.Testdata.enVeileder
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.mockito.Mock
+import org.mockito.MockitoAnnotations
 import org.mockito.Mockito.`when`
 import org.springframework.boot.test.context.SpringBootTest
 
@@ -19,6 +22,18 @@ class StillingTest {
 
     @Mock
     lateinit var tokenUtils: TokenUtils
+
+    private lateinit var closeable: AutoCloseable
+
+    @BeforeEach
+    fun setUp() {
+        closeable = MockitoAnnotations.openMocks(this)
+    }
+
+    @AfterEach
+    fun tearDown() {
+        closeable.close()
+    }
 
     @Test
     fun `Kopier stilling skal sette riktige verdier`() {

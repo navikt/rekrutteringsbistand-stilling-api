@@ -29,7 +29,7 @@ import org.junit.jupiter.api.extension.RegisterExtension
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.web.client.TestRestTemplate
+import no.nav.rekrutteringsbistand.api.config.TestRestTemplate
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders.*
@@ -105,7 +105,7 @@ internal class StillingComponentTest {
 
         restTemplate.getForObject(
             "$localBaseUrl/rekrutteringsbistandstilling/${stilling.uuid}", RekrutteringsbistandStilling::class.java
-        ).also {
+        )!!.also {
             assertThat(it.stillingsinfo).isNull()
             assertThat(it.stilling).isEqualTo(stilling.copy(versjon = 1))
         }
@@ -124,7 +124,7 @@ internal class StillingComponentTest {
 
         restTemplate.getForObject(
             "$localBaseUrl/rekrutteringsbistandstilling/${stilling.uuid}", RekrutteringsbistandStilling::class.java
-        ).also {
+        )!!.also {
             assertThat(it.stilling).isEqualTo(stilling.copy(versjon = 1))
             assertThat(it.stillingsinfo).isEqualTo(stillingsinfo.asStillingsinfoDto())
         }
@@ -155,7 +155,7 @@ internal class StillingComponentTest {
             "$localBaseUrl/rekrutteringsbistandstilling",
             requestUtenStillingstittel,
             RekrutteringsbistandStilling::class.java
-        ).also {
+        )!!.also {
             val stilling = enNyStilling
             assertThat(it.stilling.title).isEqualTo("Ny stilling")
             assertThat(it.stilling.administration?.navIdent).isEqualTo(stilling.administration.navIdent)
@@ -187,9 +187,9 @@ internal class StillingComponentTest {
 
         restTemplate.postForObject(
             "$localBaseUrl/rekrutteringsbistandstilling/kopier/${eksisterendeStillingMedStyrk.stillingsId}",
-            null,
+            KopierStillingDto(eierNavKontorEnhetId = null),
             RekrutteringsbistandStilling::class.java
-        ).also {
+        )!!.also {
             assertThat(it.stilling.title).isEqualTo(styrkTittel)
         }
     }
@@ -214,7 +214,7 @@ internal class StillingComponentTest {
             "$localBaseUrl/rekrutteringsbistandstilling/kopier/${eksisterendeStilling.stillingsId}",
             KopierStillingDto(eierNavKontorEnhetId = eierNavKontorEnhetId),
             RekrutteringsbistandStilling::class.java
-        ).also {
+        )!!.also {
             assertThat(it.stillingsinfo?.eierNavident).isEqualTo(enVeileder.navIdent)
             assertThat(it.stillingsinfo?.eierNavn).isEqualTo(enVeileder.displayName)
             assertThat(it.stillingsinfo?.eierNavKontorEnhetId).isEqualTo(eierNavKontorEnhetId)
@@ -367,7 +367,7 @@ internal class StillingComponentTest {
         restTemplate.exchange(
             "$localBaseUrl/rekrutteringsbistandstilling/${stilling.stillingsId}",
             HttpMethod.DELETE,
-            HttpEntity(null, null),
+            HttpEntity.EMPTY,
             FrontendStilling::class.java
         ).also {
             val result = it.body
@@ -396,7 +396,7 @@ internal class StillingComponentTest {
         restTemplate.exchange(
             "$localBaseUrl/rekrutteringsbistandstilling/${stilling.stillingsId}",
             HttpMethod.DELETE,
-            HttpEntity(null, null),
+            HttpEntity.EMPTY,
             FrontendStilling::class.java
         ).also {
             val stillingSlettet = it.body
@@ -447,7 +447,7 @@ internal class StillingComponentTest {
         restTemplate.exchange(
             "$localBaseUrl/rekrutteringsbistandstilling/${slettetStilling.stillingsId}",
             HttpMethod.DELETE,
-            HttpEntity(null, null),
+            HttpEntity.EMPTY,
             FrontendStilling::class.java
         ).also {
             val stillingIRespons = it.body!!
