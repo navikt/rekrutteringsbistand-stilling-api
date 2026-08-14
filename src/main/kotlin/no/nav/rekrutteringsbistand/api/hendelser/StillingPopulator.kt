@@ -27,6 +27,7 @@ class StillingPopulator(
                 it.forbid("stilling")
                 it.forbid("direktemeldtStilling")
                 it.forbidValue("@event_name", "arbeidsgiversKandidatliste.VisningKontaktinfo")
+                it.forbidValue("@event_name", "indekserKandidatlisteInfo")
             }
             validate { it.requireKey("stillingsId") }
 
