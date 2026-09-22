@@ -45,7 +45,7 @@
         <caffeine.version>3.2.0</caffeine.version>
         <opentelemetry-logback.version>2.20.1-alpha</opentelemetry-logback.version>
         <!-- Tredjeparts -->
-        <!--kotlin.version>2.0.20</kotlin.version-->
+        <tomcat.version>11.0.26</tomcat.version>        <!-- Overrider tomcat-versjon fra spring-boot-starter-parent for å fikse critical vulnerability -->
     </properties>
 
     <dependencies>
