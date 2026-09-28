@@ -1,6 +1,6 @@
 package no.nav.rekrutteringsbistand.api
 
-import com.fasterxml.jackson.databind.JsonNode
+import tools.jackson.databind.JsonNode
 import org.springframework.boot.runApplication
 import java.time.ZonedDateTime
 

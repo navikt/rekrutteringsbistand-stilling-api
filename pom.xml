@@ -36,16 +36,28 @@
         <janino.version>3.1.12</janino.version>
         <nimbus.version>10.10</nimbus.version>
         <json-smart.version>2.6.0</json-smart.version>
-        <rapids-and-rivers.version>2025110410541762250064.d7e58c3fad81</rapids-and-rivers.version>
-        <rapids-and-rivers-api.version>2025.11.04-10.54-c831038e</rapids-and-rivers-api.version>
-        <rapids-and-rivers-kafka.version>2025.11.04-10.54-c831038e</rapids-and-rivers-kafka.version>
+        <rapids-and-rivers.version>2026091610031789545782</rapids-and-rivers.version>
         <awaitility.version>4.3.0</awaitility.version>
         <caffeine.version>3.3.0</caffeine.version>
         <!-- Må matche opentelemetry.version fra spring-boot-dependencies (2.28.x -> API 1.62.x) -->
         <opentelemetry-logback.version>2.28.1-alpha</opentelemetry-logback.version>
         <!-- Tredjeparts -->
         <tomcat.version>11.0.26</tomcat.version>        <!-- Overrider tomcat-versjon fra spring-boot-starter-parent for å fikse critical vulnerability -->
+        <lz4-java.version>1.11.4</lz4-java.version>     <!-- Overrider transitiv versjon fra kafka-clients (1.10.x) for å fikse CVE-2026-59949 -->
     </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- CVE-2026-59949: kafka-clients 4.2.1 (fra Spring Boot 4.1.1) drar inn sårbar lz4-java 1.10.1.
+                 Kan fjernes (sammen med lz4-java.version) når kafka-clients fra Spring Boot bruker lz4-java >= 1.11.1.
+                 Sjekk med: mvn dependency:tree -Dincludes=at.yawk.lz4 etter å ha kommentert ut denne blokken. -->
+            <dependency>
+                <groupId>at.yawk.lz4</groupId>
+                <artifactId>lz4-java</artifactId>
+                <version>${lz4-java.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <dependency>
@@ -243,19 +255,10 @@
             <version>${rapids-and-rivers.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.github.navikt.tbd-libs</groupId>
+            <groupId>com.github.navikt.rapids-and-rivers</groupId>
             <artifactId>rapids-and-rivers-test</artifactId>
-            <version>${rapids-and-rivers-api.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.github.navikt.tbd-libs</groupId>
-            <artifactId>rapids-and-rivers-api</artifactId>
-            <version>${rapids-and-rivers-api.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.github.navikt.tbd-libs</groupId>
-            <artifactId>kafka</artifactId>
-            <version>${rapids-and-rivers-kafka.version}</version>
+            <version>${rapids-and-rivers.version}</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
