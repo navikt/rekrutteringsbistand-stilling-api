@@ -23,27 +23,26 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>25</java.version>
         <kotlin.version>2.3.21</kotlin.version>
-        <logstash-logback-encoder.version>8.0</logstash-logback-encoder.version>
+        <logstash-logback-encoder.version>8.1</logstash-logback-encoder.version>
         <logback-syslog4j.version>1.0.0</logback-syslog4j.version>
-        <wiremock.version>3.12.1</wiremock.version>
-        <jackson-module-kotlin.version>2.18.2</jackson-module-kotlin.version>
+        <wiremock.version>3.13.2</wiremock.version>
         <token-validation.version>6.0.8</token-validation.version>
-        <resilience4j.version>2.3.0</resilience4j.version>
+        <resilience4j.version>2.4.0</resilience4j.version>
         <mockito-kotlin.version>5.4.0</mockito-kotlin.version>
-        <flyway.version>11.1.1</flyway.version>
-        <testcontainers.version>1.21.3</testcontainers.version>
-        <postgresql.version>42.7.8</postgresql.version>
+        <testcontainers.version>1.21.4</testcontainers.version>
+        <postgresql.version>42.7.13</postgresql.version>
         <okhttp.version>4.12.0</okhttp.version>
         <nav-common.version>3.2025.10.10_08.21-bb7c7830d93c</nav-common.version>
         <janino.version>3.1.12</janino.version>
-        <nimbus.version>10.0.1</nimbus.version>
-        <json-smart.version>2.5.2</json-smart.version>
+        <nimbus.version>10.10</nimbus.version>
+        <json-smart.version>2.6.0</json-smart.version>
         <rapids-and-rivers.version>2025110410541762250064.d7e58c3fad81</rapids-and-rivers.version>
         <rapids-and-rivers-api.version>2025.11.04-10.54-c831038e</rapids-and-rivers-api.version>
         <rapids-and-rivers-kafka.version>2025.11.04-10.54-c831038e</rapids-and-rivers-kafka.version>
         <awaitility.version>4.3.0</awaitility.version>
-        <caffeine.version>3.2.0</caffeine.version>
-        <opentelemetry-logback.version>2.20.1-alpha</opentelemetry-logback.version>
+        <caffeine.version>3.3.0</caffeine.version>
+        <!-- Må matche opentelemetry.version fra spring-boot-dependencies (2.28.x -> API 1.62.x) -->
+        <opentelemetry-logback.version>2.28.1-alpha</opentelemetry-logback.version>
         <!-- Tredjeparts -->
         <tomcat.version>11.0.26</tomcat.version>        <!-- Overrider tomcat-versjon fra spring-boot-starter-parent for å fikse critical vulnerability -->
     </properties>
@@ -179,7 +178,11 @@
         <dependency>
             <groupId>com.fasterxml.jackson.module</groupId>
             <artifactId>jackson-module-kotlin</artifactId>
-            <version>${jackson-module-kotlin.version}</version>
+        </dependency>
+        <!-- Versjon styres av jackson-2-bom i Spring Boot -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
         </dependency>
 
         <!-- Dependencies relatert til login -->
