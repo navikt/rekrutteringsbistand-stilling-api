@@ -84,13 +84,3 @@ jobs:
         env:
           CLUSTER: prod-gcp
           RESOURCE: .nais/prod-alerts.yaml
-
-  call-trivy-security-scan:
-    needs: deploy-to-dev
-    uses: navikt/toi-github-actions-workflows/.github/workflows/trivy-security-scan.yaml@v15
-    with:
-      image: ${{ needs.deploy-to-dev.outputs.image }}
-    permissions:
-      id-token: write
-      security-events: write
-    secrets: inherit
