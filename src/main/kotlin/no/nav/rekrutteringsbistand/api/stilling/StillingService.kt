@@ -1,6 +1,6 @@
 package no.nav.rekrutteringsbistand.api.stilling
 
-import no.nav.rekrutteringsbistand.AuditLogg
+import no.nav.rekrutteringsbistand.SecureLog
 import no.nav.rekrutteringsbistand.api.RekrutteringsbistandStilling
 import no.nav.rekrutteringsbistand.api.arbeidsplassen.OpprettStillingDto
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
@@ -34,6 +34,8 @@ class StillingService(
     val geografiService: GeografiService,
     val stillingOutboxService: StillingOutboxService,
 ) {
+    private val secureLog = SecureLog(log)
+
     fun hentRekrutteringsbistandStilling(
         stillingsId: UUID,
         somSystembruker: Boolean = false
@@ -249,7 +251,7 @@ class StillingService(
         val gammelEier = gammelStilling?.innhold?.administration?.navIdent
         val nyEier = dto.stilling.administration?.navIdent
         if (!nyEier.equals(gammelEier)) {
-            AuditLogg.loggOvertattStilling(navIdent = nyEier ?: "", forrigeEier=gammelEier, stillingsid=gammelStilling?.stillingsId.toString())
+            secureLog.info("Nav-ansatt $nyEier har overtatt stilling og kandidatliste med stillingsid ${gammelStilling?.stillingsId.toString()} fra "+ if(gammelEier!=null) " fra $gammelEier" else "")
         }
     }
     @Transactional

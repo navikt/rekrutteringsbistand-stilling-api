@@ -1,7 +1,7 @@
 package no.nav.rekrutteringsbistand.api.stillingsinfo
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import no.nav.rekrutteringsbistand.AuditLogg
+import no.nav.rekrutteringsbistand.SecureLog
 import no.nav.rekrutteringsbistand.api.autorisasjon.Rolle
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
 import no.nav.rekrutteringsbistand.api.stilling.DirektemeldtStillingService
@@ -21,6 +21,8 @@ class StillingsinfoController(
     val direktemeldtStillingService: DirektemeldtStillingService,
     val tokenUtils: TokenUtils
 ) {
+    private val secureLog = SecureLog(log)
+
     @PutMapping("/stillingsinfo")
     fun overtaEierskapForEksternStillingOgKandidatliste(
         @RequestBody dto: StillingsinfoInboundDto
@@ -33,7 +35,7 @@ class StillingsinfoController(
         val forrigeEier = forrigeStillingsinfo?.eier?.navident
 
         log.info("Stilling ${dto.stillingsid} har byttet eierskap med url /stillingsinfo")
-        AuditLogg.loggOvertattStilling(navIdent = veileder.navIdent, forrigeEier=forrigeEier, stillingsid=dto.stillingsid)
+        secureLog.info("Nav-ansatt ${veileder.navIdent} har overtatt stilling og kandidatliste med stillingsid ${dto.stillingsid} fra "+ if(forrigeEier!=null) " fra $forrigeEier" else "")
         val nyEier = Eier(veileder.navIdent, veileder.displayName, dto.eierNavKontorEnhetId)
         val oppdatertStillingsinfo =
             service.overtaEierskapForEksternStillingOgKandidatliste(stillingsId = stillingsid, nyEier = nyEier)
@@ -70,7 +72,7 @@ class StillingsinfoController(
             service.overtaEierskapForEksternStillingOgKandidatliste(stillingsId = stillingsid, nyEier = nyEier)
         }
 
-        AuditLogg.loggOvertattStilling(navIdent = veileder.navIdent, forrigeEier=forrigeEier, stillingsid=dto.stillingsid)
+        secureLog.info("Nav-ansatt ${veileder.navIdent} har overtatt stilling og kandidatliste med stillingsid ${dto.stillingsid} fra "+ if(forrigeEier!=null) " fra $forrigeEier" else "")
         log.info("Stilling ${dto.stillingsid} har byttet eierskap med url /overta-eierskap")
         return ResponseEntity.status(HttpStatus.OK).body("OK")
     }
