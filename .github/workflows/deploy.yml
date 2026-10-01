@@ -29,7 +29,7 @@ jobs:
   deploy-to-dev:
     name: Deploy to dev
     needs: test
-    if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/fjern_auditlogg'
+    if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/oppgrader-avhengigheter'
     runs-on: ubuntu-latest
     outputs:
       image: ${{ steps.docker-build-push.outputs.image }}
@@ -84,13 +84,3 @@ jobs:
         env:
           CLUSTER: prod-gcp
           RESOURCE: .nais/prod-alerts.yaml
-
-  call-trivy-security-scan:
-    needs: deploy-to-dev
-    uses: navikt/toi-github-actions-workflows/.github/workflows/trivy-security-scan.yaml@v15
-    with:
-      image: ${{ needs.deploy-to-dev.outputs.image }}
-    permissions:
-      id-token: write
-      security-events: write
-    secrets: inherit

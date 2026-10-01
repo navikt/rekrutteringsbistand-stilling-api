@@ -40,7 +40,7 @@ class StillingPopulator(
         metadata: MessageMetadata,
         meterRegistry: MeterRegistry
     ) {
-        val stillingsId = Stillingsid(packet["stillingsId"].asText())
+        val stillingsId = Stillingsid(packet["stillingsId"].asString())
 
         log.info("Populerer melding med stilling og stillingsinfo for stillingsId=${stillingsId.asString()}")
 
