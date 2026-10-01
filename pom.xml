@@ -160,13 +160,6 @@
             <version>${logstash-logback-encoder.version}</version>
         </dependency>
 
-        <!-- Audit logging -->
-        <dependency>
-            <groupId>no.nav.common</groupId>
-            <artifactId>audit-log</artifactId>
-            <version>${nav-common.version}</version>
-        </dependency>
-
         <dependency>
             <groupId>org.codehaus.janino</groupId>
             <artifactId>janino</artifactId>
