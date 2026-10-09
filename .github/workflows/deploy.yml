@@ -1,86 +1,15 @@
-name: Build & deploy
-
-on: [push, workflow_dispatch]
-
-permissions:
-  packages: write
-  contents: read
-  id-token: write
+name: Build and deploy
+on: [ push, workflow_dispatch ]
 
 jobs:
-  test:
-    name: Run tests
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: '25'
-      - uses: actions/cache@v4
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-maven-cache-${{ hashFiles('pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-cache-
-      - name: Run tests
-        run: mvn verify
-
-  deploy-to-dev:
-    name: Deploy to dev
-    needs: test
-    if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/oppgrader-avhengigheter'
-    runs-on: ubuntu-latest
-    outputs:
-      image: ${{ steps.docker-build-push.outputs.image }}
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: '25'
-      - uses: actions/cache@v4
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-maven-cache-${{ hashFiles('pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-cache-
-      - name: Build jar with Maven
-        run: mvn clean package
-      - name: Push docker image to GAR and sign image
-        uses: nais/docker-build-push@v0
-        id: docker-build-push
-        with:
-          team: toi
-          tag: ${{ contains(fromJSON('["refs/heads/master", "refs/heads/main"]'), github.ref) && 'latest' || github.sha }}
-      - uses: nais/deploy/actions/deploy@v2
-        env:
-          CLUSTER: dev-gcp
-          VAR: version=${{ steps.docker-build-push.outputs.image }}
-          RESOURCE: .nais/nais.yaml
-          VARS: .nais/nais-dev.yaml
-
-  deploy-to-prod:
-    name: Deploy to prod
-    needs: deploy-to-dev
-    if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: nais/deploy/actions/deploy@v2
-        env:
-          CLUSTER: prod-gcp
-          VAR: version=${{ needs.deploy-to-dev.outputs.image }}
-          RESOURCE: .nais/nais.yaml
-          VARS: .nais/nais-prod.yaml
-
-  deploy-alerts-prod:
-    name: Deploy alerts to prod
-    if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: nais/deploy/actions/deploy@v2
-        env:
-          CLUSTER: prod-gcp
-          RESOURCE: .nais/prod-alerts.yaml
+  call-build-and-deploy:
+    uses: navikt/toi-github-actions-workflows/.github/workflows/build-and-deploy.yaml@v17
+    with:
+      java-version: '25'
+      deploy-to-dev-if-branch-name-is: 'bytt-fra-maven-til-gradlew'
+      baseimage-tagged-ref: 'europe-north1-docker.pkg.dev/cgr-nav/pull-through/nav.no/jre:openjdk-25'
+    permissions:
+      contents: read
+      id-token: write
+      security-events: write
+    secrets: inherit
