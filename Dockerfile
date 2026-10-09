@@ -1,5 +1,10 @@
-FROM europe-north1-docker.pkg.dev/cgr-nav/pull-through/nav.no/jre:openjdk-25
+ARG BASE_IMAGE_DIGEST_PINNED_REF
+FROM ${BASE_IMAGE_DIGEST_PINNED_REF}
+
 ENV TZ="Europe/Oslo"
-COPY ./target/rekrutteringsbistand-stilling-api-0.0.1-SNAPSHOT.jar app.jar
-EXPOSE 9501
+
+COPY build/libs/rekrutteringsbistand-stilling-api.jar app.jar
+
 CMD ["-jar", "app.jar"]
+
+EXPOSE 9501
