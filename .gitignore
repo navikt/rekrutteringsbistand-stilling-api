@@ -1,9 +1,21 @@
 /target/
 !.mvn/wrapper/maven-wrapper.jar
 
-
 ### IntelliJ IDEA ###
 .idea
 *.iws
 *.iml
 *.ipr
+
+# Følgende er generert av nav-pilot. Team Toi sin policy per juli 2026 er at vi ikke comitter disse filene, fordi
+# utviklere kan ønske å ha ulike AI-agent konfigurasjoner lokalt.
+.github/agents/
+.github/hooks/
+.github/instructions/
+.github/prompts/
+.github/skills/
+.nav-pilot-state.json
+copilot-instructions.md
+copilot-review-instructions.md
+AGENTS.md
+agentpakke.lock.json
