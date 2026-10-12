@@ -42,7 +42,8 @@ dependencies {
     // Spring Boot styrer ikke denne versjonen. Den må passe med OpenTelemetry-versjonen fra Spring Boot
     // (instrumentation 2.28.x hører til API 1.62.x).
     implementation("io.opentelemetry.instrumentation:opentelemetry-logback-mdc-1.0:2.28.1-alpha")
-    implementation("net.logstash.logback:logstash-logback-encoder:8.1")
+    // Rapids & Rivers krever 9.0. Vi deklarerer samme versjon, så byggefila viser hva som faktisk kjører.
+    implementation("net.logstash.logback:logstash-logback-encoder:9.0")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
     implementation("no.nav.security:token-validation-spring:6.0.12")
@@ -57,7 +58,7 @@ dependencies {
     testImplementation("org.awaitility:awaitility")
     testImplementation("com.github.navikt.rapids-and-rivers:rapids-and-rivers-test:2026091610031789545782")
 
-    // Constraints løfter transitive avhengigheter til versjoner uten kjente sårbarheter.
+    // Constraints løfter transitive avhengigheter til versjoner med sikkerhetsfikser.
     // Vanlige versjonskrav (ikke strictly) virker som minsteversjon, så Gradle velger fortsatt
     // en nyere versjon hvis Spring Boot eller andre avhengigheter ber om det.
     // Sjekk om de fortsatt trengs med: ./gradlew dependencyInsight --dependency <navn> --configuration runtimeClasspath
@@ -77,6 +78,12 @@ dependencies {
         // Fjern når kafka-clients fra Spring Boot bruker lz4-java >= 1.11.4.
         implementation("at.yawk.lz4:lz4-java:1.11.4") {
             because("CVE-2026-59949 og CVE-2026-106449 til CVE-2026-106453 i lz4-java fra kafka-clients")
+        }
+        // token-validation-spring 6.0.12 drar inn nimbus-jose-jwt 10.9.1 via oauth2-oidc-sdk.
+        // 10.10 har ingen CVE-fiks, men begrenser størrelsen på dekomprimert JWE (zip-bomb) og fikser en minnelekkasje.
+        // Fjern når token-validation-spring drar inn nimbus-jose-jwt >= 10.10.
+        implementation("com.nimbusds:nimbus-jose-jwt:10.10") {
+            because("Sikkerhetsherding i 10.10: grense for dekomprimert JWE (iss #611) og fiks av minnelekkasje i DeflateUtils")
         }
     }
 }
