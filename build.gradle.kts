@@ -4,6 +4,7 @@ plugins {
     kotlin("jvm") version "2.4.21"
     kotlin("plugin.spring") version "2.4.21"
     id("org.springframework.boot") version "4.1.1"
+    id("io.github.ben-manes.versions") version "0.64.0" // Gir kommandoen "./gradlew dependencyUpdates" som du kan be din AI bruke ved oppgradering av avhengigheter
 }
 
 group = "no.nav.tag"
@@ -42,7 +43,6 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
     implementation("no.nav.security:token-validation-spring:6.0.12")
-    implementation("com.nimbusds:nimbus-jose-jwt:10.10")
     implementation("net.minidev:json-smart")
     implementation("com.github.navikt:rapids-and-rivers:2026091610031789545782")
 
@@ -50,7 +50,6 @@ dependencies {
     testImplementation("org.testcontainers:testcontainers-postgresql")
     testImplementation("org.wiremock:wiremock-standalone:3.13.2")
     testImplementation("no.nav.security:token-validation-spring-test:6.0.12")
-    testImplementation("com.squareup.okhttp3:mockwebserver:5.5.0")
     testImplementation("org.springframework.boot:spring-boot-starter-webflux")
     testImplementation("org.mockito.kotlin:mockito-kotlin:6.4.0")
     testImplementation("org.awaitility:awaitility")
