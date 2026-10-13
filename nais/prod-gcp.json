@@ -10,7 +10,6 @@
   "ad_gruppe_utvikler": "41080368-439f-4128-858a-afbef876431e",
   "postgres_tier": "db-custom-1-3840",
   "disk_autoresize": true,
-  "ad_api_host": "pam-ad-api.intern.nav.no",
   "rekrutteringsbistand_kandidat_api_host": "rekrutteringsbistand-kandidat-api.prod-fss-pub.nais.io",
   "arbeidsmarked_openai_host": "arbeidsmarked-prod.openai.azure.com",
   "spring_profile": "prod",

@@ -28,14 +28,12 @@ import no.nav.rekrutteringsbistand.api.stilling.Geografi
 import no.nav.rekrutteringsbistand.api.stilling.Kategori
 import no.nav.rekrutteringsbistand.api.stillingsinfo.*
 import no.nav.rekrutteringsbistand.api.stillingsinfo.indekser.BulkStillingsinfoInboundDto
-import no.nav.rekrutteringsbistand.api.support.toMultiValueMap
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.*
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
-import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mockito
 import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
@@ -49,6 +47,7 @@ import org.springframework.http.HttpHeaders.AUTHORIZATION
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.reactive.server.StatusAssertions
 import org.springframework.test.web.reactive.server.WebTestClient
+import org.springframework.web.client.exchange
 import java.util.UUID
 
 private val objectMapper: ObjectMapper =
@@ -74,9 +73,6 @@ class TilgangTest {
     private lateinit var kandidatlisteKlient: KandidatlisteKlient
 
     @MockitoBean
-    private lateinit var azureKlient: AzureKlient
-
-    @MockitoBean
     @Suppress("unused")
     private lateinit var geografiService: GeografiService
 
@@ -100,13 +96,13 @@ class TilgangTest {
 
     @BeforeAll
     fun setup() {
-        stubber = Stubber(kandidatlisteKlient, azureKlient, standardsøkRepository, stillingsinfoRepository)
+        stubber = Stubber(kandidatlisteKlient, standardsøkRepository, stillingsinfoRepository)
     }
 
     @BeforeEach
     fun preTest() {
         stubber.resetAll()
-        Mockito.reset(kandidatlisteKlient, azureKlient)
+        Mockito.reset(kandidatlisteKlient)
         repository.slettAlt()
         direktemeldtStillingRepository.lagreDirektemeldtStilling(Testdata.enDirektemeldtStilling.copy(stillingsId = UUID.fromString(Testdata.enStilling.uuid)))
     }
@@ -117,11 +113,10 @@ class TilgangTest {
     }
 
     fun gjørKall(token: String?, responseEntityFunksjon: ResponseEntity<*>.() -> Unit) =
-        restTemplate.exchange(
+        restTemplate.exchange<String>(
             "${localBaseUrl()}/rekrutteringsbistand/api/v1/reportee",
             HttpMethod.GET,
-            HttpEntity(null, token?.let { mapOf("Authorization" to "Bearer $it").toMultiValueMap() }),
-            String::class.java
+            HttpEntity<Nothing>(HttpHeaders().apply { token?.let { setBearerAuth(it) } })
         ).run(responseEntityFunksjon)
 
     @Test
@@ -192,13 +187,6 @@ class TilgangTest {
             stillingsInfo::overtaEierskapForEksternStillingOgKandidatliste to Varianter(forbidden, ok, ok, forbidden),
             indekser::hentStillingsinfoBulk to Varianter(unauthorized, unauthorized, unauthorized, unauthorized),   //Hvis alt er forbidden kan testen liksågodt endres til dette
             innloggetVeileder::hentInnloggetVeileder to Varianter(ok, ok, ok, ok),
-            arbeidsplassenProxy::kategorier to Varianter(ok, ok, ok, ok),
-            arbeidsplassenProxy::geografiPostnr to Varianter(ok, ok, ok, ok),
-            arbeidsplassenProxy::geografiKommuner to Varianter(ok, ok, ok, ok),
-            arbeidsplassenProxy::geografiFylker to Varianter(ok, ok, ok, ok),
-            arbeidsplassenProxy::geografiLand to Varianter(ok, ok, ok, ok),
-            arbeidsplassenProxy::getSøk to Varianter(ok, ok, ok, ok),
-            arbeidsplassenProxy::postSøk to Varianter(ok, ok, ok, ok),
             standardSøk::hentStandardsøk to Varianter(ok, ok, ok, ok),
             standardSøk::upsertStandardsøk to Varianter(created, created, created, created),
             rekrutteringstreffFormidling::opprettFormidling to Varianter(ok, ok, ok, forbidden),
@@ -382,69 +370,6 @@ private class Kall(private val webClient: WebTestClient, private val mockLogin: 
         }
     }
 
-    inner class ArbeidsplassenProxy(private val stubber: Stubber) {
-        private val proxyPath = "/rekrutteringsbistand/api/v1"
-        private val geografiPath = "$proxyPath/geography"
-        private val searchPath = "/search-api/underenhet/_search"
-
-        val kategorier: EndepunktHandler = { rolle ->
-            stubber.mockOboToken(mockLogin.hentAzureAdVeilederToken(roller = rolle.somListe()))
-            stubber.mockPAMAdGet("categories-with-altnames")
-            get(
-                "$proxyPath/categories-with-altnames",
-                rolle
-            )
-        }
-        val geografiPostnr: EndepunktHandler = { rolle ->
-            stubber.mockOboToken(mockLogin.hentAzureAdVeilederToken(roller = rolle.somListe()))
-            stubber.mockPAMAdGet("geography/postdata")
-            get(
-                "$geografiPath/postdata",
-                rolle
-            )
-        }
-        val geografiKommuner: EndepunktHandler = { rolle ->
-            stubber.mockOboToken(mockLogin.hentAzureAdVeilederToken(roller = rolle.somListe()))
-            stubber.mockPAMAdGet("geography/municipals")
-            get(
-                "$geografiPath/municipals",
-                rolle
-            )
-        }
-        val geografiFylker: EndepunktHandler = { rolle ->
-            stubber.mockOboToken(mockLogin.hentAzureAdVeilederToken(roller = rolle.somListe()))
-            stubber.mockPAMAdGet("geography/counties")
-            get(
-                "$geografiPath/counties",
-                rolle
-            )
-        }
-        val geografiLand: EndepunktHandler = { rolle ->
-            stubber.mockOboToken(mockLogin.hentAzureAdVeilederToken(roller = rolle.somListe()))
-            stubber.mockPAMAdGet("geography/countries")
-            get(
-                "$geografiPath/countries",
-                rolle
-            )
-        }
-        val getSøk: EndepunktHandler = { rolle ->
-            stubber.mockOboToken(mockLogin.hentAzureAdVeilederToken(roller = rolle.somListe()))
-            stubber.mockArbeidsplassenGetSearch()
-            get(
-                searchPath,
-                rolle
-            )
-        }
-        val postSøk: EndepunktHandler = { rolle ->
-            stubber.mockArbeidsplassenPostSearch()
-            post(
-                searchPath,
-                rolle,
-                "body"
-            )
-        }
-    }
-
     inner class StandardSøk(private val stubber: Stubber) {
         private val standardsokPath = "/standardsok"
 
@@ -520,14 +445,12 @@ private class Kall(private val webClient: WebTestClient, private val mockLogin: 
     val stillingsInfo = StillingsInfo(stubber)
     val indekser = Indekser(stubber)
     val innloggetVeileder = InnloggetVeileder(stubber)
-    val arbeidsplassenProxy = ArbeidsplassenProxy(stubber)
     val standardSøk = StandardSøk(stubber)
     val rekrutteringstreffFormidling = RekrutteringstreffFormidling(stubber)
 }
 
 private class Stubber(
     private val kandidatlisteKlient: KandidatlisteKlient,
-    private val azureKlient: AzureKlient,
     private val standardsøkRepository: StandardsøkRepository,
     private val stillingsinfoRepository: StillingsinfoRepository
 ) {
@@ -612,34 +535,6 @@ private class Stubber(
                     WireMock.aResponse().withStatus(200).withHeader(HttpHeaders.CONNECTION, "close") // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                         .withBody(objectMapper.writeValueAsString(stilling))
-                )
-        )
-    }
-
-    fun mockOboToken(token: String) {
-        whenever(azureKlient.hentOBOToken(anyString(), anyString(), anyString())).thenReturn(token)
-    }
-
-    fun mockArbeidsplassenGetSearch() {
-        wireMock.stubFor(
-            WireMock.request(HttpMethod.GET.name(), WireMock.urlPathMatching("/search-api/underenhet/_search"))
-                .willReturn(
-                    WireMock.aResponse().withStatus(200)
-                        .withHeader(HttpHeaders.CONNECTION, "close")
-                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                        .withBody("")
-                )
-        )
-    }
-
-    fun mockArbeidsplassenPostSearch() {
-        wireMock.stubFor(
-            WireMock.request(HttpMethod.POST.name(), WireMock.urlPathMatching("/search-api/underenhet/_search"))
-                .willReturn(
-                    WireMock.aResponse().withStatus(200)
-                        .withHeader(HttpHeaders.CONNECTION, "close")
-                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                        .withBody("")
                 )
         )
     }

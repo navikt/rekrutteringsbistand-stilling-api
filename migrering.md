@@ -1,1 +1,0 @@
-# Migrering til GCP
