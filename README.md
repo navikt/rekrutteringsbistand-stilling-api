@@ -1,7 +1,6 @@
 # rekrutteringsbistand-stilling-api
 
-Administrerer Nav-veilders rekrutteringsdata" for NAV
-Fungerer også som en proxy for operasjoner mot stillingsystemet til Nav.
+Administrerer Nav-veilders rekrutteringsdata for Nav
 
 # Komme i gang
 ## Bygge
@@ -13,10 +12,6 @@ Bygg og kjør testene:
 ```
 
 ## Kjøre
-### Mocking
-I application.yml, velg mellom mocket stilling eller mot en localhost stillingserver med profilene 'stillingMock' og 'eksternStilling'.
-stillingMock er default.
-
 ### Starte applikasjonen i utviklingsmiljø 
 Start main i klassen RekrutteringsbistandApplication.
 

@@ -47,7 +47,7 @@ class TokenUtils(
 
     fun hentToken(): String {
         val token = contextHolder.getTokenValidationContext().getJwtToken(ISSUER_AZUREAD) ?: throw RuntimeException("Fant ikke token")
-        return token.tokenAsString
+        return token.encodedToken
     }
 
     fun hentOBOToken(scope: String): String = azureKlient.hentOBOToken(scope, hentNavIdent(), hentToken())

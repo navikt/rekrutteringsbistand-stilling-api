@@ -3,7 +3,6 @@ package no.nav.rekrutteringsbistand.api.stilling.ekstern
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension
 import no.nav.rekrutteringsbistand.api.TestRepository
@@ -17,7 +16,6 @@ import no.nav.rekrutteringsbistand.api.stilling.DirektemeldtStillingRepository
 import no.nav.rekrutteringsbistand.api.stilling.Kategori
 import no.nav.rekrutteringsbistand.api.stilling.FrontendStilling
 import no.nav.rekrutteringsbistand.api.stillingsinfo.*
-import no.nav.rekrutteringsbistand.api.support.toMultiValueMap
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
@@ -30,10 +28,9 @@ import no.nav.rekrutteringsbistand.api.config.TestRestTemplate
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.context.annotation.Import
 import org.springframework.http.HttpEntity
-import org.springframework.http.HttpHeaders.*
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
-import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.util.*
@@ -51,12 +48,6 @@ internal class StillingEksternComponentTest {
         @RegisterExtension
         val wiremockAzure: WireMockExtension = WireMockExtension.newInstance()
             .options(WireMockConfiguration.options().port(9954))
-            .build()
-
-        @JvmStatic
-        @RegisterExtension
-        val wiremock: WireMockExtension = WireMockExtension.newInstance()
-            .options(WireMockConfiguration.options().port(9934))
             .build()
     }
 
@@ -91,7 +82,6 @@ internal class StillingEksternComponentTest {
     @Test
     fun `GET mot en stilling skal returnere en stilling uten stillingsinfo hvis det ikke er lagret`() {
         val stilling = enStilling.copy(categoryList = listOf(styrk))
-        mockUtenAuthorization("/b2b/api/v1/ads/${stilling.uuid}", stilling)
         mockAzureObo(wiremockAzure)
         val token = mockLogin.hentAzureAdMaskinTilMaskinToken(uriTilVisStilling)
 
@@ -100,11 +90,7 @@ internal class StillingEksternComponentTest {
         restTemplate.exchange(
             "$localBaseUrl/rekrutteringsbistand/ekstern/api/v1/stilling/${stilling.uuid}",
             HttpMethod.GET,
-            HttpEntity(
-                null, mapOf(
-                    AUTHORIZATION to "Bearer $token"
-                ).toMultiValueMap()
-            ),
+            HttpEntity<Nothing>(HttpHeaders().apply { setBearerAuth(token) }),
             StillingForPersonbruker::class.java
         ).also {
             assertThat(it.body).isEqualTo(forventetStillingForPersonbruker(stilling.copy(title = "Byggeleder"), null))
@@ -156,11 +142,7 @@ internal class StillingEksternComponentTest {
         restTemplate.exchange(
             "$localBaseUrl/rekrutteringsbistand/ekstern/api/v1/stilling/$ugyldigUuid",
             HttpMethod.GET,
-            HttpEntity(
-                null, mapOf(
-                    AUTHORIZATION to "Bearer $token"
-                ).toMultiValueMap()
-            ),
+            HttpEntity<Nothing>(HttpHeaders().apply { setBearerAuth(token) }),
             String::class.java
         ).also {
             assertThat(it.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
@@ -192,40 +174,17 @@ internal class StillingEksternComponentTest {
         repository.opprett(stillingsinfo)
         lagreDirektemeldtStillingIDatabase(stilling)
 
-        mockUtenAuthorization("/b2b/api/v1/ads/${stilling.uuid}", stilling)
         mockAzureObo(wiremockAzure)
         val token = mockLogin.hentAzureAdMaskinTilMaskinToken(uriTilVisStilling)
 
         restTemplate.exchange(
             "$localBaseUrl/rekrutteringsbistand/ekstern/api/v1/stilling/${stilling.uuid}",
             HttpMethod.GET,
-            HttpEntity(
-                null, mapOf(
-                    AUTHORIZATION to "Bearer $token"
-                ).toMultiValueMap()
-            ),
+            HttpEntity<Nothing>(HttpHeaders().apply { setBearerAuth(token) }),
             StillingForPersonbruker::class.java
         ).also {
             assertThat(it.body).isEqualTo(forventetStillingForPersonbruker(stilling, stillingskategori).copy(title = forventetTittel))
         }
-    }
-
-
-    fun mockUtenAuthorization(urlPath: String, responseBody: Any) {
-        wiremock.stubFor(
-            get(urlPathMatching(urlPath))
-                .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
-                .withHeader(ACCEPT, equalTo(APPLICATION_JSON_VALUE))
-                .willReturn(
-                    aResponse().withStatus(200)
-                        .withHeader(
-                            CONNECTION,
-                            "close"
-                        ) // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
-                        .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-                        .withBody(objectMapper.writeValueAsString(responseBody))
-                )
-        )
     }
 
     private fun forventetStillingForPersonbruker(stilling: FrontendStilling, stillingskategori: Stillingskategori?): StillingForPersonbruker {

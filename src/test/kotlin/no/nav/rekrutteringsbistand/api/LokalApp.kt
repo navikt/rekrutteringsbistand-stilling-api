@@ -6,8 +6,8 @@ import java.time.ZonedDateTime
 
 fun main(args: Array<String>) {
     runApplication<RekrutteringsbistandApplication>(*args) {
-        setAdditionalProfiles("default", "sokMock", "stillingMock")
+        setAdditionalProfiles("default")
     }
 }
 
-fun JsonNode.asZonedDateTime(): ZonedDateTime = ZonedDateTime.parse(asText())
+fun JsonNode.asZonedDateTime(): ZonedDateTime = ZonedDateTime.parse(asString())

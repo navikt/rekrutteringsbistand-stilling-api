@@ -39,9 +39,6 @@ dependencies {
     runtimeOnly("org.flywaydb:flyway-database-postgresql")
     implementation("org.springframework.boot:spring-boot-starter-jdbc")
     runtimeOnly("org.postgresql:postgresql")
-    // Spring Boot styrer ikke denne versjonen. Den må passe med OpenTelemetry-versjonen fra Spring Boot
-    // (instrumentation 2.28.x hører til API 1.62.x).
-    implementation("io.opentelemetry.instrumentation:opentelemetry-logback-mdc-1.0:2.28.1-alpha")
     // Rapids & Rivers krever 9.0. Vi deklarerer samme versjon, så byggefila viser hva som faktisk kjører.
     implementation("net.logstash.logback:logstash-logback-encoder:9.0")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
