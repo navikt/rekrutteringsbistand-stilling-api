@@ -6,7 +6,7 @@ import java.time.ZonedDateTime
 
 fun main(args: Array<String>) {
     runApplication<RekrutteringsbistandApplication>(*args) {
-        setAdditionalProfiles("default", "sokMock", "stillingMock")
+        setAdditionalProfiles("default")
     }
 }
 

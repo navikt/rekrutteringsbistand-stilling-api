@@ -1,8 +1,5 @@
 package no.nav.rekrutteringsbistand.api.autorisasjon
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.options
@@ -49,9 +46,6 @@ import org.springframework.test.web.reactive.server.StatusAssertions
 import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.web.client.exchange
 import java.util.UUID
-
-private val objectMapper: ObjectMapper =
-    ObjectMapper().registerModule(JavaTimeModule()).disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
 private const val navIdent = "C12345"
 
@@ -275,8 +269,6 @@ private class Kall(private val webClient: WebTestClient, private val mockLogin: 
         val oppdaterFormidling: EndepunktHandler = { rolle -> oppdaterStilling(rolle, Stillingskategori.FORMIDLING) }
         val kopierStilling: EndepunktHandler = { rolle ->
             val stilling = Testdata.enStilling
-            stubber.mockHentStilling(stilling)
-            stubber.mockArbeidsplassenKlientOpprettStilling()
             stubber.mockHentStillingOpenSearch(stilling)
             post(
                 "$stillingPath/kopier/${stilling.uuid}",
@@ -285,7 +277,6 @@ private class Kall(private val webClient: WebTestClient, private val mockLogin: 
         }
         val slettStilling: EndepunktHandler = { rolle ->
             val stilling = Testdata.enStilling
-            stubber.mockSlettStilling(stilling)
             delete(
                 "$stillingPath/${stilling.uuid}",
                 rolle
@@ -293,7 +284,6 @@ private class Kall(private val webClient: WebTestClient, private val mockLogin: 
         }
         val hentStillingMedUuid: EndepunktHandler = { rolle ->
             val stilling = Testdata.enStilling
-            stubber.mockHentStilling(stilling)
             stubber.mockHentStillingOpenSearch(stilling)
             get(
                 "$stillingPath/${stilling.uuid}",
@@ -309,7 +299,6 @@ private class Kall(private val webClient: WebTestClient, private val mockLogin: 
         }
 
         private fun oppRettStillingKall(rolle: TestRolle, stillingskategori: Stillingskategori): StatusAssertions {
-            stubber.mockArbeidsplassenKlientOpprettStilling()
             return post(
                 stillingPath,
                 rolle,
@@ -320,8 +309,6 @@ private class Kall(private val webClient: WebTestClient, private val mockLogin: 
         private fun oppdaterStilling(rolle: TestRolle, stillingskategori: Stillingskategori): StatusAssertions {
             val stilling = Testdata.enStilling.copy(versjon = 1)
             val stillingsInfo = Testdata.enStillingsinfo.copy(stillingskategori = stillingskategori)
-            stubber.mockOppdaterStilling(stilling)
-            stubber.mockHentStilling(stilling)
             stubber.mockStillingsInfo(stilling.uuid, stillingskategori)
             return put(
                 stillingPath,
@@ -338,9 +325,7 @@ private class Kall(private val webClient: WebTestClient, private val mockLogin: 
 
         val overtaEierskapForEksternStillingOgKandidatliste: EndepunktHandler = { rolle ->
             val stilling = Testdata.enStilling
-            stubber.mockHentStilling(stilling)
             stubber.mockHentStillingOpenSearch(stilling)
-            stubber.mockOppdaterStilling(stilling)
             put(
                 stillingInfoPath,
                 rolle,
@@ -381,7 +366,6 @@ private class Kall(private val webClient: WebTestClient, private val mockLogin: 
             )
         }
         val upsertStandardsøk: EndepunktHandler = { rolle ->
-            stubber.mockPAMAdGet("def")
             put(
                 standardsokPath,
                 rolle,
@@ -455,36 +439,18 @@ private class Stubber(
     private val stillingsinfoRepository: StillingsinfoRepository
 ) {
 
-    private val wireMock: WireMockServer = WireMockServer(options().port(9934))
-
     private val wireMockStillingssokProxyClient: WireMockServer = WireMockServer(options().port(9937))
 
     init {
-        wireMock.start()
         wireMockStillingssokProxyClient.start()
     }
 
     fun close() {
-        wireMock.stop()
         wireMockStillingssokProxyClient.stop()
     }
 
     fun resetAll() {
-        wireMock.resetAll()
         wireMockStillingssokProxyClient.resetAll()
-    }
-
-    fun mockArbeidsplassenKlientOpprettStilling() {
-        wireMock.stubFor(
-            WireMock.post(WireMock.urlPathMatching("/api/v1/ads*"))
-                .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
-                .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE)).withHeader(AUTHORIZATION, WireMock.matching("Bearer .*"))
-                .willReturn(
-                    WireMock.aResponse().withStatus(200).withHeader(HttpHeaders.CONNECTION, "close") // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
-                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                        .withBody(objectMapper.writeValueAsString(Testdata.enOpprettetStilling))
-                )
-        )
     }
 
     fun mockHentStillingOpenSearch(stilling: FrontendStilling) {
@@ -496,57 +462,6 @@ private class Stubber(
                     WireMock.aResponse().withStatus(200).withHeader(HttpHeaders.CONNECTION, "close") // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                         .withBody(Testdata.esResponse)
-                )
-        )
-    }
-
-    fun mockHentStilling(stilling: FrontendStilling) {
-        wireMock.stubFor(
-            WireMock.get(WireMock.urlPathMatching("/b2b/api/v1/ads/${stilling.uuid}"))
-                .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
-                .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE)).withHeader(AUTHORIZATION, WireMock.matching("Bearer .*"))
-                .willReturn(
-                    WireMock.aResponse().withStatus(200).withHeader(HttpHeaders.CONNECTION, "close") // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
-                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                        .withBody(objectMapper.writeValueAsString(stilling))
-                )
-        )
-    }
-
-    fun mockOppdaterStilling(stilling: FrontendStilling) {
-        wireMock.stubFor(
-            WireMock.put(WireMock.urlPathMatching("/api/v1/ads/${stilling.uuid}"))
-                .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
-                .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE)).withHeader(AUTHORIZATION, WireMock.matching("Bearer .*"))
-                .willReturn(
-                    WireMock.aResponse().withStatus(200).withHeader(HttpHeaders.CONNECTION, "close") // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
-                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                        .withBody(objectMapper.writeValueAsString(stilling))
-                )
-        )
-    }
-
-    fun mockSlettStilling(stilling: FrontendStilling) {
-        wireMock.stubFor(
-            WireMock.delete(WireMock.urlPathMatching("/api/v1/ads/${stilling.uuid}"))
-                .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
-                .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE)).withHeader(AUTHORIZATION, WireMock.matching("Bearer .*"))
-                .willReturn(
-                    WireMock.aResponse().withStatus(200).withHeader(HttpHeaders.CONNECTION, "close") // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
-                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                        .withBody(objectMapper.writeValueAsString(stilling))
-                )
-        )
-    }
-
-    fun mockPAMAdGet(endPath: String) {
-        wireMock.stubFor(
-            WireMock.request(HttpMethod.GET.name(), WireMock.urlPathMatching("/api/v1/$endPath"))
-                .willReturn(
-                    WireMock.aResponse().withStatus(200)
-                        .withHeader(HttpHeaders.CONNECTION, "close")
-                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                        .withBody("")
                 )
         )
     }

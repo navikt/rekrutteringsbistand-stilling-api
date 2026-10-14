@@ -3,7 +3,6 @@ package no.nav.rekrutteringsbistand.api.stilling.ekstern
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension
 import no.nav.rekrutteringsbistand.api.TestRepository
@@ -33,7 +32,6 @@ import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders.*
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
-import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.util.*
@@ -51,12 +49,6 @@ internal class StillingEksternComponentTest {
         @RegisterExtension
         val wiremockAzure: WireMockExtension = WireMockExtension.newInstance()
             .options(WireMockConfiguration.options().port(9954))
-            .build()
-
-        @JvmStatic
-        @RegisterExtension
-        val wiremock: WireMockExtension = WireMockExtension.newInstance()
-            .options(WireMockConfiguration.options().port(9934))
             .build()
     }
 
@@ -91,7 +83,6 @@ internal class StillingEksternComponentTest {
     @Test
     fun `GET mot en stilling skal returnere en stilling uten stillingsinfo hvis det ikke er lagret`() {
         val stilling = enStilling.copy(categoryList = listOf(styrk))
-        mockUtenAuthorization("/b2b/api/v1/ads/${stilling.uuid}", stilling)
         mockAzureObo(wiremockAzure)
         val token = mockLogin.hentAzureAdMaskinTilMaskinToken(uriTilVisStilling)
 
@@ -192,7 +183,6 @@ internal class StillingEksternComponentTest {
         repository.opprett(stillingsinfo)
         lagreDirektemeldtStillingIDatabase(stilling)
 
-        mockUtenAuthorization("/b2b/api/v1/ads/${stilling.uuid}", stilling)
         mockAzureObo(wiremockAzure)
         val token = mockLogin.hentAzureAdMaskinTilMaskinToken(uriTilVisStilling)
 
@@ -208,24 +198,6 @@ internal class StillingEksternComponentTest {
         ).also {
             assertThat(it.body).isEqualTo(forventetStillingForPersonbruker(stilling, stillingskategori).copy(title = forventetTittel))
         }
-    }
-
-
-    fun mockUtenAuthorization(urlPath: String, responseBody: Any) {
-        wiremock.stubFor(
-            get(urlPathMatching(urlPath))
-                .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON_VALUE))
-                .withHeader(ACCEPT, equalTo(APPLICATION_JSON_VALUE))
-                .willReturn(
-                    aResponse().withStatus(200)
-                        .withHeader(
-                            CONNECTION,
-                            "close"
-                        ) // https://stackoverflow.com/questions/55624675/how-to-fix-nohttpresponseexception-when-running-wiremock-on-jenkins
-                        .withHeader(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-                        .withBody(objectMapper.writeValueAsString(responseBody))
-                )
-        )
     }
 
     private fun forventetStillingForPersonbruker(stilling: FrontendStilling, stillingskategori: Stillingskategori?): StillingForPersonbruker {
