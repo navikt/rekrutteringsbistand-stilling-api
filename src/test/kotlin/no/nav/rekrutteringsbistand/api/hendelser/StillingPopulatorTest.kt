@@ -101,10 +101,10 @@ class StillingPopulatorTest {
         )
         assertEquals(1, testRapid.inspektør.size)
         val message = testRapid.inspektør.message(0)
-        assertEquals("felt", message.get("uinteressant").asText())
-        assertEquals("felt2", message.path("uinteressant2").asText())
-        assertEquals(stillingsId.asString(), message.path("stillingsId").asText())
-        assertEquals(stillingsTittel, message.path("stilling").get("stillingstittel").asText())
+        assertEquals("felt", message.get("uinteressant").asString())
+        assertEquals("felt2", message.path("uinteressant2").asString())
+        assertEquals(stillingsId.asString(), message.path("stillingsId").asString())
+        assertEquals(stillingsTittel, message.path("stilling").get("stillingstittel").asString())
         assertEquals(stillingsTittel == "DIR", message.path("stilling").get("erDirektemeldt").asBoolean())
         assertEquals(
             ZonedDateTime.of(stillingstidspunkt, ZoneId.of("Europe/Oslo")),
@@ -112,20 +112,20 @@ class StillingPopulatorTest {
                 .atZone(ZoneId.of("Europe/Oslo"))
         )
         assertEquals(antallStillinger, message.path("stilling").get("antallStillinger").asInt())
-        assertEquals(organisasjonsnummer, message.path("stilling").get("organisasjonsnummer").asText())
+        assertEquals(organisasjonsnummer, message.path("stilling").get("organisasjonsnummer").asString())
         assertEquals(
             ZonedDateTime.of(stillingensPubliseringstidspunkt, ZoneId.of("Europe/Oslo")),
-            ZonedDateTime.parse(message.path("stilling").get("stillingensPubliseringstidspunkt").asText()).toInstant()
+            ZonedDateTime.parse(message.path("stilling").get("stillingensPubliseringstidspunkt").asString()).toInstant()
                 .atZone(ZoneId.of("Europe/Oslo"))
         )
         assertFalse(message.path("stilling").get("erDirektemeldt").asBoolean())
         val stillingNode = message.path("stillingsinfo")
         assertFalse(stillingNode.isMissingOrNull())
-        assertEquals(stillingsinfoDto.stillingsinfoid, stillingNode.path("stillingsinfoid").asText())
-        assertEquals(stillingsinfoDto.stillingsid, stillingNode.path("stillingsid").asText())
-        assertEquals(stillingsinfoDto.stillingskategori?.name, stillingNode.path("stillingskategori").asText())
-        assertEquals(stillingsinfoDto.eierNavident, stillingNode.path("eier").path("navident").asText())
-        assertEquals(stillingsinfoDto.eierNavn, stillingNode.path("eier").path("navn").asText())
+        assertEquals(stillingsinfoDto.stillingsinfoid, stillingNode.path("stillingsinfoid").asString())
+        assertEquals(stillingsinfoDto.stillingsid, stillingNode.path("stillingsid").asString())
+        assertEquals(stillingsinfoDto.stillingskategori?.name, stillingNode.path("stillingskategori").asString())
+        assertEquals(stillingsinfoDto.eierNavident, stillingNode.path("eier").path("navident").asString())
+        assertEquals(stillingsinfoDto.eierNavn, stillingNode.path("eier").path("navn").asString())
     }
 
     fun enStillingMed(
@@ -207,7 +207,7 @@ class StillingPopulatorTest {
         assertEquals(1, testRapid.inspektør.size)
         val message = testRapid.inspektør.message(0)
 
-        assertEquals("Statsminister", message.path("stilling").get("stillingstittel").asText())
+        assertEquals("Statsminister", message.path("stilling").get("stillingstittel").asString())
     }
 
     @Test
@@ -269,7 +269,7 @@ class StillingPopulatorTest {
         assertEquals(1, testRapid.inspektør.size)
         val message = testRapid.inspektør.message(0)
 
-        assertEquals("Kokk", message.path("stilling").get("stillingstittel").asText())
+        assertEquals("Kokk", message.path("stilling").get("stillingstittel").asString())
     }
 
     @Test
@@ -324,7 +324,7 @@ class StillingPopulatorTest {
         assertEquals(1, testRapid.inspektør.size)
         val message = testRapid.inspektør.message(0)
 
-        assertEquals("Tittel fra arbeidsplassen", message.path("stilling").get("stillingstittel").asText())
+        assertEquals("Tittel fra arbeidsplassen", message.path("stilling").get("stillingstittel").asString())
     }
 
     @Test

@@ -10,4 +10,4 @@ fun main(args: Array<String>) {
     }
 }
 
-fun JsonNode.asZonedDateTime(): ZonedDateTime = ZonedDateTime.parse(asText())
+fun JsonNode.asZonedDateTime(): ZonedDateTime = ZonedDateTime.parse(asString())

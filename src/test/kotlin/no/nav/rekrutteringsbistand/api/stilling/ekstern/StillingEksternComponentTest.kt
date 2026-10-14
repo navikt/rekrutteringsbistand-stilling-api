@@ -16,7 +16,6 @@ import no.nav.rekrutteringsbistand.api.stilling.DirektemeldtStillingRepository
 import no.nav.rekrutteringsbistand.api.stilling.Kategori
 import no.nav.rekrutteringsbistand.api.stilling.FrontendStilling
 import no.nav.rekrutteringsbistand.api.stillingsinfo.*
-import no.nav.rekrutteringsbistand.api.support.toMultiValueMap
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
@@ -29,7 +28,7 @@ import no.nav.rekrutteringsbistand.api.config.TestRestTemplate
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.context.annotation.Import
 import org.springframework.http.HttpEntity
-import org.springframework.http.HttpHeaders.*
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import java.time.ZoneId
@@ -91,11 +90,7 @@ internal class StillingEksternComponentTest {
         restTemplate.exchange(
             "$localBaseUrl/rekrutteringsbistand/ekstern/api/v1/stilling/${stilling.uuid}",
             HttpMethod.GET,
-            HttpEntity(
-                null, mapOf(
-                    AUTHORIZATION to "Bearer $token"
-                ).toMultiValueMap()
-            ),
+            HttpEntity<Nothing>(HttpHeaders().apply { setBearerAuth(token) }),
             StillingForPersonbruker::class.java
         ).also {
             assertThat(it.body).isEqualTo(forventetStillingForPersonbruker(stilling.copy(title = "Byggeleder"), null))
@@ -147,11 +142,7 @@ internal class StillingEksternComponentTest {
         restTemplate.exchange(
             "$localBaseUrl/rekrutteringsbistand/ekstern/api/v1/stilling/$ugyldigUuid",
             HttpMethod.GET,
-            HttpEntity(
-                null, mapOf(
-                    AUTHORIZATION to "Bearer $token"
-                ).toMultiValueMap()
-            ),
+            HttpEntity<Nothing>(HttpHeaders().apply { setBearerAuth(token) }),
             String::class.java
         ).also {
             assertThat(it.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
@@ -189,11 +180,7 @@ internal class StillingEksternComponentTest {
         restTemplate.exchange(
             "$localBaseUrl/rekrutteringsbistand/ekstern/api/v1/stilling/${stilling.uuid}",
             HttpMethod.GET,
-            HttpEntity(
-                null, mapOf(
-                    AUTHORIZATION to "Bearer $token"
-                ).toMultiValueMap()
-            ),
+            HttpEntity<Nothing>(HttpHeaders().apply { setBearerAuth(token) }),
             StillingForPersonbruker::class.java
         ).also {
             assertThat(it.body).isEqualTo(forventetStillingForPersonbruker(stilling, stillingskategori).copy(title = forventetTittel))

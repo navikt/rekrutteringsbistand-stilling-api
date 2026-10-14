@@ -67,7 +67,9 @@ class TilgangTest {
     private lateinit var kandidatlisteKlient: KandidatlisteKlient
 
     @MockitoBean
-    @Suppress("unused")
+    private lateinit var azureKlient: AzureKlient
+
+    @MockitoBean
     private lateinit var geografiService: GeografiService
 
     @Autowired
