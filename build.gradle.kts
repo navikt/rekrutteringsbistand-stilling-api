@@ -36,7 +36,6 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-jdbc")
     implementation("org.springframework.data:spring-data-jdbc")
     runtimeOnly("org.postgresql:postgresql")
-    implementation("io.opentelemetry.instrumentation:opentelemetry-logback-mdc-1.0:2.28.1-alpha")
     implementation("net.logstash.logback:logstash-logback-encoder:8.1")
     implementation("org.codehaus.janino:janino")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")

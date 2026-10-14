@@ -43,12 +43,7 @@
         <appender-ref ref="team-logs"/>
     </logger>
 
-    <appender name="OTEL" class="io.opentelemetry.instrumentation.logback.mdc.v1_0.OpenTelemetryAppender">
-        <appender-ref ref="consoleJsonAppender" />
-    </appender>
-
     <root level="INFO">
-        <appender-ref ref="OTEL"/>
         <appender-ref ref="team-logs" />
     </root>
 
