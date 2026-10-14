@@ -45,6 +45,7 @@
 
     <root level="INFO">
         <appender-ref ref="team-logs" />
+        <appender-ref ref="consoleJsonAppender" />
     </root>
 
     <logger name="no.nav.rekrutteringsbistand.api" level="info"/>
