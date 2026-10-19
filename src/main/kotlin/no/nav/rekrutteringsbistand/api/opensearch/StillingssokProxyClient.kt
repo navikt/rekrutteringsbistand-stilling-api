@@ -23,7 +23,7 @@ class StillingssokProxyClient(
         .followRedirects(HttpClient.Redirect.ALWAYS)
         .build()
 
-    fun hentStilling(stillingsId: UUID, somSystembruker: Boolean = false): FrontendStilling {
+    fun hentStilling(stillingsId: UUID, somSystembruker: Boolean = false): FrontendStilling? {
         val token = if(somSystembruker) {
             tokenUtils.hentSystemToken(stillingssokProxyScope)
         } else {
@@ -39,6 +39,10 @@ class StillingssokProxyClient(
 
         val response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
 
+        if(response.statusCode() == 404) {
+            log.warn("Fikk 404 fra opensearch for stillingen $stillingsId")
+            return null
+        }
         if(response.statusCode() != 200) {
             log.error("Fikk ikke hentet stillingen $stillingsId fra opensearch. Statuskode: ${response.statusCode()}")
             throw RuntimeException("Feil mot rekrutteringsbistand-stillingssok-proxy for å hente stilling $stillingsId")

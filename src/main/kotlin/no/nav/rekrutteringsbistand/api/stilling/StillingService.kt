@@ -39,7 +39,7 @@ class StillingService(
     fun hentRekrutteringsbistandStilling(
         stillingsId: UUID,
         somSystembruker: Boolean = false
-    ): RekrutteringsbistandStilling {
+    ): RekrutteringsbistandStilling? {
         val stillingsinfo = stillingsinfoService.hentStillingsinfo(Stillingsid(stillingsId))?.asStillingsinfoDto()
 
         direktemeldtStillingService.hentDirektemeldtStilling(stillingsId)?.let { direktemeldtStilling ->
@@ -50,7 +50,7 @@ class StillingService(
             )
         }
 
-        val stilling = stillingssokProxyClient.hentStilling(stillingsId, somSystembruker)
+        val stilling = stillingssokProxyClient.hentStilling(stillingsId, somSystembruker) ?: return null
         log.info("Hentet stilling fra OpenSearch $stillingsId")
 
         return RekrutteringsbistandStilling(
@@ -133,7 +133,7 @@ class StillingService(
     @Transactional
     fun kopierStilling(stillingsId: UUID, navIdent: String?, displayName: String?, eierNavKontorEnhetId: String?): RekrutteringsbistandStilling {
         log.info("Kopierer stilling med uuid: $stillingsId")
-        val eksisterendeRekrutteringsbistandStilling = hentRekrutteringsbistandStilling(stillingsId)
+        val eksisterendeRekrutteringsbistandStilling = hentRekrutteringsbistandStilling(stillingsId) ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Stilling med id $stillingsId finnes ikke og kan ikke kopieres.")
 
         if(eksisterendeRekrutteringsbistandStilling.stillingsinfo?.stillingskategori == Stillingskategori.FORMIDLING || eksisterendeRekrutteringsbistandStilling.stillingsinfo?.stillingskategori == Stillingskategori.REKRUTTERINGSTREFF_FORMIDLING) {
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Kan ikke kopiere formidlinger")

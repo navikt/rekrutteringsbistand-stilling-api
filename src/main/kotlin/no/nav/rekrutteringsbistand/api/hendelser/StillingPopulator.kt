@@ -44,7 +44,8 @@ class StillingPopulator(
 
         log.info("Populerer melding med stilling og stillingsinfo for stillingsId=${stillingsId.asString()}")
 
-        val rekrutteringsbistandStilling = stillingService.hentRekrutteringsbistandStilling(stillingsId.verdi, somSystembruker = true)
+        // Hopper over meldinger hvis stillingen ikke finnes i databasen eller i opensearch
+        val rekrutteringsbistandStilling = stillingService.hentRekrutteringsbistandStilling(stillingsId.verdi, somSystembruker = true) ?: return
 
         rekrutteringsbistandStilling.stillingsinfo?.also {
             packet["stillingsinfo"] = it.tilStillingsinfoIHendelse()
@@ -69,7 +70,7 @@ class StillingPopulator(
 private fun isoStringTilNorskTidssone(isoString: String): ZonedDateTime? {
     return try {
         ZonedDateTime.of(LocalDateTime.parse(isoString), ZoneId.of("Europe/Oslo"))
-    } catch (e: Exception) {
+    } catch (_: Exception) {
         null
     }
 }
