@@ -1,10 +1,11 @@
+import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm") version "2.4.21"
     kotlin("plugin.spring") version "2.4.21"
     id("org.springframework.boot") version "4.1.1"
-    id("io.github.ben-manes.versions") version "0.64.0" // Gir kommandoen "./gradlew dependencyUpdates" som du kan be din AI bruke ved oppgradering av avhengigheter
+    id("io.github.ben-manes.versions") version "0.66.0" // Gir kommandoen "./gradlew dependencyUpdates" som du kan be din AI bruke ved oppgradering av avhengigheter
 }
 
 group = "no.nav.tag"
@@ -41,15 +42,14 @@ dependencies {
     runtimeOnly("org.postgresql:postgresql")
     // Rapids & Rivers krever 9.0. Vi deklarerer samme versjon, så byggefila viser hva som faktisk kjører.
     implementation("net.logstash.logback:logstash-logback-encoder:9.0")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
-    implementation("no.nav.security:token-validation-spring:6.0.12")
+    implementation("tools.jackson.module:jackson-module-kotlin")
+    implementation("no.nav.security:token-validation-spring:6.0.13")
     implementation("com.github.navikt:rapids-and-rivers:2026091610031789545782")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.testcontainers:testcontainers-postgresql")
     testImplementation("org.wiremock:wiremock-standalone:3.13.2")
-    testImplementation("no.nav.security:token-validation-spring-test:6.0.12")
+    testImplementation("no.nav.security:token-validation-spring-test:6.0.13")
     testImplementation("org.springframework.boot:spring-boot-starter-webflux")
     testImplementation("org.mockito.kotlin:mockito-kotlin:6.4.0")
     testImplementation("org.awaitility:awaitility")
@@ -76,12 +76,6 @@ dependencies {
         implementation("at.yawk.lz4:lz4-java:1.11.4") {
             because("CVE-2026-59949 og CVE-2026-106449 til CVE-2026-106453 i lz4-java fra kafka-clients")
         }
-        // token-validation-spring 6.0.12 drar inn nimbus-jose-jwt 10.9.1 via oauth2-oidc-sdk.
-        // 10.10 har ingen CVE-fiks, men begrenser størrelsen på dekomprimert JWE (zip-bomb) og fikser en minnelekkasje.
-        // Fjern når token-validation-spring drar inn nimbus-jose-jwt >= 10.10.
-        implementation("com.nimbusds:nimbus-jose-jwt:10.10") {
-            because("Sikkerhetsherding i 10.10: grense for dekomprimert JWE (iss #611) og fiks av minnelekkasje i DeflateUtils")
-        }
     }
 }
 
@@ -100,4 +94,28 @@ tasks.withType<Test>().configureEach {
 
 tasks.named<org.springframework.boot.gradle.tasks.bundling.BootJar>("bootJar") {
     archiveFileName.set("rekrutteringsbistand-stilling-api.jar")
+}
+
+fun isNonStable(version: String): Boolean {
+    val stableKeyword = listOf("RELEASE", "FINAL", "GA").any { version.uppercase().contains(it) }
+    val regex = "^[0-9,.v-]+(-r)?$".toRegex()
+    val isStable = stableKeyword || regex.matches(version)
+    return !isStable
+}
+
+val navTidsstempelVersjon = "^[0-9]{22}$".toRegex()
+
+tasks.named<DependencyUpdatesTask>("dependencyUpdates").configure {
+    rejectVersionIf {
+        // Avviser ustabile kandidater (alpha, beta, RC, M osv.) med mindre vi allerede er på en ustabil versjon
+        val ustabil = isNonStable(candidate.version) && !isNonStable(currentVersion)
+
+        // Nav-biblioteker som rapids-and-rivers bruker 22-sifrede tidsstempelversjoner, men har hatt andre
+        // versjonsformater tidligere (f.eks. 2022.05.24-08.59.xxx på jitpack). Gradle tolker de 22-sifrede
+        // versjonene som tekst og rangerer dem lavere enn eldre tallversjoner, så gamle formater må avvises.
+        val gammeltVersjonsformat = navTidsstempelVersjon.matches(currentVersion) &&
+            !navTidsstempelVersjon.matches(candidate.version)
+
+        ustabil || gammeltVersjonsformat
+    }
 }

@@ -103,7 +103,7 @@ class AzureKlient(
 
 data class AzureResponse(
     val access_token: String,
-    val expires_in: Int,
+    val expires_in: Int?,
 )
 
 data class AzureFailureResponse(

@@ -23,8 +23,9 @@ class AzureCache {
             cache[scope] = HashMap()
         }
 
+        // Manglende expires_in tolkes som 0, slik Jackson 2 gjorde, og tokenet regnes da som utløpt med en gang
         val rettFørTokenetUtløper = LocalDateTime.now().plusSeconds(
-            azureResponse.expires_in.toLong() - 10
+            (azureResponse.expires_in ?: 0).toLong() - 10
         )
 
         cache[scope]!![onBehalfOf] = CachedToken(

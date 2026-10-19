@@ -95,6 +95,50 @@ internal class StillingsanalyseControllerTest {
     }
 
     @Test
+    fun `analyserStilling skal tolke manglende eller null boolske felt fra OpenAI som false`() {
+        mockOpenAiResponse(
+            """
+               {
+                  "choices": [
+                    {
+                      "message": {
+                        "content": "{ \"sensitivBegrunnelse\": \"Ingen sensitive termer.\", \"samsvarMedTittel\": null, \"tittelBegrunnelse\": \"Tittel samsvarer\", \"samsvarMedType\": true, \"typeBegrunnelse\": \"Type samsvarer\" }"
+                      }
+                    }
+                  ]
+                }
+            """.trimIndent()
+        )
+
+        val stillingsanalyseDto = StillingsanalyseController.StillingsanalyseDto(
+            stillingsId = "2",
+            stillingstype = Stillingskategori.STILLING,
+            stillingstittel = "Teststilling",
+            stillingstekst = "Dette er en test",
+            source = "DIR"
+        )
+        val headers = HttpHeaders().apply { contentType = MediaType.APPLICATION_JSON }
+
+        val response = restTemplate.postForEntity(
+            "$lokalBaseUrl/rekrutteringsbistand/stillingsanalyse",
+            HttpEntity(stillingsanalyseDto, headers),
+            StillingsanalyseController.StillingsanalyseResponsDto::class.java
+        )
+
+        assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
+        assertThat(response.body).isEqualTo(
+            StillingsanalyseController.StillingsanalyseResponsDto(
+                sensitiv = false,
+                sensitivBegrunnelse = "Ingen sensitive termer.",
+                samsvarMedTittel = false,
+                tittelBegrunnelse = "Tittel samsvarer",
+                samsvarMedType = true,
+                typeBegrunnelse = "Type samsvarer"
+            )
+        )
+    }
+
+    @Test
     fun `analyserStilling skal returnere bad request hvis source ikke er DIR`() {
         mockOpenAiResponse(openAiApiResponseBody)
 

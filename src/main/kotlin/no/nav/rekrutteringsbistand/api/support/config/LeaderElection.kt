@@ -1,11 +1,11 @@
 package no.nav.rekrutteringsbistand.api.support.config
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
+import tools.jackson.databind.DeserializationFeature
+import tools.jackson.databind.cfg.EnumFeature
+import tools.jackson.module.kotlin.jacksonMapperBuilder
 import java.net.InetAddress
 import java.net.URI
 import java.time.LocalDateTime
@@ -18,10 +18,10 @@ class LeaderElection(@Value("\${ELECTOR_PATH:NOLEADERELECTION}") val electorPath
     private val electorUri = "http://"+electorPath
 
     companion object {
-        private val jacksonMapper = jacksonObjectMapper()
-            .enable(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_USING_DEFAULT_VALUE)
+        private val jacksonMapper = jacksonMapperBuilder()
+            .enable(EnumFeature.READ_UNKNOWN_ENUM_VALUES_USING_DEFAULT_VALUE)
             .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-            .registerModule(JavaTimeModule())
+            .build()
     }
 
     fun isLeader(): Boolean {

@@ -1,19 +1,19 @@
 package no.nav.rekrutteringsbistand.api.opensearch
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import no.nav.rekrutteringsbistand.api.stilling.*
+import no.nav.rekrutteringsbistand.api.support.JacksonMappers
 import java.time.LocalDateTime
 import java.time.ZonedDateTime
 
 data class OpensSearchResponse(
     val _source: Source
 ) {
-    fun toStilling(objectMapper: ObjectMapper): FrontendStilling = FrontendStilling(
+    fun toStilling(): FrontendStilling = FrontendStilling(
         title = _source.stilling.tittel ?: "Stilling uten valgt jobbtittel",
         properties = _source.stilling.properties.mapValues {
             when(val value = it.value) {
                 null -> "null"
-                is List<*> -> objectMapper.writeValueAsString(value)
+                is List<*> -> JacksonMappers.standard.writeValueAsString(value)
                 else -> value.toString()
             }
         },

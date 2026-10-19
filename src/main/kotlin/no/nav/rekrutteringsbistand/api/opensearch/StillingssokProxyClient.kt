@@ -1,12 +1,8 @@
 package no.nav.rekrutteringsbistand.api.opensearch
 
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.rekrutteringsbistand.api.autorisasjon.TokenUtils
 import no.nav.rekrutteringsbistand.api.stilling.FrontendStilling
+import no.nav.rekrutteringsbistand.api.support.JacksonMappers
 import no.nav.rekrutteringsbistand.api.support.log
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
@@ -23,12 +19,6 @@ class StillingssokProxyClient(
     @Value("\${stillingssok-proxy.url}") private val stillingssokProxyUrl: String,
     @Value("\${scope.stillingssok-proxy}") private val stillingssokProxyScope: String,
 ) {
-    val objectMapper: ObjectMapper = jacksonObjectMapper().registerModule(JavaTimeModule())
-        .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-        .disable(DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE)
-        .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-        .setTimeZone(TimeZone.getTimeZone("Europe/Oslo"))
-
     val httpClient: HttpClient = HttpClient.newBuilder()
         .followRedirects(HttpClient.Redirect.ALWAYS)
         .build()
@@ -54,8 +44,8 @@ class StillingssokProxyClient(
             throw RuntimeException("Feil mot rekrutteringsbistand-stillingssok-proxy for å hente stilling $stillingsId")
         }
 
-        val opensSearchResponse = objectMapper.readValue(response.body(), OpensSearchResponse::class.java)
+        val opensSearchResponse = JacksonMappers.standard.readValue(response.body(), OpensSearchResponse::class.java)
 
-        return opensSearchResponse.toStilling(objectMapper)
+        return opensSearchResponse.toStilling()
     }
 }
