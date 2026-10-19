@@ -77,6 +77,11 @@ dependencies {
             because("CVE-2026-59949 og CVE-2026-106449 til CVE-2026-106453 i lz4-java fra kafka-clients")
         }
     }
+    // Spring Boot 4.1.1 styrer Jackson 3.1.5, som har sårbarheter fikset i 3.1.7. Jackson-BOM-en holder
+    // alle Jackson-modulene på samme versjon. Fjern når Spring Boot styrer Jackson >= 3.1.7.
+    implementation(platform("tools.jackson:jackson-bom:3.1.8")) {
+        because("CVE-2026-91777, CVE-2026-91776, CVE-2026-83557, CVE-2026-68497 og CVE-2026-19032 i jackson-databind 3.1.5")
+    }
 }
 
 tasks.withType<KotlinCompile>().configureEach {
