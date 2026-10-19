@@ -41,7 +41,7 @@ class StillingsinfoService(
         opprinneligStillingsinfo?.let { repo.oppdaterEier(it.stillingsinfoid, nyEier) } ?: repo.opprett(stillingsinfoMedNyEier)
 
         try {
-            val arbeidsplassenStilling = stillingssokProxyClient.hentStilling(stillingsId.verdi)
+            val arbeidsplassenStilling = stillingssokProxyClient.hentStilling(stillingsId.verdi) ?: throw RuntimeException("Kunne ikke overta stillingen fordi stillingen $stillingsId ikke finnes")
             val direktemeldtStillingInnhold = arbeidsplassenStilling.toDirektemeldtStillingInnhold()
 
             val direktemeldtStilling = DirektemeldtStilling(
