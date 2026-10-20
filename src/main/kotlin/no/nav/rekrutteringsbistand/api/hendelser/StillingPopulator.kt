@@ -70,7 +70,7 @@ class StillingPopulator(
 private fun isoStringTilNorskTidssone(isoString: String): ZonedDateTime? {
     return try {
         ZonedDateTime.of(LocalDateTime.parse(isoString), ZoneId.of("Europe/Oslo"))
-    } catch (e: Exception) {
+    } catch (_: Exception) {
         null
     }
 }

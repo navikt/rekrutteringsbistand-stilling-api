@@ -1,6 +1,7 @@
 package no.nav.rekrutteringsbistand.api.support.rest
 
 import jakarta.servlet.http.HttpServletRequest
+import no.nav.rekrutteringsbistand.SecureLog
 import no.nav.rekrutteringsbistand.api.support.log
 import no.nav.security.token.support.core.exceptions.JwtTokenValidatorException
 import org.springframework.dao.EmptyResultDataAccessException
@@ -25,6 +26,8 @@ import java.util.UUID
 @ControllerAdvice
 class RestResponseEntityExceptionHandler : ResponseEntityExceptionHandler() {
 
+    private val secureLog = SecureLog(log)
+
     override fun handleExceptionInternal(
         ex: Exception,
         body: Any?,
@@ -32,6 +35,9 @@ class RestResponseEntityExceptionHandler : ResponseEntityExceptionHandler() {
         statusCode: HttpStatusCode,
         request: WebRequest
     ): ResponseEntity<Any>? {
+        val msg = "Returnerer HTTP ${statusCode.value()} for ${request.getDescription(false)} pga. ${ex.javaClass.simpleName}. Se team-logs for detaljer."
+        if (statusCode.is5xxServerError) log.error(msg) else log.warn(msg)
+        secureLog.warn("Returnerer HTTP ${statusCode.value()} for ${request.getDescription(false)}: ${ex.message}", ex)
         val newBody = when {
             body is ProblemDetail && body !is TraceableProblemDetail -> TraceableProblemDetail.from(body)
             body == null && ex is ErrorResponse -> TraceableProblemDetail.from(ex.updateAndGetBody(null, Locale.getDefault()))

@@ -1,7 +1,7 @@
 package no.nav.rekrutteringsbistand.api.stillingsanalyse
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
+import tools.jackson.module.kotlin.jacksonObjectMapper
+import tools.jackson.module.kotlin.readValue
 import no.nav.rekrutteringsbistand.api.stillingsanalyse.StillingsanalyseController.StillingsanalyseResponsDto
 import no.nav.rekrutteringsbistand.api.support.log
 import org.springframework.beans.factory.annotation.Value
@@ -68,7 +68,7 @@ class OpenAiClient(
 
             val cleanedResponse = aiContent.removePrefix("```json").removeSuffix("```").trim()
 
-            val retur: StillingsanalyseResponsDto = objectMapper.readValue(cleanedResponse)
+            val retur = objectMapper.readValue<OpenAiStillingsanalyse>(cleanedResponse).tilResponsDto()
             log.info("Suksessfult kall mot OpenAI API for stilling ${stillingsanalyseDto.stillingsId}")
             retur
 
@@ -84,6 +84,28 @@ data class OpenAiMessage(
     val role: String,
     val content: String
 )
+
+/**
+ * Svaret fra språkmodellen. De boolske feltene er nullable, og manglende eller null verdier tolkes
+ * som false, slik Jackson 2 gjorde. Jackson 3 feiler ellers på manglende primitive verdier.
+ */
+private data class OpenAiStillingsanalyse(
+    val sensitiv: Boolean?,
+    val sensitivBegrunnelse: String,
+    val samsvarMedTittel: Boolean?,
+    val tittelBegrunnelse: String,
+    val samsvarMedType: Boolean?,
+    val typeBegrunnelse: String
+) {
+    fun tilResponsDto() = StillingsanalyseResponsDto(
+        sensitiv = sensitiv ?: false,
+        sensitivBegrunnelse = sensitivBegrunnelse,
+        samsvarMedTittel = samsvarMedTittel ?: false,
+        tittelBegrunnelse = tittelBegrunnelse,
+        samsvarMedType = samsvarMedType ?: false,
+        typeBegrunnelse = typeBegrunnelse
+    )
+}
 
 data class OpenAiRequest(
     val messages: List<OpenAiMessage>,

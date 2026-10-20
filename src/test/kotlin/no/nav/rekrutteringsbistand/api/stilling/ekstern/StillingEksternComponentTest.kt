@@ -1,8 +1,5 @@
 package no.nav.rekrutteringsbistand.api.stilling.ekstern
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension
 import no.nav.rekrutteringsbistand.api.TestRepository
@@ -12,6 +9,7 @@ import no.nav.rekrutteringsbistand.api.config.MdcTraceIdTestConfig
 import no.nav.rekrutteringsbistand.api.config.MockLogin
 import no.nav.rekrutteringsbistand.api.mockAzureObo
 import no.nav.rekrutteringsbistand.api.stilling.DirektemeldtStilling
+import no.nav.rekrutteringsbistand.api.support.JacksonMappers
 import no.nav.rekrutteringsbistand.api.stilling.DirektemeldtStillingRepository
 import no.nav.rekrutteringsbistand.api.stilling.Kategori
 import no.nav.rekrutteringsbistand.api.stilling.FrontendStilling
@@ -69,10 +67,6 @@ internal class StillingEksternComponentTest {
 
     @Autowired
     lateinit var testRepository: TestRepository
-
-    private val objectMapper = ObjectMapper()
-        .registerModule(JavaTimeModule())
-        .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
     @AfterEach
     fun tearDown() {
@@ -147,11 +141,11 @@ internal class StillingEksternComponentTest {
         ).also {
             assertThat(it.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
 
-            val json = objectMapper.readTree(it.body)
-            assertThat(json.get("detail").asText()).isEqualTo("Ugyldig UUID")
-            assertThat(json.get("title").asText()).isEqualTo("Valideringsfeil")
+            val json = JacksonMappers.standard.readTree(it.body)
+            assertThat(json.get("detail").asString()).isEqualTo("Ugyldig UUID")
+            assertThat(json.get("title").asString()).isEqualTo("Valideringsfeil")
             // Spring Framework 7 utelater "type" når den er lik RFC-standardverdien "about:blank"
-            assertThat(json.get("type")?.asText() ?: "about:blank").isEqualTo("about:blank")
+            assertThat(json.get("type")?.asString() ?: "about:blank").isEqualTo("about:blank")
             assertThat(json.get("status").asInt()).isEqualTo(400)
             assertThat(json.has("traceId")).isTrue()
         }

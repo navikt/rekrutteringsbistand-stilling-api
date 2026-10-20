@@ -1,6 +1,6 @@
 package no.nav.rekrutteringsbistand.api.stilling.outbox
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import tools.jackson.module.kotlin.jacksonObjectMapper
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import no.nav.rekrutteringsbistand.api.Testdata.enDirektemeldtStilling
 import no.nav.rekrutteringsbistand.api.hendelser.RapidApplikasjon
@@ -44,7 +44,7 @@ class ProsesserStillingOutboxJobbTest {
 
         val melding = publisertMelding()
         assertTrue(melding["stillingsinfo"].isNull, "stillingsinfo skal være JSON null, var: ${melding["stillingsinfo"]}")
-        assertEquals(stillingsId.toString(), melding["stillingsId"].asText())
+        assertEquals(stillingsId.toString(), melding["stillingsId"].asString())
     }
 
     @Test

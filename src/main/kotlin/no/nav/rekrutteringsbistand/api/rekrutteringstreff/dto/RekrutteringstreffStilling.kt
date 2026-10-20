@@ -8,5 +8,5 @@ data class RekrutteringstreffStilling(
     val employer: Arbeidsgiver,
     val locationList: List<Geografi>,
     val categoryList: List<Kategori>,
-    val properties: Map<String, String> = HashMap(),
+    val properties: Map<String, String?> = HashMap(),
 )

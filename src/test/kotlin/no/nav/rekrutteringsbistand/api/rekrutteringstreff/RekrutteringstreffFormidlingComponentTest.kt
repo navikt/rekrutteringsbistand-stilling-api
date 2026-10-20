@@ -29,8 +29,11 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import no.nav.rekrutteringsbistand.api.config.TestRestTemplate
 import org.springframework.boot.test.web.server.LocalServerPort
+import org.springframework.http.HttpEntity
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpHeaders.*
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import java.util.*
@@ -267,6 +270,37 @@ class RekrutteringstreffFormidlingComponentTest {
         assertThat(stilling.innhold.properties).containsKey("gyldigVerdi")
         assertThat(stilling.innhold.properties).doesNotContainKey("tomVerdi")
         assertThat(stilling.innhold.properties).doesNotContainKey("tomListe")
+    }
+
+    @Test
+    fun `POST opprett formidling skal tåle null-verdier i properties og filtrere dem bort`() {
+        mockAzureObo(wiremockAzure)
+        mockKandidatlisteOppdatering()
+
+        val json = """
+            {
+              "eierNavKontorEnhetId": "0318",
+              "rekrutteringstreffId": "${UUID.randomUUID()}",
+              "stilling": {
+                "employer": { "name": "Test Bedrift AS", "orgnr": "123456789", "publicName": "Test Bedrift" },
+                "locationList": [],
+                "categoryList": [],
+                "properties": { "sector": "Offentlig", "nullVerdi": null }
+              }
+            }
+        """.trimIndent()
+        val headers = HttpHeaders().apply { contentType = MediaType.APPLICATION_JSON }
+
+        val response = restTemplate.postForEntity(
+            "$localBaseUrl/rekrutteringstreff/formidling",
+            HttpEntity(json, headers),
+            OpprettRekrutteringstreffFormidlingRespons::class.java
+        )
+
+        assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
+        val stilling = direktemeldtStillingRepository.hentDirektemeldtStilling(response.body!!.stillingsId)
+        assertThat(stilling!!.innhold.properties).containsEntry("sector", "Offentlig")
+        assertThat(stilling.innhold.properties).doesNotContainKey("nullVerdi")
     }
 
     @Test
