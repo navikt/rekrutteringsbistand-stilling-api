@@ -55,7 +55,9 @@ class RekrutteringstreffFormidlingService(
             location = null,
             locationList = populertLocationList,
             categoryList = stilling.categoryList.map { it.toDirektemeldtStillingKategori() },
-            properties = stilling.properties.filterValues { !it.isNullOrBlank() && it != "[]" }, // fjern tomme verdier,
+            properties = stilling.properties // fjern tomme verdier
+                .mapNotNull { (key, value) -> value?.takeIf { it.isNotBlank() && it != "[]" }?.let { key to it } }
+                .toMap(),
             businessName = stilling.employer.name,
             firstPublished = true,
             deactivatedByExpiry = false,
