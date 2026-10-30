@@ -93,6 +93,8 @@ class StillingController(
     @GetMapping("/rekrutteringsbistandstilling/{uuid}")
     fun hentRekrutteringsbistandStilling(@PathVariable uuid: UUID): ResponseEntity<RekrutteringsbistandStilling> {
         // TODO styrk(kan tas til slutt): Interne stillinger burde ikke sende tittel.
-        return ok(stillingService.hentRekrutteringsbistandStilling(uuid))
+        val stilling = stillingService.hentRekrutteringsbistandStilling(uuid)
+            ?: return ResponseEntity.notFound().build()
+        return ok(stilling)
     }
 }

@@ -131,6 +131,20 @@ internal class StillingComponentTest {
     }
 
     @Test
+    fun `GET mot en rekrutteringsbistandstilling skal returnere 404 hvis stillingen ikke finnes`() {
+        val stillingsId = UUID.randomUUID()
+        mockAzureObo(wiremockAzure)
+        whenever(stillingssokProxyClient.hentStilling(stillingsId)).thenReturn(null)
+
+        val respons = restTemplate.getForEntity(
+            "$localBaseUrl/rekrutteringsbistandstilling/$stillingsId", String::class.java
+        )
+
+        assertThat(respons.statusCode).isEqualTo(HttpStatus.NOT_FOUND)
+        assertThat(respons.body).isNull()
+    }
+
+    @Test
     @Disabled("Denne er grønn lokalt men rød på Github")
     fun `GET mot en rekrutteringsbistandstilling skal føre til retries gitt nettverkshikke ved kall på Arbeidsplassen`() {
         val stillingsId = UUID.randomUUID().toString()
