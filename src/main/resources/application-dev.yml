@@ -1,9 +1,9 @@
 scope:
-  kandidat-api: api://dev-fss.toi.rekrutteringsbistand-kandidat-api/.default
+  kandidat-api: api://dev-gcp.toi.rekrutteringsbistand-kandidat-api/.default
   stillingssok-proxy: api://dev-gcp.toi.rekrutteringsbistand-stillingssok-proxy/.default
 
 external:
-  kandidatliste-api.url: https://rekrutteringsbistand-kandidat-api.dev-fss-pub.nais.io/rekrutteringsbistand-kandidat-api/rest/veileder/stilling
+  kandidatliste-api.url: http://rekrutteringsbistand-kandidat-api/rekrutteringsbistand-kandidat-api/rest/veileder/stilling
 
 stillingssok-proxy.url: http://rekrutteringsbistand-stillingssok-proxy/stilling/_doc
 geografi.url: http://pam-geografi.teampam/rest
