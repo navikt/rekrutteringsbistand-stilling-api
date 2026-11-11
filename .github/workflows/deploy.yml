@@ -6,7 +6,7 @@ jobs:
     uses: navikt/toi-github-actions-workflows/.github/workflows/build-and-deploy.yaml@v17
     with:
       java-version: '25'
-      deploy-to-dev-if-branch-name-is: 'fjern-jackson2'
+      deploy-to-dev-if-branch-name-is: 'legg_til_vis_stilling_veileder_inbound'
       baseimage-tagged-ref: 'europe-north1-docker.pkg.dev/cgr-nav/pull-through/nav.no/jre:openjdk-25'
     permissions:
       contents: read

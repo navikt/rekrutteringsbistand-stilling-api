@@ -13,6 +13,7 @@
   "arbeidsmarked_openai_host": "arbeidsmarked-dev.openai.azure.com",
   "spring_profile": "dev",
   "vis_stilling_azp_name": "dev-gcp:toi:vis-stilling",
+  "vis_stilling_veileder_azp_name": "dev-gcp:toi:vis-stilling-veileder",
   "kandidatvarsel_azp_name": "dev-gcp:toi:rekrutteringsbistand-kandidatvarsel-api",
   "toi_stilling_indekser_azp_name": "dev-gcp:toi:toi-stilling-indekser",
   "rekrutteringsbistand_stilling_group_id": "rekrutteringsbistand-stilling-rapidconsumer-1"
