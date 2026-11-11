@@ -69,6 +69,7 @@ spec:
     inbound:
       rules:
         - application: vis-stilling
+        - application: vis-stilling-veileder
         - application: rekrutteringsbistand-frontend
         - application: rekrutteringsbistand-frontend2
         - application: rekrutteringsbistand-kandidat-api
@@ -93,6 +94,8 @@ spec:
       value: {{ spring_profile }}
     - name: VIS_STILLING_AZP_NAME
       value: {{ vis_stilling_azp_name }}
+    - name: VIS_STILLING_VEILEDER_AZP_NAME
+      value: {{ vis_stilling_veileder_azp_name }}
     - name: KANDIDATVARSEL_AZP_NAME
       value: {{ kandidatvarsel_azp_name }}
     - name: TOI_STILLING_INDEKSER_AZP_NAME

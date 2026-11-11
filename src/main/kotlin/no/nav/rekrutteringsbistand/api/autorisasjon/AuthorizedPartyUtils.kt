@@ -15,6 +15,9 @@ class AuthorizedPartyUtils(
     @Value("\${vis-stilling.azp-name}")
     private val visStillingAzpName: String = ""
 
+    @Value("\${vis-stilling-veileder.azp-name}")
+    private val visStillingVeilederAzpName: String = ""
+
     @Value("\${kandidatvarsel.azp-name}")
     private val kandidatvarselAzpName: String = ""
 
@@ -25,8 +28,8 @@ class AuthorizedPartyUtils(
         return authorizedPartyName() == toiStillingIndekserAzpName
     }
 
-    fun kallKommerFraVisStilling(): Boolean {
-        return authorizedPartyName() == visStillingAzpName
+    fun kallKommerFraVisStillingEllerVisStillingVeileder(): Boolean {
+        return authorizedPartyName() == visStillingAzpName || authorizedPartyName() == visStillingVeilederAzpName
     }
 
     fun kallKommerFraKandidatvarsel(): Boolean {

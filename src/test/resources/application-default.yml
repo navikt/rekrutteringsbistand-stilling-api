@@ -40,5 +40,6 @@ stillingssok-proxy.url: http://localhost:9937/stilling/_doc
 geografi.url: http://localhost:9938/rest
 
 vis-stilling.azp-name: local:toi:vis-stilling
+vis-stilling-veileder.azp-name: local:toi:vis-stilling-veileder
 kandidatvarsel.azp-name: local:toi:kandidatvarsel
 toi.stilling.indekser.azp-name: local:toi:toi-stilling-indekser
