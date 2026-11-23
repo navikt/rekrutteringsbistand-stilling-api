@@ -9,6 +9,8 @@
   "ad_gruppe_utvikler": "41080368-439f-4128-858a-afbef876431e",
   "postgres_tier": "db-custom-1-3840",
   "disk_autoresize": true,
+  "gcp_db_point_in_time_recovery": true,
+  "gcp_db_query_string_length": 4500,
   "arbeidsmarked_openai_host": "arbeidsmarked-prod.openai.azure.com",
   "spring_profile": "prod",
   "vis_stilling_azp_name": "prod-gcp:toi:vis-stilling",
