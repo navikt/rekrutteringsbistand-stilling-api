@@ -112,7 +112,7 @@ class PersondataFilterTest {
 
     @Test
     fun `filtrerUtPersonsensitiveData skal fjerne tenkt fødselsnummer`() {
-        val input = "Fødselsnummer: 01010111111."
+        val input = "Fødselsnummer: 00000000001."
         val expected = "Fødselsnummer: ."
         val actual = PersondataFilter.filtrerUtPersonsensitiveData(input)
         assertEquals(expected, actual)
